@@ -15,182 +15,7 @@
         >
           <img src="./assets/dhis2.png" />
         </v-btn>
-        <v-menu
-          open-on-hover
-          bottom
-          offset-y
-          v-if='!$store.state.denyAccess'
-        >
-          <v-btn
-            slot="activator"
-            flat
-          >
-            <v-icon>sync</v-icon>{{ $t('App.menu.dataSourcesParent.msg')}}
-          </v-btn>
-          <v-list>
-            <v-list-tile to="AddDataSources">
-              <v-list-tile-title>
-                <v-icon>compare_arrows</v-icon>{{ $t('App.menu.addDataSources.msg')}}
-              </v-list-tile-title>
-            </v-list-tile>
-            <v-list-tile to="ViewDataSources">
-              <v-list-tile-title>
-                <v-icon>list</v-icon>{{ $t('App.menu.viewDataSources.msg')}}
-              </v-list-tile-title>
-            </v-list-tile>
-          </v-list>
-        </v-menu>
-        <v-tooltip bottom>
-          <v-btn
-            to="view"
-            flat
-            v-if='!$store.state.denyAccess'
-            slot="activator"
-            :disabled="Object.keys($store.state.activePair.source1).length === 0"
-          >
-            <v-icon>list</v-icon>{{ $t('App.menu.view.msg')}}
-          </v-btn>
-          <span>{{ $t('App.menu.view.tooltip') }}</span>
-        </v-tooltip>
-        <v-menu
-          open-on-hover
-          bottom
-          offset-y
-          v-if='!$store.state.denyAccess'
-        >
-          <v-btn
-            slot="activator"
-            flat
-          >
-            <v-icon>find_in_page</v-icon>{{ $t('App.menu.recoParent.msg')}}
-          </v-btn>
-          <v-list>
-            <v-tooltip top>
-              <v-list-tile
-                to="dataSourcesPair"
-                slot="activator"
-                v-if="$store.state.dataSources.length > 1 || $store.state.dataSourcePairs.length > 0"
-              >
-                <v-list-tile-title>
-                  <v-icon>compare_arrows</v-icon>{{ $t('App.menu.createPair.msg')}}
-                </v-list-tile-title>
-              </v-list-tile>
-              <v-list-tile
-                to="dataSourcesPair"
-                slot="activator"
-                disabled
-                v-else
-              >
-                <v-list-tile-title>
-                  <v-icon>compare_arrows</v-icon>{{ $t('App.menu.createPair.msg')}}
-                </v-list-tile-title>
-              </v-list-tile>
-              <span>{{ $t('App.menu.createPair.tooltip')}}</span>
-            </v-tooltip>
-            <v-tooltip top>
-              <v-list-tile
-                to="scores"
-                slot="activator"
-                disabled
-                v-if='Object.keys($store.state.activePair.source1).length === 0'
-              >
-                <v-list-tile-title>
-                  <v-icon>find_in_page</v-icon>{{ $t('App.menu.reconcile.msg') }}
-                </v-list-tile-title>
-              </v-list-tile>
-              <v-list-tile
-                to="scores"
-                slot="activator"
-                v-else
-              >
-                <v-list-tile-title>
-                  <v-icon>find_in_page</v-icon>{{ $t('App.menu.reconcile.msg') }}
-                </v-list-tile-title>
-              </v-list-tile>
-              <span>{{ $t('App.menu.reconcile.tooltip') }}</span>
-            </v-tooltip>
-            <v-tooltip bottom>
-              <v-list-tile
-                to="recoStatus"
-                slot="activator"
-                disabled
-                v-if='Object.keys($store.state.activePair.source1).length === 0'
-              >
-                <v-list-tile-title>
-                  <v-icon>dashboard</v-icon> {{ $t('App.menu.recoStatus.msg') }}
-                </v-list-tile-title>
-              </v-list-tile>
-              <v-list-tile
-                to="recoStatus"
-                slot="activator"
-                v-else
-              >
-                <v-list-tile-title>
-                  <v-icon>dashboard</v-icon> {{ $t('App.menu.recoStatus.msg') }}
-                </v-list-tile-title>
-              </v-list-tile>
-              <span>{{ $t('App.menu.recoStatus.tooltip') }}</span>
-            </v-tooltip>
-          </v-list>
-        </v-menu>
-        <v-menu
-          open-on-hover
-          bottom
-          offset-y
-          v-if='!$store.state.denyAccess && !$store.state.config.generalConfig.authDisabled'
-        >
-          <v-btn
-            slot="activator"
-            flat
-          >
-            <v-icon>perm_identity</v-icon>{{ $t('App.menu.account.msg')}}
-          </v-btn>
-          <v-list>
-            <v-tooltip top>
-              <v-list-tile
-                to="addUser"
-                slot="activator"
-                v-if='$store.state.auth.role === "Admin"'
-              >
-                <v-list-tile-title>
-                  <v-icon>perm_identity</v-icon>{{ $t('App.menu.addUser.msg')}}
-                </v-list-tile-title>
-              </v-list-tile>
-              <span>{{ $t('App.menu.addUser.tooltip')}}</span>
-            </v-tooltip>
-            <v-tooltip bottom>
-              <v-list-tile
-                to="usersList"
-                slot="activator"
-                v-if='$store.state.auth.role === "Admin"'
-              >
-                <v-list-tile-title>
-                  <v-icon>perm_identity</v-icon>{{ $t('App.menu.usersList.msg')}}
-                </v-list-tile-title>
-              </v-list-tile>
-              <span>{{ $t('App.menu.usersList.tooltip')}}</span>
-            </v-tooltip>
-            <v-list-tile to="changePassword">
-              <v-list-tile-title>
-                <v-icon>perm_identity</v-icon>{{ $t('App.menu.changePassword.msg')}}
-              </v-list-tile-title>
-            </v-list-tile>
-          </v-list>
-        </v-menu>
-        <v-btn
-          flat
-          to="configure"
-          v-if='!$store.state.denyAccess'
-        >
-          <v-icon>settings</v-icon> {{ $t('App.menu.configure.msg') }}
-        </v-btn>
-        <v-btn
-          flat
-          to="logout"
-          v-if='!$store.state.denyAccess && !$store.state.config.generalConfig.authDisabled'
-        >
-          <v-icon>logout</v-icon> {{ $t('App.menu.logout.msg') }}
-        </v-btn>
+        <appMenu></appMenu>
       </v-toolbar-items>
       <v-spacer></v-spacer>
       <v-toolbar-items>
@@ -294,7 +119,16 @@
           ></v-select>
         </v-flex>
       </v-layout>
-      <router-view />
+      <v-alert
+        :style="{width: $store.state.alert.width}"
+        v-model="$store.state.alert.show"
+        :type="$store.state.alert.type"
+        :dismissible="$store.state.alert.dismisible"
+        :transition="$store.state.alert.transition"
+      >
+        {{$store.state.alert.msg}}
+      </v-alert>
+      <router-view :key='"baseRouterViewKey" + $store.state.baseRouterViewKey'></router-view>
     </v-content>
     <v-footer
       dark
@@ -308,12 +142,16 @@
 </template>
 <script>
 import axios from 'axios'
+import Menu from '@/components/menu'
 import { scoresMixin } from './mixins/scoresMixin'
 import { generalMixin } from './mixins/generalMixin'
 import { dataSourcePairMixin } from './components/DataSourcesPair/dataSourcePairMixin'
 import { eventBus } from './main'
 import { uuid } from 'vue-uuid'
 import VueCookies from 'vue-cookies'
+import {
+  tasksVerification
+} from './modules/tasksVerification'
 const backendServer = process.env.BACKEND_SERVER
 
 export default {
@@ -321,6 +159,12 @@ export default {
   props: ['generalConfig'],
   data () {
     return {
+      items: [
+        { title: 'Click Me' },
+        { title: 'Click Me' },
+        { title: 'Click Me' },
+        { title: 'Click Me 2' }
+      ],
       fixed: false,
       title: this.$t('App.title'),
       locale: 'en',
@@ -328,7 +172,8 @@ export default {
         { text: 'English', value: 'en' },
         { text: 'French', value: 'fr' }
       ],
-      activeDataSourcePair: {}
+      activeDataSourcePair: {},
+      tasksVerification: tasksVerification
     }
   },
   watch: {
@@ -608,6 +453,9 @@ export default {
       }
     }
   },
+  components: {
+    'appMenu': Menu
+  },
   created () {
     this.$router.push({ name: 'AddDataSources' })
     this.$store.state.config.generalConfig = this.generalConfig
@@ -616,6 +464,7 @@ export default {
       this.$store.state.auth.userID = VueCookies.get('userID')
       this.$store.state.auth.username = VueCookies.get('username')
       this.$store.state.auth.role = VueCookies.get('role')
+      this.$store.state.auth.tasks = JSON.parse(VueCookies.get('tasks'))
       this.$store.state.signupFields = VueCookies.get('signupFields')
       this.$store.state.customSignupFields = VueCookies.get(
         'customSignupFields'

@@ -8,6 +8,15 @@ Vue.use(Vuex)
 
 export const store = new Vuex.Store({
   state: {
+    baseRouterViewKey: 0,
+    alert: {
+      width: '800px',
+      show: false,
+      msg: '',
+      type: 'success', // success or error
+      dismisible: true,
+      transition: 'scale-transition'
+    },
     auth: {
       username: '',
       userID: '',
@@ -40,7 +49,10 @@ export const store = new Vuex.Store({
           enabled: false
         },
         allowShareToAllForNonAdmin: false,
-        selfRegistration: false,
+        selfRegistration: {
+          enabled: false,
+          requiresApproval: false
+        },
         datasetsAdditionWays: ['CSV Upload', 'Remote Servers Sync'],
         datasetsAutosyncTime: '*/15 * * * *',
         authDisabled: false,

@@ -66,7 +66,7 @@
         </v-card-text>
         <v-card-actions>
           <v-btn
-            color="success"
+            color="primary"
             :disabled='!$store.state.config.generalConfig.externalAuth.adminRole || dhis2Roles.length === 0'
             @click="saveConfiguration('generalConfig', 'authDisabled')"
           >
@@ -152,7 +152,7 @@
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
-            color="success"
+            color="primary"
             :disabled='!fixSource2To || sharedToAllDatasets.length === 0'
             @click="savefixSource2To"
           >
@@ -209,14 +209,14 @@
                 >
                   <v-checkbox
                     @change="saveConfiguration('generalConfig', 'parConstrIdAuto')"
-                    color="success"
+                    color="primary"
                     label="Automatch By ID"
                     v-model="$store.state.config.generalConfig.reconciliation.parentConstraint.idAutoMatch"
                     disabled
                   ></v-checkbox>
                   <v-checkbox
                     @change="saveConfiguration('generalConfig', 'parConstrNameAuto')"
-                    color="success"
+                    color="primary"
                     label="Automatch By Name (when parents differ)"
                     v-model="$store.state.config.generalConfig.reconciliation.parentConstraint.nameAutoMatch"
                   ></v-checkbox>
@@ -292,6 +292,9 @@
               </v-flex>
               <v-flex>
                 <v-card>
+                  <v-card-title primary-title>
+                    GOFR Authentication
+                  </v-card-title>
                   <v-card-text>
                     <v-switch
                       @change="disableGOFRAuth"
@@ -398,55 +401,82 @@
                   </v-card-text>
                 </v-card>
               </v-flex>
+              <v-divider></v-divider>
               <v-flex>
-                <v-switch
-                  @change="saveConfiguration('generalConfig', 'selfRegistration')"
-                  color="primary"
-                  label="Enable self registration"
-                  v-model="$store.state.config.generalConfig.selfRegistration"
-                >
-                </v-switch>
-                <v-layout
-                  row
-                  wrap
-                  v-if='$store.state.config.generalConfig.selfRegistration'
-                >
-                  <v-spacer></v-spacer>
-                  <v-flex xs3>
-                    <v-treeview :items="signupFields"></v-treeview>
-                  </v-flex>
-                  <v-flex xs8>
-                    <v-btn
-                      small
-                      round
-                      @click='moreFields = !moreFields'
-                      color="success"
-                    >Add More Fields</v-btn>
-                    <v-text-field
-                      v-if='moreFields'
-                      v-model="fieldLabel"
-                      label="Field Label"
-                    ></v-text-field>
-                    <v-text-field
-                      v-if='moreFields'
-                      v-model="fieldName"
-                      label="Unique Name"
-                    ></v-text-field>
-                    <v-select
-                      v-if='moreFields'
-                      :items="requiredText"
-                      v-model="required"
-                      label="Required"
-                    ></v-select>
-                    <v-btn
-                      color="info"
-                      small
-                      v-if='moreFields'
-                      @click='addMoreFields'
-                    >Save</v-btn>
-                  </v-flex>
-                </v-layout>
+                <v-card>
+                  <v-card-title primary-title>
+                    Self Registration
+                  </v-card-title>
+                  <v-card-text>
+                    <v-switch
+                      @change="saveConfiguration('generalConfig', 'selfRegistration')"
+                      color="primary"
+                      label="Enable self registration"
+                      v-model="$store.state.config.generalConfig.selfRegistration.enabled"
+                    >
+                    </v-switch>
+                    <v-layout
+                      row
+                      wrap
+                      v-if='$store.state.config.generalConfig.selfRegistration.enabled'
+                    >
+                      <v-spacer></v-spacer>
+                      <v-flex xs3>
+                        <v-treeview :items="signupFields"></v-treeview>
+                      </v-flex>
+                      <v-spacer></v-spacer>
+                      <v-flex xs8>
+                        <v-btn
+                          small
+                          round
+                          @click='moreFields = !moreFields'
+                          color="primary"
+                        >Add More Fields</v-btn>
+                        <v-text-field
+                          v-if='moreFields'
+                          v-model="fieldLabel"
+                          label="Field Label"
+                        ></v-text-field>
+                        <v-text-field
+                          v-if='moreFields'
+                          v-model="fieldName"
+                          label="Unique Name"
+                        ></v-text-field>
+                        <v-select
+                          v-if='moreFields'
+                          :items="requiredText"
+                          v-model="required"
+                          label="Required"
+                        ></v-select>
+                        <v-btn
+                          color="info"
+                          small
+                          v-if='moreFields'
+                          @click='addMoreFields'
+                        >
+                          <v-icon left>save</v-icon> Save
+                        </v-btn>
+                        <v-btn
+                          color="error"
+                          small
+                          v-if='moreFields'
+                          @click='moreFields = false'
+                        >
+                          <v-icon left>close</v-icon> Cancel
+                        </v-btn>
+                      </v-flex>
+                    </v-layout>
+                    <v-switch
+                      @change="saveConfiguration('generalConfig', 'selfRegistration')"
+                      color="primary"
+                      label="Requires Admin Approval Of Self Registration"
+                      v-model="$store.state.config.generalConfig.selfRegistration.requiresApproval"
+                    >
+                    </v-switch>
+                  </v-card-text>
+                </v-card>
               </v-flex>
+              <v-divider></v-divider>
               <v-flex xs1>
                 <v-card>
                   <v-card-title primary-title>
@@ -489,6 +519,71 @@
                       </template>
                     </v-data-table>
                   </v-card-text>
+                </v-card>
+              </v-flex>
+              <v-flex xs1>
+                <v-card color="grey lighten-3">
+                  <v-card-text>
+                    SMTP Configuration For Email Notifications
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-layout column>
+                      <v-flex>
+                        <v-text-field
+                          label="SMTP Host"
+                          v-model="smtp.host"
+                          box
+                        ></v-text-field>
+                      </v-flex>
+                      <v-flex>
+                        <v-text-field
+                          label="SMTP Port"
+                          v-model="smtp.port"
+                          box
+                        ></v-text-field>
+                      </v-flex>
+                      <v-flex>
+                        <v-text-field
+                          label="SMTP Username"
+                          v-model="smtp.username"
+                          box
+                        ></v-text-field>
+                      </v-flex>
+                      <v-flex>
+                        <v-text-field
+                          type="password"
+                          label="SMTP Password"
+                          v-model="smtp.password"
+                          browser-autocomplete='new-password'
+                          box
+                        ></v-text-field>
+                      </v-flex>
+                      <v-flex>
+                        <v-switch
+                          color="primary"
+                          label="SMTP Secured"
+                          v-model="smtp.secured"
+                        >
+                        </v-switch>
+                      </v-flex>
+                      <v-flex>
+                        <v-layout
+                          row
+                          wrap
+                        >
+                          <v-spacer></v-spacer>
+                          <v-flex xs1>
+                            <v-btn
+                              color="primary"
+                              @click="saveSMTP"
+                            >
+                              <v-icon>save</v-icon>Save
+                            </v-btn>
+                          </v-flex>
+                        </v-layout>
+                      </v-flex>
+                    </v-layout>
+                  </v-card-actions>
                 </v-card>
               </v-flex>
               <v-flex xs1>
@@ -538,7 +633,7 @@
                           <v-spacer></v-spacer>
                           <v-flex xs1>
                             <v-btn
-                              color="success"
+                              color="primary"
                               @click="recoProgressNotificationChanged"
                             >
                               <v-icon>save</v-icon>Save
@@ -588,6 +683,13 @@ export default {
   },
   data () {
     return {
+      smtp: {
+        host: '',
+        port: '',
+        username: '',
+        password: '',
+        secured: true
+      },
       autoDisableSingleDatasourceDialog: false,
       selectDatasourceDialog: false,
       fixSource2To: '',
@@ -665,8 +767,7 @@ export default {
           this.$store.state.dialogError = true
           this.$store.state.errorTitle = 'Error'
           this.$store.state.errorColor = 'error'
-          this.$store.state.errorDescription =
-            'This feature can only be enabled if there is a defined datasource to serve as Source 2 for all reconciliation'
+          this.$store.state.errorDescription = 'This feature can only be enabled if there is a defined datasource to serve as Source 2 for all reconciliation'
           setTimeout(() => {
             this.$store.state.config.generalConfig.reconciliation.singleDataSource = false
           })
@@ -729,11 +830,7 @@ export default {
       }
     },
     recoProgressNotificationChanged () {
-      if (
-        !this.$store.state.config.generalConfig.hasOwnProperty(
-          'recoProgressNotification'
-        )
-      ) {
+      if (!this.$store.state.config.generalConfig.hasOwnProperty('recoProgressNotification')) {
         this.$store.state.config.generalConfig.recoProgressNotification = {}
       }
       this.$store.state.config.generalConfig.recoProgressNotification.url = this.notification_endpoint
@@ -741,9 +838,37 @@ export default {
       this.$store.state.config.generalConfig.recoProgressNotification.password = this.notification_password
       this.saveConfiguration('generalConfig')
     },
+    saveSMTP () {
+      let formData = new FormData()
+      this.$store.state.progressTitle = 'Saving SMTP'
+      this.$store.state.dynamicProgress = true
+      formData.append('host', this.smtp.host)
+      formData.append('port', this.smtp.port)
+      formData.append('username', this.smtp.username)
+      formData.append('password', this.smtp.password)
+      formData.append('secured', this.smtp.secured)
+      axios.post(backendServer + '/saveSMTP', formData, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(() => {
+        this.$store.state.dynamicProgress = false
+        this.$store.state.dialogError = true
+        this.$store.state.errorColor = 'primary'
+        this.$store.state.errorTitle = 'Info'
+        this.$store.state.errorDescription = 'SMTP saved successfully'
+      }).catch((err) => {
+        console.log(err)
+        this.$store.state.dynamicProgress = false
+        this.$store.state.dialogError = true
+        this.$store.state.errorColor = 'error'
+        this.$store.state.errorTitle = 'Error'
+        this.$store.state.errorDescription = 'SMTP failed to be saved'
+      })
+    },
     addMoreFields () {
       this.$store.state.progressTitle = 'Saving field'
-      // this.$store.state.dynamicProgress = true
+      this.$store.state.dynamicProgress = true
       let exist = this.signupFields[0].children.find(child => {
         return child.id === this.fieldName
       })
@@ -868,6 +993,21 @@ export default {
     }
   },
   created () {
+    axios.get(backendServer + '/getSMTP').then((response) => {
+      if (response && response.data) {
+        this.smtp.host = response.data.host
+        this.smtp.port = response.data.port
+        this.smtp.username = response.data.username
+        this.smtp.password = response.data.password
+        this.smtp.secured = response.data.secured
+      }
+    }).catch((err) => {
+      console.log(err)
+      this.$store.state.dialogError = true
+      this.$store.state.errorColor = 'error'
+      this.$store.state.errorTitle = 'Error'
+      this.$store.state.errorDescription = 'An error occured while getting SMTP config'
+    })
     if (
       this.$store.state.config.generalConfig.authDisabled &&
       this.$store.state.config.generalConfig.authMethod === 'dhis2'

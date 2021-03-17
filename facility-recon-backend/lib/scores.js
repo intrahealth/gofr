@@ -1,3 +1,5 @@
+
+
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-loop-func */
@@ -14,7 +16,7 @@ const redisClient = redis.createClient({
   host: process.env.REDIS_HOST || '127.0.0.1',
 });
 const geodist = require('geodist');
-const _ = require('underscore');
+const lodash = require('lodash');
 const mixin = require('./mixin')();
 const config = require('./config');
 const mcsd = require('./mcsd')();
@@ -40,7 +42,7 @@ module.exports = function () {
       getPotential,
       callback,
     ) {
-      let scoreRequestId = `scoreResults${clientId}`;
+      const scoreRequestId = `scoreResults${clientId}`;
       const scoreResults = [];
       const matchBrokenCode = config.getConf('mapping:matchBrokenCode');
       const maxSuggestions = config.getConf('matchResults:maxSuggestions');
@@ -69,101 +71,84 @@ module.exports = function () {
       let totalAllNoMatch = 0;
       let totalAllIgnored = 0;
       let totalAllFlagged = 0;
-      let useCache = false;
+      let useCachedParents = false;
 
-      async.series([
-        (callback) => {
-          if (!getPotential) {
-            redisClient.del(`parents${recoLevel}${source2DB}`, () => callback(null));
-          } else {
-            return callback(null);
+      redisClient.get(`parents${recoLevel}${source2DB}`, (error, results) => {
+        if (error) {
+          winston.error(error);
+          winston.error(`An error has occured while getting parents for ${source2DB}`);
+        } else if (results) {
+          try {
+            results = JSON.parse(results);
+            useCachedParents = true;
+            source2MappedParentIds = results.source2MappedParentIds;
+            source2MappedParentNames = results.source2MappedParentNames;
+            source2ParentNames = results.source2ParentNames;
+          } catch (err) {
+            winston.error(err);
           }
-        },
-        (callback) => {
-          redisClient.get(`parents${recoLevel}${source2DB}`, (error, results) => {
-            if (error) {
-              winston.error(error);
-              winston.error(`An error has occured while getting parents for ${source2DB}`);
-            } else if (results) {
-              try {
-                results = JSON.parse(results);
-                useCache = true;
-                source2MappedParentIds = results.source2MappedParentIds;
-                source2MappedParentNames = results.source2MappedParentNames;
-                source2ParentNames = results.source2ParentNames;
-              } catch (error) {
-                winston.error(error);
-              }
-            }
-            return callback(null);
-          });
-        },
-        (callback) => {
-          if (!useCache) {
-            winston.info('Populating parents');
-            for (const entry of mcsdSource2.entry) {
-              if (entry.resource.hasOwnProperty('partOf')) {
-                source2ParentNames[entry.resource.id] = [];
-                source2MappedParentIds[entry.resource.id] = [];
-                source2MappedParentNames[entry.resource.id] = [];
-                const entityParent = entry.resource.partOf.reference;
-                mcsd.getLocationParentsFromData(entityParent, mcsdSource2All, 'all', (parents) => {
-                  // lets make sure that we use the mapped parent for comparing against Source1
-                  async.each(parents, (parent, parentCallback) => {
-                    const parentIdentifier = URI(config.getConf('mCSD:url'))
-                      .segment(source2DB)
-                      .segment('fhir')
-                      .segment('Location')
-                      .segment(parent.id)
-                      .toString();
-                    this.matchStatus(mcsdMapped, parentIdentifier, (mapped) => {
-                      if (mapped) {
-                        source2MappedParentIds[entry.resource.id].push(mapped.resource.id);
-                        source2MappedParentNames[entry.resource.id].push(mapped.resource.name);
-                        source2ParentNames[entry.resource.id].push(parent.text);
-                      } else {
-                        source2MappedParentIds[entry.resource.id].push(parent.id);
-                        source2ParentNames[entry.resource.id].push(parent.text);
-                      }
-                      parentCallback();
-                    });
-                  }, () => {
-                    count += 1;
-                    const percent = parseFloat((count * 100 / totalSource2Records)).toFixed(1);
-                    scoreRequestId = `scoreResults${clientId}`;
-                    const scoreResData = JSON.stringify({
-                      status: '2/3 - Scanning Source2 Location Parents',
-                      error: null,
-                      percent,
-                      stage: 'not last',
-                    });
-                    redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
-                    if (count === mcsdSource2.entry.length) {
-                      const source2Parents = {};
-                      source2Parents.source2MappedParentIds = source2MappedParentIds;
-                      source2Parents.source2MappedParentNames = source2MappedParentNames;
-                      source2Parents.source2ParentNames = source2ParentNames;
-                      redisClient.set(`parents${recoLevel}${source2DB}`, JSON.stringify(source2Parents), 'EX', 1200);
-                      winston.info('Done populating parents');
-                      return callback(null);
+        }
+
+        if (!useCachedParents) {
+          winston.info('Populating parents');
+
+          for (const entry of mcsdSource2.entry) {
+            if (entry.resource.hasOwnProperty('partOf')) {
+              source2ParentNames[entry.resource.id] = [];
+              source2MappedParentIds[entry.resource.id] = [];
+              source2MappedParentNames[entry.resource.id] = [];
+              const entityParent = entry.resource.partOf.reference;
+              mcsd.getLocationParentsFromData(entityParent, mcsdSource2All, 'all', (parents) => {
+                // lets make sure that we use the mapped parent for comparing against Source1
+                async.each(parents, (parent, parentCallback) => {
+                  const parentIdentifier = URI(config.getConf('mCSD:url'))
+                    .segment(source2DB)
+                    .segment('fhir')
+                    .segment('Location')
+                    .segment(parent.id)
+                    .toString();
+                  this.matchStatus(mcsdMapped, parentIdentifier, (mapped) => {
+                    if (mapped) {
+                      source2MappedParentIds[entry.resource.id].push(mapped.resource.id);
+                      source2MappedParentNames[entry.resource.id].push(mapped.resource.name);
+                      source2ParentNames[entry.resource.id].push(parent.text);
+                    } else {
+                      source2MappedParentIds[entry.resource.id].push(parent.id);
+                      source2ParentNames[entry.resource.id].push(parent.text);
                     }
+                    parentCallback();
                   });
+                }, () => {
+                  count += 1;
+                  const percent = parseFloat((count * 100 / totalSource2Records).toFixed(1));
+                  const scoreResData = JSON.stringify({
+                    status: '2/3 - Scanning Source2 Location Parents',
+                    error: null,
+                    percent,
+                    stage: 'not last',
+                  });
+                  redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
+                  if (count === mcsdSource2.entry.length) {
+                    const source2Parents = {};
+                    source2Parents.source2MappedParentIds = source2MappedParentIds;
+                    source2Parents.source2MappedParentNames = source2MappedParentNames;
+                    source2Parents.source2ParentNames = source2ParentNames;
+                    redisClient.set(`parents${recoLevel}${source2DB}`, JSON.stringify(source2Parents), 'EX', 1200);
+                    winston.info('Done populating parents');
+                  }
                 });
-              }
+              });
             }
-          } else {
-            return callback(null);
           }
-        },
-      ], () => {
+        }
         winston.info('Calculating scores now');
         count = 0;
         async.eachSeries(mcsdSource1.entry, (source1Entry, source1Callback) => {
           // check if this Source1 Orgid is mapped
           const source1Id = source1Entry.resource.id;
           let matchBroken = false;
-          if (source1Entry.resource.hasOwnProperty('tag')) {
-            const matchBrokenTag = source1Entry.resource.tag.find(tag => tag.code == matchBrokenCode);
+          if (source1Entry.resource.meta.hasOwnProperty('tag')) {
+            const matchBrokenTag = source1Entry.resource.meta.tag.find(tag => tag.code == matchBrokenCode);
             if (matchBrokenTag) {
               matchBroken = true;
             }
@@ -195,16 +180,16 @@ module.exports = function () {
                 let ignorered = null;
                 let flagged = null;
                 let matchCommentsTag = {};
-                if (match.resource.hasOwnProperty('tag')) {
-                  noMatch = match.resource.tag.find(tag => tag.code == noMatchCode);
-                  ignorered = match.resource.tag.find(tag => tag.code == ignoreCode);
-                  flagged = match.resource.tag.find(tag => tag.code == flagCode);
-                  matchCommentsTag = match.resource.tag.find(tag => tag.code == matchCommentsCode);
+                if (match.resource.meta.hasOwnProperty('tag')) {
+                  noMatch = match.resource.meta.tag.find(tag => tag.code == noMatchCode);
+                  ignorered = match.resource.meta.tag.find(tag => tag.code == ignoreCode);
+                  flagged = match.resource.meta.tag.find(tag => tag.code == flagCode);
+                  matchCommentsTag = match.resource.meta.tag.find(tag => tag.code == matchCommentsCode);
                 }
                 if (flagged) {
                   totalAllFlagged += 1;
                   thisRanking.source1.tag = 'flagged';
-                  const flagComment = match.resource.tag.find(tag => tag.code == flagCommentCode);
+                  const flagComment = match.resource.meta.tag.find(tag => tag.code == flagCommentCode);
                   if (flagComment) {
                     thisRanking.source1.flagComment = flagComment.display;
                   }
@@ -221,27 +206,26 @@ module.exports = function () {
                   }
                   scoreResults.push(thisRanking);
                   count += 1;
-                  const percent = parseFloat((count * 100 / totalSource1Records)).toFixed(1);
+                  const percent = parseFloat((count * 100 / totalSource1Records).toFixed(1));
                   const scoreResData = JSON.stringify({
                     status: '3/3 - Running Automatching',
                     error: null,
                     percent,
                     stage: 'last',
                   });
-                  redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
+                  redisClient.set(scoreRequestId, scoreResData);
                   updateDataSavingPercent();
                   return source1Callback();
                 }
-
                 const matchedSource2Id = mixin.getIdFromIdentifiers(match.resource.identifier, 'https://digitalhealth.intrahealth.org/source2');
                 const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, matchedSource2Id);
                 const matchInSource2 = mcsdSource2.entry.find(entry => entry.resource.id == matchedSource2Id);
 
                 if (matchInSource2) {
                   source2MatchedIDs.push(matchedSource2Id);
-                  let matchComments = [];
+                  const matchComments = [];
                   if (matchCommentsTag && matchCommentsTag.hasOwnProperty('display')) {
-                    matchComments = matchCommentsTag.display;
+                    matchComments.push(matchCommentsTag.display);
                   }
                   thisRanking.exactMatch = {
                     name: matchInSource2.resource.name,
@@ -254,7 +238,7 @@ module.exports = function () {
                 }
                 scoreResults.push(thisRanking);
                 count += 1;
-                const percent = parseFloat((count * 100 / totalSource1Records)).toFixed(1);
+                const percent = parseFloat((count * 100 / totalSource1Records).toFixed(2));
                 const scoreResData = JSON.stringify({
                   status: '3/3 - Running Automatching',
                   error: null,
@@ -273,7 +257,7 @@ module.exports = function () {
               let source1ParentReceived;
               if (source1Entry.resource.hasOwnProperty('partOf')) {
                 const entityParent = source1Entry.resource.partOf.reference;
-                source1ParentReceived = new Promise((resolve, reject) => {
+                source1ParentReceived = new Promise((resolve) => {
                   mcsd.getLocationParentsFromData(entityParent, mcsdSource1All, 'all', (parents) => {
                     source1Parents = parents;
                     let fakeLocationExist = false;
@@ -326,7 +310,7 @@ module.exports = function () {
                 const promises2 = [];
                 for (let x = 0; x < source2Filtered.length; x++) {
                   const source2Entry = source2Filtered[x];
-                  promises2.push(new Promise((resolve, reject) => {
+                  promises2.push(new Promise((resolve) => {
                     const matchComments = [];
                     const id = source2Entry.resource.id;
                     const source2Identifier = URI(config.getConf('mCSD:url'))
@@ -356,9 +340,9 @@ module.exports = function () {
                       const lev = levenshtein.get(source2Name.toLowerCase(), source1Name.toLowerCase());
                       // when parent constraint is On then automatch by name is also enabled by default
                       // when parent constraint is off then check if name automatch is also on
-                      if (lev == 0 &&
-                        !matchBroken &&
-                        (parentsDiffer == false || (parentConstraint.enabled == false && parentConstraint.nameAutoMatch == true) || recoLevel == 2)
+                      if (lev == 0
+                        && !matchBroken
+                        && (parentsDiffer == false || (parentConstraint.enabled == false && parentConstraint.nameAutoMatch == true) || recoLevel == 2)
                       ) {
                         const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.resource.id);
                         ignore.push(source2Entry.resource.id);
@@ -422,7 +406,7 @@ module.exports = function () {
                           });
                         } else {
                           const existingLev = Object.keys(thisRanking.potentialMatches);
-                          const max = _.max(existingLev);
+                          const max = lodash.max(existingLev);
                           if (lev < max) {
                             const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.resource.id);
                             delete thisRanking.potentialMatches[max];
@@ -444,7 +428,7 @@ module.exports = function () {
                 Promise.all(promises2).then(() => {
                   scoreResults.push(thisRanking);
                   count += 1;
-                  const percent = parseFloat((count * 100 / totalSource1Records)).toFixed(1);
+                  const percent = parseFloat((count * 100 / totalSource1Records).toFixed(1));
                   const scoreResData = JSON.stringify({
                     status: '3/3 - Running Automatching',
                     error: null,
@@ -495,15 +479,6 @@ module.exports = function () {
               Promise.all(promises).then(() => {
                 updateDataSavingPercent('done');
               });
-              // async.eachSeries(matchesToSave, (match, nxtMatch) => {
-              //   mcsd.saveMatch(match.source1Id, match.source2Id, match.source1DB, match.source2DB, match.mappingDB, match.recoLevel, match.totalLevels, 'match', true, false, () => {
-              //     updateDataSavingPercent();
-              //     return nxtMatch();
-              //   });
-              // }, () => {
-              //   console.timeEnd('saving')
-              //   updateDataSavingPercent('done');
-              // });
             }, timeout);
           });
         });
@@ -517,7 +492,7 @@ module.exports = function () {
         } else {
           countSaved += 1;
         }
-        const percent = parseFloat((countSaved * 100 / totalSource1Records)).toFixed(1);
+        const percent = parseFloat((countSaved * 100 / totalSource1Records).toFixed(1));
         const scoreSavingStatId = `scoreSavingStatus${clientId}`;
         const scoreSavingData = JSON.stringify({
           status: '1/1 - Saving Data',
@@ -544,7 +519,7 @@ module.exports = function () {
       getPotential,
       callback,
     ) {
-      let scoreRequestId = `scoreResults${clientId}`;
+      const scoreRequestId = `scoreResults${clientId}`;
       const scoreResults = [];
       const matchBrokenCode = config.getConf('mapping:matchBrokenCode');
       const maxSuggestions = config.getConf('matchResults:maxSuggestions');
@@ -573,107 +548,91 @@ module.exports = function () {
       let totalAllNoMatch = 0;
       let totalAllIgnored = 0;
       let totalAllFlagged = 0;
-      let useCache = false;
-      async.series([
-        (callback) => {
-          if (!getPotential) {
-            redisClient.del(`parents${recoLevel}${source2DB}`, () => callback(null));
-          } else {
-            return callback(null);
+      const useCachedParents = false;
+
+      redisClient.get(`parents${recoLevel}${source2DB}`, (error, results) => {
+        if (error) {
+          winston.error(error);
+          winston.error(`An error has occured while getting parents for ${source2DB}`);
+        } else if (results) {
+          try {
+            results = JSON.parse(results);
+            useCachedParents = true;
+            source2MappedParentIds = results.source2MappedParentIds;
+            source2MappedParentNames = results.source2MappedParentNames;
+            source2ParentNames = results.source2ParentNames;
+          } catch (err) {
+            winston.error(err);
           }
-        },
-        (callback) => {
-          redisClient.get(`parents${recoLevel}${source2DB}`, (error, results) => {
-            if (error) {
-              winston.error(error);
-              winston.error(`An error has occured while getting parents for ${source2DB}`);
-            } else if (results) {
-              try {
-                results = JSON.parse(results);
-                useCache = true;
-                source2MappedParentIds = results.source2MappedParentIds;
-                source2MappedParentNames = results.source2MappedParentNames;
-                source2ParentNames = results.source2ParentNames;
-              } catch (error) {
-                winston.error(error);
+        }
+
+        if (!useCachedParents) {
+          winston.info('Populating parents');
+          for (let i = 0, len = mcsdSource2.entry.length; i < len; i++) {
+            const entry = mcsdSource2.entry[i];
+            const source2Identifier = URI(config.getConf('mCSD:url'))
+              .segment(source2DB)
+              .segment('fhir')
+              .segment('Location')
+              .segment(entry.resource.id)
+              .toString();
+            source2LevelMappingStatus[entry.resource.id] = [];
+            this.matchStatus(mcsdMapped, source2Identifier, (mapped) => {
+              if (mapped) {
+                source2LevelMappingStatus[entry.resource.id] = true;
+              } else {
+                source2LevelMappingStatus[entry.resource.id] = false;
               }
-            }
-            return callback(null);
-          });
-        },
-        (callback) => {
-          if (!useCache) {
-            winston.info('Populating parents');
-            for (let i = 0, len = mcsdSource2.entry.length; i < len; i++) {
-              const entry = mcsdSource2.entry[i];
-              const source2Identifier = URI(config.getConf('mCSD:url'))
-                .segment(source2DB)
-                .segment('fhir')
-                .segment('Location')
-                .segment(entry.resource.id)
-                .toString();
-              source2LevelMappingStatus[entry.resource.id] = [];
-              this.matchStatus(mcsdMapped, source2Identifier, (mapped) => {
-                if (mapped) {
-                  source2LevelMappingStatus[entry.resource.id] = true;
-                } else {
-                  source2LevelMappingStatus[entry.resource.id] = false;
-                }
-              });
-              if (entry.resource.hasOwnProperty('partOf')) {
-                source2ParentNames[entry.resource.id] = [];
-                source2MappedParentIds[entry.resource.id] = [];
-                source2MappedParentNames[entry.resource.id] = [];
-                const entityParent = entry.resource.partOf.reference;
-                mcsd.getLocationParentsFromData(entityParent, mcsdSource2All, 'all', (parents) => {
-                  // lets make sure that we use the mapped parent for comparing against Source1
-                  async.each(parents, (parent, parentCallback) => {
-                    const parentIdentifier = URI(config.getConf('mCSD:url'))
-                      .segment(source2DB)
-                      .segment('fhir')
-                      .segment('Location')
-                      .segment(parent.id)
-                      .toString();
-                    this.matchStatus(mcsdMapped, parentIdentifier, (mapped) => {
-                      if (mapped) {
-                        source2MappedParentIds[entry.resource.id].push(mapped.resource.id);
-                        source2MappedParentNames[entry.resource.id].push(mapped.resource.name);
-                        source2ParentNames[entry.resource.id].push(parent.text);
-                      } else {
-                        source2MappedParentIds[entry.resource.id].push(parent.id);
-                        source2ParentNames[entry.resource.id].push(parent.text);
-                      }
-                      parentCallback();
-                    });
-                  }, () => {
-                    count += 1;
-                    scoreRequestId = `scoreResults${clientId}`;
-                    const percent = parseFloat((count * 100 / totalSource2Records)).toFixed(1);
-                    const scoreResData = JSON.stringify({
-                      status: '2/3 - Scanning Source2 Location Parents',
-                      error: null,
-                      percent,
-                      stage: 'not last',
-                    });
-                    redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
-                    if (count === mcsdSource2.entry.length) {
-                      const source2Parents = {};
-                      source2Parents.source2MappedParentIds = source2MappedParentIds;
-                      source2Parents.source2MappedParentNames = source2MappedParentNames;
-                      source2Parents.source2ParentNames = source2ParentNames;
-                      redisClient.set(`parents${recoLevel}${source2DB}`, JSON.stringify(source2Parents), 'EX', 1200);
-                      winston.info('Done populating parents');
-                      return callback(null);
+            });
+            if (entry.resource.hasOwnProperty('partOf')) {
+              source2ParentNames[entry.resource.id] = [];
+              source2MappedParentIds[entry.resource.id] = [];
+              source2MappedParentNames[entry.resource.id] = [];
+              const entityParent = entry.resource.partOf.reference;
+              mcsd.getLocationParentsFromData(entityParent, mcsdSource2All, 'all', (parents) => {
+                // lets make sure that we use the mapped parent for comparing against Source1
+                async.each(parents, (parent, parentCallback) => {
+                  const parentIdentifier = URI(config.getConf('mCSD:url'))
+                    .segment(source2DB)
+                    .segment('fhir')
+                    .segment('Location')
+                    .segment(parent.id)
+                    .toString();
+                  this.matchStatus(mcsdMapped, parentIdentifier, (mapped) => {
+                    if (mapped) {
+                      source2MappedParentIds[entry.resource.id].push(mapped.resource.id);
+                      source2MappedParentNames[entry.resource.id].push(mapped.resource.name);
+                      source2ParentNames[entry.resource.id].push(parent.text);
+                    } else {
+                      source2MappedParentIds[entry.resource.id].push(parent.id);
+                      source2ParentNames[entry.resource.id].push(parent.text);
                     }
+                    parentCallback();
                   });
+                }, () => {
+                  count += 1;
+                  const percent = parseFloat((count * 100 / totalSource2Records).toFixed(1));
+                  const scoreResData = JSON.stringify({
+                    status: '2/3 - Scanning Source2 Location Parents',
+                    error: null,
+                    percent,
+                    stage: 'not last',
+                  });
+                  redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
+                  if (count === mcsdSource2.entry.length) {
+                    const source2Parents = {};
+                    source2Parents.source2MappedParentIds = source2MappedParentIds;
+                    source2Parents.source2MappedParentNames = source2MappedParentNames;
+                    source2Parents.source2ParentNames = source2ParentNames;
+                    redisClient.set(`parents${recoLevel}${source2DB}`, JSON.stringify(source2Parents), 'EX', 1200);
+                    winston.info('Done populating parents');
+                  }
                 });
-              }
+              });
             }
-          } else {
-            return callback(null);
           }
-        },
-      ], () => {
+        }
+
         // clear mcsdSource2All
         mcsdSource2All = {};
         winston.info('Calculating scores now');
@@ -690,8 +649,8 @@ module.exports = function () {
           }
 
           let matchBroken = false;
-          if (source1Entry.resource.hasOwnProperty('tag')) {
-            const matchBrokenTag = source1Entry.resource.tag.find(tag => tag.code == matchBrokenCode);
+          if (source1Entry.resource.meta.hasOwnProperty('tag')) {
+            const matchBrokenTag = source1Entry.resource.meta.tag.find(tag => tag.code == matchBrokenCode);
             if (matchBrokenTag) {
               matchBroken = true;
             }
@@ -710,11 +669,7 @@ module.exports = function () {
                 entityParent = source1Entry.resource.partOf.reference;
               }
               mcsd.getLocationParentsFromData(entityParent, mcsdSource1All, 'names', (source1Parents) => {
-                const ident = source1Entry.resource.identifier.find(identifier => identifier.system == 'https://digitalhealth.intrahealth.org/source1');
-                let source1BuildingId = source1Entry.resource.id;
-                // if (ident) {
-                //   source1BuildingId = ident.value;
-                // }
+                const source1BuildingId = source1Entry.resource.id;
                 const source1IdHierarchy = mixin.createIdHierarchy(mcsdSource1, source1BuildingId);
                 thisRanking.source1 = {
                   name: source1Entry.resource.name,
@@ -730,16 +685,16 @@ module.exports = function () {
                 let ignorered = null;
                 let flagged = null;
                 let matchCommentsTag = {};
-                if (match.resource.hasOwnProperty('tag')) {
-                  noMatch = match.resource.tag.find(tag => tag.code == noMatchCode);
-                  ignorered = match.resource.tag.find(tag => tag.code == ignoreCode);
-                  flagged = match.resource.tag.find(tag => tag.code == flagCode);
-                  matchCommentsTag = match.resource.tag.find(tag => tag.code == matchCommentsCode);
+                if (match.resource.meta.hasOwnProperty('tag')) {
+                  noMatch = match.resource.meta.tag.find(tag => tag.code == noMatchCode);
+                  ignorered = match.resource.meta.tag.find(tag => tag.code == ignoreCode);
+                  flagged = match.resource.meta.tag.find(tag => tag.code == flagCode);
+                  matchCommentsTag = match.resource.meta.tag.find(tag => tag.code == matchCommentsCode);
                 }
                 if (flagged) {
                   totalAllFlagged += 1;
                   thisRanking.source1.tag = 'flagged';
-                  const flagComment = match.resource.tag.find(tag => tag.code == flagCommentCode);
+                  const flagComment = match.resource.meta.tag.find(tag => tag.code == flagCommentCode);
                   if (flagComment) {
                     thisRanking.source1.flagComment = flagComment.display;
                   }
@@ -756,7 +711,7 @@ module.exports = function () {
                   }
                   scoreResults.push(thisRanking);
                   count += 1;
-                  const percent = parseFloat((count * 100 / totalSource1Records)).toFixed(1);
+                  const percent = parseFloat((count * 100 / totalSource1Records).toFixed(1));
                   const scoreResData = JSON.stringify({
                     status: '3/3 - Running Automatching',
                     error: null,
@@ -773,9 +728,9 @@ module.exports = function () {
                 if (matchInSource2) {
                   const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, matchedSource2Id);
                   source2MatchedIDs.push(matchedSource2Id);
-                  let matchComments = [];
+                  const matchComments = [];
                   if (matchCommentsTag && matchCommentsTag.hasOwnProperty('display')) {
-                    matchComments = matchCommentsTag.display;
+                    matchComments.push(matchCommentsTag.display);
                   }
                   thisRanking.exactMatch = {
                     name: matchInSource2.resource.name,
@@ -788,7 +743,7 @@ module.exports = function () {
                 }
                 scoreResults.push(thisRanking);
                 count += 1;
-                const percent = parseFloat((count * 100 / totalSource1Records)).toFixed(1);
+                const percent = parseFloat((count * 100 / totalSource1Records).toFixed(1));
                 const scoreResData = JSON.stringify({
                   status: '3/3 - Running Automatching',
                   error: null,
@@ -807,20 +762,14 @@ module.exports = function () {
               let source1ParentReceived;
               if (source1Entry.resource.hasOwnProperty('partOf')) {
                 const entityParent = source1Entry.resource.partOf.reference;
-                source1ParentReceived = new Promise((resolve, reject) => {
+                source1ParentReceived = new Promise((resolve) => {
                   mcsd.getLocationParentsFromData(entityParent, mcsdSource1All, 'all', (parents) => {
                     source1Parents = parents;
-                    async.eachSeries(parents, (parent, nxtParent) => {
-                      source1ParentNames.push(
-                        parent.text,
-                      );
-                      source1ParentIds.push(
-                        parent.id,
-                      );
-                      return nxtParent();
-                    }, () => {
-                      resolve();
-                    });
+                    for (const parent of parents) {
+                      source1ParentNames.push(parent.text);
+                      source1ParentIds.push(parent.id);
+                    }
+                    resolve();
                   });
                 });
               } else {
@@ -828,11 +777,7 @@ module.exports = function () {
               }
               source1ParentReceived.then(() => {
                 thisRanking = {};
-                let source1BuildingId = source1Entry.resource.id;
-                const ident = source1Entry.resource.identifier.find(identifier => identifier.system == 'https://digitalhealth.intrahealth.org/source1');
-                // if (ident) {
-                //   source1BuildingId = ident.value;
-                // }
+                const source1BuildingId = source1Entry.resource.id;
                 let parents;
                 if (source1Parents[source1Parents.length - 1].id == topOrgId) {
                   parents = source1ParentNames.slice(0, source1Parents.length - 1);
@@ -863,9 +808,7 @@ module.exports = function () {
                     return source2Callback();
                   }
                   const matchComments = [];
-                  const {
-                    id,
-                  } = source2Entry.resource;
+                  const { id } = source2Entry.resource;
                   const source2Identifiers = source2Entry.resource.identifier;
                   // if this source2 is already mapped then skip it
                   const ignoreThis = ignore.find(toIgnore => toIgnore == id);
@@ -938,30 +881,25 @@ module.exports = function () {
                       recoLevel,
                       totalLevels,
                     });
-                    // mcsd.saveMatch(source1Id, source2Entry.resource.id, source1DB, source2DB, mappingDB, recoLevel, totalLevels, 'match', true, false, () => {
-                    //   updateDataSavingPercent();
-                    // });
                     totalAllMapped += 1;
                     source2MatchedIDs.push(source2Entry.resource.id);
                     return source2Callback();
                   }
-                  if (matchingIdent && matchBroken) {
-                    if (getPotential) {
-                      const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.resource.id);
-                      if (!thisRanking.potentialMatches.hasOwnProperty('0')) {
-                        thisRanking.potentialMatches['0'] = [];
-                      }
-                      thisRanking.potentialMatches['0'].push({
-                        name: source2Name,
-                        parents: source2ParentNames[source2Entry.resource.id].slice(0, source2ParentNames[source2Entry.resource.id].length - 1),
-                        mappedParentName: source2MappedParentNames[source2Entry.resource.id][0],
-                        lat: source2Latitude,
-                        long: source2Longitude,
-                        geoDistance: dist,
-                        id: source2Entry.resource.id,
-                        source2IdHierarchy,
-                      });
+                  if (matchingIdent && matchBroken && getPotential) {
+                    const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.resource.id);
+                    if (!thisRanking.potentialMatches.hasOwnProperty('0')) {
+                      thisRanking.potentialMatches['0'] = [];
                     }
+                    thisRanking.potentialMatches['0'].push({
+                      name: source2Name,
+                      parents: source2ParentNames[source2Entry.resource.id].slice(0, source2ParentNames[source2Entry.resource.id].length - 1),
+                      mappedParentName: source2MappedParentNames[source2Entry.resource.id][0],
+                      lat: source2Latitude,
+                      long: source2Longitude,
+                      geoDistance: dist,
+                      id: source2Entry.resource.id,
+                      source2IdHierarchy,
+                    });
                     return source2Callback();
                   }
 
@@ -969,8 +907,8 @@ module.exports = function () {
 
                   const lev = levenshtein.get(source2Name.toLowerCase(), source1Name.toLowerCase());
 
-                  if (lev == 0 && !matchBroken &&
-                    (parentsDiffer == false || (parentConstraint.enabled == false && parentConstraint.nameAutoMatch == true) || recoLevel == 2)
+                  if (lev == 0 && !matchBroken
+                    && (parentsDiffer == false || (parentConstraint.enabled == false && parentConstraint.nameAutoMatch == true) || recoLevel == 2)
                   ) {
                     const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.resource.id);
                     ignore.push(source2Entry.resource.id);
@@ -996,16 +934,13 @@ module.exports = function () {
                       recoLevel,
                       totalLevels,
                     });
-                    // mcsd.saveMatch(source1Id, source2Entry.resource.id, source1DB, source2DB, mappingDB, recoLevel, totalLevels, 'match', true, false, () => {
-                    //   updateDataSavingPercent();
-                    // });
                     totalAllMapped += 1;
                     source2MatchedIDs.push(source2Entry.resource.id);
                     return source2Callback();
                   }
 
-                  // use dictionary
                   if (getPotential) {
+                    // use dictionary
                     const dictionary = config.getConf('dictionary');
                     for (const abbr in dictionary) {
                       let replacedSource1 = source1Name.replace(abbr, '');
@@ -1067,7 +1002,7 @@ module.exports = function () {
                       });
                     } else {
                       const existingLev = Object.keys(thisRanking.potentialMatches);
-                      const max = _.max(existingLev);
+                      const max = lodash.max(existingLev);
                       if (lev < max) {
                         const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.resource.id);
                         delete thisRanking.potentialMatches[max];
@@ -1089,7 +1024,7 @@ module.exports = function () {
                 }, () => {
                   scoreResults.push(thisRanking);
                   count += 1;
-                  const percent = parseFloat((count * 100 / totalSource1Records)).toFixed(1);
+                  const percent = parseFloat((count * 100 / totalSource1Records).toFixed(1));
                   const scoreResData = JSON.stringify({
                     status: '3/3 - Running Automatching',
                     error: null,
@@ -1154,7 +1089,7 @@ module.exports = function () {
         } else {
           countSaved += 1;
         }
-        const percent = parseFloat((countSaved * 100 / totalSource1Records)).toFixed(1);
+        const percent = parseFloat((countSaved * 100 / totalSource1Records).toFixed(1));
         const scoreSavingStatId = `scoreSavingStatus${clientId}`;
         const scoreSavingData = JSON.stringify({
           status: '1/1 - Saving Data',
@@ -1169,8 +1104,8 @@ module.exports = function () {
         return callback();
       }
       const status = mcsdMapped.entry.find(
-        entry => entry.resource.id === id ||
-        (entry.resource.hasOwnProperty('identifier') && entry.resource.identifier.find(identifier => identifier.value === id)),
+        entry => entry.resource.id === id
+        || (entry.resource.hasOwnProperty('identifier') && entry.resource.identifier.find(identifier => identifier.value === id)),
       );
       return callback(status);
     },
@@ -1208,10 +1143,10 @@ module.exports = function () {
           let flagged;
           let flagComments;
           if (matched) {
-            noMatch = matched.resource.tag.find(tag => tag.code == noMatchCode);
-            ignored = matched.resource.tag.find(tag => tag.code == ignoreCode);
-            flagged = matched.resource.tag.find(tag => tag.code == flagCode);
-            flagComments = matched.resource.tag.find(tag => tag.code == flagCommentCode);
+            noMatch = matched.resource.meta.tag.find(tag => tag.code == noMatchCode);
+            ignored = matched.resource.meta.tag.find(tag => tag.code == ignoreCode);
+            flagged = matched.resource.meta.tag.find(tag => tag.code == flagCode);
+            flagComments = matched.resource.meta.tag.find(tag => tag.code == flagCommentCode);
           }
           let newTag;
           if (noMatch) {
@@ -1241,12 +1176,12 @@ module.exports = function () {
                 delete copiedEntry.resource.partOf;
               }
               if (newTag) {
-                if (!copiedEntry.resource.tag) {
-                  copiedEntry.resource.tag = [];
+                if (!copiedEntry.resource.meta.tag) {
+                  copiedEntry.resource.meta.tag = [];
                 }
-                copiedEntry.resource.tag.push(newTag);
+                copiedEntry.resource.meta.tag.push(newTag);
                 if (flagComments) {
-                  copiedEntry.resource.tag.push(flagComments);
+                  copiedEntry.resource.meta.tag.push(flagComments);
                 }
               }
               mcsdUnmatched.entry.push(copiedEntry);
@@ -1272,9 +1207,10 @@ module.exports = function () {
                   name,
                 };
                 if (parentsFields) {
-                  async.eachOf(parentsFields, (parent, key, nxtParnt) => {
+                  for (const key in parentsFields) {
+                    const parent = parentsFields[key];
                     data[parent] = reversedParents[key];
-                  });
+                  }
                 } else {
                   data.parents = parentCache[entityParent];
                 }
@@ -1292,9 +1228,10 @@ module.exports = function () {
                 name,
               };
               if (parentsFields) {
-                async.eachOf(parentsFields, (parent, key, nxtParnt) => {
+                for (const key in parentsFields) {
+                  const parent = parentsFields[key];
                   data[parent] = reversedParents[key];
-                });
+                }
               } else {
                 data.parents = parentCache[entityParent];
               }
@@ -1338,10 +1275,10 @@ module.exports = function () {
             let nomatch;
             let ignore;
             let flagged;
-            if (mapped.resource.hasOwnProperty('tag')) {
-              nomatch = mapped.resource.tag.find(tag => tag.code === noMatchCode);
-              ignore = mapped.resource.tag.find(tag => tag.code === ignoreCode);
-              flagged = mapped.resource.tag.find(tag => tag.code === flagCode);
+            if (mapped.resource.meta.hasOwnProperty('tag')) {
+              nomatch = mapped.resource.meta.tag.find(tag => tag.code === noMatchCode);
+              ignore = mapped.resource.meta.tag.find(tag => tag.code === ignoreCode);
+              flagged = mapped.resource.meta.tag.find(tag => tag.code === flagCode);
             }
             if (flagged) {
               mappingStatus.flagged.push({
@@ -1370,7 +1307,7 @@ module.exports = function () {
             }
             count += 1;
             const statusRequestId = `mappingStatus${clientId}`;
-            const percent = parseFloat((count * 100 / source1Locations.entry.length)).toFixed(1);
+            const percent = parseFloat((count * 100 / source1Locations.entry.length).toFixed(1));
             const statusResData = JSON.stringify({
               status: '2/2 - Loading Source2 and Source1 Data',
               error: null,
@@ -1385,7 +1322,7 @@ module.exports = function () {
             });
             count += 1;
             const statusRequestId = `mappingStatus${clientId}`;
-            const percent = parseFloat((count * 100 / source1Locations.entry.length)).toFixed(1);
+            const percent = parseFloat((count * 100 / source1Locations.entry.length).toFixed(1));
             const statusResData = JSON.stringify({
               status: '2/2 - Loading Source2 and Source1 Data',
               error: null,

@@ -65,5 +65,65 @@
   "encryption": {
     "algorithm": "aes-256-ctr",
     "secret": "b1ea334a-bf5a-11e8-a355-529269fb1459"
+  },
+  "codeSystems": [{
+    "uri": "https://codesystem.digitalhealth.intrahealth.org/specialties",
+    "name": "specialties"
+  }, {
+    "uri": "https://codesystem.digitalhealth.intrahealth.org/servicetypes",
+    "name": "serviceTypes"
+  }, {
+    "uri": "https://codesystem.digitalhealth.intrahealth.org/servicecategories",
+    "name": "serviceCategories"
+  }, {
+    "uri": "https://codesystem.digitalhealth.intrahealth.org/serviceeligibilities",
+    "name": "serviceEligibilities"
+  }, {
+    "uri": "https://codesystem.digitalhealth.intrahealth.org/facilityownerships",
+    "name": "facilityOwnerships"
+  }, {
+    "uri": "https://codesystem.digitalhealth.intrahealth.org/languages",
+    "name": "languages"
+  }, {
+    "uri": "https://codesystem.digitalhealth.intrahealth.org/referralmethods",
+    "name": "referralMethods"
+  }, {
+    "uri": "https://codesystem.digitalhealth.intrahealth.org/programs",
+    "name": "programs"
+  }, {
+    "uri": "https://codesystem.digitalhealth.intrahealth.org/servicecharacteristics",
+    "name": "serviceCharacteristics"
+  }, {
+    "uri": "https://codesystem.digitalhealth.intrahealth.org/serviceprovisionconditions",
+    "name": "serviceProvisionConditions"
+  }, {
+    "uri": "http://codesystem.digitalhealth.intrahealth.org/originalrequestid",
+    "name": "originalRequestId"
+  }, {
+    "uri": "http://codesystem.digitalhealth.intrahealth.org/updatingResourceID",
+    "name": "updatingResourceID"
+  }, {
+    "uri": "http://codesystem.digitalhealth.intrahealth.org/facilityupdaterequest",
+    "name": "facilityUpdateRequest"
+  }, {
+    "uri": "http://codesystem.digitalhealth.intrahealth.org/facilityaddrequest",
+    "name": "facilityAddRequest"
+  }],
+  "hapi": {
+    "DBUser": "hapi",
+    "DBPassword": "hapi",
+    "defaultDBName": "gofr_empty",
+    "requestsDBName": "gofrrequests_empty",
+    "fhirVersion": "R4",
+    "DBDependencyGrpID": "org.postgresql",
+    "DBDependencyArtfactID": "postgresql",
+    "DBDriver": "org.postgresql.Driver",
+    "DBDialect": "org.hibernate.dialect.PostgreSQL95Dialect",
+    "serverStarterPath": "/home/ally/hapi-fhir-jpaserver-starter",
+    "tomcatPath": "/opt/tomcat"
+  },
+  "pg": {
+    "user": "gofr",
+    "password": "gofr"
   }
 }

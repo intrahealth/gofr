@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
-const Schema = mongoose.Schema;
+const {
+  Schema,
+} = mongoose;
 
 const usersFields = {
   firstName: {
@@ -17,6 +19,13 @@ const usersFields = {
   role: {
     type: Schema.Types.ObjectId,
     ref: 'Roles',
+  },
+  phone: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
     required: true,
   },
   userName: {
@@ -43,6 +52,10 @@ const Roles = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  tasks: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Tasks',
+  }],
 });
 
 const DataSources = new mongoose.Schema({
@@ -122,6 +135,24 @@ const SharedDataSourceLocations = new mongoose.Schema({
   },
 });
 
+const SMTP = new mongoose.Schema({
+  host: {
+    type: String,
+  },
+  port: {
+    type: String,
+  },
+  username: {
+    type: String,
+  },
+  password: {
+    type: String,
+  },
+  secured: {
+    type: Boolean,
+  },
+});
+
 const DataSourcePair = new mongoose.Schema({
   source1: {
     type: Schema.Types.ObjectId,
@@ -180,7 +211,12 @@ const MetaData = new mongoose.Schema({
     }],
     generalConfig: {
       selfRegistration: {
-        type: Boolean,
+        enabled: {
+          type: Boolean,
+        },
+        requiresApproval: {
+          type: Boolean,
+        },
       },
       allowShareToAllForNonAdmin: {
         type: Boolean,
@@ -303,6 +339,15 @@ const MetaData = new mongoose.Schema({
     },
   },
 });
+const Tasks = new mongoose.Schema({
+  name: {
+    type: String,
+    unique: true,
+  },
+  display: {
+    type: String,
+  },
+});
 module.exports = {
   Users,
   Roles,
@@ -311,4 +356,6 @@ module.exports = {
   DataSourcePair,
   MetaData,
   usersFields,
+  Tasks,
+  SMTP,
 };

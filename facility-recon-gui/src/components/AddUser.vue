@@ -2,43 +2,30 @@
   <v-container>
     <v-layout
       row
-      wrap>
-      <v-spacer/>
+      wrap
+    >
+      <v-spacer />
       <v-flex xs6>
-        <v-alert
-          style="width: 500px"
-          v-model="alertSuccess"
-          type="success"
-          dismissible
-          transition="scale-transition"
-        >
-          {{alertMsg}}
-        </v-alert>
-        <v-alert
-          style="width: 500px"
-          v-model="alertFail"
-          type="error"
-          dismissible
-          transition="scale-transition"
-        >
-          {{alertMsg}}
-        </v-alert>
         <v-card
           class="mx-auto"
-          style="max-width: 500px;">
+          style="max-width: 500px;"
+        >
           <v-system-bar
             color="deep-purple darken-4"
-            dark/>
+            dark
+          />
           <v-toolbar
             color="deep-purple accent-4"
             cards
             dark
-            flat>
+            flat
+          >
             <v-card-title class="title font-weight-regular">Add New User</v-card-title>
           </v-toolbar>
           <v-form
             ref="form"
-            class="pa-3 pt-4">
+            class="pa-3 pt-4"
+          >
             <v-text-field
               required
               @blur="$v.firstName.$touch()"
@@ -47,12 +34,14 @@
               v-model="firstName"
               box
               color="deep-purple"
-              label="First Name"/>
+              label="First Name*"
+            />
             <v-text-field
               v-model="otherName"
               box
               color="deep-purple"
-              label="Middle Names"/>
+              label="Middle Names"
+            />
             <v-text-field
               required
               @blur="$v.surname.$touch()"
@@ -61,7 +50,30 @@
               v-model="surname"
               box
               color="deep-purple"
-              label="Surname"/>
+              label="Surname*"
+            />
+            <v-text-field
+              required
+              @blur="validatePhone"
+              @change="validatePhone"
+              @input="validatePhone"
+              :error-messages="phoneErrors"
+              v-model="phone"
+              box
+              color="deep-purple"
+              label="Phone*"
+            />
+            <v-text-field
+              required
+              @blur="validateEmail"
+              @change="validateEmail"
+              @input="validateEmail"
+              :error-messages="emailErrors"
+              v-model="email"
+              box
+              color="deep-purple"
+              label="Email*"
+            />
             <v-text-field
               required
               @blur="$v.userName.$touch()"
@@ -70,8 +82,12 @@
               v-model="userName"
               box
               color="deep-purple"
-              label="Username"/>
-            <label v-for='(type, name) in $store.state.customSignupFields' :key="name">
+              label="Username*"
+            />
+            <label
+              v-for='(type, name) in $store.state.customSignupFields'
+              :key="name"
+            >
               <v-text-field
                 v-if='type.required'
                 required
@@ -98,7 +114,8 @@
               type="password"
               box
               color="deep-purple"
-              label="Password"/>
+              label="Password*"
+            />
             <v-text-field
               required
               @blur="$v.retype_password.$touch()"
@@ -108,37 +125,43 @@
               type="password"
               box
               color="deep-purple"
-              label="Re-type Password"/>
+              label="Re-type Password*"
+            />
             <v-select
               required
               :items="roles"
               v-model="role"
-              single-line clearable
+              single-line
+              clearable
               @blur="$v.role.$touch()"
               @change="$v.role.$touch()"
               :error-messages="roleErrors"
               box
-              label="Role"
+              label="Role*"
             ></v-select>
           </v-form>
-          <v-divider/>
+          <v-divider />
           <v-card-actions>
             <v-btn
               flat
-              @click="$refs.form.reset()">
+              @click="$store.state.baseRouterViewKey++"
+            >
               <v-icon>clear</v-icon>Clear
             </v-btn>
-            <v-spacer/>
+            <v-spacer />
             <v-btn
               @click="addUser()"
               :disabled="$v.$invalid"
               class="white--text"
               color="deep-purple accent-4"
-              depressed><v-icon left>how_to_reg</v-icon>Add</v-btn>
+              depressed
+            >
+              <v-icon left>language</v-icon>Add
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-flex>
-      <v-spacer/>
+      <v-spacer />
     </v-layout>
   </v-container>
 </template>
@@ -148,7 +171,6 @@ import { required } from 'vuelidate/lib/validators'
 import { generalMixin } from '../mixins/generalMixin'
 
 const backendServer = process.env.BACKEND_SERVER
-
 export default {
   mixins: [generalMixin],
   validations: {
@@ -157,24 +179,49 @@ export default {
     password: { required },
     role: { required },
     firstName: { required },
-    surname: { required }
+    surname: { required },
+    phone: { required },
+    email: { required }
   },
   data () {
     return {
       firstName: '',
       otherName: '',
       surname: '',
+      phone: '',
+      email: '',
       userName: '',
       password: '',
       retype_password: '',
       role: '',
       customFields: [],
-      alertFail: false,
-      alertSuccess: false,
-      alertMsg: ''
+      phoneErrors: [],
+      emailErrors: []
     }
   },
   methods: {
+    validateEmail () {
+      this.emailErrors = []
+      if (!this.email) {
+        this.emailErrors.push('Email is required')
+        return false
+      }
+      let re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!re.test(this.email)) {
+        this.emailErrors.push('Invalid Email')
+        return false
+      }
+    },
+    validatePhone () {
+      this.phoneErrors = []
+      if (!this.phone) {
+        return this.phoneErrors.push('Phone is required')
+      }
+      let re = /^[+]?[\s./0-9]*[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/g
+      if (!re.test(this.phone)) {
+        return this.phoneErrors.push('Invalid phone number')
+      }
+    },
     addUser () {
       if (this.password !== this.retype_password) {
         this.$store.state.dialogError = true
@@ -190,6 +237,8 @@ export default {
       formData.append('password', this.password)
       formData.append('userName', this.userName)
       formData.append('surname', this.surname)
+      formData.append('phone', this.phone)
+      formData.append('email', this.email)
       formData.append('role', this.role)
       for (let field in this.customFields) {
         formData.append(field, this.customFields[field])
@@ -199,18 +248,18 @@ export default {
           'Content-Type': 'multipart/form-data'
         }
       }).then(() => {
-        let fields = Object.keys(this.$v.$params)
-        for (let field of fields) {
-          this.$v[field].$reset()
-        }
-        this.$refs.form.reset()
-        this.$store.state.dynamicProgress = false
-        this.alertSuccess = true
-        this.alertMsg = 'User added successfully'
+        this.$store.state.alert.show = true
+        this.$store.state.alert.width = '500px'
+        this.$store.state.alert.msg = 'User added successfully'
+        this.$store.state.alert.type = 'success'
+        // increment component key to force component reload
+        this.$store.state.baseRouterViewKey += 1
       }).catch((err) => {
-        this.$store.state.dynamicProgress = false
-        this.alertFail = true
-        this.alertMsg = 'This user was not added, ensure userName is not used'
+        this.$store.state.alert.show = true
+        this.$store.state.alert.width = '500px'
+        this.$store.state.alert.msg = 'This user was not added, ensure userName is not used'
+        this.$store.state.alert.type = 'error'
+        this.$store.state.baseRouterViewKey += 1
         console.log(err.response.data.error)
       })
     }

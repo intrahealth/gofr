@@ -1,10 +1,6 @@
 import axios from 'axios'
-import {
-  generalMixin
-} from './generalMixin'
-import {
-  eventBus
-} from '../main'
+import { generalMixin } from './generalMixin'
+import { eventBus } from '../main'
 
 const CancelToken = axios.CancelToken
 const backendServer = process.env.BACKEND_SERVER
@@ -36,7 +32,6 @@ export const scoresMixin = {
       this.$store.state.scoreSavingProgressData.cancelTokenSource.cancel('Cancelling request.')
       this.checkScoreSavingStatus()
       this.saveProgressTimedout = true
-      console.log('timedout')
     },
     checkScoreProgress () {
       // if the req takes one minute without responding then display a message to user
@@ -52,9 +47,10 @@ export const scoresMixin = {
       const clientId = this.$store.state.clientId
       axios.get(backendServer + '/progress/scoreResults/' + clientId, {
         cancelToken: this.$store.state.scoresProgressData.cancelTokenSource.token
-      }).then(scoreProgress => {
+      }).then((scoreProgress) => {
         clearInterval(this.$store.state.scoresProgressData.progressReqTimer)
-        if (!scoreProgress.data || (!scoreProgress.data.status && !scoreProgress.data.percent && !scoreProgress.data.error && this.$store.state.scoreResults.length === 0)) {
+        if (!scoreProgress.data ||
+          (!scoreProgress.data.status && !scoreProgress.data.percent && !scoreProgress.data.error && this.$store.state.scoreResults.length === 0)) {
           // clearInterval(this.$store.state.scoresProgressData.scoreProgressTimer)
           this.$store.state.scoresProgressData.scoreDialog = false
           this.$store.state.scoresProgressData.scoreProgressTitle = 'Waiting for progress status'
@@ -66,12 +62,7 @@ export const scoresMixin = {
           this.$store.state.scoreSavingProgressData.savingMatches = true
           this.checkScoreSavingStatus()
           return
-        } else if (
-          scoreProgress.data.status === null &&
-          scoreProgress.data.percent === null &&
-          scoreProgress.data.error === null &&
-          this.$store.state.scoreResults.length > 0
-        ) {
+        } else if ((scoreProgress.data.status === null && scoreProgress.data.percent === null && scoreProgress.data.error === null && this.$store.state.scoreResults.length > 0)) {
           this.$store.state.scoresProgressData.scoreDialog = false
           this.$store.state.scoresProgressData.scoreProgressTitle = 'Waiting for progress status'
           this.clearProgress('scoreResults')
@@ -123,20 +114,14 @@ export const scoresMixin = {
                 source2Parents: scoreResult.exactMatch.parents,
                 flagComment: scoreResult.source1.flagComment
               })
-            } else if (
-              scoreResult.source1.hasOwnProperty('tag') &&
-              scoreResult.source1.tag === 'noMatch'
-            ) {
+            } else if (scoreResult.source1.hasOwnProperty('tag') && scoreResult.source1.tag === 'noMatch') {
               let parents = scoreResult.source1.parents
               this.$store.state.noMatchContent.push({
                 source1Name: scoreResult.source1.name,
                 source1Id: scoreResult.source1.id,
                 parents: parents
               })
-            } else if (
-              scoreResult.source1.hasOwnProperty('tag') &&
-              scoreResult.source1.tag === 'ignore'
-            ) {
+            } else if (scoreResult.source1.hasOwnProperty('tag') && scoreResult.source1.tag === 'ignore') {
               let parents = scoreResult.source1.parents
               this.$store.state.ignoreContent.push({
                 source1Name: scoreResult.source1.name,
@@ -157,9 +142,7 @@ export const scoresMixin = {
               })
             } else {
               let addTree = this.topTree
-              for (
-                let i = scoreResult.source1.parents.length - 1; i >= 0; i--
-              ) {
+              for (let i = scoreResult.source1.parents.length - 1; i >= 0; i--) {
                 if (!addTree[scoreResult.source1.parents[i]]) {
                   addTree[scoreResult.source1.parents[i]] = {}
                 }
@@ -174,13 +157,11 @@ export const scoresMixin = {
           }
           this.$store.state.source1Parents = this.topTree
           this.$store.state.scoresProgressData.scoreDialog = false
-          this.$store.state.scoresProgressData.scoreProgressTitle =
-            'Waiting for progress status'
+          this.$store.state.scoresProgressData.scoreProgressTitle = 'Waiting for progress status'
         } else {
           this.checkScoreProgress()
         }
-      }).catch(thrown => {
-        console.log(JSON.stringify(thrown))
+      }).catch((thrown) => {
         if (this.$store.state.scoresProgressData.requestCancelled) {
           this.$store.state.scoresProgressData.requestCancelled = false
         } else {
@@ -192,63 +173,46 @@ export const scoresMixin = {
     checkScoreSavingStatus () {
       // if the req takes one minute without responding then display a message to user
       this.$store.state.scoreSavingProgressData.cancelTokenSource = CancelToken.source()
-      this.$store.state.scoreSavingProgressData.progressReqTimer = setInterval(
-        this.scoreSavingProgressCheckTimeout,
-        10000
-      )
+      this.$store.state.scoreSavingProgressData.progressReqTimer = setInterval(this.scoreSavingProgressCheckTimeout, 10000)
       const clientId = this.$store.state.clientId
-      axios
-        .get(backendServer + '/progress/scoreSavingStatus/' + clientId, {
-          cancelToken: this.$store.state.scoreSavingProgressData
-            .cancelTokenSource.token
-        })
-        .then(scoreSavingStatus => {
-          this.saveProgressTimedout = false
+      axios.get(backendServer + '/progress/scoreSavingStatus/' + clientId, {
+        cancelToken: this.$store.state.scoreSavingProgressData.cancelTokenSource.token
+      }).then((scoreSavingStatus) => {
+        clearInterval(this.$store.state.scoreSavingProgressData.progressReqTimer)
+        if (!scoreSavingStatus.data ||
+          (!scoreSavingStatus.data.status && !scoreSavingStatus.data.percent && !scoreSavingStatus.data.error && this.$store.state.scoreSavingProgressData.savingMatches)) {
+          this.$store.state.errorTitle = 'An error has occured'
+          this.$store.state.errorDescription = 'An error has occured while checking saving status'
+          this.$store.state.errorColor = 'error'
+          this.$store.state.dialogError = true
+          this.$store.state.scoreSavingProgressData.savingMatches = false
+          this.$store.state.scoreSavingProgressData.percent = 0
+          this.clearProgress('scoreSavingStatus')
+          return
+        } else if ((!scoreSavingStatus.data.status && !scoreSavingStatus.data.percent && !scoreSavingStatus.data.error && !this.$store.state.scoreSavingProgressData.savingMatches)) {
+          this.$store.state.scoreSavingProgressData.savingMatches = false
+          this.$store.state.scoreSavingProgressData.percent = 0
+          this.clearProgress('scoreSavingStatus')
+          return
+        }
+        if (scoreSavingStatus.data.percent) {
+          this.$store.state.scoreSavingProgressData.percent = scoreSavingStatus.data.percent
+        }
+        if (scoreSavingStatus.data.percent === 100) {
+          this.$store.state.scoreSavingProgressData.savingMatches = false
+          this.$store.state.scoreSavingProgressData.percent = 0
+          this.clearProgress('scoreSavingStatus')
+        } else {
+          this.checkScoreSavingStatus()
+        }
+      }).catch((thrown) => {
+        if (this.$store.state.scoreSavingProgressData.requestCancelled) {
+          this.$store.state.scoreSavingProgressData.requestCancelled = false
+        } else {
           clearInterval(this.$store.state.scoreSavingProgressData.progressReqTimer)
-          if (
-            !scoreSavingStatus.data ||
-            (!scoreSavingStatus.data.status &&
-              !scoreSavingStatus.data.percent &&
-              !scoreSavingStatus.data.error &&
-              this.$store.state.scoreSavingProgressData.savingMatches)
-          ) {
-            this.$store.state.errorTitle = 'An error has occured'
-            this.$store.state.errorDescription = 'An error has occured while checking saving status'
-            this.$store.state.errorColor = 'error'
-            this.$store.state.dialogError = true
-            this.$store.state.scoreSavingProgressData.savingMatches = false
-            this.$store.state.scoreSavingProgressData.percent = 0
-            this.clearProgress('scoreSavingStatus')
-            return
-          } else if (
-            !scoreSavingStatus.data.status &&
-            !scoreSavingStatus.data.percent &&
-            !scoreSavingStatus.data.error &&
-            !this.$store.state.scoreSavingProgressData.savingMatches
-          ) {
-            this.$store.state.scoreSavingProgressData.savingMatches = false
-            this.$store.state.scoreSavingProgressData.percent = 0
-            this.clearProgress('scoreSavingStatus')
-            return
-          }
-          if (scoreSavingStatus.data.percent) {
-            this.$store.state.scoreSavingProgressData.percent = scoreSavingStatus.data.percent
-          }
-          if (parseInt(scoreSavingStatus.data.percent) === 100) {
-            this.$store.state.scoreSavingProgressData.savingMatches = false
-            this.$store.state.scoreSavingProgressData.percent = 0
-            this.clearProgress('scoreSavingStatus')
-          } else {
-            this.checkScoreSavingStatus()
-          }
-        }).catch(thrown => {
-          if (this.$store.state.scoreSavingProgressData.requestCancelled) {
-            this.$store.state.scoreSavingProgressData.requestCancelled = false
-          } else {
-            clearInterval(this.$store.state.scoreSavingProgressData.progressReqTimer)
-            this.checkScoreSavingStatus()
-          }
-        })
+          this.checkScoreSavingStatus()
+        }
+      })
     },
     getScores (getPotential) {
       if (!getPotential) {
@@ -305,7 +269,6 @@ export const scoresMixin = {
       let parentConstraint = JSON.stringify(this.$store.state.config.generalConfig.reconciliation.parentConstraint)
       let path = `source1=${source1}&source2=${source2}&source1Owner=${source1Owner}&source2Owner=${source2Owner}&source1LimitOrgId=${source1LimitOrgId}&source2LimitOrgId=${source2LimitOrgId}&totalSource1Levels=${totalSource1Levels}&totalSource2Levels=${totalSource2Levels}`
       path += `&recoLevel=${recoLevel}&clientId=${clientId}&userID=${userID}&parentConstraint=` + parentConstraint + '&getPotential=' + getPotential
-      this.$store.state.scoresProgressData.scoreProgressPercent = 0
       axios.get(backendServer + '/reconcile/?' + path).then(() => {
         this.checkScoreProgress()
       })

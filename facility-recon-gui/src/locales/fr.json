@@ -4,6 +4,10 @@
     "initApp": "Initialisation de l'App",
     "source": "la source",
     "menu": {
+      "facilityRecon": {
+        "msg": "rapprochement des installations",
+        "tooltip": "rapprochement des installations"
+      },
       "createPair": {
         "msg": "Créer et gérer une paire de sources de données",
         "tooltip": "Select data sources to start mathing"
@@ -16,23 +20,127 @@
         "msg": "État de rapprochement",
         "tooltip": "Statut de correspondance"
       },
+      "facilityRegistry": {
+        "msg": "registre des installations",
+        "tooltip": "registre des installations"
+      },
+      "createOrgHier": {
+        "msg": "Créer une hiérarchie",
+        "tooltip": "Ajouter une installation et une édition"
+      },
+      "healthService": {
+        "msg": "Services de santé",
+        "tooltip": "Ajouter des services et définir des terminologies de service"
+      },
+      "healthServiceTerminologies": {
+        "msg": "Ajouter des terminologies",
+        "tooltip": "Ajouter des terminologies basées sur le service"
+      },
+      "facilityRegReports": {
+        "msg": "Rapports",
+        "tooltip": "Voir les rapports"
+      },
+      "historyReport": {
+        "msg": "Histoire",
+        "tooltip": "Suivre l'historique des installations et des services"
+      },
+      "addJurisdiction": {
+        "msg": "Ajouter une juridiction",
+        "tooltip": "Ajouter des comtés / districts"
+      },
+      "addFacility": {
+        "msg": "Add Facility",
+        "tooltip": "Add Facility"
+      },
+      "facilitiesReport": {
+        "msg": "Facilities Report",
+        "tooltip": "Facilities Report"
+      },
+      "servicesReport": {
+        "msg": "Services Report",
+        "tooltip": "Services Report"
+      },
+      "facilitiesRequestsReport": {
+        "msg": "Facilities Requests Report",
+        "tooltip": "Report on requests made to create new facilities"
+      },
+      "facilitiesUpdateRequestsReport": {
+        "msg": "Facilities Updates Requests Report",
+        "tooltip": "Report about requests to update details of facilities"
+      },
+      "requestNewFacility": {
+        "msg": "Request Addition of New Facility",
+        "tooltip": "Request Addition of New Facility"
+      },
+      "requestUpdateFacility": {
+        "msg": "Request Update of Facility Details",
+        "tooltip": "Request Update of Facility Details"
+      },
+      "addServiceType": {
+        "msg": "Add Service Type",
+        "tooltip": "Add Service Type"
+      },
+      "addServiceCategory": {
+        "msg": "Add Service Category",
+        "tooltip": "Add Service Category"
+      },
+      "addServiceSpecialty": {
+        "msg": "Add Service Specialty",
+        "tooltip": "Add Service Specialty"
+      },
+      "addServiceEligibility": {
+        "msg": "Add Service Eligibility",
+        "tooltip": "Add Service Eligibility"
+      },
+      "addLanguage": {
+        "msg": "Add Language",
+        "tooltip": "Add Language"
+      },
+      "addReferralMethod": {
+        "msg": "Add Referral Methods",
+        "tooltip": "Add Referral Methods"
+      },
+      "addProgram": {
+        "msg": "Add Programs",
+        "tooltip": "Add Programs"
+      },
+      "addCharacteristic": {
+        "msg": "Add Characteristics",
+        "tooltip": "Add Characteristics"
+      },
+      "addServiceProvisionCondition": {
+        "msg": "Add Service Provision Condition",
+        "tooltip": "Add Service Provision Condition"
+      },
+      "addService": {
+        "msg": "Ajouter un service",
+        "tooltip": "Ajouter le service offert par les établissements de santé"
+      },
+      "services": {
+        "msg": "Prestations de service",
+        "tooltip": "Prestations de service"
+      },
       "archive": {
         "msg": "Téléchargements archivés",
         "tooltip": "Accès aux données de sauvegarde"
       },
       "account": {
-        "msg": "Account"
+        "msg": "Compte"
       },
       "addUser": {
-        "msg": "Add User",
-        "tooltip": "Create new user account"
+        "msg": "Ajouter un utilisateur",
+        "tooltip": "Créer un nouveau compte d'utilisateur"
       },
       "usersList": {
-        "msg": "Users List",
-        "tooltip": "Enable and Disable user accounts"
+        "msg": "Liste des utilisateurs",
+        "tooltip": "Gérer les comptes d'utilisateurs"
+      },
+      "rolesManagement": {
+        "msg": "Gestion des rôles",
+        "tooltip": "Ajouter ou supprimer des tâches spécifiques sur les rôles"
       },
       "changePassword": {
-        "msg": "Change Password"
+        "msg": "Changer le mot de passe"
       },
       "logout": {
         "msg": "Connectez - Out"
@@ -45,10 +153,12 @@
         "tooltip": "Télécharger des données CSV et ajouter des serveurs DHIS2 ou FHIR distants"
       },
       "viewDataSources": {
-        "msg": "Afficher les sources de données"
+        "msg": "Afficher les sources de données",
+        "tooltip": "Afficher les jeux de données pouvant être utilisés pour la réconciliation"
       },
       "addDataSources": {
-        "msg": "Ajouter des sources de données"
+        "msg": "Ajouter des sources de données",
+        "tooltip": "Ajouter un nouveau jeu de données que vous souhaitez réconcilier"
       },
       "view": {
         "msg": "Vue",

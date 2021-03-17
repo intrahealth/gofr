@@ -1,3 +1,7 @@
+
+
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable func-names */
 
@@ -10,10 +14,10 @@ const formidable = require('formidable');
 const winston = require('winston');
 const https = require('https');
 const http = require('http');
-const URI = require('urijs');
 const os = require('os');
 const fs = require('fs');
 const request = require('request');
+const Cryptr = require('cryptr');
 const fsFinder = require('fs-finder');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -26,24 +30,31 @@ const redisClient = redis.createClient({
 });
 const moment = require('moment');
 const json2csv = require('json2csv').parse;
-const csv = require('fast-csv');
-const url = require('url');
+const URL = require('url');
+const URI = require('urijs');
 const async = require('async');
 const mongoose = require('mongoose');
 const models = require('./models');
 const schemas = require('./schemas');
+const mail = require('./mail')();
 const mixin = require('./mixin')();
 const mongo = require('./mongo')();
 const config = require('./config');
+const FRRouter = require('./routes/facilityRegistry');
 const mcsd = require('./mcsd')();
 const dhis = require('./dhis')();
 const fhir = require('./fhir')();
+const hapi = require('./hapi');
 const scores = require('./scores')();
+const defaultSetups = require('./defaultSetup.js');
 
 const mongoUser = config.getConf('DB_USER');
 const mongoPasswd = config.getConf('DB_PASSWORD');
 const mongoHost = config.getConf('DB_HOST');
 const mongoPort = config.getConf('DB_PORT');
+
+const cryptr = new Cryptr(config.getConf('auth:secret'));
+
 const app = express();
 const server = require('http').createServer(app);
 
@@ -52,19 +63,19 @@ const cleanReqPath = function (req, res, next) {
   return next();
 };
 const jwtValidator = function (req, res, next) {
-  if (req.method == 'OPTIONS' ||
-    (req.query.hasOwnProperty('authDisabled') && req.query.authDisabled) ||
-    req.path == '/authenticate/' ||
-    req.path == '/getSignupConf' ||
-    req.path == '/getGeneralConfig' ||
-    req.path == '/addUser/' ||
-    req.path.startsWith('/progress') ||
-    req.path == '/' ||
-    req.path.startsWith('/static/js') ||
-    req.path.startsWith('/static/config.json') ||
-    req.path.startsWith('/static/css') ||
-    req.path.startsWith('/static/img') ||
-    req.path.startsWith('/favicon.ico')
+  if (req.method == 'OPTIONS'
+    || (req.query.hasOwnProperty('authDisabled') && req.query.authDisabled)
+    || req.path == '/authenticate/'
+    || req.path == '/getSignupConf'
+    || req.path == '/getGeneralConfig'
+    || req.path == '/addUser/'
+    || req.path.startsWith('/progress')
+    || req.path == '/'
+    || req.path.startsWith('/static/js')
+    || req.path.startsWith('/static/config.json')
+    || req.path.startsWith('/static/css')
+    || req.path.startsWith('/static/img')
+    || req.path.startsWith('/favicon.ico')
   ) {
     return next();
   }
@@ -77,7 +88,7 @@ const jwtValidator = function (req, res, next) {
       error: 'Token is missing',
     });
   } else {
-    tokenArray = req.headers.authorization.split(' ');
+    const tokenArray = req.headers.authorization.split(' ');
     const token = req.headers.authorization = tokenArray[1];
     jwt.verify(token, config.getConf('auth:secret'), (err, decoded) => {
       if (err) {
@@ -113,6 +124,7 @@ app.use(bodyParser.urlencoded({
   extended: true,
 }));
 app.use(bodyParser.json());
+app.use('/FR/', FRRouter);
 // socket config - large documents can cause machine to max files open
 
 https.globalAgent.maxSockets = 32;
@@ -134,11 +146,17 @@ if (cluster.isMaster) {
       if (data.length == 0) {
         winston.info('Default user not found, adding now ...');
         const roles = [{
-            name: 'Admin',
-          },
-          {
-            name: 'Data Manager',
-          },
+          name: 'Admin',
+          tasks: [],
+        },
+        {
+          name: 'Data Manager',
+          tasks: [],
+        },
+        {
+          name: 'Guest',
+          tasks: [],
+        },
         ];
         models.RolesModel.collection.insertMany(roles, (err, data) => {
           models.RolesModel.find({
@@ -150,6 +168,8 @@ if (cluster.isMaster) {
               userName: 'root@gofr.org',
               status: 'Active',
               role: data[0]._id,
+              email: 'root@gofr.org',
+              phone: '+255',
               password: bcrypt.hashSync('gofr', 8),
             });
             User.save((err, data) => {
@@ -164,6 +184,94 @@ if (cluster.isMaster) {
         });
       }
     });
+
+    // check if FR DB Exists
+    const defaultDB = config.getConf('hapi:defaultDBName');
+    const requestsDB = config.getConf('hapi:requestsDBName');
+    let url = URI(config.getConf('mCSD:url')).segment(defaultDB).segment('fhir').segment('Location')
+      .toString();
+    const options = {
+      url,
+    };
+    url = false;
+    request.get(options, (err, res, body) => {
+      if (!res) {
+        winston.error('It appears that FHIR server is not running, quiting GOFR now ...');
+      }
+      if (res.statusCode === 404) {
+        async.series({
+          createDefaultDB: (callback) => {
+            hapi.createServer(defaultDB, (err) => {
+              if (err) {
+                winston.error(err);
+              } else {
+                createFakeOrgID(defaultDB);
+              }
+              callback(null);
+            });
+          },
+          createRequestsDB: (callback) => {
+            hapi.createServer(requestsDB, (err) => {
+              if (err) {
+                winston.error(err);
+              } else {
+                createFakeOrgID(requestsDB);
+              }
+              callback(null);
+            });
+          },
+        }, () => {
+          // launch
+          defaultSetups.initialize();
+        });
+      } else {
+        // check if FR has fake org id
+        createFakeOrgID(requestsDB);
+        createFakeOrgID(defaultDB);
+      }
+    });
+
+    function createFakeOrgID(database) {
+      mcsd.getLocationByID(database, topOrgId, false, (results) => {
+        if (results.entry.length === 0) {
+          winston.info('Fake Org ID does not exist into the FR Database, Creating now');
+          const resource = {};
+          resource.resourceType = 'Location';
+          resource.name = topOrgName;
+          resource.id = topOrgId;
+          resource.identifier = [{
+            system: 'https://digitalhealth.intrahealth.org/id',
+            value: topOrgId,
+          }];
+          resource.physicalType = {
+            coding: [{
+              system: 'http://hl7.org/fhir/location-physical-type',
+              code: 'jdn',
+              display: 'Jurisdiction',
+            }],
+            text: 'Jurisdiction',
+          };
+          const fhirDoc = {};
+          fhirDoc.entry = [];
+          fhirDoc.type = 'batch';
+          fhirDoc.resourceType = 'Bundle';
+          fhirDoc.entry.push({
+            resource,
+            request: {
+              method: 'PUT',
+              url: `Location/${topOrgId}`,
+            },
+          });
+          mcsd.saveLocations(fhirDoc, database, (err, res) => {
+            if (err) {
+              winston.error(err);
+            } else {
+              winston.info('Fake Org Id Created Successfully');
+            }
+          });
+        }
+      });
+    }
   });
 
   const numWorkers = require('os').cpus().length;
@@ -180,7 +288,7 @@ if (cluster.isMaster) {
 
   cluster.on('exit', (worker, code, signal) => {
     console.log(`Worker ${worker.process.pid} died with code: ${code}, and signal: ${signal}`);
-    delete(workers[worker.process.pid]);
+    delete (workers[worker.process.pid]);
     console.log('Starting a new worker');
     const newworker = cluster.fork();
     workers[newworker.process.pid] = newworker;
@@ -280,15 +388,18 @@ if (cluster.isMaster) {
             // get role name
             models.RolesModel.find({
               _id: data[0].role,
-            }).lean().exec((err, roles) => {
+            }).populate('tasks').lean().exec((err, roles) => {
               let role = null;
+              let tasks;
               if (roles.length === 1) {
                 role = roles[0].name;
+                tasks = roles[0].tasks;
               }
               winston.info(`Successfully Authenticated user ${fields.username}`);
               res.status(200).json({
                 token,
                 role,
+                tasks,
                 userID,
               });
             });
@@ -337,10 +448,12 @@ if (cluster.isMaster) {
                 }
                 schemaData[field] = fields[field];
               }
-              if (!schemaData.hasOwnProperty('role') || !schemaData.role) {
+              if (schemaData.status !== 'Pending' && (!schemaData.hasOwnProperty('role') || !schemaData.role)) {
                 schemaData.role = data[0]._id;
               }
-              schemaData.status = 'Active';
+              if (!schemaData.status) {
+                schemaData.status = 'Active';
+              }
               const Users = new models.UsersModel(schemaData);
               Users.save((err, data) => {
                 if (err) {
@@ -349,6 +462,29 @@ if (cluster.isMaster) {
                     error: 'Internal error occured',
                   });
                 } else {
+                  // alert admin about this account
+                  if (fields.status === 'Pending') {
+                    models.RolesModel.find({
+                      name: 'Admin',
+                    }, (err, data) => {
+                      if (data && Array.isArray(data)) {
+                        const adminRoleId = data[0]._id;
+                        mongo.getUsersFromRoles([adminRoleId], (err, data) => {
+                          if (!err && data && Array.isArray(data)) {
+                            const emails = [];
+                            for (const dt of data) {
+                              emails.push(dt.email);
+                            }
+                            const subject = 'New account creation request';
+                            const emailText = `There is a new request to create an account on facility registry with username ${fields.userName}, please go and approve`;
+                            mail.send(subject, emailText, emails, () => {
+
+                            });
+                          }
+                        });
+                      }
+                    });
+                  }
                   winston.info('User created successfully');
                   res.status(200).json({
                     id: data._id,
@@ -372,6 +508,141 @@ if (cluster.isMaster) {
             error: 'Internal error occured',
           });
         }
+      });
+    });
+  });
+
+  app.post('/updateRole', (req, res) => {
+    winston.info('Received a request to change account status');
+    const form = new formidable.IncomingForm();
+    form.parse(req, (err, fields) => {
+      let role;
+      try {
+        role = JSON.parse(fields.role);
+      } catch (error) {
+        return res.status(500).send('Invalid JSON of roles submitted');
+      }
+      winston.info('Received a request to update role');
+      models.RolesModel.findByIdAndUpdate(role.value, {
+        $set: {
+          tasks: [],
+        },
+      }, (err, data) => {
+        if (err) {
+          winston.error(err);
+          winston.error('An error occured while removing tasks from role');
+          return res.status(500).send();
+        }
+        models.RolesModel.findByIdAndUpdate(role.value, {
+          $push: {
+            tasks: {
+              $each: role.tasks,
+            },
+          },
+        }, (err, data) => {
+          if (err) {
+            winston.error(err);
+            res.status(500).send(err);
+          } else {
+            winston.info('Role updated successfully');
+            res.status(200).send();
+          }
+        });
+      });
+    });
+  });
+
+  app.post('/saveSMTP', (req, res) => {
+    winston.info('Received a request to save SMTP Config');
+    const form = new formidable.IncomingForm();
+    form.parse(req, (err, fields) => {
+      models.SMTPModel.findOne({}, (err, data) => {
+        if (data) {
+          let password;
+          if (fields.password !== data.password) {
+            password = cryptr.encrypt(fields.password); // bcrypt.hashSync(fields.password, 8);
+          } else {
+            password = data.password;
+          }
+          models.SMTPModel.findByIdAndUpdate(data.id, {
+            host: fields.host,
+            port: fields.port,
+            username: fields.username,
+            password,
+            secured: fields.secured,
+          }, (err, data) => {
+            if (err) {
+              winston.error(err);
+              winston.error('An error has occured while saving SMTP config');
+              return res.status(500).send();
+            }
+            res.status(200).send();
+          });
+        } else {
+          const smtp = new models.SMTPModel({
+            host: fields.host,
+            port: fields.port,
+            username: fields.username,
+            password: cryptr.encrypt(fields.password),
+            secured: fields.secured,
+          });
+          smtp.save((err, data) => {
+            if (err) {
+              winston.error(err);
+              winston.error('An error has occured while saving SMTP config');
+              return res.status(500).send();
+            }
+            res.status(200).send();
+          });
+        }
+      });
+    });
+  });
+
+  app.get('/getSMTP', (req, res) => {
+    winston.info('Received a request to get SMTP Config');
+    mongo.getSMTP((err, data) => {
+      if (err) {
+        winston.error('An error occured while getting SMTP config');
+        return res.status(500).send();
+      }
+      res.status(200).json(data);
+    });
+  });
+
+  app.post('/processUserAccoutRequest', (req, res) => {
+    winston.info('Received a request to change account status');
+    const form = new formidable.IncomingForm();
+    form.parse(req, (err, fields) => {
+      const {
+        role,
+        status,
+        id,
+      } = fields;
+      const updates = {};
+      if (role) {
+        updates.role = role;
+      }
+      updates.status = status;
+      models.UsersModel.findByIdAndUpdate(id, updates, (err, data) => {
+        if (err) {
+          winston.error('An error has occured while changing account status');
+          winston.error(err);
+          res.status(500).send();
+          return;
+        }
+        const subject = 'Account status on facility registry';
+        let statusText = 'Rejected';
+        if (fields.status === 'Active') {
+          statusText = 'Approved';
+        }
+        const emailText = `Your account has been ${statusText}, you may now access the facility registry. Your username is ${data.userName}`;
+        const emails = [data.email];
+        mail.send(subject, emailText, emails, () => {
+
+        });
+        winston.info('Account status has been changed');
+        res.status(200).send();
       });
     });
   });
@@ -500,7 +771,7 @@ if (cluster.isMaster) {
           password = mongo.decrypt(server.password);
         }
         const auth = `Basic ${Buffer.from(`${server.username}:${password}`).toString('base64')}`;
-        const dhis2URL = url.parse(server.host);
+        const dhis2URL = URL.parse(server.host);
         const database = server.name + server.userID._id;
         dhis.getLastUpdate(database, dhis2URL, auth, (lastUpdate) => {
           if (lastUpdate) {
@@ -888,6 +1159,22 @@ if (cluster.isMaster) {
     });
   });
 
+  app.get('/getTasks/:id?', (req, res) => {
+    winston.info('Received a request to get tasks');
+    let idFilter;
+    if (req.params.id) {
+      idFilter = {
+        _id: req.params.id,
+      };
+    } else {
+      idFilter = {};
+    }
+    models.TasksModel.find(idFilter).lean().exec((err, tasks) => {
+      winston.info(`sending back a list of ${tasks.length} tasks`);
+      res.status(200).json(tasks);
+    });
+  });
+
   app.get('/countLevels/:source1/:source2/:sourcesOwner/:sourcesLimitOrgId', (req, res) => {
     winston.info('Received a request to get total levels');
     const sourcesOwner = JSON.parse(req.params.sourcesOwner);
@@ -1238,8 +1525,11 @@ if (cluster.isMaster) {
       winston.info(`Fetching Locations For ${source}`);
       const db = source + sourceOwner;
       const locationReceived = new Promise((resolve, reject) => {
-        mcsd.getLocationChildren(db, sourceLimitOrgId, (mcsdData) => {
-          mcsd.getBuildings(mcsdData, (buildings) => {
+        mcsd.getLocationChildren({
+          database: db,
+          parent: sourceLimitOrgId,
+        }, (mcsdData) => {
+          mcsd.getBuildingsFromData(mcsdData, (buildings) => {
             resolve({
               buildings,
               mcsdData,
@@ -1323,7 +1613,10 @@ if (cluster.isMaster) {
       winston.info(`Fetching Locations For ${source}`);
       async.parallel({
         locationChildren(callback) {
-          mcsd.getLocationChildren(db, sourceLimitOrgId, (mcsdData) => {
+          mcsd.getLocationChildren({
+            database: db,
+            parent: sourceLimitOrgId,
+          }, (mcsdData) => {
             winston.info(`Done Fetching Locations For ${source}`);
             return callback(false, mcsdData);
           });
@@ -1336,7 +1629,7 @@ if (cluster.isMaster) {
         },
       }, (error, response) => {
         winston.info(`Creating ${source} Tree`);
-        mcsd.createTree(response.locationChildren, sourceLimitOrgId, (tree) => {
+        mcsd.createTree(response.locationChildren, sourceLimitOrgId, false, (tree) => {
           if (sourceLimitOrgId !== topOrgId) {
             tree = {
               text: response.parentDetails.entry[0].resource.name,
@@ -1383,7 +1676,10 @@ if (cluster.isMaster) {
     redisClient.set(statusRequestId, statusResData, 'EX', 1200);
 
     const source2LocationReceived = new Promise((resolve, reject) => {
-      mcsd.getLocationChildren(source2DB, source2LimitOrgId, (mcsdSource2) => {
+      mcsd.getLocationChildren({
+        database: source2DB,
+        parent: source2LimitOrgId,
+      }, (mcsdSource2) => {
         mcsdSource2All = mcsdSource2;
         let level;
         if (recoLevel === totalSource1Levels) {
@@ -1402,7 +1698,10 @@ if (cluster.isMaster) {
       winston.error(err);
     });
     const source1LocationReceived = new Promise((resolve, reject) => {
-      mcsd.getLocationChildren(source1DB, source1LimitOrgId, (mcsdSource1) => {
+      mcsd.getLocationChildren({
+        database: source1DB,
+        parent: source1LimitOrgId,
+      }, (mcsdSource1) => {
         mcsd.filterLocations(mcsdSource1, source1LimitOrgId, recoLevel, (mcsdSource1Level) => {
           resolve(mcsdSource1Level);
         });
@@ -1422,10 +1721,6 @@ if (cluster.isMaster) {
         res.status(200).json(mappingStatus);
       });
     });
-  });
-
-  app.get('/getPotentialMatches', (req, res) => {
-
   });
 
   app.get('/reconcile', (req, res) => {
@@ -1497,7 +1792,10 @@ if (cluster.isMaster) {
       async.parallel({
         source2Locations(callback) {
           const dbSource2 = source2 + source2Owner;
-          mcsd.getLocationChildren(dbSource2, source2LimitOrgId, (mcsdSource2) => {
+          mcsd.getLocationChildren({
+            database: dbSource2,
+            parent: source2LimitOrgId,
+          }, (mcsdSource2) => {
             mcsdSource2All = mcsdSource2;
             let level;
             if (recoLevel === totalSource1Levels) {
@@ -1509,12 +1807,15 @@ if (cluster.isMaster) {
             if (levelMaps[orgid] && levelMaps[orgid][recoLevel]) {
               level = levelMaps[orgid][recoLevel];
             }
-            mcsd.filterLocations(mcsdSource2, source2LimitOrgId, level, mcsdSource2Level => callback(null, mcsdSource2Level));
+            mcsd.filterLocations(mcsdSource2, source2LimitOrgId, level, mcsdSource2Level => callback(false, mcsdSource2Level));
           });
         },
         source1Loations(callback) {
           const dbSource1 = source1 + source1Owner;
-          mcsd.getLocationChildren(dbSource1, source1LimitOrgId, (mcsdSource1) => {
+          mcsd.getLocationChildren({
+            database: dbSource1,
+            parent: source1LimitOrgId,
+          }, (mcsdSource1) => {
             mcsdSource1All = mcsdSource1;
             if (id) {
               const locations = mcsdSource1.entry.filter(entry => entry.resource.id == id);
@@ -1529,12 +1830,12 @@ if (cluster.isMaster) {
               }
               return callback(null, mcsdSource1Locations);
             }
-            mcsd.filterLocations(mcsdSource1, source1LimitOrgId, recoLevel, mcsdSource1Level => callback(null, mcsdSource1Level));
+            mcsd.filterLocations(mcsdSource1, source1LimitOrgId, recoLevel, mcsdSource1Level => callback(false, mcsdSource1Level));
           });
         },
         mappingData(callback) {
           const mappingDB = source1 + userID + source2;
-          mcsd.getLocations(mappingDB, mcsdMapped => callback(null, mcsdMapped));
+          mcsd.getLocations(mappingDB, mcsdMapped => callback(false, mcsdMapped));
         },
       }, (error, results) => {
         const source1DB = source1 + source1Owner;
@@ -1577,9 +1878,6 @@ if (cluster.isMaster) {
                 stage: 'last',
               });
               redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
-              if (id) {
-                res.status(200).json(scoreResData);
-              }
               winston.info('Score results sent back');
             },
           );
@@ -1671,10 +1969,10 @@ if (cluster.isMaster) {
           entry: [],
         };
         async.eachOf(mapped.entry, (entry, key, nxtEntry) => {
-          if (entry.resource.hasOwnProperty('tag')) {
-            const flagged = entry.resource.tag.find(tag => tag.code == flagCode);
-            const noMatch = entry.resource.tag.find(tag => tag.code == noMatchCode);
-            const ignore = entry.resource.tag.find(tag => tag.code == ignoreCode);
+          if (entry.resource.meta.hasOwnProperty('tag')) {
+            const flagged = entry.resource.meta.tag.find(tag => tag.code == flagCode);
+            const noMatch = entry.resource.meta.tag.find(tag => tag.code == noMatchCode);
+            const ignore = entry.resource.meta.tag.find(tag => tag.code == ignoreCode);
             if (noMatch || ignore || flagged) {
               delete mapped.entry[key];
             }
@@ -1699,14 +1997,14 @@ if (cluster.isMaster) {
             manuallyMatched,
             matchCommentsTag,
             flagCommentsTag;
-          if (entry.resource.hasOwnProperty('tag')) {
-            flagged = entry.resource.tag.find(tag => tag.code == flagCode);
-            noMatch = entry.resource.tag.find(tag => tag.code == noMatchCode);
-            ignore = entry.resource.tag.find(tag => tag.code == ignoreCode);
-            autoMatched = entry.resource.tag.find(tag => tag.code == autoMatchedCode);
-            manuallyMatched = entry.resource.tag.find(tag => tag.code == manualllyMatchedCode);
-            matchCommentsTag = entry.resource.tag.find(tag => tag.code == matchCommentsCode);
-            flagCommentsTag = entry.resource.tag.find(tag => tag.code == flagCommentCode);
+          if (entry.resource.meta.hasOwnProperty('tag')) {
+            flagged = entry.resource.meta.tag.find(tag => tag.code == flagCode);
+            noMatch = entry.resource.meta.tag.find(tag => tag.code == noMatchCode);
+            ignore = entry.resource.meta.tag.find(tag => tag.code == ignoreCode);
+            autoMatched = entry.resource.meta.tag.find(tag => tag.code == autoMatchedCode);
+            manuallyMatched = entry.resource.meta.tag.find(tag => tag.code == manualllyMatchedCode);
+            matchCommentsTag = entry.resource.meta.tag.find(tag => tag.code == matchCommentsCode);
+            flagCommentsTag = entry.resource.meta.tag.find(tag => tag.code == flagCommentCode);
           }
           if (noMatch || ignore || flagged) {
             return nxtmCSD();
@@ -1747,18 +2045,18 @@ if (cluster.isMaster) {
           }, (error, response) => {
             // remove unmapped levels
             const levels1 = Object.keys(levelMapping1);
-            async.each(levels1, (level, nxtLevel) => {
+            for (const level of levels1) {
               if (!levelMapping1[level] || levelMapping1[level] == 'null' || levelMapping1[level] == 'undefined' || levelMapping1[level] == 'false') {
                 delete levelMapping1[level];
               }
-            });
+            }
 
             const levels2 = Object.keys(levelMapping2);
-            async.each(levels2, (level, nxtLevel) => {
+            for (const level of levels2) {
               if (!levelMapping2[level] || levelMapping2[level] == 'null' || levelMapping2[level] == 'undefined' || levelMapping2[level] == 'false') {
                 delete levelMapping2[level];
               }
-            });
+            }
             // end of removing unmapped levels
 
             // get level of a facility
@@ -1854,14 +2152,13 @@ if (cluster.isMaster) {
                       mcsd.getLocationParentsFromData(thisMatched[0]['source 2 ID'], response.source2mCSD, 'names', (parents) => {
                         parents = parents.slice(0, parents.length - 1);
                         parents.reverse();
-                        async.eachOf(parentsFields2, (parent, key, nxtParnt) => {
+                        for (const key in parentsFields2) {
+                          const parent = parentsFields2[key];
                           thisMatched2[parent] = parents[key];
-                          return nxtParnt();
-                        }, () => {
-                          thisMatched2.Status = thisMatched[0].Status;
-                          thisMatched2.Comments = thisMatched[0].Comments;
-                          return callback(null, thisMatched2);
-                        });
+                        }
+                        thisMatched2.Status = thisMatched[0].Status;
+                        thisMatched2.Comments = thisMatched[0].Comments;
+                        return callback(null, thisMatched2);
                       });
                     },
                   }, (error, respo) => {
@@ -1922,10 +2219,16 @@ if (cluster.isMaster) {
     if (type == 'FHIR') {
       async.series({
         source1mCSD(callback) {
-          mcsd.getLocationChildren(source1DB, source1LimitOrgId, mcsd => callback(null, mcsd));
+          mcsd.getLocationChildren({
+            database: source1DB,
+            parent: source1LimitOrgId,
+          }, mcsdRes => callback(null, mcsdRes));
         },
         source2mCSD(callback) {
-          mcsd.getLocationChildren(source2DB, source2LimitOrgId, mcsd => callback(null, mcsd));
+          mcsd.getLocationChildren({
+            database: source2DB,
+            parent: source2LimitOrgId,
+          }, mcsdRes => callback(null, mcsdRes));
         },
       }, (error, response) => {
         const mappingDB = req.query.source1 + userID + req.query.source2;
@@ -1960,10 +2263,16 @@ if (cluster.isMaster) {
 
       async.parallel({
         source1mCSD(callback) {
-          mcsd.getLocationChildren(source1DB, source1LimitOrgId, mcsd => callback(null, mcsd));
+          mcsd.getLocationChildren({
+            database: source1DB,
+            parent: source1LimitOrgId,
+          }, mcsdRes => callback(null, mcsdRes));
         },
         source2mCSD(callback) {
-          mcsd.getLocationChildren(source2DB, source2LimitOrgId, mcsd => callback(null, mcsd));
+          mcsd.getLocationChildren({
+            database: source2DB,
+            parent: source2LimitOrgId,
+          }, mcsdRes => callback(null, mcsdRes));
         },
       }, (error, response) => {
         // remove unmapped levels
@@ -1979,22 +2288,20 @@ if (cluster.isMaster) {
 
         // get level of a facility
         const levelsArr1 = [];
-        async.eachOf(levelMapping1, (level, key, nxtLevel) => {
+        for (const key in levelMapping1) {
           if (key.startsWith('level')) {
             levelsArr1.push(parseInt(key.replace('level', '')));
           }
-          return nxtLevel();
-        });
+        }
         const source1FacilityLevel = levelsArr1.length + 1;
         levelsArr1.push(source1FacilityLevel);
 
         const levelsArr2 = [];
-        async.eachOf(levelMapping2, (level, key, nxtLevel) => {
+        for (const key in levelMapping2) {
           if (key.startsWith('level')) {
             levelsArr2.push(parseInt(key.replace('level', '')));
           }
-          return nxtLevel();
-        });
+        }
         const source2FacilityLevel = levelsArr2.length + 1;
         levelsArr2.push(source2FacilityLevel);
         // end of getting level of a facility
@@ -2053,7 +2360,8 @@ if (cluster.isMaster) {
               let thisFields = [];
               const parentsFields = [];
               thisFields = thisFields.concat(fields);
-              async.eachOf(levelMapping2, (level, key, nxtLevel) => {
+              for (const key in levelMapping2) {
+                const level = levelMapping2[key];
                 if (!key.startsWith('level')) {
                   return nxtLevel();
                 }
@@ -2064,7 +2372,7 @@ if (cluster.isMaster) {
                 }
                 parentsFields.push(level);
                 thisFields.push(level);
-              });
+              }
               mcsd.filterLocations(response.source2mCSD, source2LimitOrgId, level, (mcsdLevel) => {
                 scores.getUnmatched(response.source2mCSD, mcsdLevel, mappingDB, true, 'source2', parentsFields, (unmatched, mcsdUnmatched) => {
                   if (unmatched.length > 0) {
@@ -2299,7 +2607,7 @@ if (cluster.isMaster) {
               winston.info('Done matching');
               if (err) {
                 res.status(400).send({
-                  error: err,
+                  error: 'Un expected error has occured',
                 });
               } else res.status(200).send();
             });
@@ -2349,6 +2657,12 @@ if (cluster.isMaster) {
           connection.close();
           if (data.recoStatus === 'in-progress') {
             mcsd.breakMatch(source1Id, mappingDB, source1DB, (err, results) => {
+              if (err) {
+                winston.error(err);
+                return res.status(500).json({
+                  error: err,
+                });
+              }
               winston.info(`break match done for ${fields.source1Id}`);
               res.status(200).send(err);
             });
@@ -2380,10 +2694,9 @@ if (cluster.isMaster) {
         winston.error({
           error: 'Missing Source1 ID',
         });
-        res.status(500).json({
+        return res.status(500).json({
           error: 'Missing Source1 ID',
         });
-        return;
       }
       const {
         userID,
@@ -2576,11 +2889,11 @@ if (cluster.isMaster) {
           return callback(true, false);
         }
 
-        if (configData.hasOwnProperty('config') &&
-          configData.config.hasOwnProperty('generalConfig') &&
-          configData.config.generalConfig.hasOwnProperty('recoProgressNotification') &&
-          configData.config.generalConfig.recoProgressNotification.enabled &&
-          configData.config.generalConfig.recoProgressNotification.url
+        if (configData.hasOwnProperty('config')
+          && configData.config.hasOwnProperty('generalConfig')
+          && configData.config.generalConfig.hasOwnProperty('recoProgressNotification')
+          && configData.config.generalConfig.recoProgressNotification.enabled
+          && configData.config.generalConfig.recoProgressNotification.url
         ) {
           const {
             url,
@@ -2765,20 +3078,27 @@ if (cluster.isMaster) {
     } = req.params;
     const name = mixin.toTitleCase(req.params.name);
     winston.info(`Received request to delete data source with id ${id}`);
-    mongo.deleteDataSource(id, name, sourceOwner, userID, (err, response) => {
-      const dbName = name + userID;
-      const cacheUrl = URI(config.getConf('mCSD:url')).segment(dbName).segment('fhir').toString();
-      mcsd.cleanCache(`url_${cacheUrl}`, true);
+    const dbName = name + userID;
+    hapi.deleteServer(dbName, (err) => {
       if (err) {
         res.status(500).json({
           error: 'Unexpected error occured while deleting data source,please retry',
         });
         winston.error(err);
-      } else {
-        res.status(200).json({
-          status: 'done',
-        });
+        return;
       }
+      mongo.deleteDataSource(id, name, sourceOwner, userID, (err, response) => {
+        if (err) {
+          res.status(500).json({
+            error: 'Unexpected error occured while deleting data source,please retry',
+          });
+          winston.error(err);
+        } else {
+          res.status(200).json({
+            status: 'done',
+          });
+        }
+      });
     });
   });
 
@@ -2844,53 +3164,64 @@ if (cluster.isMaster) {
       } catch (error) {
         winston.error(error);
       }
-      mongo.addDataSourcePair(fields, (error, errMsg, results) => {
-        if (error) {
-          if (errMsg) {
-            winston.error(errMsg);
-          } else {
-            winston.error(error);
-          }
-          res.status(400).json({
-            error: errMsg,
-          });
-        } else {
-          const db1 = mixin.toTitleCase(JSON.parse(fields.source1).name) + JSON.parse(fields.source1).userID._id;
-          const db2 = mixin.toTitleCase(JSON.parse(fields.source2).name) + JSON.parse(fields.source2).userID._id;
-          async.series({
-            levelMapping1(callback) {
-              mongo.getLevelMapping(db1, levelMapping => callback(false, levelMapping));
-            },
-            levelMapping2(callback) {
-              mongo.getLevelMapping(db2, levelMapping => callback(false, levelMapping));
-            },
-          }, (err, mappings) => {
-            winston.info('Data source pair saved successfully');
-            res.status(200).json(JSON.stringify(mappings));
+      const database = mixin.toTitleCase(JSON.parse(fields.source1).name) + JSON.parse(fields.source1).userID._id + mixin.toTitleCase(JSON.parse(fields.source2).name);
+      hapi.createServer(database, (err) => {
+        if (err) {
+          return res.status(400).json({
+            error: 'An expected error occured',
           });
         }
+        mongo.addDataSourcePair(fields, (error, errMsg, results) => {
+          if (error) {
+            if (errMsg) {
+              winston.error(errMsg);
+            } else {
+              winston.error(error);
+            }
+            res.status(400).json({
+              error: errMsg,
+            });
+          } else {
+            const db1 = mixin.toTitleCase(JSON.parse(fields.source1).name) + JSON.parse(fields.source1).userID._id;
+            const db2 = mixin.toTitleCase(JSON.parse(fields.source2).name) + JSON.parse(fields.source2).userID._id;
+            async.series({
+              levelMapping1(callback) {
+                mongo.getLevelMapping(db1, levelMapping => callback(false, levelMapping));
+              },
+              levelMapping2(callback) {
+                mongo.getLevelMapping(db2, levelMapping => callback(false, levelMapping));
+              },
+            }, (err, mappings) => {
+              winston.info('Data source pair saved successfully');
+              res.status(200).json(JSON.stringify(mappings));
+            });
+          }
+        });
       });
     });
   });
 
   app.delete('/deleteSourcePair', (req, res) => {
-    winston.info(`Received a request to delete data source pair with id ${req.params.pairId}`);
+    winston.info(`Received a request to delete data source pair with id ${req.params.id}`);
     const {
       pairId,
       userID,
     } = req.query;
     const source1Name = mixin.toTitleCase(req.query.source1Name);
     const source2Name = mixin.toTitleCase(req.query.source2Name);
-
     const dbName = source1Name + userID + source2Name;
-    mongo.deleteSourcePair(pairId, dbName, (err, data) => {
-      const url = URI(config.getConf('mCSD:url')).segment(dbName).segment('fhir').toString();
-      mcsd.cleanCache(`url_${url}`, true);
+    hapi.deleteServer(dbName, (err) => {
       if (err) {
         winston.error(err);
         return res.send(500).send(err);
       }
-      res.status(200).send();
+      mongo.deleteSourcePair(pairId, dbName, (err, data) => {
+        if (err) {
+          winston.error(err);
+          return res.send(500).send(err);
+        }
+        res.status(200).send();
+      });
     });
   });
 
@@ -3017,8 +3348,7 @@ if (cluster.isMaster) {
         res.status(400).json({
           error: 'Please submit CSV file for facility reconciliation',
         });
-        res.end();
-        return;
+        return res.end();
       }
       const fileName = Object.keys(files)[0];
       winston.info('validating CSV File');
@@ -3028,7 +3358,7 @@ if (cluster.isMaster) {
         percent: null,
       });
       redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
-      validateCSV(files[fileName].path, fields, (valid, invalid) => {
+      mixin.validateCSV(files[fileName].path, fields, (valid, invalid) => {
         if (invalid.length > 0) {
           winston.error('Uploaded CSV is invalid (has either duplicated IDs or empty levels/facility),execution stopped');
           res.status(400).json({
@@ -3039,135 +3369,53 @@ if (cluster.isMaster) {
         }
         res.status(200).end();
 
-        const oldPath = files[fileName].path;
-
-        const newPath = `${__dirname}/csvUploads/${fields.userID}+${mixin.toTitleCase(fields.csvName)}+${moment().format()}.csv`;
-        fs.readFile(oldPath, (err, data) => {
-          if (err) {
-            winston.error(err);
-          }
-          fs.writeFile(newPath, data, (err) => {
-            if (err) {
-              winston.error(err);
-            }
-          });
-        });
         winston.info('CSV File Passed Validation');
-        winston.info(`Uploading data for ${database} now`);
-        const uploadReqPro = JSON.stringify({
-          status: '3/3 Uploading of DB started',
+        uploadReqPro = JSON.stringify({
+          status: '3/3 Uploading of data started',
           error: null,
           percent: null,
         });
         redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
-        mongo.saveLevelMapping(fields, database, (error, response) => {
+        winston.info('Creating HAPI server now');
+        hapi.createServer(database, (err) => {
+          if (err) {
+            uploadReqPro = JSON.stringify({
+              status: 'Error',
+              error: 'An error has occured, upload cancelled',
+              percent: null,
+            });
+            redisClient.set(uploadRequestId, uploadReqPro);
+            return;
+          }
+          const oldPath = files[fileName].path;
 
-        });
-        mcsd.CSVTomCSD(files[fileName].path, fields, database, clientId, () => {
-          winston.info(`Data upload for ${database} is done`);
-          const uploadReqPro = JSON.stringify({
-            status: 'Done',
-            error: null,
-            percent: 100,
+          const newPath = `${__dirname}/csvUploads/${fields.userID}+${mixin.toTitleCase(fields.csvName)}+${moment().format()}.csv`;
+          fs.readFile(oldPath, (err, data) => {
+            if (err) {
+              winston.error(err);
+            }
+            fs.writeFile(newPath, data, (err) => {
+              if (err) {
+                winston.error(err);
+              }
+            });
           });
-          redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
+          winston.info(`Uploading data for ${database} now`);
+          mongo.saveLevelMapping(fields, database, (error, response) => {
+
+          });
+          mcsd.CSVTomCSD(files[fileName].path, fields, database, clientId, () => {
+            winston.info(`Data upload for ${database} is done`);
+            const uploadReqPro = JSON.stringify({
+              status: 'Done',
+              error: null,
+              percent: 100,
+            });
+            redisClient.set(uploadRequestId, uploadReqPro);
+          });
         });
       });
     });
-
-    function validateCSV(filePath, headerMapping, callback) {
-      const invalid = [];
-      const ids = [];
-      const levels = config.getConf('levels');
-      levels.sort();
-      levels.reverse();
-      csv
-        .fromPath(filePath, {
-          headers: true,
-        })
-        .on('data', (data) => {
-          let rowMarkedInvalid = false;
-          let index = 0;
-          async.eachSeries(levels, (level, nxtLevel) => {
-            if (headerMapping[level] === null ||
-              headerMapping[level] === 'null' ||
-              headerMapping[level] === undefined ||
-              !headerMapping[level]) {
-              return nxtLevel();
-            }
-            if (data[headerMapping.code] == '') {
-              populateData(headerMapping, data, 'Missing Facility ID', invalid);
-              rowMarkedInvalid = true;
-            }
-            if (data[headerMapping.lat] && !mixin.isFloat(data[headerMapping.lat]) && !mixin.isInt(data[headerMapping.lat])) {
-              populateData(headerMapping, data, 'Invalid Characters In latitude', invalid);
-              rowMarkedInvalid = true;
-            }
-            if (data[headerMapping.long] && !mixin.isFloat(data[headerMapping.long]) && !mixin.isInt(data[headerMapping.long])) {
-              populateData(headerMapping, data, 'Invalid Characters In longitude', invalid);
-              rowMarkedInvalid = true;
-            }
-            if (index === 0) {
-              index++;
-              if (ids.length == 0) {
-                ids.push(data[headerMapping.code]);
-              } else {
-                const idExist = ids.find(id => id === data[headerMapping.code]);
-                if (idExist) {
-                  rowMarkedInvalid = true;
-                  const reason = 'Duplicate ID';
-                  populateData(headerMapping, data, reason, invalid);
-                } else {
-                  ids.push(data[headerMapping.code]);
-                }
-              }
-            }
-            if (!rowMarkedInvalid) {
-              if (data[headerMapping[level]] === null ||
-                data[headerMapping[level]] === undefined ||
-                data[headerMapping[level]] === false ||
-                !data[headerMapping[level]] ||
-                data[headerMapping[level]] === '' ||
-                !isNaN(headerMapping[level]) ||
-                data[headerMapping[level]] == 0) {
-                const reason = `${headerMapping[level]} is blank`;
-                populateData(headerMapping, data, reason, invalid);
-              } else {
-                return nxtLevel();
-              }
-            }
-          }, () => {
-            if (data[headerMapping.facility] === null ||
-              data[headerMapping.facility] === undefined ||
-              data[headerMapping.facility] === false ||
-              data[headerMapping.facility] === '' ||
-              data[headerMapping.facility] == 0) {
-              const reason = `${headerMapping.facility} is blank`;
-              populateData(headerMapping, data, reason, invalid);
-            }
-          });
-        })
-        .on('end', () => callback(true, invalid));
-
-      function populateData(headerMapping, data, reason, invalid) {
-        const row = {};
-        async.each(headerMapping, (header, nxtHeader) => {
-          if (header == 'null') {
-            return nxtHeader();
-          }
-          if (!data.hasOwnProperty(header)) {
-            return nxtHeader();
-          }
-          row[header] = data[header];
-          return nxtHeader();
-        }, () => {
-          invalid.push({
-            data: row,
-            reason,
-          });
-        });
-      }
-    }
   });
 
   // merging signup custom fields into Users model

@@ -79,8 +79,8 @@
         <v-card-actions>
           <v-toolbar>
             <v-btn
-              v-if="$store.state.config.generalConfig.selfRegistration"
-              color="success"
+              v-if="$store.state.config.generalConfig.selfRegistration.enabled"
+              color="primary"
               @click="displaySignup"
             >Signup</v-btn>
             <v-spacer></v-spacer>
@@ -88,7 +88,7 @@
               @click="authenticate()"
               :disabled="$v.$invalid"
               class="white--text"
-              color="success"
+              color="primary"
               depressed
             >Login</v-btn>
           </v-toolbar>
@@ -134,10 +134,16 @@ export default {
           this.$store.state.auth.username = this.username
           this.$store.state.auth.userID = authResp.data.userID
           this.$store.state.auth.role = authResp.data.role
+          this.$store.state.auth.tasks = authResp.data.tasks
           VueCookies.config('30d')
           VueCookies.set('token', this.$store.state.auth.token, 'infinity')
           VueCookies.set('userID', this.$store.state.auth.userID, 'infinity')
           VueCookies.set('role', this.$store.state.auth.role, 'infinity')
+          VueCookies.set(
+            'tasks',
+            JSON.stringify(this.$store.state.auth.tasks),
+            'infinity'
+          )
           VueCookies.set(
             'username',
             this.$store.state.auth.username,
@@ -184,7 +190,11 @@ export default {
         this.$store.state.signupFields = resp.data.allSignupFields
         this.$store.state.customSignupFields = resp.data.customSignupFields
         VueCookies.set('signupFields', resp.data.allSignupFields, 'infinity')
-        VueCookies.set('customSignupFields', resp.data.customSignupFields, 'infinity')
+        VueCookies.set(
+          'customSignupFields',
+          resp.data.customSignupFields,
+          'infinity'
+        )
       }
     })
   },

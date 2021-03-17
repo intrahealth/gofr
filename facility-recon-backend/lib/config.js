@@ -48,12 +48,12 @@ function setConf(key, value) {
 }
 
 setConf('DB_HOST', process.env.DB_HOST || 'localhost');
-setConf('DB_NAME', process.env.DB_NAME || 'GOFR');
+setConf('DB_NAME', process.env.DB_NAME || 'GOFR_NEW1');
 setConf('DB_USER', process.env.DB_USER || '');
 setConf('DB_PASSWORD', process.env.DB_PASSWORD || '');
 setConf('DB_PORT', process.env.DB_PORT || '27017');
 setConf('REDIS_HOST', process.env.REDIS_HOST || '127.0.0.1');
-setConf('mCSD:url', process.env.HEARTH_URL || 'http://localhost:3447');
+setConf('mCSD:url', process.env.HEARTH_URL || 'http://localhost:8081');
 setConf('server:port', process.env.GOFR_PORT || getConf('server:port'));
 
 exports.getConf = getConf;

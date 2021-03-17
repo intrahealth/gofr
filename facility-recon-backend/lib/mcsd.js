@@ -1,4 +1,8 @@
+/* eslint-disable radix */
 /* eslint-disable no-restricted-syntax */
+/* eslint-disable guard-for-in */
+/* eslint-disable no-param-reassign */
+/* eslint-disable consistent-return */
 require('./init');
 const request = require('request');
 const URI = require('urijs');
@@ -11,101 +15,55 @@ const isJSON = require('is-json');
 const levenshtein = require('fast-levenshtein');
 const geodist = require('geodist');
 const redis = require('redis');
-const cache = require('memory-cache');
+const moment = require('moment');
+const lodash = require('lodash');
+const mail = require('./mail')();
 const mongo = require('./mongo')();
 const mixin = require('./mixin')();
+const config = require('./config');
+const codesystem = require('../terminologies/gofr-codesystem.json');
+
+const topOrgId = config.getConf('mCSD:fakeOrgId');
+const topOrgName = config.getConf('mCSD:fakeOrgName');
 
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST || '127.0.0.1',
 });
-const config = require('./config');
 
 module.exports = () => ({
-  getLocations(database, callback) {
-    const baseUrl = URI(config.getConf('mCSD:url')).segment(database).segment('fhir').segment('Location')
-      .toString();
-    let url = `${baseUrl}?_count=37000`;
-    let locations;
-    redisClient.get(`url_${baseUrl}`, (error, results) => {
-      if (results) {
-        try {
-          locations = JSON.parse(results);
-        } catch (error) {
-          winston.error(error);
-        }
-      }
-      if (locations) {
-        winston.info(`Getting ${baseUrl} from cache`);
-        return callback(locations);
-      }
-      locations = {
-        entry: [],
-      };
-
-      const started = cache.get(`started_${baseUrl}`);
-      if (started) {
-        winston.info(`getLocations is in progress will try again in 10 seconds.${baseUrl}`);
-        setTimeout(() => {
-          this.getLocations(database, callback);
-        }, 10000);
-        return;
-      }
-      redisClient.set(`started_${baseUrl}`, '', 'EX', 600);
-      winston.info(`Getting ${baseUrl} from server`);
-      async.doWhilst(
-        (callback) => {
-          const options = {
-            url,
-          };
-          url = false;
-          request.get(options, (err, res, body) => {
-            if (!isJSON(body)) {
-              cache.del(`started_${baseUrl}`);
-              return callback(false, false);
-            }
-            body = JSON.parse(body);
-            if (!body.hasOwnProperty('entry')) {
-              winston.error('Non mCSD data returned');
-              cache.del(`started_${baseUrl}`);
-              return callback(false, false);
-            }
-            const next = body.link.find(link => link.relation == 'next');
-            if (next) {
-              url = next.url;
-            }
-            locations.entry = locations.entry.concat(body.entry);
-            return callback(false, url);
-          });
-        },
-        () => url != false,
-        () => {
-          if (locations.entry.length > 1) {
-            winston.info(`Saving ${baseUrl} to cache`);
-            redisClient.set(`url_${baseUrl}`, JSON.stringify(locations), 'EX', config.getConf('mCSD:cacheTime'));
-          } else {
-            winston.info(`Not more than 1 entry for ${baseUrl} so not caching.`);
-          }
-          cache.del(`started_${baseUrl}`);
-          return callback(locations);
-        },
-      );
-    });
+  getTerminologyCode(code) {
+    return codesystem.concept.find(concept => concept.code === code);
   },
 
-  getLocationByID(database, id, getCached, callback) {
-    let url;
-    if (id) {
-      url = `${URI(config.getConf('mCSD:url')).segment(database).segment('fhir').segment('Location')}?_id=${id.toString()}`;
-    } else {
-      url = URI(config.getConf('mCSD:url')).segment(database).segment('fhir').segment('Location')
-        .toString();
+  getCodeSystem({
+    codeSystemURI,
+    code,
+    database,
+  }, callback) {
+    if (!database) {
+      database = config.getConf('hapi:defaultDBName');
     }
-    const locations = {};
-    locations.entry = [];
+    let url = URI(config.getConf('mCSD:url'));
+    if (database) {
+      url = url.segment(database);
+    }
+    url = url.segment('fhir').segment('CodeSystem');
+    if (codeSystemURI) {
+      url.addQuery('url', codeSystemURI);
+    }
+    if (code) {
+      url.addQuery('code', code);
+    }
+    url = url.toString();
+    const codeSystems = {};
+    codeSystems.entry = [];
     async.doWhilst(
       (callback) => {
         const options = {
           url,
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
         };
         url = false;
         request.get(options, (err, res, body) => {
@@ -117,7 +75,297 @@ module.exports = () => ({
           if (next) {
             url = next.url;
           }
-          locations.entry = locations.entry.concat(mcsd.entry);
+          if (mcsd.entry && mcsd.entry.length > 0) {
+            codeSystems.entry = codeSystems.entry.concat(mcsd.entry);
+          }
+          return callback(false, url);
+        });
+      },
+      () => url != false,
+      () => {
+        callback(codeSystems);
+      },
+    );
+  },
+
+  getCodeSystemFromCodesMinimal({
+    codes,
+    codeSystemName,
+  }, callback) {
+    const codeSystemURI = mixin.getCodesysteURI(codeSystemName);
+    let concepts = [];
+    if (Array.isArray(codes) && codes.length > 0) {
+      this.getCodeSystem({
+        codeSystemURI: codeSystemURI.uri,
+      }, (codeSystems) => {
+        async.each(codeSystems.entry, (codeSystem, nxtSyst) => {
+          const codeConcept = codeSystem.resource.concept.filter(concept => codes.includes(concept.code));
+          concepts = concepts.concat(codeConcept);
+          return nxtSyst();
+        }, () => callback(concepts));
+      });
+    } else {
+      return callback(null);
+    }
+  },
+
+  getOrganizationByID({
+    database,
+    id,
+  }, callback) {
+    if (!database) {
+      database = config.getConf('hapi:defaultDBName');
+    }
+    let url = URI(config.getConf('mCSD:url'));
+    if (database) {
+      url = url.segment(database);
+    }
+    url = url.segment('fhir').segment('Organization');
+    if (id) {
+      url = `${url}?_id=${id.toString()}`;
+    } else {
+      url = url.toString();
+    }
+    const organizations = {};
+    organizations.entry = [];
+    async.doWhilst(
+      (callback) => {
+        const options = {
+          url,
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        };
+        url = false;
+        request.get(options, (err, res, body) => {
+          if (!isJSON(body)) {
+            return callback(false, false);
+          }
+          const mcsd = JSON.parse(body);
+          const next = mcsd.link.find(link => link.relation == 'next');
+          if (next) {
+            url = next.url;
+          }
+          if (mcsd.entry && mcsd.entry.length > 0) {
+            organizations.entry = organizations.entry.concat(mcsd.entry);
+          }
+          return callback(false, url);
+        });
+      },
+      () => url != false,
+      () => {
+        callback(organizations);
+      },
+    );
+  },
+
+  getServices({
+    database,
+    id,
+  }, callback) {
+    if (!database) {
+      database = config.getConf('hapi:defaultDBName');
+    }
+    const baseUrl = URI(config.getConf('mCSD:url')).segment(database).segment('fhir').segment('HealthcareService');
+    let url = baseUrl;
+    baseUrl.toString();
+    if (id) {
+      url.addQuery('_id', id);
+    }
+    url = url.toString();
+    let services;
+    redisClient.get(`url_${baseUrl}`, (error, results) => {
+      if (results) {
+        winston.info(`Getting ${baseUrl} from cache`);
+        return callback(results);
+      }
+      services = {
+        entry: [],
+      };
+
+      let started;
+      redisClient.get(`started_${baseUrl}`, (err, resultsSt) => {
+        started = resultsSt;
+      });
+      if (started) {
+        winston.info(`getServices is in progress will try again in 10 seconds.${baseUrl}`);
+        setTimeout(() => {
+          this.getLocations({
+            database,
+            id,
+          }, callback);
+        }, 10000);
+        return;
+      }
+      redisClient.set(`started_${baseUrl}`, '');
+      winston.info(`Getting ${baseUrl} from server`);
+      async.doWhilst(
+        (callback) => {
+          const options = {
+            url,
+            headers: {
+              'Cache-Control': 'no-cache',
+            },
+          };
+          url = false;
+          request.get(options, (err, res, body) => {
+            if (!isJSON(body)) {
+              this.cleanCache(`started_${baseUrl}`, true);
+              return callback(false, false);
+            }
+            body = JSON.parse(body);
+            if (body.total == 0 && body.entry && body.entry.length > 0) {
+              winston.error('Non mCSD data returned');
+              this.cleanCache(`started_${baseUrl}`, true);
+              return callback(false, false);
+            }
+            const next = body.link.find(link => link.relation == 'next');
+            if (next) {
+              url = next.url;
+            }
+            if (body.entry && body.entry.length > 0) {
+              services.entry = services.entry.concat(body.entry);
+            }
+            return callback(false, url);
+          });
+        },
+        () => url != false,
+        () => {
+          if (services.entry.length > 1) {
+            winston.info(`Saving ${baseUrl} to cache`);
+            redisClient.set(`url_${baseUrl}`, JSON.stringify(services), 'EX', config.getConf('mCSD:cacheTime'));
+          }
+          this.cleanCache(`started_${baseUrl}`, true);
+          return callback(services);
+        },
+      );
+    });
+  },
+
+  getLocations(database, callback) {
+    const baseUrl = URI(config.getConf('mCSD:url')).segment(database).segment('fhir').segment('Location')
+      .toString();
+    let url = `${baseUrl}?_count=37000`;
+    let locations;
+    redisClient.get(`url_${baseUrl}`, (error, results) => {
+      if (results) {
+        try {
+          locations = JSON.parse(results);
+        } catch (err) {
+          winston.error(err);
+        }
+      }
+      if (locations) {
+        winston.info(`Getting ${baseUrl} from cache`);
+        return callback(locations);
+      }
+      locations = {
+        entry: [],
+      };
+
+      let started;
+      redisClient.get(`started_${baseUrl}`, (err, resultsSt) => {
+        started = resultsSt;
+      });
+      if (started) {
+        winston.info(`getLocations is in progress will try again in 10 seconds.${baseUrl}`);
+        setTimeout(() => {
+          this.getLocations(database, callback);
+        }, 10000);
+        return;
+      }
+      redisClient.set(`started_${baseUrl}`, '');
+      winston.info(`Getting ${baseUrl} from server`);
+      async.doWhilst(
+        (callback) => {
+          const options = {
+            url,
+            headers: {
+              'Cache-Control': 'no-cache',
+            },
+          };
+          url = false;
+          request.get(options, (err, res, body) => {
+            if (!isJSON(body)) {
+              this.cleanCache(`started_${baseUrl}`, true);
+              return callback(null, false);
+            }
+            body = JSON.parse(body);
+            if (body.total == 0 && body.entry && body.entry.length > 0) {
+              winston.error('Non mCSD data returned');
+              this.cleanCache(`started_${baseUrl}`, true);
+              return callback(null, false);
+            }
+            if (!body.hasOwnProperty('entry')) {
+              winston.error('Non mCSD data returned');
+              this.cleanCache(`started_${baseUrl}`, true);
+              return callback(null, false);
+            }
+            const next = body.link.find(link => link.relation == 'next');
+            if (next) {
+              url = next.url;
+            }
+            if (body.entry && body.entry.length > 0) {
+              locations.entry = locations.entry.concat(body.entry);
+            }
+            return callback(null, url);
+          });
+        },
+        () => url !== false,
+        () => {
+          if (locations.entry.length > 1) {
+            winston.info(`Saving ${baseUrl} to cache`);
+            redisClient.set(`url_${baseUrl}`, JSON.stringify(locations), 'EX', config.getConf('mCSD:cacheTime'));
+          } else {
+            winston.info(`Not more than 1 entry for ${baseUrl} so not caching.`);
+          }
+          this.cleanCache(`started_${baseUrl}`, true);
+          return callback(locations);
+        },
+      );
+    });
+  },
+
+  getLocationByID(database, id, includeFacilityOrganization, callback) {
+    if (!database) {
+      database = config.getConf('hapi:defaultDBName');
+    }
+    let url = URI(config.getConf('mCSD:url'));
+    if (database) {
+      url = url.segment(database);
+    }
+    url = url.segment('fhir').segment('Location');
+    if (id) {
+      url.addQuery('_id', id);
+    }
+    if (includeFacilityOrganization) {
+      url.addQuery('_include', 'Location:organization');
+    }
+    url = url.toString();
+
+    const locations = {};
+    locations.entry = [];
+    async.doWhilst(
+      (callback) => {
+        const options = {
+          url,
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        };
+        url = false;
+        request.get(options, (err, res, body) => {
+          if (!isJSON(body)) {
+            return callback(false, false);
+          }
+          const mcsd = JSON.parse(body);
+          const next = mcsd.link.find(link => link.relation == 'next');
+          if (next) {
+            url = next.url;
+          }
+          if (mcsd.entry && mcsd.entry.length > 0) {
+            locations.entry = locations.entry.concat(mcsd.entry);
+          }
           return callback(false, url);
         });
       },
@@ -127,6 +375,7 @@ module.exports = () => ({
       },
     );
   },
+
   getLocationByIdentifier(database, identifier, callback) {
     const locations = {};
     locations.entry = [];
@@ -139,6 +388,9 @@ module.exports = () => ({
       (callback) => {
         const options = {
           url,
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
         };
         url = false;
         request.get(options, (err, res, body) => {
@@ -150,7 +402,9 @@ module.exports = () => ({
           if (next) {
             url = next.url;
           }
-          locations.entry = locations.entry.concat(body.entry);
+          if (body.entry && body.entry.length > 0) {
+            locations.entry = locations.entry.concat(body.entry);
+          }
           return callback(false, url);
         });
       },
@@ -161,56 +415,62 @@ module.exports = () => ({
     );
   },
 
-  getLocationChildren(database, topOrgId, callback) {
-    if (!topOrgId) {
-      topOrgId = '';
+  getLocationChildren({
+    database,
+    parent,
+  }, callback) {
+    if (!database) {
+      database = config.getConf('hapi:defaultDBName');
     }
-    const urlPrefix = URI(config.getConf('mCSD:url')).segment(database).segment('fhir').segment('Location');
-    const url = urlPrefix.segment(topOrgId).segment('$hierarchy').toString();
-    redisClient.get(`url_${urlPrefix.toString()}`, (error, results) => {
-      let locations;
-      if (results) {
-        try {
-          locations = JSON.parse(results);
-        } catch (error) {
-          winston.error(error);
-        }
-      }
-      if (locations) {
-        winston.info(`Getting ${url} from cache`);
-        return callback(locations);
-      }
-
-      const started = cache.get(`started_${url}`);
-      if (started) {
-        winston.info('getLocationChildren is in progress will try again in 10 seconds.');
-        setTimeout(this.getLocationChildren, 10000, database, topOrgId, callback);
-        return;
-      }
-      redisClient.set(`started_${urlPrefix}`, '', 'EX', 600);
-      winston.info(`Getting ${url} from server`);
-
-      const options = {
-        url,
-      };
-      request.get(options, (err, res, body) => {
-        if (!isJSON(body)) {
-          const mcsd = {};
-          mcsd.entry = [];
-          cache.del(`started_${url}`);
-          return callback(mcsd);
-        }
-        body = JSON.parse(body);
-        if (body.entry.length > 1) {
-          winston.info(`Saving ${urlPrefix} to cache`);
-          redisClient.set(`url_${urlPrefix}`, JSON.stringify(body), 'EX', config.getConf('mCSD:cacheTime'));
-        } else {
-          winston.info(`Not more than 1 entry for ${url} so not caching.`);
-        }
-        cache.del(`started_${url}`);
-        callback(body);
-      });
-    });
+    if (!parent) {
+      parent = '';
+    }
+    let baseUrl = URI(config.getConf('mCSD:url'));
+    if (database) {
+      baseUrl = baseUrl.segment(database);
+    }
+    baseUrl = baseUrl.segment('fhir').segment('Location').toString();
+    let url = baseUrl;
+    if (parent) {
+      url += `?_id=${parent}&_revinclude:recurse=Location:partof`;
+    }
+    url = url.toString();
+    const locations = {
+      entry: [],
+    };
+    winston.info(`Getting ${url} from server`);
+    async.doWhilst(
+      (doCallback) => {
+        const options = {
+          url,
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        };
+        url = false;
+        request.get(options, (err, res, body) => {
+          if (!isJSON(body)) {
+            return doCallback(false, false);
+          }
+          body = JSON.parse(body);
+          if (body.total == 0 && body.entry && body.entry.length > 0) {
+            winston.error('Non mCSD data returned');
+            return doCallback(false, false);
+          }
+          if (!body.entry || body.entry.length === 0) {
+            return doCallback(false, false);
+          }
+          const next = body.link.find(link => link.relation == 'next');
+          if (next) {
+            url = next.url;
+          }
+          locations.entry = locations.entry.concat(body.entry);
+          return doCallback(false, url);
+        });
+      },
+      () => url != false,
+      () => callback(locations),
+    );
   },
 
   getImmediateChildren(database, id, callback) {
@@ -221,6 +481,9 @@ module.exports = () => ({
       (callback) => {
         const options = {
           url,
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
         };
         url = false;
         request.get(options, (err, res, body) => {
@@ -232,7 +495,9 @@ module.exports = () => ({
           if (next) {
             url = next.url;
           }
-          locations.entry = locations.entry.concat(mcsd.entry);
+          if (mcsd.entry && mcsd.entry.length > 0) {
+            locations.entry = locations.entry.concat(mcsd.entry);
+          }
           return callback(false, url);
         });
       },
@@ -245,11 +510,11 @@ module.exports = () => ({
 
   getLocationParentsFromDB(database, entityParent, topOrg, details, callback) {
     const parents = [];
-    if (entityParent == null ||
-      entityParent == false ||
-      entityParent == undefined ||
-      !topOrg ||
-      !database
+    if (entityParent == null
+      || entityParent == false
+      || entityParent == undefined
+      || !topOrg
+      || !database
     ) {
       return callback(parents);
     }
@@ -263,11 +528,13 @@ module.exports = () => ({
 
       const splParent = entityParent.split('/');
       entityParent = splParent[(splParent.length - 1)];
-      const locationID = entityParent;
       const url = `${URI(config.getConf('mCSD:url')).segment(database).segment('fhir').segment('Location')}?_id=${entityParent.toString()}`;
 
       const options = {
         url,
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
       };
 
       request.get(options, (err, res, body) => {
@@ -275,20 +542,21 @@ module.exports = () => ({
           return callback(parents);
         }
         body = JSON.parse(body);
-        if (!body.entry || body.entry.length === 0) {
-          winston.error(`Organization Unit with ID ${locationID} not found`);
-          return callback(parents);
-        }
         let long = null;
         let lat = null;
+        if (!body.entry || body.entry.length === 0) {
+          winston.error('Empty mcsd data received, this wasnt expected');
+          return callback(parents);
+        }
         if (body.entry[0].resource.hasOwnProperty('position')) {
           long = body.entry[0].resource.position.longitude;
           lat = body.entry[0].resource.position.latitude;
         }
-        let entityParent = null;
+        entityParent = null;
         if (body.entry[0].resource.hasOwnProperty('partOf')) {
           entityParent = body.entry[0].resource.partOf.reference;
         }
+
         if (details == 'all') {
           parents.push({
             text: body.entry[0].resource.name,
@@ -305,7 +573,6 @@ module.exports = () => ({
         }
 
         // stop after we reach the topOrg which is the country
-        const entityID = body.entry[0].resource.id;
         // if this is a topOrg then end here,we dont need to fetch the upper org which is continent i.e Africa
         if (entityParent && topOrg && entityParent.endsWith(topOrg)) {
           me.getLocationByID(database, topOrg, false, (loc) => {
@@ -328,10 +595,10 @@ module.exports = () => ({
         // if this is a topOrg then end here,we dont need to fetch the upper org which is continent i.e Africa
         else if (topOrg && sourceEntityID.endsWith(topOrg)) {
           return callback(parents);
-        } else if (body.entry[0].resource.hasOwnProperty('partOf') &&
-          body.entry[0].resource.partOf.reference != false &&
-          body.entry[0].resource.partOf.reference != null &&
-          body.entry[0].resource.partOf.reference != undefined) {
+        } else if (body.entry[0].resource.hasOwnProperty('partOf')
+          && body.entry[0].resource.partOf.reference != false
+          && body.entry[0].resource.partOf.reference != null
+          && body.entry[0].resource.partOf.reference != undefined) {
           entityParent = body.entry[0].resource.partOf.reference;
           getPar(entityParent, (parents) => {
             callback(parents);
@@ -391,10 +658,10 @@ module.exports = () => ({
           winston.error('parent details (either id,names or all) to be returned not specified');
         }
 
-        if (entry.resource.hasOwnProperty('partOf') &&
-          entry.resource.partOf.reference != false &&
-          entry.resource.partOf.reference != null &&
-          entry.resource.partOf.reference != undefined) {
+        if (entry.resource.hasOwnProperty('partOf')
+          && entry.resource.partOf.reference != false
+          && entry.resource.partOf.reference != null
+          && entry.resource.partOf.reference != undefined) {
           entityParent = entry.resource.partOf.reference;
           filter(entityParent, parents => callback(parents));
         } else {
@@ -414,15 +681,25 @@ module.exports = () => ({
       callback(parents.slice());
     });
   },
-  getBuildings(mcsd, callback) {
+
+  getBuildingsFromData(mcsd, callback) {
     const buildings = [];
     mcsd.entry.map((entry) => {
-      const found = entry.resource.physicalType.coding.find(coding => coding.code == 'bu');
+      if (!entry.resource || !entry.resource.physicalType || !entry.resource.physicalType.coding || !Array.isArray(entry.resource.physicalType.coding)) {
+        return;
+      }
+      const found = entry.resource.physicalType.coding.find(coding => coding.code === 'bu');
       if (found) {
         buildings.push(entry);
       }
     });
     return callback(buildings);
+  },
+
+  getBuildings(filters, callback) {
+    this.getLocationChildren(filters, (locations) => {
+      this.getBuildingsFromData(locations, buildings => callback(false, buildings));
+    });
   },
 
   filterLocations(mcsd, topOrgId, levelNumber, callback) {
@@ -495,6 +772,9 @@ module.exports = () => ({
     function cntLvls(url, callback) {
       const options = {
         url,
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
       };
       request.get(options, (err, res, body) => {
         if (!isJSON(body)) {
@@ -505,9 +785,9 @@ module.exports = () => ({
         }
         body = JSON.parse(body);
         let entry;
-        if (body.entry.length === 0 && prev_entry.length > 0) {
+        if ((body.total === 0 || (body.entry && body.entry.length === 0)) && prev_entry.length > 0) {
           entry = prev_entry.shift();
-        } else if (body.entry.length === 0 && Object.keys(prev_entry).length === 0) {
+        } else if ((body.total === 0 || (body.entry && body.entry.length === 0)) && Object.keys(prev_entry).length === 0) {
           return callback(totalLevels);
         } else {
           prev_entry = [];
@@ -525,6 +805,7 @@ module.exports = () => ({
       cntLvls(url, totalLevels => callback(false, totalLevels));
     });
   },
+
   editLocation(id, name, parent, db, callback) {
     this.getLocationByID(db, id, false, (location) => {
       location.entry[0].resource.name = name;
@@ -545,7 +826,7 @@ module.exports = () => ({
       promise.then(() => {
         const fhir = {};
         fhir.entry = [];
-        fhir.type = 'document';
+        fhir.type = 'batch';
         fhir.entry = fhir.entry.concat(location.entry[0]);
         this.saveLocations(fhir, db, (err, res) => {
           if (err) {
@@ -554,6 +835,1068 @@ module.exports = () => ({
           callback(err);
         });
       });
+    });
+  },
+
+  addJurisdiction({
+    database,
+    name,
+    code,
+    id,
+    parent,
+  }, callback) {
+    const resource = {};
+    resource.resourceType = 'Location';
+    resource.meta = {};
+    resource.meta.profile = [];
+    resource.meta.profile.push('http://ihe.net/fhir/StructureDefinition/IHE_mCSD_Location');
+    resource.name = name;
+    if (id) {
+      resource.id = id;
+    } else {
+      resource.id = uuid4();
+    }
+    if (parent) {
+      resource.partOf = {
+        reference: `Location/${parent}`,
+      };
+    } else {
+      resource.partOf = {
+        reference: `Location/${topOrgId}`,
+        display: topOrgName,
+      };
+    }
+    if (code) {
+      resource.identifier = [{
+        system: 'https://digitalhealth.intrahealth.org/code',
+        value: code,
+      }];
+    }
+    resource.physicalType = {
+      coding: [{
+        system: 'http://hl7.org/fhir/location-physical-type',
+        code: 'jdn',
+        display: 'Jurisdiction',
+      }],
+      text: 'Jurisdiction',
+    };
+    const fhir = {};
+    fhir.entry = [];
+    fhir.type = 'batch';
+    fhir.resourceType = 'Bundle';
+    fhir.entry.push({
+      resource,
+      request: {
+        method: 'PUT',
+        url: `Location/${resource.id}`,
+      },
+    });
+    this.saveLocations(fhir, database, (err, res) => {
+      if (err) {
+        winston.error(err);
+      }
+      callback(err, resource.id);
+    });
+  },
+  addService(fields, callback) {
+    async.series({
+      type: (callback) => {
+        const types = JSON.parse(fields.type);
+        this.getCodeSystemFromCodesMinimal({
+          codes: types,
+          codeSystemName: 'serviceTypes',
+        }, (concepts) => {
+          callback(null, concepts);
+        });
+      },
+      category: (callback) => {
+        const categories = JSON.parse(fields.category);
+        this.getCodeSystemFromCodesMinimal({
+          codes: categories,
+          codeSystemName: 'serviceCategories',
+        }, concepts => callback(null, concepts));
+      },
+      characteristic: (callback) => {
+        let characteristics;
+        try {
+          characteristics = JSON.parse(fields.characteristic);
+        } catch (error) {
+          return callback(null, null);
+        }
+        this.getCodeSystemFromCodesMinimal({
+          codes: characteristics,
+          codeSystemName: 'serviceCharacteristics',
+        }, concepts => callback(null, concepts));
+      },
+      serviceProvisionCode: (callback) => {
+        let serviceProvisionConditions;
+        try {
+          serviceProvisionConditions = JSON.parse(fields.serviceProvisionCode);
+        } catch (error) {
+          return callback(null, null);
+        }
+        this.getCodeSystemFromCodesMinimal({
+          codes: serviceProvisionConditions,
+          codeSystemName: 'serviceProvisionConditions',
+        }, concepts => callback(null, concepts));
+      },
+      program: (callback) => {
+        let programs;
+        try {
+          programs = JSON.parse(fields.program);
+        } catch (error) {
+          return callback(null, null);
+        }
+        this.getCodeSystemFromCodesMinimal({
+          codes: programs,
+          codeSystemName: 'programs',
+        }, concepts => callback(null, concepts));
+      },
+      specialty: (callback) => {
+        const specialties = JSON.parse(fields.specialty);
+        this.getCodeSystemFromCodesMinimal({
+          codes: specialties,
+          codeSystemName: 'specialties',
+        }, concepts => callback(null, concepts));
+      },
+      eligibility: (callback) => {
+        const eligibilities = JSON.parse(fields.eligibility);
+        this.getCodeSystemFromCodesMinimal({
+          codes: eligibilities,
+          codeSystemName: 'serviceEligibilities',
+        }, concepts => callback(null, concepts));
+      },
+      language: (callback) => {
+        const languages = JSON.parse(fields.communication);
+        this.getCodeSystemFromCodesMinimal({
+          codes: languages,
+          codeSystemName: 'languages',
+        }, concepts => callback(null, concepts));
+      },
+      referralMethod: (callback) => {
+        const referralMethods = JSON.parse(fields.referralMethod);
+        this.getCodeSystemFromCodesMinimal({
+          codes: referralMethods,
+          codeSystemName: 'referralMethods',
+        }, concepts => callback(null, concepts));
+      },
+      location: (callback) => {
+        const locations = JSON.parse(fields.location);
+        if (Array.isArray(locations) && locations.length > 0) {
+          const locationRef = locations.map(location => ({
+            reference: `Location/${location}`,
+          }));
+          return callback(null, locationRef);
+        }
+        return callback(null);
+      },
+    }, (err, response) => {
+      const resource = {};
+      resource.resourceType = 'HealthcareService';
+      if (fields.id) {
+        resource.id = fields.id;
+      } else {
+        resource.id = uuid4();
+      }
+      resource.name = fields.name;
+      if (fields.code) {
+        resource.identifier = [{
+          system: 'https://digitalhealth.intrahealth.org/code',
+          value: fields.code,
+        }];
+      }
+      resource.active = JSON.parse(fields.active);
+      resource.appointmentRequired = JSON.parse(fields.appointmentRequired);
+      if (JSON.parse(fields.category).length > 0) {
+        const codeSystemURI = mixin.getCodesysteURI('serviceCategories');
+        const codeableConcept = mixin.createCodeableConcept(response.category, codeSystemURI.uri);
+        resource.category = codeableConcept;
+      }
+      if (JSON.parse(fields.type).length > 0) {
+        const codeSystemURI = mixin.getCodesysteURI('serviceTypes');
+        const codeableConcept = mixin.createCodeableConcept(response.type, codeSystemURI.uri);
+        resource.type = codeableConcept;
+      }
+      if (JSON.parse(fields.characteristic).length > 0) {
+        const codeSystemURI = mixin.getCodesysteURI('serviceCharacteristics');
+        const codeableConcept = mixin.createCodeableConcept(response.characteristic, codeSystemURI.uri);
+        resource.characteristic = codeableConcept;
+      }
+      if (JSON.parse(fields.program).length > 0) {
+        const codeSystemURI = mixin.getCodesysteURI('programs');
+        const codeableConcept = mixin.createCodeableConcept(response.program, codeSystemURI.uri);
+        resource.program = codeableConcept;
+      }
+      if (JSON.parse(fields.specialty).length > 0) {
+        const codeSystemURI = mixin.getCodesysteURI('specialties');
+        const codeableConcept = mixin.createCodeableConcept(response.specialty, codeSystemURI.uri);
+        resource.specialty = codeableConcept;
+      }
+      if (JSON.parse(fields.eligibility).length > 0) {
+        resource.eligibility = [];
+        const codeSystemURI = mixin.getCodesysteURI('serviceEligibilities');
+        const codeableConcept = mixin.createCodeableConcept(response.eligibility, codeSystemURI.uri);
+        codeableConcept.forEach((codeable) => {
+          resource.eligibility.push({
+            code: codeable,
+          });
+        });
+      }
+      if (JSON.parse(fields.communication).length > 0) {
+        const codeSystemURI = mixin.getCodesysteURI('languages');
+        const codeableConcept = mixin.createCodeableConcept(response.language, codeSystemURI.uri);
+        resource.communication = codeableConcept;
+      }
+      if (JSON.parse(fields.referralMethod).length > 0) {
+        const codeSystemURI = mixin.getCodesysteURI('referralMethods');
+        const codeableConcept = mixin.createCodeableConcept(response.referralMethod, codeSystemURI.uri);
+        resource.referralMethod = codeableConcept;
+      }
+      if (JSON.parse(fields.serviceProvisionCode).length > 0) {
+        const codeSystemURI = mixin.getCodesysteURI('serviceProvisionConditions');
+        const codeableConcept = mixin.createCodeableConcept(response.serviceProvisionCode, codeSystemURI.uri);
+        resource.serviceProvisionCode = codeableConcept;
+      }
+      if (JSON.parse(fields.location).length > 0) {
+        resource.location = response.location;
+      }
+      if (fields.comment) {
+        resource.comment = fields.comment;
+      }
+      if (fields.extraDetails) {
+        resource.extraDetails = fields.extraDetails;
+      }
+      if (fields.photo) {
+        resource.photo = fields.photo;
+      }
+      try {
+        const telecom = JSON.parse(fields.telecom);
+        resource.telecom = [];
+        if (telecom.phone) {
+          resource.telecom.push({
+            system: 'phone',
+            value: telecom.phone,
+          });
+        }
+        if (telecom.email) {
+          resource.telecom.push({
+            system: 'email',
+            value: telecom.email,
+          });
+        }
+        if (telecom.fax) {
+          resource.telecom.push({
+            system: 'fax',
+            value: telecom.fax,
+          });
+        }
+        if (telecom.website) {
+          resource.telecom.push({
+            system: 'url',
+            value: telecom.website,
+          });
+        }
+      } catch (error) {
+        winston.error(error);
+      }
+      if (resource.telecom.length === 0) {
+        delete resource.telecom;
+      }
+      const availableTime = JSON.parse(fields.availableTime);
+      resource.availableTime = [];
+      availableTime.forEach((avTime) => {
+        const time = {};
+        let addThis = false;
+        if (avTime.mainFields.daysOfWeek.length > 0) {
+          time.daysOfWeek = avTime.mainFields.daysOfWeek;
+          addThis = true;
+        }
+        time.allDay = avTime.mainFields.allDay;
+        if (avTime.mainFields.availableStartTime && !avTime.mainFields.allDay) {
+          time.availableStartTime = avTime.mainFields.availableStartTime;
+          addThis = true;
+        }
+        if (avTime.mainFields.availableEndTime && !avTime.mainFields.allDay) {
+          time.availableEndTime = avTime.mainFields.availableEndTime;
+          addThis = true;
+        }
+        if (addThis) {
+          resource.availableTime.push(time);
+        }
+      });
+      if (resource.availableTime.length === 0) {
+        delete resource.availableTime;
+      }
+      const notAvailable = JSON.parse(fields.notAvailable);
+      resource.notAvailable = [];
+      notAvailable.forEach((notAv) => {
+        const notAvDet = {};
+        notAvDet.description = notAv.mainFields.description;
+        if (notAvDet.description) {
+          if (notAv.mainFields.during && notAv.mainFields.during.start) {
+            notAvDet.during = {};
+            notAvDet.during.start = notAv.mainFields.during.start;
+          }
+          if (notAv.mainFields.during && notAv.mainFields.during.end) {
+            notAvDet.during.end = notAv.mainFields.during.end;
+          }
+          resource.notAvailable.push(notAvDet);
+        }
+      });
+      const fhir = {};
+      fhir.entry = [];
+      fhir.type = 'batch';
+      fhir.resourceType = 'Bundle';
+      fhir.entry.push({
+        resource,
+        request: {
+          method: 'PUT',
+          url: `HealthcareService/${resource.id}`,
+        },
+      });
+      this.saveLocations(fhir, '', (err, res) => {
+        if (err) {
+          winston.error(err);
+        }
+        callback(err);
+      });
+    });
+  },
+  addBuilding(fields, callback) {
+    let database = '';
+    if (fields.action && fields.action === 'request') {
+      database = config.getConf('hapi:requestsDBName');
+    }
+    async.series([
+      (callback) => {
+        if (fields.id) {
+          this.getLocationByID(database, fields.id, true, location => callback(null, location));
+        } else {
+          return callback(null);
+        }
+      },
+    ], (error, response) => {
+      if (error) {
+        winston.error('An error has occured while trying to get a resource ID');
+        return callback(error);
+      }
+      if (!response || !Array.isArray(response) || (response[0] && (!response[0].entry || !Array.isArray(response[0].entry)))) {
+        winston.error('invalid response received');
+        return callback('invalid response received');
+      }
+      let LocationResource;
+      let OrganizationResource;
+      if (response[0]) {
+        LocationResource = response[0].entry.find(entry => entry.resource.resourceType === 'Location');
+        OrganizationResource = response[0].entry.find(entry => entry.resource.resourceType === 'Organization');
+      }
+      if (LocationResource) {
+        LocationResource = LocationResource.resource;
+      } else {
+        LocationResource = {};
+      }
+      if (OrganizationResource) {
+        OrganizationResource = OrganizationResource.resource;
+      } else {
+        OrganizationResource = {};
+      }
+      if (!LocationResource.id) {
+        LocationResource.id = uuid4();
+        LocationResource.resourceType = 'Location';
+        LocationResource.meta = {};
+        LocationResource.meta.profile = [];
+        LocationResource.meta.profile.push('http://ihe.net/fhir/StructureDefinition/IHE_mCSD_Location');
+        LocationResource.meta.profile.push('http://ihe.net/fhir/StructureDefinition/IHE_mCSD_FacilityLocation');
+      }
+      let oldName;
+      if (fields.name) {
+        oldName = LocationResource.name;
+        LocationResource.name = fields.name;
+      }
+      if (fields.alt_name) {
+        if (!LocationResource.alias) {
+          LocationResource.alias = [];
+          LocationResource.alias.push(fields.alt_name);
+        } else {
+          const aliasIndex = LocationResource.alias.indexOf(fields.alt_name);
+          if (aliasIndex === -1) {
+            LocationResource.alias.push(fields.alt_name);
+          } else {
+            LocationResource.alias[aliasIndex] = fields.alt_name;
+          }
+        }
+      } else {
+        LocationResource.alias = [];
+      }
+      if (fields.code) {
+        if (!LocationResource.identifier) {
+          LocationResource.identifier = [{
+            system: 'https://digitalhealth.intrahealth.org/code',
+            value: fields.code,
+          }];
+        } else {
+          const codeIndex = LocationResource.identifier.findIndex(identifier => identifier.system === 'https://digitalhealth.intrahealth.org/code');
+          if (codeIndex === -1) {
+            LocationResource.identifier.push({
+              system: 'https://digitalhealth.intrahealth.org/code',
+              value: fields.code,
+            });
+          } else {
+            LocationResource.identifier[codeIndex] = {
+              system: 'https://digitalhealth.intrahealth.org/code',
+              value: fields.code,
+            };
+          }
+        }
+      } else {
+        const codeIndex = LocationResource.identifier && LocationResource.identifier.findIndex(identifier => identifier.system === 'https://digitalhealth.intrahealth.org/code');
+        if (codeIndex !== -1 && LocationResource.identifier) {
+          LocationResource.identifier.splice(codeIndex, 1);
+        }
+      }
+
+      if (!LocationResource.type) {
+        LocationResource.type = [];
+        const coding = [];
+        coding.push({
+          system: 'urn:ietf:rfc:3986',
+          code: 'urn:ihe:iti:mcsd:2019:facility',
+          display: 'Facility',
+          userSelected: false,
+        });
+        LocationResource.type.push({
+          coding,
+        });
+      }
+      if (fields.type) {
+        const typeConcept = this.getTerminologyCode(fields.type);
+        if (typeConcept) {
+          const type = {};
+          type.text = typeConcept.display;
+          type.coding = [{
+            system: 'https://digitalhealth.intrahealth.org/locType',
+            code: typeConcept.code,
+            display: typeConcept.display,
+          }];
+          const typeIndex = LocationResource.type.findIndex((type) => {
+            const coding = type.coding.find(coding => coding.system === 'https://digitalhealth.intrahealth.org/locType');
+            return coding;
+          });
+          if (typeIndex === -1) {
+            LocationResource.type.push(type);
+          } else {
+            LocationResource.type[typeIndex] = type;
+          }
+        }
+      } else {
+        const typeIndex = LocationResource.type.findIndex((type) => {
+          const coding = type.coding.find(coding => coding.system === 'https://digitalhealth.intrahealth.org/locType');
+          return coding;
+        });
+        if (typeIndex !== -1) {
+          LocationResource.type.splice(typeIndex, 1);
+        }
+      }
+      if (fields.status) {
+        LocationResource.status = fields.status;
+      } else {
+        LocationResource.status = 'active';
+      }
+      if (fields.lat || fields.long) {
+        if (!LocationResource.position) {
+          LocationResource.position = {};
+        }
+        if (fields.lat) {
+          LocationResource.position.latitude = fields.lat;
+        } else {
+          delete LocationResource.position.latitude;
+        }
+        if (fields.long) {
+          LocationResource.position.longitude = fields.long;
+        } else {
+          delete LocationResource.position.longitude;
+        }
+      } else {
+        delete LocationResource.position;
+      }
+      try {
+        fields.contact = JSON.parse(fields.contact);
+        if (!LocationResource.telecom) {
+          LocationResource.telecom = [];
+        }
+        if (fields.contact.phone) {
+          const phoneIndex = LocationResource.telecom.findIndex(telecom => telecom.system === 'phone');
+          if (phoneIndex === -1) {
+            LocationResource.telecom.push({
+              system: 'phone',
+              value: fields.contact.phone,
+            });
+          } else {
+            LocationResource.telecom[phoneIndex] = {
+              system: 'phone',
+              value: fields.contact.phone,
+            };
+          }
+        } else {
+          const phoneIndex = LocationResource.telecom.findIndex(telecom => telecom.system === 'phone');
+          if (phoneIndex !== -1) {
+            LocationResource.telecom.splice(phoneIndex, 1);
+          }
+        }
+        if (fields.contact.email) {
+          const emailIndex = LocationResource.telecom.findIndex(telecom => telecom.system === 'email');
+          if (emailIndex === -1) {
+            LocationResource.telecom.push({
+              system: 'email',
+              value: fields.contact.email,
+            });
+          } else {
+            LocationResource.telecom[emailIndex] = {
+              system: 'email',
+              value: fields.contact.email,
+            };
+          }
+        } else {
+          const emailIndex = LocationResource.telecom.findIndex(telecom => telecom.system === 'email');
+          if (emailIndex !== -1) {
+            LocationResource.telecom.splice(emailIndex, 1);
+          }
+        }
+        if (fields.contact.fax) {
+          const faxIndex = LocationResource.telecom.findIndex(telecom => telecom.system === 'fax');
+          if (faxIndex === -1) {
+            LocationResource.telecom.push({
+              system: 'fax',
+              value: fields.contact.fax,
+            });
+          } else {
+            LocationResource.telecom[faxIndex] = {
+              system: 'fax',
+              value: fields.contact.fax,
+            };
+          }
+        } else {
+          const faxIndex = LocationResource.telecom.findIndex(telecom => telecom.system === 'fax');
+          if (faxIndex !== -1) {
+            LocationResource.telecom.splice(faxIndex, 1);
+          }
+        }
+        if (fields.contact.website) {
+          const urlIndex = LocationResource.telecom.findIndex(telecom => telecom.system === 'url');
+          if (urlIndex === -1) {
+            LocationResource.telecom.push({
+              system: 'url',
+              value: fields.contact.website,
+            });
+          } else {
+            LocationResource.telecom[urlIndex] = {
+              system: 'url',
+              value: fields.contact.website,
+            };
+          }
+        } else {
+          const urlIndex = LocationResource.telecom.findIndex(telecom => telecom.system === 'url');
+          if (urlIndex !== -1) {
+            LocationResource.telecom.splice(urlIndex, 1);
+          }
+        }
+      } catch (error) {
+        winston.error(error);
+      }
+      if (fields.description) {
+        LocationResource.description = fields.description;
+      } else {
+        LocationResource.description = '';
+      }
+      if (fields.parent) {
+        LocationResource.partOf = {
+          reference: `Location/${fields.parent}`,
+        };
+      }
+      LocationResource.physicalType = {
+        coding: [{
+          system: 'http://hl7.org/fhir/location-physical-type',
+          code: 'bu',
+          display: 'Building',
+        }],
+        text: 'Building',
+      };
+      if (fields.action === 'request' && fields.requestCategory !== 'requestsList') {
+        const facilityUpdateRequestURI = mixin.getCodesysteURI('facilityUpdateRequest');
+        const facilityAddRequestURI = mixin.getCodesysteURI('facilityAddRequest');
+        if (!LocationResource.meta) {
+          LocationResource.meta = {};
+        }
+        if (!LocationResource.meta.tag) {
+          LocationResource.meta.tag = [];
+        }
+        let requestURI;
+        let requestDescription;
+        if (fields.requestType === 'add') {
+          requestURI = facilityAddRequestURI.uri;
+          requestDescription = 'Request to add new facility';
+        } else if (fields.requestType === 'update') {
+          requestURI = facilityUpdateRequestURI.uri;
+          requestDescription = 'Request to update facility details';
+        }
+        const extension = [{
+          url: 'status',
+          valueString: 'pending',
+        }, {
+          url: 'description',
+          valueString: requestDescription,
+        }, {
+          url: 'username',
+          valueString: fields.username,
+        }, {
+          url: 'statusDate',
+          valueDate: moment().format('YYYY-MM-DDTHH:mm:ssZ'),
+        }];
+        if (fields.id && LocationResource.id && fields.id !== LocationResource.id) {
+          extension.push({
+            url: 'registryResourceId',
+            valueReference: {
+              reference: `Location/${fields.id}`,
+            },
+          });
+        }
+        if (!LocationResource.extension) {
+          LocationResource.extension = [];
+        }
+        LocationResource.extension.push({
+          url: requestURI,
+          extension,
+        });
+      }
+
+      if (!OrganizationResource.id) {
+        OrganizationResource.id = uuid4();
+        OrganizationResource.resourceType = 'Organization';
+        OrganizationResource.meta = {};
+        OrganizationResource.meta.profile = [];
+        OrganizationResource.meta.profile.push('http://ihe.net/fhir/StructureDefinition/IHE_mCSD_Organization');
+        OrganizationResource.meta.profile.push('http://ihe.net/fhir/StructureDefinition/IHE_mCSD_FacilityOrganization');
+      }
+      OrganizationResource.name = fields.name;
+      LocationResource.managingOrganization = {
+        reference: `Organization/${OrganizationResource.id}`,
+      };
+      if (fields.ownership) {
+        const ownershipConcept = this.getTerminologyCode(fields.ownership);
+        if (ownershipConcept) {
+          if (!OrganizationResource.type) {
+            OrganizationResource.type = [];
+          }
+          const type = {};
+          type.text = ownershipConcept.display;
+          type.coding = [{
+            system: 'https://digitalhealth.intrahealth.org/orgType',
+            code: ownershipConcept.code,
+            display: ownershipConcept.display,
+          }];
+          const typeIndex = OrganizationResource.type.findIndex((type) => {
+            const coding = type.coding.find(coding => coding.system === 'https://digitalhealth.intrahealth.org/orgType');
+            return coding;
+          });
+          if (typeIndex === -1) {
+            OrganizationResource.type.push(type);
+          } else {
+            OrganizationResource.type[typeIndex] = type;
+          }
+        }
+      } else {
+        const typeIndex = OrganizationResource.type && OrganizationResource.type.findIndex((type) => {
+          const coding = type.coding.find(coding => coding.system === 'https://digitalhealth.intrahealth.org/orgType');
+          return coding;
+        });
+        if (typeIndex !== -1 && OrganizationResource.type) {
+          OrganizationResource.type.splice(typeIndex, 1);
+        }
+      }
+      const fhir = {};
+      fhir.entry = [];
+      fhir.type = 'batch';
+      fhir.resourceType = 'Bundle';
+      if (OrganizationResource) {
+        fhir.entry.push({
+          resource: OrganizationResource,
+          request: {
+            method: 'PUT',
+            url: `Organization/${OrganizationResource.id}`,
+          },
+        });
+      }
+      fhir.entry.push({
+        resource: LocationResource,
+        request: {
+          method: 'PUT',
+          url: `Location/${LocationResource.id}`,
+        },
+      });
+      this.saveLocations(fhir, database, (err, body) => {
+        if (err) {
+          winston.error(err);
+        }
+        if (!err && fields.action === 'request' && fields.requestCategory !== 'requestsList') {
+          const requestingUsername = fields.username;
+          const tasks = [];
+          let subject;
+          let emailText;
+          if (fields.requestType === 'add') {
+            tasks.push('facility_registry_can_approve_new_facility_request');
+            tasks.push('facility_registry_can_reject_new_facility_request');
+            subject = 'Request to add new facility';
+            emailText = `User ${requestingUsername} has sent a request of adding a facility with name ${LocationResource.name}`;
+          } else if (fields.requestType === 'update') {
+            tasks.push('facility_registry_can_reject_update_facility_details_requests');
+            tasks.push('facility_registry_can_approve_update_facility_details_requests');
+            subject = 'Request to update facility details';
+            emailText = `User ${requestingUsername} has sent a request of updating details about a facility with name ${LocationResource.name}`;
+          }
+          mongo.getTaskIdFromName(tasks, (err, data) => {
+            if (err || !data) {
+              return;
+            }
+            const tasksID = [];
+            for (const dt of data) {
+              tasksID.push(dt._id);
+            }
+            mongo.getRolesFromTasks(tasksID, (err, data) => {
+              if (err || !data) {
+                return;
+              }
+              const rolesId = [];
+              for (const dt of data) {
+                rolesId.push(dt._id);
+              }
+              mongo.getUsersFromRoles(rolesId, (err, data) => {
+                if (err || !data) {
+                  return;
+                }
+                const emails = [];
+                for (const dt of data) {
+                  emails.push(dt.email);
+                }
+                mail.send(subject, emailText, emails, () => {
+
+                });
+              });
+            });
+          });
+        }
+        callback(err);
+      });
+    });
+  },
+
+  changeBuildingRequestStatus({
+    id,
+    status,
+    requestType,
+  }, callback) {
+    const database = config.getConf('hapi:requestsDBName');
+    this.getLocationByID(database, id, true, (location) => {
+      if (!location || !location.entry || location.entry.length === 0) {
+        winston.error(`No location with id ${id} found`);
+        return callback(`No location with id ${id} found`);
+      }
+      const requestLocationResource = location.entry.find(entry => entry.resource.resourceType === 'Location');
+      const requestOrganizationResource = location.entry.find(entry => entry.resource.resourceType === 'Organization');
+      if (!requestLocationResource) {
+        winston.error(`No location resource with id ${id} found`);
+        return callback(`No location resource with id ${id} found`);
+      }
+      const requestExtension = mixin.getLatestFacilityRequest(requestLocationResource.resource.extension, requestType);
+      if (!requestExtension || !Array.isArray(requestExtension)) {
+        winston.error('Request extension cant be found, stop changing status');
+        return callback(true);
+      }
+      for (const i in requestExtension) {
+        if (requestExtension[i].url === 'status') {
+          requestExtension[i].valueString = status;
+        }
+      }
+
+      const copyRequestLocationResource = lodash.cloneDeep(requestLocationResource);
+      const copyRequestOrganizationResource = lodash.cloneDeep(requestOrganizationResource);
+
+      const registryBundle = {};
+      const requestsBundle = {};
+      registryBundle.entry = [];
+      requestsBundle.entry = [];
+      registryBundle.type = 'batch';
+      requestsBundle.type = 'batch';
+      registryBundle.resourceType = 'Bundle';
+      requestsBundle.resourceType = 'Bundle';
+
+      let requestURI;
+      const facilityUpdateRequestURI = mixin.getCodesysteURI('facilityUpdateRequest');
+      const facilityAddRequestURI = mixin.getCodesysteURI('facilityAddRequest');
+      if (requestType === 'add' && status === 'approved') {
+        requestURI = facilityAddRequestURI.uri;
+      } else if (requestType === 'update') {
+        requestURI = facilityUpdateRequestURI.uri;
+      }
+
+      if (status === 'approved' && requestType === 'update') {
+        let updatingResourceID;
+        const ext = requestLocationResource.resource.extension && requestLocationResource.resource.extension.find(extension => extension.url === requestURI);
+        if (ext) {
+          const valRef = ext.extension.find(extension => extension.url === 'registryResourceId');
+          if (valRef) {
+            updatingResourceID = valRef.valueReference.reference.split('/').pop();
+          }
+        }
+        if (updatingResourceID) {
+          this.getLocationByID('', updatingResourceID, true, (regLoc) => {
+            if (!regLoc || !regLoc.entry || regLoc.entry.length === 0) {
+              winston.error(`No location with id ${updatingResourceID} found`);
+              return callback(`No location with id ${updatingResourceID} found`);
+            }
+            const registryLocationResource = regLoc.entry.find(entry => entry.resource.resourceType === 'Location');
+            const registryOganizationResource = regLoc.entry.find(entry => entry.resource.resourceType === 'Organization');
+            const registryLocationId = registryLocationResource.resource.id;
+            const registryLocationOrg = lodash.cloneDeep(registryLocationResource.resource.managingOrganization);
+            const registryOrganizationId = registryOganizationResource.resource.id;
+            Object.assign(registryLocationResource.resource, copyRequestLocationResource.resource);
+            Object.assign(registryOganizationResource.resource, copyRequestOrganizationResource.resource);
+            registryLocationResource.resource.id = registryLocationId;
+            registryLocationResource.resource.managingOrganization = registryLocationOrg;
+            if (registryOganizationResource && registryOganizationResource.resource) {
+              registryOganizationResource.resource.id = registryOrganizationId;
+            }
+            // remove request extension
+            for (const i in registryLocationResource.resource.extension) {
+              if (registryLocationResource.resource.extension[i].url === requestURI) {
+                registryLocationResource.resource.extension.splice(i, 1);
+              }
+            }
+            if (registryOganizationResource) {
+              registryBundle.entry.push({
+                resource: registryOganizationResource.resource,
+                request: {
+                  method: 'PUT',
+                  url: `Organization/${registryOganizationResource.resource.id}`,
+                },
+              });
+            }
+            registryBundle.entry.push({
+              resource: registryLocationResource.resource,
+              request: {
+                method: 'PUT',
+                url: `Location/${registryLocationResource.resource.id}`,
+              },
+            });
+            requestsBundle.entry.push({
+              resource: requestLocationResource.resource,
+              request: {
+                method: 'PUT',
+                url: `Location/${requestLocationResource.resource.id}`,
+              },
+            });
+            async.parallel({
+              updateRegistry: (callback) => {
+                this.saveLocations(registryBundle, '', (err, res) => {
+                  if (err) {
+                    winston.error(err);
+                    return callback(err);
+                  }
+                  return callback(null);
+                });
+              },
+              updateRequests: (callback) => {
+                this.saveLocations(requestsBundle, database, (err, res) => {
+                  if (err) {
+                    winston.error(err);
+                    return callback(err);
+                  }
+                  return callback(null);
+                });
+              },
+            }, (err) => {
+              if (err) {
+                return callback(err);
+              }
+              return callback();
+            });
+          });
+        } else {
+          return callback(true);
+        }
+      } else if (status === 'approved' && requestType === 'add') {
+        copyRequestLocationResource.resource.id = uuid4();
+        if (copyRequestOrganizationResource) {
+          copyRequestOrganizationResource.resource.id = uuid4();
+          copyRequestLocationResource.resource.managingOrganization = {
+            reference: `Organization/${copyRequestOrganizationResource.resource.id}`,
+          };
+        }
+        // remove request extension
+        for (const i in copyRequestLocationResource.resource.extension) {
+          if (copyRequestLocationResource.resource.extension[i].url === requestURI) {
+            copyRequestLocationResource.resource.extension.splice(i, 1);
+          }
+        }
+        // link the Location to be created into the registry with the requesting resource
+        for (const i in requestLocationResource.resource.extension) {
+          if (requestLocationResource.resource.extension[i].url === requestURI) {
+            requestLocationResource.resource.extension[i].extension.push({
+              url: 'registryResourceId',
+              valueReference: {
+                reference: `Location/${copyRequestLocationResource.resource.id}`,
+              },
+            });
+          }
+        }
+        if (copyRequestOrganizationResource) {
+          registryBundle.entry.push({
+            resource: copyRequestOrganizationResource.resource,
+            request: {
+              method: 'PUT',
+              url: `Organization/${copyRequestOrganizationResource.resource.id}`,
+            },
+          });
+        }
+        registryBundle.entry.push({
+          resource: copyRequestLocationResource.resource,
+          request: {
+            method: 'PUT',
+            url: `Location/${copyRequestLocationResource.resource.id}`,
+          },
+        });
+        requestsBundle.entry.push({
+          resource: requestLocationResource.resource,
+          request: {
+            method: 'PUT',
+            url: `Location/${requestLocationResource.resource.id}`,
+          },
+        });
+        async.parallel({
+          updateRegistry: (callback) => {
+            this.saveLocations(registryBundle, '', (err, res) => {
+              if (err) {
+                winston.error(err);
+                return callback(err);
+              }
+              return callback(null);
+            });
+          },
+          updateRequests: (callback) => {
+            this.saveLocations(requestsBundle, database, (err, res) => {
+              if (err) {
+                winston.error(err);
+                return callback(err);
+              }
+              return callback(null);
+            });
+          },
+        }, (err) => {
+          if (err) {
+            return callback(err);
+          }
+          return callback();
+        });
+      } else {
+        requestsBundle.entry.push({
+          resource: requestLocationResource.resource,
+          request: {
+            method: 'PUT',
+            url: `Location/${requestLocationResource.resource.id}`,
+          },
+        });
+        this.saveLocations(requestsBundle, database, (err, res) => {
+          if (err) {
+            winston.error(err);
+            return callback(err);
+          }
+          return callback(null);
+        });
+      }
+    });
+  },
+
+  addCodeSystem({
+    name,
+    text,
+    code,
+    codeSystemType,
+  }, callback) {
+    const codeSyst = mixin.getCodesysteURI(codeSystemType);
+    if (!codeSyst) {
+      winston.error(`Code system type ${codeSystemType} not found on the config file`);
+      return callback(true);
+    }
+    const codeSystemURI = codeSyst.uri;
+    this.getCodeSystem({
+      codeSystemURI,
+    }, (codeSystem) => {
+      let codeSystemResource = {};
+      if (codeSystem.entry.length > 0) {
+        codeSystemResource = codeSystem.entry[0].resource;
+        codeSystemResource.date = moment().format('YYYY-MM-DDTHH:mm:ssZ');
+        codeSystemResource.concept.push({
+          code,
+          display: name,
+        });
+      } else {
+        codeSystemResource.resourceType = 'CodeSystem';
+        codeSystemResource.id = uuid4();
+        codeSystemResource.url = codeSystemURI;
+        codeSystemResource.status = 'active';
+        codeSystemResource.content = 'complete';
+        codeSystemResource.caseSensitive = true;
+        codeSystemResource.date = moment().format('YYYY-MM-DDTHH:mm:ssZ');
+        codeSystemResource.version = '1.0.0';
+        codeSystemResource.concept = [];
+        codeSystemResource.concept.push({
+          code,
+          display: name,
+        });
+      }
+      const fhir = {};
+      fhir.entry = [];
+      fhir.type = 'batch';
+      fhir.resourceType = 'Bundle';
+      fhir.entry.push({
+        resource: codeSystemResource,
+        request: {
+          method: 'PUT',
+          url: `CodeSystem/${codeSystemResource.id}`,
+        },
+      });
+      this.saveLocations(fhir, '', (err, res) => {
+        if (err) {
+          winston.error(err);
+        }
+        callback(err);
+      });
+    });
+  },
+
+  deleteResource({
+    database,
+    resource,
+    id,
+  }, callback) {
+    if (!database) {
+      database = config.getConf('hapi:defaultDBName');
+    }
+    const urlPrefix = URI(config.getConf('mCSD:url'))
+      .segment(database)
+      .segment('fhir')
+      .segment(resource);
+    const url = URI(urlPrefix).segment(id).toString();
+    const options = {
+      url,
+    };
+    request.delete(options, (err, res, body) => {
+      this.cleanCache(`url_${urlPrefix.toString()}`, true);
+      this.cleanCache('parents', true);
+      if (err) {
+        winston.error(err);
+        return callback(err);
+      }
+      return callback();
     });
   },
 
@@ -571,7 +1914,7 @@ module.exports = () => ({
             url,
           };
           request.delete(options, (err, res, body) => {
-            this.cleanCache(`url_${url_prefix.toString()}`, true);
+            this.cleanCache(url_prefix.toString());
             return callback1(false);
           });
         },
@@ -597,6 +1940,7 @@ module.exports = () => ({
                   };
                   request.delete(options, (err, res, body) => {
                     this.cleanCache(`url_${url_prefix.toString()}`, true);
+                    this.cleanCache('parents', true);
                     return nxtEntry();
                   });
                 }, () => nxtDB());
@@ -613,7 +1957,14 @@ module.exports = () => ({
   },
 
   saveLocations(mCSD, database, callback) {
-    const url = URI(config.getConf('mCSD:url')).segment(database).segment('fhir').toString();
+    if (!database) {
+      database = config.getConf('hapi:defaultDBName');
+    }
+    let url = URI(config.getConf('mCSD:url'));
+    if (database) {
+      url = url.segment(database);
+    }
+    url = url.segment('fhir').toString();
     const options = {
       url,
       headers: {
@@ -622,11 +1973,17 @@ module.exports = () => ({
       json: mCSD,
     };
     request.post(options, (err, res, body) => {
+      if (res.statusCode === 404) {
+        winston.error(body);
+        winston.error('Looks like the mapping DB does not exist, cant save this location');
+        return callback('Failed to save', null);
+      }
       if (err) {
         winston.error(err);
         return callback(err);
       }
       this.cleanCache(`url_${url}/Location`, true);
+      this.cleanCache('parents', true);
       callback(err, body);
     });
   },
@@ -634,13 +1991,13 @@ module.exports = () => ({
     if (isPrefix) {
       redisClient.keys(`${key}*`, (err, keys) => {
         for (const key1 of keys) {
-          redisClient.del(key1, () => {
+          redisClient.DEL(key1, (err, res) => {
             winston.info(`DELETING ${key1} from cache because something was modified.`);
           });
         }
       });
     } else {
-      redisClient.del(key, () => {
+      redisClient.DEL(key, () => {
         winston.info(`DELETING ${key} from cache because something was modified.`);
       });
     }
@@ -773,7 +2130,8 @@ module.exports = () => ({
 
         const fhir = {};
         fhir.entry = [];
-        fhir.type = 'document';
+        fhir.type = 'batch';
+        fhir.resourceType = 'Bundle';
         const entry = [];
         const resource = {};
         resource.resourceType = 'Location';
@@ -818,47 +2176,47 @@ module.exports = () => ({
             system: 'http://hl7.org/fhir/location-physical-type',
           }],
         };
+        if (!resource.meta) {
+          resource.meta = {};
+        }
+        if (!resource.meta.tag) {
+          resource.meta.tag = [];
+        }
         if (matchComments.length > 0) {
-          if (!resource.hasOwnProperty('tag')) {
-            resource.tag = [];
-          }
-          resource.tag.push({
+          resource.meta.tag.push({
             system: source2System,
             code: matchCommentsCode,
             display: matchComments,
           });
         }
+        if (!resource.meta) {
+          resource.meta = {};
+        }
+        if (!resource.meta.tag) {
+          resource.meta.tag = [];
+        }
         if (type == 'flag') {
-          if (!resource.hasOwnProperty('tag')) {
-            resource.tag = [];
-          }
           if (flagComment) {
-            resource.tag.push({
+            resource.meta.tag.push({
               system: source2System,
               code: flagCommentCode,
               display: flagComment,
             });
           }
-          resource.tag.push({
+          resource.meta.tag.push({
             system: source2System,
             code: flagCode,
             display: 'To be reviewed',
           });
         }
         if (autoMatch) {
-          if (!resource.hasOwnProperty('tag')) {
-            resource.tag = [];
-          }
-          resource.tag.push({
+          resource.meta.tag.push({
             system: source2System,
             code: autoMatchedCode,
             display: 'Automatically Matched',
           });
         } else {
-          if (!resource.hasOwnProperty('tag')) {
-            resource.tag = [];
-          }
-          resource.tag.push({
+          resource.meta.tag.push({
             system: source2System,
             code: manualllyMatchedCode,
             display: 'Manually Matched',
@@ -866,9 +2224,16 @@ module.exports = () => ({
         }
         entry.push({
           resource,
+          request: {
+            method: 'PUT',
+            url: `Location/${resource.id}`,
+          },
         });
         fhir.entry = fhir.entry.concat(entry);
         me.saveLocations(fhir, mappingDB, (err, res) => {
+          const url_prefix = URI(config.getConf('mCSD:url')).segment(mappingDB).segment('fhir').segment('Location');
+          this.cleanCache(`url_${url_prefix.toString()}`, true);
+          this.cleanCache(`parents${recoLevel}${source2DB}`);
           if (err) {
             winston.error(err);
           }
@@ -879,7 +2244,6 @@ module.exports = () => ({
   },
   acceptFlag(source1Id, mappingDB, callback) {
     this.getLocationByID(mappingDB, source1Id, false, (flagged) => {
-      delete flagged.resourceType;
       delete flagged.id;
       delete flagged.meta;
       delete flagged.total;
@@ -887,20 +2251,24 @@ module.exports = () => ({
       const flagCode = config.getConf('mapping:flagCode');
       const flagCommentCode = config.getConf('mapping:flagCommentCode');
       // remove the flag tag
-      for (const k in flagged.entry[0].resource.tag) {
-        const tag = flagged.entry[0].resource.tag[k];
+      for (const k in flagged.entry[0].resource.meta.tag) {
+        const tag = flagged.entry[0].resource.meta.tag[k];
         if (tag.code === flagCode) {
-          flagged.entry[0].resource.tag.splice(k, 1);
+          flagged.entry[0].resource.meta.tag.splice(k, 1);
         }
       }
 
-      for (const k in flagged.entry[0].resource.tag) {
-        const tag = flagged.entry[0].resource.tag[k];
+      for (const k in flagged.entry[0].resource.meta.tag) {
+        const tag = flagged.entry[0].resource.meta.tag[k];
         if (tag.code === flagCommentCode) {
-          flagged.entry[0].resource.tag.splice(k, 1);
+          flagged.entry[0].resource.meta.tag.splice(k, 1);
         }
       }
-      flagged.type = 'document';
+      flagged.entry[0].request = {};
+      flagged.entry[0].request.method = 'PUT';
+      flagged.entry[0].request.url = `Location/${flagged.entry[0].resource.id}`;
+      flagged.resourceType = 'Bundle';
+      flagged.type = 'batch';
 
       // deleting existing location
       const url_prefix = URI(config.getConf('mCSD:url')).segment(mappingDB).segment('fhir').segment('Location');
@@ -910,6 +2278,7 @@ module.exports = () => ({
       };
       request.delete(options, (err, res, body) => {
         this.cleanCache(`url_${url_prefix.toString()}`, true);
+        this.cleanCache('parents', true);
         if (err) {
           winston.error(err);
           return callback(err);
@@ -931,85 +2300,96 @@ module.exports = () => ({
 
     const me = this;
     async.parallel({
-        source1Mapped(callback) {
-          me.getLocationByID(mappingDB, source1Id, false, (mapped) => {
-            if (mapped.entry.length > 0) {
-              winston.error('Attempting to mark an already mapped location as no match');
-              return callback(null, 'This location was already mapped, recalculate scores to update the level you are working on');
-            }
-            return callback(null, null);
-          });
-        },
+      source1Mapped(callback) {
+        me.getLocationByID(mappingDB, source1Id, false, (mapped) => {
+          if (mapped.entry.length > 0) {
+            winston.error('Attempting to mark an already mapped location as no match');
+            return callback(null, 'This location was already mapped, recalculate scores to update the level you are working on');
+          }
+          return callback(null, null);
+        });
       },
-      (err, res) => {
-        if (res.source1Mapped !== null) {
-          return callback(res.source1Mapped);
+    },
+    (err, res) => {
+      if (res.source1Mapped !== null) {
+        return callback(res.source1Mapped);
+      }
+      me.getLocationByID(source1DB, source1Id, false, (mcsd) => {
+        if (mcsd.entry.length === 0) {
+          winston.error(`Location with ID ${source1Id} not found on the mCSD DB, this isnt expected, please cross check`);
+          return callback(true);
         }
-        me.getLocationByID(source1DB, source1Id, false, (mcsd) => {
-          const fhir = {};
-          fhir.entry = [];
-          fhir.type = 'document';
-          const entry = [];
-          const resource = {};
-          resource.resourceType = 'Location';
-          resource.name = mcsd.entry[0].resource.name;
-          resource.id = source1Id;
+        const fhir = {};
+        fhir.entry = [];
+        fhir.type = 'batch';
+        fhir.resourceType = 'Bundle';
+        const entry = [];
+        const resource = {};
+        resource.resourceType = 'Location';
+        resource.name = mcsd.entry[0].resource.name;
+        resource.id = source1Id;
 
-          if (mcsd.entry[0].resource.hasOwnProperty('partOf')) {
-            resource.partOf = {
-              display: mcsd.entry[0].resource.partOf.display,
-              reference: mcsd.entry[0].resource.partOf.reference,
-            };
-          }
-          if (recoLevel == totalLevels) {
-            var typeCode = 'bu';
-            var typeName = 'building';
-          } else {
-            var typeCode = 'jdn';
-            var typeName = 'Jurisdiction';
-          }
-          resource.physicalType = {
-            coding: [{
-              code: typeCode,
-              display: typeName,
-              system: 'http://hl7.org/fhir/location-physical-type',
-            }],
+        if (mcsd.entry[0].resource.hasOwnProperty('partOf')) {
+          resource.partOf = {
+            display: mcsd.entry[0].resource.partOf.display,
+            reference: mcsd.entry[0].resource.partOf.reference,
           };
-          resource.identifier = [];
-          const source1URL = URI(config.getConf('mCSD:url')).segment(source1DB).segment('fhir').segment('Location')
-            .segment(source1Id)
-            .toString();
-          resource.identifier.push({
+        }
+        let typeCode;
+        let typeName;
+        if (recoLevel == totalLevels) {
+          typeCode = 'bu';
+          typeName = 'building';
+        } else {
+          typeCode = 'jdn';
+          typeName = 'Jurisdiction';
+        }
+        resource.physicalType = {
+          coding: [{
+            code: typeCode,
+            display: typeName,
+            system: 'http://hl7.org/fhir/location-physical-type',
+          }],
+        };
+        resource.identifier = [];
+        const url_prefix = URI(config.getConf('mCSD:url')).segment(source1DB).segment('fhir').segment('Location');
+        const source1URL = URI(url_prefix).segment(source1Id).toString();
+        resource.identifier.push({
+          system: source1System,
+          value: source1URL,
+        });
+        resource.meta = {};
+        resource.meta.tag = [];
+        if (type == 'nomatch') {
+          resource.meta.tag.push({
             system: source1System,
-            value: source1URL,
+            code: noMatchCode,
+            display: 'No Match',
           });
-
-          resource.tag = [];
-          if (type == 'nomatch') {
-            resource.tag.push({
-              system: source1System,
-              code: noMatchCode,
-              display: 'No Match',
-            });
-          } else if (type == 'ignore') {
-            resource.tag.push({
-              system: source1System,
-              code: ignoreCode,
-              display: 'Ignore',
-            });
+        } else if (type == 'ignore') {
+          resource.meta.tag.push({
+            system: source1System,
+            code: ignoreCode,
+            display: 'Ignore',
+          });
+        }
+        entry.push({
+          resource,
+          request: {
+            method: 'PUT',
+            url: `Location/${resource.id}`,
+          },
+        });
+        fhir.entry = fhir.entry.concat(entry);
+        me.saveLocations(fhir, mappingDB, (err, res) => {
+          this.cleanCache(`url_${url_prefix.toString()}`, true);
+          if (err) {
+            winston.error(err);
           }
-          entry.push({
-            resource,
-          });
-          fhir.entry = fhir.entry.concat(entry);
-          me.saveLocations(fhir, mappingDB, (err, res) => {
-            if (err) {
-              winston.error(err);
-            }
-            callback(err);
-          });
+          callback(err);
         });
       });
+    });
   },
   breakMatch(source1Id, mappingDB, source1DB, callback) {
     if (!source1Id) {
@@ -1034,39 +2414,52 @@ module.exports = () => ({
       request.delete(options, (err, res, body) => {
         this.cleanCache(`url_${url_prefix.toString()}`, true);
         this.cleanCache(`url_${source1UrlPrefix.toString()}`, true);
+        this.cleanCache('parents', true);
+        if (res.statusCode === 409) {
+          return callback('Can not break this match as there are other matches that are child of this', null);
+        }
         if (err) {
-          winston.error(err);
+          return callback('Un expected error has occured, match was not broken', null);
         }
-        callback(err, null);
-      });
-      delete location.resourceType;
-      delete location.id;
-      delete location.meta;
-      delete location.total;
-      delete location.link;
-      const matchBrokenCode = config.getConf('mapping:matchBrokenCode');
-      // remove the flag tag
-      let found = false;
-      async.eachSeries(location.entry[0].resource.tag, (tag, nxtTag) => {
-        if (tag.code === matchBrokenCode) {
-          found = true;
-        }
-        return nxtTag();
-      }, () => {
-        location.type = 'document';
-        if (!found) {
-          if (!location.entry[0].resource.hasOwnProperty('tag')) {
-            location.entry[0].resource.tag = [];
+        delete location.resourceType;
+        delete location.id;
+        delete location.meta;
+        delete location.total;
+        delete location.link;
+        const matchBrokenCode = config.getConf('mapping:matchBrokenCode');
+        // remove the flag tag
+        let found = false;
+        async.eachSeries(location.entry[0].resource.meta.tag, (tag, nxtTag) => {
+          if (tag.code === matchBrokenCode) {
+            found = true;
           }
-          const source1System = 'https://digitalhealth.intrahealth.org/source1';
-          location.entry[0].resource.tag.push({
-            system: source1System,
-            code: matchBrokenCode,
-            display: 'Match Broken',
-          });
-          winston.error(location)
-          this.saveLocations(location, source1DB, (err, res) => {});
-        }
+          return nxtTag();
+        }, () => {
+          location.resourceType = 'Bundle';
+          location.type = 'batch';
+          if (!found) {
+            const source1System = 'https://digitalhealth.intrahealth.org/source1';
+            if (!location.entry[0].resource.meta) {
+              location.entry[0].resource.meta = {};
+            }
+            if (!location.entry[0].resource.meta.tag) {
+              location.entry[0].resource.meta.tag = [];
+            }
+            location.entry[0].resource.meta.tag.push({
+              system: source1System,
+              code: matchBrokenCode,
+              display: 'Match Broken',
+            });
+            location.entry[0].request = {};
+            location.entry[0].request.method = 'PUT';
+            location.entry[0].request.url = `Location/${location.entry[0].resource.id}`;
+            this.saveLocations(location, source1DB, (err, res) => {
+              callback(err, null);
+            });
+          } else {
+            callback(err, null);
+          }
+        });
       });
     });
   },
@@ -1082,6 +2475,7 @@ module.exports = () => ({
       url,
     };
     request.delete(options, (err, res, body) => {
+      winston.error(url_prefix.toString())
       this.cleanCache(`url_${url_prefix.toString()}`, true);
       if (err) {
         winston.error(err);
@@ -1120,7 +2514,7 @@ module.exports = () => ({
         const jurisdictions = [];
         if (data[headerMapping.facility] == '') {
           countRow++;
-          const percent = parseFloat((countRow * 100 / totalRows).toFixed(2));
+          const percent = parseFloat((countRow * 100 / totalRows).toFixed(1));
           const uploadReqPro = JSON.stringify({
             status: '3/3 Writing Uploaded data into server',
             error: null,
@@ -1138,14 +2532,13 @@ module.exports = () => ({
         let facilityParent = null;
         let facilityParentUUID = null;
         async.eachSeries(levels, (level, nxtLevel) => {
-          if (data[headerMapping[level]] != null &&
-            data[headerMapping[level]] != undefined &&
-            data[headerMapping[level]] != false &&
-            data[headerMapping[level]] != ''
+          if (data[headerMapping[level]] != null
+            && data[headerMapping[level]] != undefined
+            && data[headerMapping[level]] != false
+            && data[headerMapping[level]] != ''
           ) {
             let name = data[headerMapping[level]].trim();
             name = mixin.toTitleCaseSpace(name);
-            const nameForID = name.toLowerCase();
             const levelNumber = parseInt(level.replace('level', ''));
             let mergedParents = '';
 
@@ -1161,7 +2554,8 @@ module.exports = () => ({
             } else {
               var namespaceMod = `${namespace}0${levelNumber}`;
             }
-            const UUID = uuid5(nameForID + mergedParents, namespaceMod);
+
+            const UUID = uuid5(name + mergedParents, namespaceMod);
             const topLevels = [...new Array(levelNumber)].map(Function.call, Number);
             // removing zero as levels starts from 1
             topLevels.splice(0, 1);
@@ -1191,11 +2585,11 @@ module.exports = () => ({
                 parent = data[headerMapping[topLevelName]].trim();
                 parent = mixin.toTitleCaseSpace(parent);
                 parent = parent.toLowerCase();
-
+                let namespaceMod;
                 if (topLevel.toString().length < 2) {
-                  var namespaceMod = `${namespace}00${topLevel}`;
+                  namespaceMod = `${namespace}00${topLevel}`;
                 } else {
-                  var namespaceMod = `${namespace}0${topLevel}`;
+                  namespaceMod = `${namespace}0${topLevel}`;
                 }
                 parentUUID = uuid5(parent + mergedGrandParents, namespaceMod);
                 parentFound = true;
@@ -1260,13 +2654,13 @@ module.exports = () => ({
             promises.push(new Promise((resolve, reject) => {
               this.saveLocations(tmpBundle, database, () => {
                 countRow += tmpBundle.entry.length;
-                const percent = parseFloat((countRow * 100 / totalRows).toFixed(2));
+                const percent = parseFloat((countRow * 100 / totalRows).toFixed(1));
                 const uploadReqPro = JSON.stringify({
                   status: '3/3 Writing Uploaded data into server',
                   error: null,
                   percent,
                 });
-                redisClient.set(uploadRequestId, uploadReqPro);
+                redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
 
                 resolve();
               });
@@ -1282,7 +2676,7 @@ module.exports = () => ({
               error: null,
               percent: 100,
             });
-            redisClient.set(uploadRequestId, uploadReqPro);
+            redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
             callback();
           });
         });
@@ -1433,20 +2827,30 @@ module.exports = () => ({
     }, () => callback(grid, totalBuildings));
   },
 
-  createTree(mcsd, topOrg, callback) {
+  createTree(mcsd, topOrg, includeBuilding, callback) {
     const tree = [];
     const lookup = [];
     const addLater = {};
     async.each(mcsd.entry, (entry, callback1) => {
-      const found = entry.resource.physicalType.coding.find(coding => coding.code == 'bu');
-      if (found) {
+      const found = entry.resource.physicalType && entry.resource.physicalType.coding.find(coding => coding.code === 'bu');
+      if (found && !includeBuilding) {
         return callback1();
       }
-
-      const id = entry.resource.id;
+      let locType;
+      if (found) {
+        locType = 'bu';
+      } else {
+        locType = 'ju';
+      }
+      const {
+        id,
+      } = entry.resource;
       const item = {
         text: entry.resource.name,
         id,
+        data: {
+          locType,
+        },
         children: [],
       };
       lookup[id] = item;

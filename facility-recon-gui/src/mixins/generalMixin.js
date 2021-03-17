@@ -6,22 +6,28 @@ const backendServer = process.env.BACKEND_SERVER
 export const generalMixin = {
   data () {
     return {
-      roles: []
+      roles: [],
+      tasks: []
     }
   },
   computed: {
     canAddDataset () {
-      if (!this.$store.state.config.generalConfig.reconciliation.singleDataSource) {
+      if (
+        !this.$store.state.config.generalConfig.reconciliation.singleDataSource
+      ) {
         return true
       } else {
         let totalDtSrcs = 0
         for (let source of this.$store.state.dataSources) {
-          if (source._id === this.$store.state.config.generalConfig.reconciliation.fixSource2To) {
+          if (
+            source._id ===
+            this.$store.state.config.generalConfig.reconciliation.fixSource2To
+          ) {
             continue
           }
           let userID = this.$store.state.auth.userID
           let orgId = this.$store.state.dhis.user.orgId
-          let sharedToMe = source.shared.users.find((user) => {
+          let sharedToMe = source.shared.users.find(user => {
             return user._id === userID
           })
           let itsMine = source.owner.id === userID
@@ -45,11 +51,48 @@ export const generalMixin = {
     }
   },
   methods: {
+    getCodeSystem (codeSystemType, callback) {
+      axios
+        .get('/FR/getCodeSystem', {
+          params: {
+            codeSystemType
+          }
+        })
+        .then(response => {
+          return callback(null, response.data)
+        })
+        .catch(err => {
+          console.log(err)
+          return callback(err, null)
+        })
+    },
+    getTree (includeBuilding, callback) {
+      axios.get(backendServer + '/FR/getTree', {
+        params: {
+          includeBuilding
+        }
+      }).then((hierarchy) => {
+        if (hierarchy.data) {
+          let err = false
+          return callback(err, hierarchy.data)
+        }
+      }).catch((err) => {
+        return callback(err, [])
+      })
+    },
     clearProgress (type) {
-      axios.get(backendServer + '/clearProgress/' + type + '/' + this.$store.state.clientId)
+      axios.get(
+        backendServer +
+        '/clearProgress/' +
+        type +
+        '/' +
+        this.$store.state.clientId
+      )
     },
     getGeneralConfig (callback) {
-      let defaultGenerConfig = JSON.stringify(this.$store.state.config.generalConfig)
+      let defaultGenerConfig = JSON.stringify(
+        this.$store.state.config.generalConfig
+      )
       axios
         .get(backendServer + '/getGeneralConfig?defaultGenerConfig=' + defaultGenerConfig)
         .then(config => {
@@ -63,7 +106,12 @@ export const generalMixin = {
         })
     },
     toTitleCase (str) {
-      return str.toLowerCase().split(' ').map(word => word.replace(word[0], word[0].toUpperCase())).join('')
+      return str
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.replace(word[0], word[0].toUpperCase()))
+        .join('')
+        .toLowerCase()
     },
 
     translateDataHeader (source, level) {
@@ -98,7 +146,12 @@ export const generalMixin = {
         // end of getting level adjustments
 
         let levelValue = this.$store.state.levelMapping[source]['level' + level]
-        if (levelValue && levelValue !== 'null' && levelValue !== 'undefined' && levelValue !== 'false') {
+        if (
+          levelValue &&
+          levelValue !== 'null' &&
+          levelValue !== 'undefined' &&
+          levelValue !== 'false'
+        ) {
           return levelValue
         } else {
           return this.$store.state.levelMapping[source]['facility']
@@ -111,14 +164,20 @@ export const generalMixin = {
       let shared
       let activeDataSourcePair = {}
       this.$store.state.dataSourcePairs.forEach(pair => {
-        if (pair.userID._id === this.$store.state.auth.userID && pair.status === 'active') {
+        if (
+          pair.userID._id === this.$store.state.auth.userID &&
+          pair.status === 'active'
+        ) {
           activeDataSourcePair = pair
         }
         if (Object.keys(activeDataSourcePair).length > 0) {
           shared = undefined
           return
         }
-        if (pair.userID._id !== this.$store.state.auth.userID && pair.shared.activeUsers.indexOf(this.$store.state.auth.userID) !== -1) {
+        if (
+          pair.userID._id !== this.$store.state.auth.userID &&
+          pair.shared.activeUsers.indexOf(this.$store.state.auth.userID) !== -1
+        ) {
           shared = pair
         }
       })
@@ -145,21 +204,24 @@ export const generalMixin = {
         source1LimitOrgId: '',
         source2LimitOrgId: ''
       }
-      let dtSrc1 = this.$store.state.dataSources.find((dtSrc) => {
+      let dtSrc1 = this.$store.state.dataSources.find(dtSrc => {
         return dtSrc._id === this.$store.state.activePair.source1.id
       })
-      let dtSrc2 = this.$store.state.dataSources.find((dtSrc) => {
+      let dtSrc2 = this.$store.state.dataSources.find(dtSrc => {
         return dtSrc._id === this.$store.state.activePair.source2.id
       })
 
       if (dtSrc1 && dtSrc1.hasOwnProperty('userID') && dtSrc1.userID._id !== this.$store.state.auth.userID) {
-        let limit = dtSrc1.sharedLocation.find((sharedLocation) => {
+        let limit = dtSrc1.sharedLocation.find(sharedLocation => {
           return sharedLocation.user === this.$store.state.auth.userID
         })
         if (limit) {
           sourceLimitOrgId.source1LimitOrgId = limit.location
         } else {
-          if (dtSrc1.shareToAll.activated && dtSrc1.shareToAll.limitByUserLocation) {
+          if (
+            dtSrc1.shareToAll.activated &&
+            dtSrc1.shareToAll.limitByUserLocation
+          ) {
             sourceLimitOrgId.source1LimitOrgId = this.$store.state.dhis.user.orgId
             if (!sourceLimitOrgId.source1LimitOrgId) {
               sourceLimitOrgId.source1LimitOrgId = 'undefined'
@@ -169,13 +231,16 @@ export const generalMixin = {
       }
 
       if (dtSrc2 && dtSrc2.hasOwnProperty('userID') && dtSrc2.userID._id !== this.$store.state.auth.userID) {
-        let limit = dtSrc2.sharedLocation.find((sharedLocation) => {
+        let limit = dtSrc2.sharedLocation.find(sharedLocation => {
           return sharedLocation.user === this.$store.state.auth.userID
         })
         if (limit) {
           sourceLimitOrgId.source2LimitOrgId = limit.location
         } else {
-          if (dtSrc2.shareToAll.activated && dtSrc2.shareToAll.limitByUserLocation) {
+          if (
+            dtSrc2.shareToAll.activated &&
+            dtSrc2.shareToAll.limitByUserLocation
+          ) {
             sourceLimitOrgId.source2LimitOrgId = this.$store.state.dhis.user.orgId
             if (!sourceLimitOrgId.source2LimitOrgId) {
               sourceLimitOrgId.source2LimitOrgId = 'undefined'
@@ -188,13 +253,16 @@ export const generalMixin = {
     getLimitOrgIdOnDataSource (dataSource) {
       let limitOrgId
       if (dataSource && dataSource.hasOwnProperty('userID') && dataSource.userID._id !== this.$store.state.auth.userID) {
-        let limit = dataSource.sharedLocation.find((sharedLocation) => {
+        let limit = dataSource.sharedLocation.find(sharedLocation => {
           return sharedLocation.user === this.$store.state.auth.userID
         })
         if (limit) {
           limitOrgId = limit.location
         } else {
-          if (dataSource.shareToAll.activated && dataSource.shareToAll.limitByUserLocation) {
+          if (
+            dataSource.shareToAll.activated &&
+            dataSource.shareToAll.limitByUserLocation
+          ) {
             limitOrgId = this.$store.state.dhis.user.orgId
             if (!limitOrgId) {
               limitOrgId = 'undefined'
@@ -205,16 +273,30 @@ export const generalMixin = {
       return limitOrgId
     },
     getRoles () {
-      axios.get(backendServer + '/getRoles').then((roles) => {
-        for (let role of roles.data) {
-          this.roles.push({
-            text: role.name,
-            value: role._id
-          })
-        }
-      }).catch((err) => {
-        console.log(err.response)
-      })
+      axios
+        .get(backendServer + '/getRoles')
+        .then(roles => {
+          for (let role of roles.data) {
+            this.roles.push({
+              text: role.name,
+              value: role._id,
+              tasks: role.tasks
+            })
+          }
+        })
+        .catch(err => {
+          console.log(err.response)
+        })
+    },
+    getTasks () {
+      axios
+        .get(backendServer + '/getTasks')
+        .then(tasks => {
+          this.tasks = tasks.data
+        })
+        .catch(err => {
+          console.log(err.response)
+        })
     },
     saveConfiguration (configLevel, configName) {
       let userID = this.$store.state.auth.userID
@@ -258,9 +340,9 @@ export const generalMixin = {
         }
         return true
       } else if (process.env.NODE_ENV === 'development') {
-        this.$store.state.dhis.host = 'https://play.dhis2.org/2.32.0/'
-        this.$store.state.dhis.dev.auth.username = 'bombaliuser1'
-        this.$store.state.dhis.dev.auth.password = 'Qv?B/*w6'
+        this.$store.state.dhis.host = 'https://test.geoalign.datim.org/'
+        this.$store.state.dhis.dev.auth.username = 'Alicia_MOH_DataImport'
+        this.$store.state.dhis.dev.auth.password = 'P@$$w0rd@1'
         axios.defaults.params = {
           authDisabled: true
         }

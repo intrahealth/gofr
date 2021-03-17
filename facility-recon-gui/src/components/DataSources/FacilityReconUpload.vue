@@ -594,8 +594,8 @@ export default {
       if (this.uploadName === '') {
         return this.uploadNameErrors.push('Upload name is required')
       }
-      if (this.uploadName.length > 19) {
-        return this.uploadNameErrors.push('Name must not exceed 19 characters')
+      if (this.uploadName.length > 35) {
+        return this.uploadNameErrors.push('Name must not exceed 35 characters')
       }
       for (let invalidChar of this.invalidCharacters) {
         if (this.uploadName.indexOf(invalidChar) !== -1) {
@@ -623,7 +623,6 @@ export default {
           this.$store.state.errorDescription = 'You should delete this data source from view data source page then re-upload'
           this.$store.state.errorColor = 'error'
           this.$store.state.dialogError = true
-          // clearInterval(this.UploadProgressTimer)
           return
         } else if (uploadProgress.data.error !== null) {
           this.$store.state.uploadRunning = false
@@ -632,7 +631,6 @@ export default {
           this.$store.state.dialogError = true
           this.$store.state.errorTitle = 'Error'
           this.$store.state.errorDescription = uploadProgress.data.error
-          // clearInterval(this.UploadProgressTimer)
           console.log(uploadProgress.data.error)
           return
         }

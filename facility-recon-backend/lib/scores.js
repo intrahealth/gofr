@@ -548,7 +548,7 @@ module.exports = function () {
       let totalAllNoMatch = 0;
       let totalAllIgnored = 0;
       let totalAllFlagged = 0;
-      const useCachedParents = false;
+      let useCachedParents = false;
 
       redisClient.get(`parents${recoLevel}${source2DB}`, (error, results) => {
         if (error) {

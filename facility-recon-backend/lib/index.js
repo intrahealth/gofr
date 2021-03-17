@@ -197,6 +197,7 @@ if (cluster.isMaster) {
     request.get(options, (err, res, body) => {
       if (!res) {
         winston.error('It appears that FHIR server is not running, quiting GOFR now ...');
+        process.exit()
       }
       if (res.statusCode === 404) {
         async.series({
@@ -807,7 +808,7 @@ if (cluster.isMaster) {
                 res.status(500).send('An error has occured while getting data source');
                 return;
               }
-              winston.info(`returning list of data sources ${JSON.stringify(sources)}`);
+              winston.info(`returning list of data sources`);
               res.status(200).json(sources);
             });
           });
@@ -1878,6 +1879,9 @@ if (cluster.isMaster) {
                 stage: 'last',
               });
               redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
+              if (id) {
+                res.status(200).json(scoreResData);
+              }
               winston.info('Score results sent back');
             },
           );

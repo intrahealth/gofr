@@ -2475,7 +2475,6 @@ module.exports = () => ({
       url,
     };
     request.delete(options, (err, res, body) => {
-      winston.error(url_prefix.toString())
       this.cleanCache(`url_${url_prefix.toString()}`, true);
       if (err) {
         winston.error(err);

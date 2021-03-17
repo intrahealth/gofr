@@ -1,10 +1,6 @@
 import axios from 'axios'
-import {
-  generalMixin
-} from './generalMixin'
-import {
-  eventBus
-} from '../main'
+import { generalMixin } from './generalMixin'
+import { eventBus } from '../main'
 
 const CancelToken = axios.CancelToken
 const backendServer = process.env.BACKEND_SERVER
@@ -22,7 +18,7 @@ export const scoresMixin = {
       this.$store.state.scoresProgressData.scoreProgressTitle = 'Server is busy with automatching, please be patient'
       clearInterval(this.$store.state.scoresProgressData.progressReqTimer)
       let percent = parseInt(this.$store.state.scoresProgressData.scoreProgressPercent)
-      if (percent !== 100 || (percent === 100 && this.$store.state.scoresProgressData.stage !== 'final')) {
+      if (percent !== 100 || (percent === 100 && this.$store.state.scoresProgressData.stage !== 'last')) {
         this.$store.state.scoresProgressData.requestCancelled = true
         this.$store.state.scoresProgressData.cancelTokenSource.cancel('Cancelling request.')
         this.checkScoreProgress()
@@ -35,11 +31,19 @@ export const scoresMixin = {
       this.$store.state.scoreSavingProgressData.requestCancelled = true
       this.$store.state.scoreSavingProgressData.cancelTokenSource.cancel('Cancelling request.')
       this.checkScoreSavingStatus()
+      this.saveProgressTimedout = true
     },
     checkScoreProgress () {
       // if the req takes one minute without responding then display a message to user
       this.$store.state.scoresProgressData.cancelTokenSource = CancelToken.source()
-      this.$store.state.scoresProgressData.progressReqTimer = setInterval(this.scoreProgressCheckTimeout, 10000)
+      let time
+      let percent = parseInt(this.$store.state.scoresProgressData.scoreProgressPercent)
+      if (percent > 96) {
+        time = 402382
+      } else {
+        time = 10000
+      }
+      this.$store.state.scoresProgressData.progressReqTimer = setInterval(this.scoreProgressCheckTimeout, time)
       const clientId = this.$store.state.clientId
       axios.get(backendServer + '/progress/scoreResults/' + clientId, {
         cancelToken: this.$store.state.scoresProgressData.cancelTokenSource.token
@@ -101,7 +105,6 @@ export const scoresMixin = {
               this.$store.state.flagged.push({
                 source1Name: scoreResult.source1.name,
                 source1Id: scoreResult.source1.id,
-                source1UUID: scoreResult.source1.uuid,
                 source1IdHierarchy: scoreResult.source1.source1IdHierarchy,
                 source1Parents: scoreResult.source1.parents,
                 source2Name: scoreResult.exactMatch.name,
@@ -116,7 +119,6 @@ export const scoresMixin = {
               this.$store.state.noMatchContent.push({
                 source1Name: scoreResult.source1.name,
                 source1Id: scoreResult.source1.id,
-                source1UUID: scoreResult.source1.uuid,
                 parents: parents
               })
             } else if (scoreResult.source1.hasOwnProperty('tag') && scoreResult.source1.tag === 'ignore') {
@@ -124,14 +126,12 @@ export const scoresMixin = {
               this.$store.state.ignoreContent.push({
                 source1Name: scoreResult.source1.name,
                 source1Id: scoreResult.source1.id,
-                source1UUID: scoreResult.source1.uuid,
                 parents: parents
               })
             } else if (Object.keys(scoreResult.exactMatch).length > 0) {
               this.$store.state.matchedContent.push({
                 source1Name: scoreResult.source1.name,
                 source1Id: scoreResult.source1.id,
-                source1UUID: scoreResult.source1.uuid,
                 source1Parents: scoreResult.source1.parents,
                 source2Name: scoreResult.exactMatch.name,
                 source2Id: scoreResult.exactMatch.id,
@@ -151,7 +151,6 @@ export const scoresMixin = {
               this.$store.state.source1UnMatched.push({
                 name: scoreResult.source1.name,
                 id: scoreResult.source1.id,
-                UUID: scoreResult.source1.uuid,
                 parents: scoreResult.source1.parents
               })
             }
@@ -215,7 +214,10 @@ export const scoresMixin = {
         }
       })
     },
-    getScores () {
+    getScores (getPotential) {
+      if (!getPotential) {
+        getPotential = false
+      }
       let source1 = this.getSource1()
       let source2 = this.getSource2()
       let sourcesOwner = this.getDatasourceOwner()
@@ -266,7 +268,7 @@ export const scoresMixin = {
       let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
       let parentConstraint = JSON.stringify(this.$store.state.config.generalConfig.reconciliation.parentConstraint)
       let path = `source1=${source1}&source2=${source2}&source1Owner=${source1Owner}&source2Owner=${source2Owner}&source1LimitOrgId=${source1LimitOrgId}&source2LimitOrgId=${source2LimitOrgId}&totalSource1Levels=${totalSource1Levels}&totalSource2Levels=${totalSource2Levels}`
-      path += `&recoLevel=${recoLevel}&clientId=${clientId}&userID=${userID}&parentConstraint=` + parentConstraint
+      path += `&recoLevel=${recoLevel}&clientId=${clientId}&userID=${userID}&parentConstraint=` + parentConstraint + '&getPotential=' + getPotential
       axios.get(backendServer + '/reconcile/?' + path).then(() => {
         this.checkScoreProgress()
       })

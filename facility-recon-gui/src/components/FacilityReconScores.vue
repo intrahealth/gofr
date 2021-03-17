@@ -358,14 +358,15 @@
             slot="activator"
             color="primary"
             dark
-            @click="getScores"
+            @click="getScores(false)"
             round
           >
             <v-icon>repeat_one</v-icon> Recalculate Scores
           </v-btn>
           <template v-else>
-            Saving matches for {{translateDataHeader('source1', $store.state.recoLevel - 2)}}
+            Saving matches for {{translateDataHeader('source1', $store.state.recoLevel - 1)}}
             <v-progress-linear
+              v-if='!saveProgressTimedout'
               color="error"
               width="20"
               height="20"
@@ -375,6 +376,11 @@
                 <span class="green--text"><b>{{$store.state.scoreSavingProgressData.percent}}%</b></span>
               </center>
             </v-progress-linear>
+            <v-progress-linear
+              v-else
+              indeterminate
+              color="red"
+            ></v-progress-linear>
           </template>
         </v-flex>
         <v-flex
@@ -897,7 +903,7 @@
                       color="error"
                       style='text-transform: none'
                       small
-                      @click='breakMatch(props.item.source1UUID)'
+                      @click='breakMatch(props.item.source1Id)'
                     >
                       <v-icon>undo</v-icon>Break Match
                     </v-btn>
@@ -906,7 +912,7 @@
                       color="error"
                       style='text-transform: none'
                       small
-                      @click='breakMatch(props.item.source1UUID)'
+                      @click='breakMatch(props.item.source1Id)'
                     >
                       <v-icon>undo</v-icon>Break Match
                     </v-btn>
@@ -951,7 +957,7 @@
                       color="error"
                       style='text-transform: none'
                       small
-                      @click='breakNoMatch(props.item.source1UUID, "nomatch")'
+                      @click='breakNoMatch(props.item.source1Id, "nomatch")'
                     >
                       <v-icon>cached</v-icon>Break No Match
                     </v-btn>
@@ -960,7 +966,7 @@
                       color="error"
                       style='text-transform: none'
                       small
-                      @click='breakNoMatch(props.item.source1UUID, "nomatch")'
+                      @click='breakNoMatch(props.item.source1Id, "nomatch")'
                     >
                       <v-icon>cached</v-icon>Break No Match
                     </v-btn>
@@ -1005,7 +1011,7 @@
                       color="error"
                       style='text-transform: none'
                       small
-                      @click='breakNoMatch(props.item.source1UUID, "ignore")'
+                      @click='breakNoMatch(props.item.source1Id, "ignore")'
                     >
                       <v-icon>cached</v-icon>Break Ignore
                     </v-btn>
@@ -1014,7 +1020,7 @@
                       color="error"
                       style='text-transform: none'
                       small
-                      @click='breakNoMatch(props.item.source1UUID, "ignore")'
+                      @click='breakNoMatch(props.item.source1Id, "ignore")'
                     >
                       <v-icon>cached</v-icon>Break Ignore
                     </v-btn>
@@ -1063,7 +1069,7 @@
                       color="primary"
                       style='text-transform: none'
                       small
-                      @click='acceptFlag(props.item.source1UUID)'
+                      @click='acceptFlag(props.item.source1Id)'
                     >
                       <v-icon>thumb_up</v-icon>Confirm Match
                     </v-btn>
@@ -1072,7 +1078,7 @@
                       color="primary"
                       style='text-transform: none'
                       small
-                      @click='acceptFlag(props.item.source1UUID)'
+                      @click='acceptFlag(props.item.source1Id)'
                     >
                       <v-icon>thumb_up</v-icon>Confirm Match
                     </v-btn>
@@ -1082,7 +1088,7 @@
                       color="error"
                       style='text-transform: none'
                       small
-                      @click='unFlag(props.item.source1UUID)'
+                      @click='unFlag(props.item.source1Id)'
                     >
                       <v-icon>cached</v-icon>Release
                     </v-btn>
@@ -1091,7 +1097,7 @@
                       color="error"
                       style='text-transform: none'
                       small
-                      @click='unFlag(props.item.source1UUID)'
+                      @click='unFlag(props.item.source1Id)'
                     >
                       <v-icon>cached</v-icon>Release
                     </v-btn>
@@ -1156,6 +1162,7 @@ export default {
   mixins: [scoresMixin, generalMixin],
   data () {
     return {
+      clientId: '',
       flagCommentDialog: false,
       flagComment: '',
       helpDialog: false,
@@ -1177,13 +1184,13 @@ export default {
       alertText: '',
       alertTitle: '',
       alert: false,
+      saveProgressTimedout: false,
       source1Parents: {},
       source1Filter: { text: '', level: '' },
       source1TreeUpdate: 0,
       selectedSource1: {},
       selectedSource1Name: null,
       selectedSource1Id: null,
-      selectedSource1UUID: null,
       selectedSource1Lat: null,
       selectedSource1Long: null,
       selectedSource1Parents: [],
@@ -1256,7 +1263,7 @@ export default {
         return
       }
       this.$store.state.recoLevel = level
-      this.getScores()
+      this.getScores(false)
       if (
         this.$store.state.recoLevel === this.$store.state.totalSource1Levels
       ) {
@@ -1265,7 +1272,108 @@ export default {
         this.dialogWidth = '1190px'
       }
     },
-    getPotentialMatch (id) {
+    getBuildingPotentialMatches (id) {
+      this.potentialMatches = []
+      let source1 = this.getSource1()
+      let source2 = this.getSource2()
+      let recoLevel = this.$store.state.recoLevel
+      let totalSource1Levels = this.$store.state.totalSource1Levels
+      let totalSource2Levels = this.$store.state.totalSource2Levels
+      if (this.clientId) {
+        let lastChar = this.clientId[this.clientId.length - 1]
+        lastChar = parseInt(lastChar)
+        lastChar += 1
+        this.clientId += lastChar
+      } else {
+        let lastChar = this.$store.state.clientId[this.$store.state.clientId.length - 1]
+        lastChar = parseInt(lastChar)
+        lastChar += 1
+        this.clientId = this.$store.state.clientId + lastChar
+      }
+
+      let sourcesOwner = this.getDatasourceOwner()
+      let userID = this.$store.state.activePair.userID._id
+      let source1Owner = sourcesOwner.source1Owner
+      let source2Owner = sourcesOwner.source2Owner
+      let source1LimitOrgId = this.getLimitOrgIdOnActivePair()
+        .source1LimitOrgId
+      let source2LimitOrgId = this.getLimitOrgIdOnActivePair()
+        .source2LimitOrgId
+      let parentConstraint = JSON.stringify(
+        this.$store.state.config.generalConfig.reconciliation.parentConstraint
+      )
+      let path = `id=${id}&source1=${source1}&source2=${source2}&source1Owner=${source1Owner}&source2Owner=${source2Owner}&source1LimitOrgId=${source1LimitOrgId}&source2LimitOrgId=${source2LimitOrgId}&totalSource1Levels=${totalSource1Levels}&totalSource2Levels=${totalSource2Levels}`
+      path +=
+        `&recoLevel=${recoLevel}&clientId=${this.clientId}&userID=${userID}&parentConstraint=` +
+        parentConstraint +
+        '&getPotential=' +
+        true
+      this.$store.state.dynamicProgress = true
+      this.$store.state.progressTitle = 'Getting potential matches from server'
+      axios
+        .get(backendServer + '/reconcile/?' + path)
+        .then(response => {
+          this.$store.state.dynamicProgress = false
+          if (response.data) {
+            let scores = JSON.parse(response.data).responseData.scoreResults
+            if (scores.length > 0) {
+              let matches = scores[0]
+              const exactMatches = matches.exactMatch
+              if (Object.keys(exactMatches).length > 0) {
+                this.$store.state.dialogError = true
+                this.$store.state.errorDescription =
+                  'This location is already mapped, please recalculate scores to get changes'
+                this.$store.state.errorTitle = 'Info'
+                this.$store.state.errorColor = 'error'
+                return
+              }
+              this.selectedSource1 = matches.source1
+              this.selectedSource1Name = matches.source1.name
+              this.selectedSource1Parents = matches.source1.parents
+              this.selectedSource1Lat = matches.source1.lat
+              this.selectedSource1Long = matches.source1.long
+              this.selectedSource1Id = matches.source1.id
+              for (let score in matches.potentialMatches) {
+                for (let j in matches.potentialMatches[score]) {
+                  let potentials = matches.potentialMatches[score][j]
+                  var matched = this.$store.state.matchedContent.find(
+                    matched => {
+                      return matched.source2Id === potentials.id
+                    }
+                  )
+                  var flagged = this.$store.state.flagged.find(flagged => {
+                    return flagged.source2Id === potentials.id
+                  })
+                  if (matched) {
+                    continue
+                  }
+                  if (flagged) {
+                    continue
+                  }
+                  this.potentialMatches.push({
+                    score: score,
+                    name: potentials.name,
+                    id: potentials.id,
+                    source2IdHierarchy: potentials.source2IdHierarchy,
+                    lat: potentials.lat,
+                    long: potentials.long,
+                    geoDistance: potentials.geoDistance,
+                    parents: potentials.parents,
+                    mappedParentName: potentials.mappedParentName
+                  })
+                }
+              }
+            }
+            this.dialog = true
+          } else {
+            this.dialog = true
+          }
+        })
+        .catch(error => {
+          console.log(error)
+        })
+    },
+    getJurisdictionPotentialMatches (id) {
       this.potentialMatches = []
       this.showAllPotential = false
       for (let scoreResult of this.$store.state.scoreResults) {
@@ -1276,7 +1384,6 @@ export default {
           this.selectedSource1Lat = scoreResult.source1.lat
           this.selectedSource1Long = scoreResult.source1.long
           this.selectedSource1Id = scoreResult.source1.id
-          this.selectedSource1UUID = scoreResult.source1.uuid
           for (let score in scoreResult.potentialMatches) {
             for (let j in scoreResult.potentialMatches[score]) {
               let potentials = scoreResult.potentialMatches[score][j]
@@ -1308,6 +1415,9 @@ export default {
         }
       }
       this.dialog = true
+    },
+    getPotentialMatch (id) {
+      this.getBuildingPotentialMatches(id)
     },
     potentialMatchComment (potentialMatch) {
       let comment = ''
@@ -1381,7 +1491,7 @@ export default {
       this.$store.state.dynamicProgress = true
       let sourcesOwner = this.getDatasourceOwner()
       let formData = new FormData()
-      formData.append('source1Id', this.selectedSource1UUID)
+      formData.append('source1Id', this.selectedSource1Id)
       formData.append('source2Id', this.source2Id)
       formData.append('source1Owner', sourcesOwner.source1Owner)
       formData.append('source2Owner', sourcesOwner.source2Owner)
@@ -1410,13 +1520,12 @@ export default {
 
           // Add from a list of Source 1 Matched and remove from list of Source 1 unMatched
           for (let k in this.$store.state.source1UnMatched) {
-            if (this.$store.state.source1UnMatched[k].UUID === this.selectedSource1UUID) {
+            if (this.$store.state.source1UnMatched[k].id === this.selectedSource1Id) {
               if (this.matchType === 'match') {
                 ++this.$store.state.totalAllMapped
                 this.$store.state.matchedContent.push({
                   source1Name: this.selectedSource1Name,
                   source1Id: this.selectedSource1Id,
-                  source1UUID: this.selectedSource1UUID,
                   source1Parents: this.$store.state.source1UnMatched[k].parents,
                   source2Name: this.source2Name,
                   source2Id: this.source2Id,
@@ -1430,7 +1539,6 @@ export default {
                 this.$store.state.flagged.push({
                   source1Name: this.selectedSource1Name,
                   source1Id: this.selectedSource1Id,
-                  source1UUID: this.selectedSource1UUID,
                   source1Parents: this.$store.state.source1UnMatched[k].parents,
                   source2Name: this.source2Name,
                   source2Id: this.source2Id,
@@ -1445,7 +1553,6 @@ export default {
           }
           this.flagComment = ''
           this.selectedSource1Id = null
-          this.selectedSource1UUID = null
           this.selectedSource1Name = null
           this.dialog = false
         })
@@ -1456,16 +1563,15 @@ export default {
           this.alertTitle = 'Error'
           this.alertText = err.response.data.error
           this.selectedSource1Id = null
-          this.selectedSource1UUID = null
           this.selectedSource1Name = null
           this.dialog = false
         })
     },
-    acceptFlag (source1UUID) {
+    acceptFlag (source1Id) {
       this.$store.state.progressTitle = 'Accepting flag'
       this.$store.state.dynamicProgress = true
       let formData = new FormData()
-      formData.append('source1Id', source1UUID)
+      formData.append('source1Id', source1Id)
       let userID = this.$store.state.activePair.userID._id
       axios
         .post(backendServer + '/acceptFlag/' + this.getSource1() + '/' + this.getSource2() + '/' + userID, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
@@ -1473,11 +1579,10 @@ export default {
           this.$store.state.dynamicProgress = false
           // Add from a list of Source 1 Matched and remove from list of Flagged
           for (let k in this.$store.state.flagged) {
-            if (this.$store.state.flagged[k].source1UUID === source1UUID) {
+            if (this.$store.state.flagged[k].source1Id === source1Id) {
               this.$store.state.matchedContent.push({
                 source1Name: this.$store.state.flagged[k].source1Name,
                 source1Id: this.$store.state.flagged[k].source1Id,
-                source1UUID: this.$store.state.flagged[k].source1UUID,
                 source1Parents: this.$store.state.flagged[k].source1Parents,
                 source2Name: this.$store.state.flagged[k].source2Name,
                 source2Id: this.$store.state.flagged[k].source2Id,
@@ -1497,19 +1602,18 @@ export default {
           this.alertTitle = 'Error'
           this.alertText = err.response.data.error
           this.selectedSource1Id = null
-          this.selectedSource1UUID = null
           this.selectedSource1Name = null
           this.dialog = false
           console.log(err)
         })
     },
-    breakMatch (source1UUID) {
+    breakMatch (source1Id) {
       this.$store.state.progressTitle = 'Breaking match'
       this.$store.state.dynamicProgress = true
       let formData = new FormData()
       let userID = this.$store.state.activePair.userID._id
       let sourcesOwner = this.getDatasourceOwner()
-      formData.append('source1Id', source1UUID)
+      formData.append('source1Id', source1Id)
       axios
         .post(backendServer + '/breakMatch/' + this.getSource1() + '/' + this.getSource2() + '/' + sourcesOwner.source1Owner + '/' + sourcesOwner.source2Owner + '/' + userID, formData, {
           headers: {
@@ -1519,15 +1623,11 @@ export default {
         )
         .then(data => {
           this.$store.state.dynamicProgress = false
-          this.alert = true
-          this.alertTitle = 'Information'
-          this.alertText = 'Scores for this Location may not be available unless you recalculate scores'
           for (let k in this.$store.state.matchedContent) {
-            if (this.$store.state.matchedContent[k].source1UUID === source1UUID) {
+            if (this.$store.state.matchedContent[k].source1Id === source1Id) {
               this.$store.state.source1UnMatched.push({
                 name: this.$store.state.matchedContent[k].source1Name,
                 id: this.$store.state.matchedContent[k].source1Id,
-                UUID: this.$store.state.matchedContent[k].source1UUID,
                 parents: this.$store.state.matchedContent[k].source1Parents
               })
               this.$store.state.source2UnMatched.push({
@@ -1548,19 +1648,18 @@ export default {
           this.alertTitle = 'Error'
           this.alertText = err.response.data.error
           this.selectedSource1Id = null
-          this.selectedSource1UUID = null
           this.selectedSource1Name = null
           this.dialog = false
           console.log(err)
         })
     },
-    unFlag (source1UUID) {
+    unFlag (source1Id) {
       this.$store.state.progressTitle = 'Unflagging match'
       this.$store.state.dynamicProgress = true
       let formData = new FormData()
       let userID = this.$store.state.activePair.userID._id
       let sourcesOwner = this.getDatasourceOwner()
-      formData.append('source1Id', source1UUID)
+      formData.append('source1Id', source1Id)
       axios
         .post(backendServer + '/breakMatch/' + this.getSource1() + '/' + this.getSource2() + '/' + sourcesOwner.source1Owner + '/' + sourcesOwner.source2Owner + '/' + userID, formData, {
           headers: {
@@ -1569,15 +1668,11 @@ export default {
         }
         ).then(data => {
           this.$store.state.dynamicProgress = false
-          this.alert = true
-          this.alertTitle = 'Information'
-          this.alertText = 'Scores for this Location may not be available unless you recalculate scores'
           for (let k in this.$store.state.flagged) {
-            if (this.$store.state.flagged[k].source1UUID === source1UUID) {
+            if (this.$store.state.flagged[k].source1Id === source1Id) {
               this.$store.state.source1UnMatched.push({
                 name: this.$store.state.flagged[k].source1Name,
                 id: this.$store.state.flagged[k].source1Id,
-                UUID: this.$store.state.flagged[k].source1UUID,
                 parents: this.$store.state.flagged[k].source1Parents
               })
               this.$store.state.source2UnMatched.push({
@@ -1598,17 +1693,16 @@ export default {
           this.alertTitle = 'Error'
           this.alertText = err.response.data.error
           this.selectedSource1Id = null
-          this.selectedSource1UUID = null
           this.selectedSource1Name = null
           this.dialog = false
           console.log(err)
         })
     },
-    breakNoMatch (source1UUID, type) {
+    breakNoMatch (source1Id, type) {
       this.$store.state.progressTitle = 'Breaking no match'
       this.$store.state.dynamicProgress = true
       let formData = new FormData()
-      formData.append('source1Id', source1UUID)
+      formData.append('source1Id', source1Id)
       formData.append('recoLevel', this.$store.state.recoLevel)
       formData.append('totalLevels', this.$store.state.totalSource1Levels)
       let userID = this.$store.state.activePair.userID._id
@@ -1621,17 +1715,12 @@ export default {
         )
         .then(data => {
           this.$store.state.dynamicProgress = false
-          this.alert = true
-          this.alertTitle = 'Information'
-          this.alertText =
-            'Scores for this Location may not be available unless you recalculate scores'
           if (type === 'nomatch') {
             for (let k in this.$store.state.noMatchContent) {
-              if (this.$store.state.noMatchContent[k].source1UUID === source1UUID) {
+              if (this.$store.state.noMatchContent[k].source1Id === source1Id) {
                 this.$store.state.source1UnMatched.push({
                   name: this.$store.state.noMatchContent[k].source1Name,
                   id: this.$store.state.noMatchContent[k].source1Id,
-                  UUID: this.$store.state.noMatchContent[k].source1UUID,
                   parents: this.$store.state.noMatchContent[k].parents
                 })
                 this.$store.state.noMatchContent.splice(k, 1)
@@ -1640,11 +1729,10 @@ export default {
             }
           } else if (type === 'ignore') {
             for (let k in this.$store.state.ignoreContent) {
-              if (this.$store.state.ignoreContent[k].source1UUID === source1UUID) {
+              if (this.$store.state.ignoreContent[k].source1Id === source1Id) {
                 this.$store.state.source1UnMatched.push({
                   name: this.$store.state.ignoreContent[k].source1Name,
                   id: this.$store.state.ignoreContent[k].source1Id,
-                  UUID: this.$store.state.ignoreContent[k].source1UUID,
                   parents: this.$store.state.ignoreContent[k].parents
                 })
                 this.$store.state.ignoreContent.splice(k, 1)
@@ -1659,7 +1747,6 @@ export default {
           this.alertTitle = 'Error'
           this.alertText = err.response.data.error
           this.selectedSource1Id = null
-          this.selectedSource1UUID = null
           this.selectedSource1Name = null
           this.dialog = false
           console.log(err)
@@ -1673,7 +1760,7 @@ export default {
       let source1Owner = sourcesOwner.source1Owner
       let source2Owner = sourcesOwner.source2Owner
       let formData = new FormData()
-      formData.append('source1Id', this.selectedSource1UUID)
+      formData.append('source1Id', this.selectedSource1Id)
       formData.append('recoLevel', this.$store.state.recoLevel)
       formData.append('totalLevels', this.$store.state.totalSource1Levels)
 
@@ -1694,7 +1781,6 @@ export default {
                 this.$store.state.noMatchContent.push({
                   source1Name: this.selectedSource1Name,
                   source1Id: this.selectedSource1Id,
-                  source1UUID: this.selectedSource1UUID,
                   parents: this.$store.state.source1UnMatched[k].parents
                 })
                 ++this.$store.state.totalAllNoMatch
@@ -1710,7 +1796,6 @@ export default {
                 this.$store.state.ignoreContent.push({
                   source1Name: this.selectedSource1Name,
                   source1Id: this.selectedSource1Id,
-                  source1UUID: this.selectedSource1UUID,
                   parents: this.$store.state.source1UnMatched[k].parents
                 })
                 ++this.$store.state.totalAllIgnore
@@ -1720,7 +1805,6 @@ export default {
           }
           this.dialog = false
           this.selectedSource1Id = null
-          this.selectedSource1UUID = null
           this.selectedSource1Name = null
         })
         .catch(err => {
@@ -1730,7 +1814,6 @@ export default {
           this.alertText = err.response.data.error
           this.dialog = false
           this.selectedSource1Id = null
-          this.selectedSource1UUID = null
           this.selectedSource1Name = null
         })
     },
@@ -2078,7 +2161,7 @@ export default {
   created () {
     if (this.$store.state.recalculateScores) {
       this.$store.state.recalculateScores = false
-      this.getScores()
+      this.getScores(false)
     }
     eventBus.$on('changeCSVHeaderNames', () => {
       let levelName = this.translateDataHeader(

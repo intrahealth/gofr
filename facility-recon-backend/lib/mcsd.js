@@ -15,7 +15,6 @@ const isJSON = require('is-json');
 const levenshtein = require('fast-levenshtein');
 const geodist = require('geodist');
 const redis = require('redis');
-const cache = require('memory-cache');
 const moment = require('moment');
 const lodash = require('lodash');
 const mail = require('./mail')();
@@ -62,6 +61,9 @@ module.exports = () => ({
       (callback) => {
         const options = {
           url,
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
         };
         url = false;
         request.get(options, (err, res, body) => {
@@ -130,6 +132,9 @@ module.exports = () => ({
       (callback) => {
         const options = {
           url,
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
         };
         url = false;
         request.get(options, (err, res, body) => {
@@ -169,67 +174,72 @@ module.exports = () => ({
     }
     url = url.toString();
     let services;
-    services = cache.get(`url_${baseUrl}`);
-    if (services) {
-      winston.info(`Getting ${baseUrl} from cache`);
-      return callback(services);
-    }
-    services = {
-      entry: [],
-    };
+    redisClient.get(`url_${baseUrl}`, (error, results) => {
+      if (results) {
+        winston.info(`Getting ${baseUrl} from cache`);
+        return callback(results);
+      }
+      services = {
+        entry: [],
+      };
 
-    const started = cache.get(`started_${baseUrl}`);
-    if (started) {
-      winston.info(`getServices is in progress will try again in 10 seconds.${baseUrl}`);
-      setTimeout(() => {
-        this.getLocations({
-          database,
-          id,
-        }, callback);
-      }, 10000);
-      return;
-    }
-    cache.put(`started_${baseUrl}`, true);
-    winston.info(`Getting ${baseUrl} from server`);
-    async.doWhilst(
-      (callback) => {
-        const options = {
-          url,
-        };
-        url = false;
-        request.get(options, (err, res, body) => {
-          if (!isJSON(body)) {
-            cache.del(`started_${baseUrl}`);
-            return callback(false, false);
+      let started;
+      redisClient.get(`started_${baseUrl}`, (err, resultsSt) => {
+        started = resultsSt;
+      });
+      if (started) {
+        winston.info(`getServices is in progress will try again in 10 seconds.${baseUrl}`);
+        setTimeout(() => {
+          this.getLocations({
+            database,
+            id,
+          }, callback);
+        }, 10000);
+        return;
+      }
+      redisClient.set(`started_${baseUrl}`, '');
+      winston.info(`Getting ${baseUrl} from server`);
+      async.doWhilst(
+        (callback) => {
+          const options = {
+            url,
+            headers: {
+              'Cache-Control': 'no-cache',
+            },
+          };
+          url = false;
+          request.get(options, (err, res, body) => {
+            if (!isJSON(body)) {
+              this.cleanCache(`started_${baseUrl}`, true);
+              return callback(false, false);
+            }
+            body = JSON.parse(body);
+            if (body.total == 0 && body.entry && body.entry.length > 0) {
+              winston.error('Non mCSD data returned');
+              this.cleanCache(`started_${baseUrl}`, true);
+              return callback(false, false);
+            }
+            const next = body.link.find(link => link.relation == 'next');
+            if (next) {
+              url = next.url;
+            }
+            if (body.entry && body.entry.length > 0) {
+              services.entry = services.entry.concat(body.entry);
+            }
+            return callback(false, url);
+          });
+        },
+        () => url != false,
+        () => {
+          if (services.entry.length > 1) {
+            winston.info(`Saving ${baseUrl} to cache`);
+            redisClient.set(`url_${baseUrl}`, JSON.stringify(services), 'EX', config.getConf('mCSD:cacheTime'));
           }
-          body = JSON.parse(body);
-          if (body.total == 0 && body.entry && body.entry.length > 0) {
-            winston.error('Non mCSD data returned');
-            cache.del(`started_${baseUrl}`);
-            return callback(false, false);
-          }
-          const next = body.link.find(link => link.relation == 'next');
-          if (next) {
-            url = next.url;
-          }
-          if (body.entry && body.entry.length > 0) {
-            services.entry = services.entry.concat(body.entry);
-          }
-          return callback(false, url);
-        });
-      },
-      () => url != false,
-      () => {
-        if (services.entry.length > 1) {
-          winston.info(`Saving ${baseUrl} to cache`);
-          cache.put(`url_${baseUrl}`, services, config.getConf('mCSD:cacheTime'));
-        } else {
-          winston.info(`Not more than 1 entry for ${baseUrl} so not caching.`);
-        }
-        cache.del(`started_${baseUrl}`);
-        return callback(services);
-      },
-    );
+          this.cleanCache(`started_${baseUrl}`, true);
+          return callback(services);
+        },
+      );
+    });
   },
 
   getLocations(database, callback) {
@@ -237,64 +247,83 @@ module.exports = () => ({
       .toString();
     let url = `${baseUrl}?_count=37000`;
     let locations;
-    locations = cache.get(`url_${baseUrl}`);
-    if (locations) {
-      winston.info(`Getting ${baseUrl} from cache`);
-      return callback(locations);
-    }
-    locations = {
-      entry: [],
-    };
-
-    const started = cache.get(`started_${baseUrl}`);
-    if (started) {
-      winston.info(`getLocations is in progress will try again in 10 seconds.${baseUrl}`);
-      setTimeout(() => {
-        this.getLocations(database, callback);
-      }, 10000);
-      return;
-    }
-    cache.put(`started_${baseUrl}`, true);
-    winston.info(`Getting ${baseUrl} from server`);
-    async.doWhilst(
-      (callback) => {
-        const options = {
-          url,
-        };
-        url = false;
-        request.get(options, (err, res, body) => {
-          if (!isJSON(body)) {
-            cache.del(`started_${baseUrl}`);
-            return callback(false, false);
-          }
-          body = JSON.parse(body);
-          if (body.total == 0 && body.entry && body.entry.length > 0) {
-            winston.error('Non mCSD data returned');
-            cache.del(`started_${baseUrl}`);
-            return callback(false, false);
-          }
-          const next = body.link.find(link => link.relation == 'next');
-          if (next) {
-            url = next.url;
-          }
-          if (body.entry && body.entry.length > 0) {
-            locations.entry = locations.entry.concat(body.entry);
-          }
-          return callback(false, url);
-        });
-      },
-      () => url != false,
-      () => {
-        if (locations.entry.length > 1) {
-          winston.info(`Saving ${baseUrl} to cache`);
-          cache.put(`url_${baseUrl}`, locations, config.getConf('mCSD:cacheTime'));
-        } else {
-          winston.info(`Not more than 1 entry for ${baseUrl} so not caching.`);
+    redisClient.get(`url_${baseUrl}`, (error, results) => {
+      if (results) {
+        try {
+          locations = JSON.parse(results);
+        } catch (err) {
+          winston.error(err);
         }
-        cache.del(`started_${baseUrl}`);
+      }
+      if (locations) {
+        winston.info(`Getting ${baseUrl} from cache`);
         return callback(locations);
-      },
-    );
+      }
+      locations = {
+        entry: [],
+      };
+
+      let started;
+      redisClient.get(`started_${baseUrl}`, (err, resultsSt) => {
+        started = resultsSt;
+      });
+      if (started) {
+        winston.info(`getLocations is in progress will try again in 10 seconds.${baseUrl}`);
+        setTimeout(() => {
+          this.getLocations(database, callback);
+        }, 10000);
+        return;
+      }
+      redisClient.set(`started_${baseUrl}`, '');
+      winston.info(`Getting ${baseUrl} from server`);
+      async.doWhilst(
+        (callback) => {
+          const options = {
+            url,
+            headers: {
+              'Cache-Control': 'no-cache',
+            },
+          };
+          url = false;
+          request.get(options, (err, res, body) => {
+            if (!isJSON(body)) {
+              this.cleanCache(`started_${baseUrl}`, true);
+              return callback(null, false);
+            }
+            body = JSON.parse(body);
+            if (body.total == 0 && body.entry && body.entry.length > 0) {
+              winston.error('Non mCSD data returned');
+              this.cleanCache(`started_${baseUrl}`, true);
+              return callback(null, false);
+            }
+            if (!body.hasOwnProperty('entry')) {
+              winston.error('Non mCSD data returned');
+              this.cleanCache(`started_${baseUrl}`, true);
+              return callback(null, false);
+            }
+            const next = body.link.find(link => link.relation == 'next');
+            if (next) {
+              url = next.url;
+            }
+            if (body.entry && body.entry.length > 0) {
+              locations.entry = locations.entry.concat(body.entry);
+            }
+            return callback(null, url);
+          });
+        },
+        () => url !== false,
+        () => {
+          if (locations.entry.length > 1) {
+            winston.info(`Saving ${baseUrl} to cache`);
+            redisClient.set(`url_${baseUrl}`, JSON.stringify(locations), 'EX', config.getConf('mCSD:cacheTime'));
+          } else {
+            winston.info(`Not more than 1 entry for ${baseUrl} so not caching.`);
+          }
+          this.cleanCache(`started_${baseUrl}`, true);
+          return callback(locations);
+        },
+      );
+    });
   },
 
   getLocationByID(database, id, includeFacilityOrganization, callback) {
@@ -320,6 +349,9 @@ module.exports = () => ({
       (callback) => {
         const options = {
           url,
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
         };
         url = false;
         request.get(options, (err, res, body) => {
@@ -356,6 +388,9 @@ module.exports = () => ({
       (callback) => {
         const options = {
           url,
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
         };
         url = false;
         request.get(options, (err, res, body) => {
@@ -408,6 +443,9 @@ module.exports = () => ({
       (doCallback) => {
         const options = {
           url,
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
         };
         url = false;
         request.get(options, (err, res, body) => {
@@ -443,6 +481,9 @@ module.exports = () => ({
       (callback) => {
         const options = {
           url,
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
         };
         url = false;
         request.get(options, (err, res, body) => {
@@ -469,11 +510,11 @@ module.exports = () => ({
 
   getLocationParentsFromDB(database, entityParent, topOrg, details, callback) {
     const parents = [];
-    if (entityParent == null ||
-      entityParent == false ||
-      entityParent == undefined ||
-      !topOrg ||
-      !database
+    if (entityParent == null
+      || entityParent == false
+      || entityParent == undefined
+      || !topOrg
+      || !database
     ) {
       return callback(parents);
     }
@@ -491,26 +532,47 @@ module.exports = () => ({
 
       const options = {
         url,
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
       };
 
-      const cachedData = cache.get(url);
-      if (cachedData) {
-        var entityParent = cachedData.entityParent;
+      request.get(options, (err, res, body) => {
+        if (!isJSON(body)) {
+          return callback(parents);
+        }
+        body = JSON.parse(body);
+        let long = null;
+        let lat = null;
+        if (!body.entry || body.entry.length === 0) {
+          winston.error('Empty mcsd data received, this wasnt expected');
+          return callback(parents);
+        }
+        if (body.entry[0].resource.hasOwnProperty('position')) {
+          long = body.entry[0].resource.position.longitude;
+          lat = body.entry[0].resource.position.latitude;
+        }
+        entityParent = null;
+        if (body.entry[0].resource.hasOwnProperty('partOf')) {
+          entityParent = body.entry[0].resource.partOf.reference;
+        }
+
         if (details == 'all') {
           parents.push({
-            text: cachedData.text,
-            id: cachedData.id,
-            lat: cachedData.lat,
-            long: cachedData.long,
+            text: body.entry[0].resource.name,
+            id: body.entry[0].resource.id,
+            lat,
+            long,
           });
         } else if (details == 'id') {
-          parents.push(cachedData.id);
+          parents.push(body.entry[0].resource.id);
         } else if (details == 'names') {
-          parents.push(cachedData.text);
+          parents.push(body.entry[0].resource.name);
         } else {
           winston.error('parent details (either id,names or all) to be returned not specified');
         }
 
+        // stop after we reach the topOrg which is the country
         // if this is a topOrg then end here,we dont need to fetch the upper org which is continent i.e Africa
         if (entityParent && topOrg && entityParent.endsWith(topOrg)) {
           me.getLocationByID(database, topOrg, false, (loc) => {
@@ -518,8 +580,8 @@ module.exports = () => ({
               parents.push({
                 text: loc.entry[0].resource.name,
                 id: topOrg,
-                lat: cachedData.lat,
-                long: cachedData.long,
+                lat,
+                long,
               });
             } else if (details == 'id') {
               parents.push(loc.entry[0].resource.id);
@@ -529,93 +591,20 @@ module.exports = () => ({
             return callback(parents);
           });
         }
+
         // if this is a topOrg then end here,we dont need to fetch the upper org which is continent i.e Africa
         else if (topOrg && sourceEntityID.endsWith(topOrg)) {
           return callback(parents);
-        } else if (entityParent) {
+        } else if (body.entry[0].resource.hasOwnProperty('partOf')
+          && body.entry[0].resource.partOf.reference != false
+          && body.entry[0].resource.partOf.reference != null
+          && body.entry[0].resource.partOf.reference != undefined) {
+          entityParent = body.entry[0].resource.partOf.reference;
           getPar(entityParent, (parents) => {
             callback(parents);
           });
-        } else return callback(parents);
-      } else {
-        request.get(options, (err, res, body) => {
-          if (!isJSON(body)) {
-            return callback(parents);
-          }
-          body = JSON.parse(body);
-          let long = null;
-          let lat = null;
-          if (body.total === 0 && body.entry && body.entry.length > 0) {
-            winston.error('Empty mcsd data received, this wasnt expected');
-            return callback(parents);
-          }
-          if (body.entry[0].resource.hasOwnProperty('position')) {
-            long = body.entry[0].resource.position.longitude;
-            lat = body.entry[0].resource.position.latitude;
-          }
-          var entityParent = null;
-          if (body.entry[0].resource.hasOwnProperty('partOf')) {
-            entityParent = body.entry[0].resource.partOf.reference;
-          }
-
-          const cacheData = {
-            text: body.entry[0].resource.name,
-            id: body.entry[0].resource.id,
-            lat,
-            long,
-            entityParent,
-          };
-          cache.put(url, cacheData, 120 * 1000);
-          if (details == 'all') {
-            parents.push({
-              text: body.entry[0].resource.name,
-              id: body.entry[0].resource.id,
-              lat,
-              long,
-            });
-          } else if (details == 'id') {
-            parents.push(body.entry[0].resource.id);
-          } else if (details == 'names') {
-            parents.push(body.entry[0].resource.name);
-          } else {
-            winston.error('parent details (either id,names or all) to be returned not specified');
-          }
-
-          // stop after we reach the topOrg which is the country
-          const entityID = body.entry[0].resource.id;
-          // if this is a topOrg then end here,we dont need to fetch the upper org which is continent i.e Africa
-          if (entityParent && topOrg && entityParent.endsWith(topOrg)) {
-            me.getLocationByID(database, topOrg, false, (loc) => {
-              if (details == 'all') {
-                parents.push({
-                  text: loc.entry[0].resource.name,
-                  id: topOrg,
-                  lat,
-                  long,
-                });
-              } else if (details == 'id') {
-                parents.push(loc.entry[0].resource.id);
-              } else if (details == 'names') {
-                parents.push(loc.entry[0].resource.name);
-              }
-              return callback(parents);
-            });
-          }
-
-          // if this is a topOrg then end here,we dont need to fetch the upper org which is continent i.e Africa
-          else if (topOrg && sourceEntityID.endsWith(topOrg)) {
-            return callback(parents);
-          } else if (body.entry[0].resource.hasOwnProperty('partOf') &&
-            body.entry[0].resource.partOf.reference != false &&
-            body.entry[0].resource.partOf.reference != null &&
-            body.entry[0].resource.partOf.reference != undefined) {
-            var entityParent = body.entry[0].resource.partOf.reference;
-            getPar(entityParent, (parents) => {
-              callback(parents);
-            });
-          } else callback(parents);
-        });
-      }
+        } else callback(parents);
+      });
     }
     getPar(entityParent, parents => callback(parents));
   },
@@ -669,10 +658,10 @@ module.exports = () => ({
           winston.error('parent details (either id,names or all) to be returned not specified');
         }
 
-        if (entry.resource.hasOwnProperty('partOf') &&
-          entry.resource.partOf.reference != false &&
-          entry.resource.partOf.reference != null &&
-          entry.resource.partOf.reference != undefined) {
+        if (entry.resource.hasOwnProperty('partOf')
+          && entry.resource.partOf.reference != false
+          && entry.resource.partOf.reference != null
+          && entry.resource.partOf.reference != undefined) {
           entityParent = entry.resource.partOf.reference;
           filter(entityParent, parents => callback(parents));
         } else {
@@ -783,6 +772,9 @@ module.exports = () => ({
     function cntLvls(url, callback) {
       const options = {
         url,
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
       };
       request.get(options, (err, res, body) => {
         if (!isJSON(body)) {
@@ -913,7 +905,7 @@ module.exports = () => ({
         this.getCodeSystemFromCodesMinimal({
           codes: types,
           codeSystemName: 'serviceTypes',
-        }, concepts => {
+        }, (concepts) => {
           callback(null, concepts);
         });
       },
@@ -1464,7 +1456,7 @@ module.exports = () => ({
           extension.push({
             url: 'registryResourceId',
             valueReference: {
-              reference: 'Location/' + fields.id,
+              reference: `Location/${fields.id}`,
             },
           });
         }
@@ -1648,13 +1640,9 @@ module.exports = () => ({
 
       if (status === 'approved' && requestType === 'update') {
         let updatingResourceID;
-        let ext = requestLocationResource.resource.extension && requestLocationResource.resource.extension.find((extension) => {
-          return extension.url === requestURI;
-        })
+        const ext = requestLocationResource.resource.extension && requestLocationResource.resource.extension.find(extension => extension.url === requestURI);
         if (ext) {
-          const valRef = ext.extension.find((extension) => {
-            return extension.url === 'registryResourceId';
-          })
+          const valRef = ext.extension.find(extension => extension.url === 'registryResourceId');
           if (valRef) {
             updatingResourceID = valRef.valueReference.reference.split('/').pop();
           }
@@ -1740,7 +1728,7 @@ module.exports = () => ({
         if (copyRequestOrganizationResource) {
           copyRequestOrganizationResource.resource.id = uuid4();
           copyRequestLocationResource.resource.managingOrganization = {
-            reference: "Organization/" + copyRequestOrganizationResource.resource.id
+            reference: `Organization/${copyRequestOrganizationResource.resource.id}`,
           };
         }
         // remove request extension
@@ -1755,7 +1743,7 @@ module.exports = () => ({
             requestLocationResource.resource.extension[i].extension.push({
               url: 'registryResourceId',
               valueReference: {
-                reference: 'Location/' + copyRequestLocationResource.resource.id,
+                reference: `Location/${copyRequestLocationResource.resource.id}`,
               },
             });
           }
@@ -1902,11 +1890,12 @@ module.exports = () => ({
       url,
     };
     request.delete(options, (err, res, body) => {
+      this.cleanCache(`url_${urlPrefix.toString()}`, true);
+      this.cleanCache('parents', true);
       if (err) {
         winston.error(err);
         return callback(err);
       }
-      this.cleanCache(urlPrefix.toString());
       return callback();
     });
   },
@@ -1950,7 +1939,8 @@ module.exports = () => ({
                     url,
                   };
                   request.delete(options, (err, res, body) => {
-                    this.cleanCache(url_prefix.toString());
+                    this.cleanCache(`url_${url_prefix.toString()}`, true);
+                    this.cleanCache('parents', true);
                     return nxtEntry();
                   });
                 }, () => nxtDB());
@@ -1992,22 +1982,23 @@ module.exports = () => ({
         winston.error(err);
         return callback(err);
       }
-      this.cleanCache(`${url}/Location`);
+      this.cleanCache(`url_${url}/Location`, true);
+      this.cleanCache('parents', true);
       callback(err, body);
     });
   },
-  cleanCache(url, selfOnly) {
-    for (const key of cache.keys()) {
-      if (key.substring(0, url.length + 4) === `url_${url}`) {
+  cleanCache(key, isPrefix) {
+    if (isPrefix) {
+      redisClient.keys(`${key}*`, (err, keys) => {
+        for (const key1 of keys) {
+          redisClient.DEL(key1, (err, res) => {
+            winston.info(`DELETING ${key1} from cache because something was modified.`);
+          });
+        }
+      });
+    } else {
+      redisClient.DEL(key, () => {
         winston.info(`DELETING ${key} from cache because something was modified.`);
-        cache.del(key);
-      }
-    }
-    // clean the other workers caches
-    if (!selfOnly && process.hasOwnProperty('send')) {
-      process.send({
-        content: 'clean',
-        url,
       });
     }
   },
@@ -2061,6 +2052,12 @@ module.exports = () => ({
         me.getLocationParentsFromDB(source2DB, source2Id, fakeOrgId, 'id', parents => callback(null, parents));
       },
     }, (err, res) => {
+      if (!res.source2mCSD || !res.source2mCSD.entry || res.source2mCSD.entry.length === 0) {
+        return callback(true, false);
+      }
+      if (!res.source1mCSD || !res.source1mCSD.entry || res.source1mCSD.entry.length === 0) {
+        return callback(true, false);
+      }
       if (res.source1Mapped !== null) {
         return callback(res.source1Mapped);
       }
@@ -2087,14 +2084,6 @@ module.exports = () => ({
         const matchComments = [];
         if (!res.source2Parents.includes(res.source1Parents[0])) {
           matchComments.push('Parents differ');
-        }
-        if (res.source2mCSD.entry.length === 0) {
-          winston.error('source2 mcsd has returned empty results, cant save match');
-          return callback(true);
-        }
-        if (res.source1mCSD.entry.length === 0) {
-          winston.error('source1 mcsd has returned empty results, cant save match');
-          return callback(true);
         }
         const source1Name = res.source2mCSD.entry[0].resource.name;
         const source2Name = res.source1mCSD.entry[0].resource.name;
@@ -2200,6 +2189,12 @@ module.exports = () => ({
             display: matchComments,
           });
         }
+        if (!resource.meta) {
+          resource.meta = {};
+        }
+        if (!resource.meta.tag) {
+          resource.meta.tag = [];
+        }
         if (type == 'flag') {
           if (flagComment) {
             resource.meta.tag.push({
@@ -2236,6 +2231,9 @@ module.exports = () => ({
         });
         fhir.entry = fhir.entry.concat(entry);
         me.saveLocations(fhir, mappingDB, (err, res) => {
+          const url_prefix = URI(config.getConf('mCSD:url')).segment(mappingDB).segment('fhir').segment('Location');
+          this.cleanCache(`url_${url_prefix.toString()}`, true);
+          this.cleanCache(`parents${recoLevel}${source2DB}`);
           if (err) {
             winston.error(err);
           }
@@ -2279,7 +2277,8 @@ module.exports = () => ({
         url,
       };
       request.delete(options, (err, res, body) => {
-        this.cleanCache(url_prefix.toString());
+        this.cleanCache(`url_${url_prefix.toString()}`, true);
+        this.cleanCache('parents', true);
         if (err) {
           winston.error(err);
           return callback(err);
@@ -2301,96 +2300,96 @@ module.exports = () => ({
 
     const me = this;
     async.parallel({
-        source1Mapped(callback) {
-          me.getLocationByID(mappingDB, source1Id, false, (mapped) => {
-            if (mapped.entry.length > 0) {
-              winston.error('Attempting to mark an already mapped location as no match');
-              return callback(null, 'This location was already mapped, recalculate scores to update the level you are working on');
-            }
-            return callback(null, null);
-          });
-        },
+      source1Mapped(callback) {
+        me.getLocationByID(mappingDB, source1Id, false, (mapped) => {
+          if (mapped.entry.length > 0) {
+            winston.error('Attempting to mark an already mapped location as no match');
+            return callback(null, 'This location was already mapped, recalculate scores to update the level you are working on');
+          }
+          return callback(null, null);
+        });
       },
-      (err, res) => {
-        if (res.source1Mapped !== null) {
-          return callback(res.source1Mapped);
+    },
+    (err, res) => {
+      if (res.source1Mapped !== null) {
+        return callback(res.source1Mapped);
+      }
+      me.getLocationByID(source1DB, source1Id, false, (mcsd) => {
+        if (mcsd.entry.length === 0) {
+          winston.error(`Location with ID ${source1Id} not found on the mCSD DB, this isnt expected, please cross check`);
+          return callback(true);
         }
-        me.getLocationByID(source1DB, source1Id, false, (mcsd) => {
-          if (mcsd.entry.length === 0) {
-            winston.error(`Location with ID ${source1Id} not found on the mCSD DB, this isnt expected, please cross check`);
-            return callback(true);
-          }
-          const fhir = {};
-          fhir.entry = [];
-          fhir.type = 'batch';
-          fhir.resourceType = 'Bundle';
-          const entry = [];
-          const resource = {};
-          resource.resourceType = 'Location';
-          resource.name = mcsd.entry[0].resource.name;
-          resource.id = source1Id;
+        const fhir = {};
+        fhir.entry = [];
+        fhir.type = 'batch';
+        fhir.resourceType = 'Bundle';
+        const entry = [];
+        const resource = {};
+        resource.resourceType = 'Location';
+        resource.name = mcsd.entry[0].resource.name;
+        resource.id = source1Id;
 
-          if (mcsd.entry[0].resource.hasOwnProperty('partOf')) {
-            resource.partOf = {
-              display: mcsd.entry[0].resource.partOf.display,
-              reference: mcsd.entry[0].resource.partOf.reference,
-            };
-          }
-          let typeCode;
-          let typeName;
-          if (recoLevel == totalLevels) {
-            typeCode = 'bu';
-            typeName = 'building';
-          } else {
-            typeCode = 'jdn';
-            typeName = 'Jurisdiction';
-          }
-          resource.physicalType = {
-            coding: [{
-              code: typeCode,
-              display: typeName,
-              system: 'http://hl7.org/fhir/location-physical-type',
-            }],
+        if (mcsd.entry[0].resource.hasOwnProperty('partOf')) {
+          resource.partOf = {
+            display: mcsd.entry[0].resource.partOf.display,
+            reference: mcsd.entry[0].resource.partOf.reference,
           };
-          resource.identifier = [];
-          const source1URL = URI(config.getConf('mCSD:url')).segment(source1DB).segment('fhir').segment('Location')
-            .segment(source1Id)
-            .toString();
-          resource.identifier.push({
+        }
+        let typeCode;
+        let typeName;
+        if (recoLevel == totalLevels) {
+          typeCode = 'bu';
+          typeName = 'building';
+        } else {
+          typeCode = 'jdn';
+          typeName = 'Jurisdiction';
+        }
+        resource.physicalType = {
+          coding: [{
+            code: typeCode,
+            display: typeName,
+            system: 'http://hl7.org/fhir/location-physical-type',
+          }],
+        };
+        resource.identifier = [];
+        const url_prefix = URI(config.getConf('mCSD:url')).segment(source1DB).segment('fhir').segment('Location');
+        const source1URL = URI(url_prefix).segment(source1Id).toString();
+        resource.identifier.push({
+          system: source1System,
+          value: source1URL,
+        });
+        resource.meta = {};
+        resource.meta.tag = [];
+        if (type == 'nomatch') {
+          resource.meta.tag.push({
             system: source1System,
-            value: source1URL,
+            code: noMatchCode,
+            display: 'No Match',
           });
-          resource.meta = {};
-          resource.meta.tag = [];
-          if (type == 'nomatch') {
-            resource.meta.tag.push({
-              system: source1System,
-              code: noMatchCode,
-              display: 'No Match',
-            });
-          } else if (type == 'ignore') {
-            resource.meta.tag.push({
-              system: source1System,
-              code: ignoreCode,
-              display: 'Ignore',
-            });
+        } else if (type == 'ignore') {
+          resource.meta.tag.push({
+            system: source1System,
+            code: ignoreCode,
+            display: 'Ignore',
+          });
+        }
+        entry.push({
+          resource,
+          request: {
+            method: 'PUT',
+            url: `Location/${resource.id}`,
+          },
+        });
+        fhir.entry = fhir.entry.concat(entry);
+        me.saveLocations(fhir, mappingDB, (err, res) => {
+          this.cleanCache(`url_${url_prefix.toString()}`, true);
+          if (err) {
+            winston.error(err);
           }
-          entry.push({
-            resource,
-            request: {
-              method: 'PUT',
-              url: `Location/${resource.id}`,
-            },
-          });
-          fhir.entry = fhir.entry.concat(entry);
-          me.saveLocations(fhir, mappingDB, (err, res) => {
-            if (err) {
-              winston.error(err);
-            }
-            callback(err);
-          });
+          callback(err);
         });
       });
+    });
   },
   breakMatch(source1Id, mappingDB, source1DB, callback) {
     if (!source1Id) {
@@ -2398,6 +2397,10 @@ module.exports = () => ({
     }
     const url_prefix = URI(config.getConf('mCSD:url'))
       .segment(mappingDB)
+      .segment('fhir')
+      .segment('Location');
+    const source1UrlPrefix = URI(config.getConf('mCSD:url'))
+      .segment(source1DB)
       .segment('fhir')
       .segment('Location');
     const url = URI(url_prefix).segment(source1Id).toString();
@@ -2409,7 +2412,9 @@ module.exports = () => ({
         return callback(true, null);
       }
       request.delete(options, (err, res, body) => {
-        this.cleanCache(url_prefix.toString());
+        this.cleanCache(`url_${url_prefix.toString()}`, true);
+        this.cleanCache(`url_${source1UrlPrefix.toString()}`, true);
+        this.cleanCache('parents', true);
         if (res.statusCode === 409) {
           return callback('Can not break this match as there are other matches that are child of this', null);
         }
@@ -2470,7 +2475,8 @@ module.exports = () => ({
       url,
     };
     request.delete(options, (err, res, body) => {
-      this.cleanCache(url_prefix.toString());
+      winston.error(url_prefix.toString())
+      this.cleanCache(`url_${url_prefix.toString()}`, true);
       if (err) {
         winston.error(err);
       }
@@ -2499,6 +2505,7 @@ module.exports = () => ({
       entry: [],
     };
 
+    const invalidIDChars = [/\//g, /\s/g];
     csv
       .fromPath(filePath, {
         headers: true,
@@ -2507,7 +2514,7 @@ module.exports = () => ({
         const jurisdictions = [];
         if (data[headerMapping.facility] == '') {
           countRow++;
-          const percent = parseFloat((countRow * 100 / totalRows).toFixed(2));
+          const percent = parseFloat((countRow * 100 / totalRows).toFixed(1));
           const uploadReqPro = JSON.stringify({
             status: '3/3 Writing Uploaded data into server',
             error: null,
@@ -2517,16 +2524,18 @@ module.exports = () => ({
           winston.error(`Skipped ${JSON.stringify(data)}`);
           return;
         }
-        data[headerMapping.code] = data[headerMapping.code].replace(/\s/g, '-');
+        for (const invalidChar of invalidIDChars) {
+          data[headerMapping.code] = data[headerMapping.code].replace(invalidChar, '-');
+        }
         levels.sort();
         levels.reverse();
         let facilityParent = null;
         let facilityParentUUID = null;
         async.eachSeries(levels, (level, nxtLevel) => {
-          if (data[headerMapping[level]] != null &&
-            data[headerMapping[level]] != undefined &&
-            data[headerMapping[level]] != false &&
-            data[headerMapping[level]] != ''
+          if (data[headerMapping[level]] != null
+            && data[headerMapping[level]] != undefined
+            && data[headerMapping[level]] != false
+            && data[headerMapping[level]] != ''
           ) {
             let name = data[headerMapping[level]].trim();
             name = mixin.toTitleCaseSpace(name);
@@ -2535,7 +2544,10 @@ module.exports = () => ({
 
             // merge parents of this location
             for (let k = levelNumber - 1; k >= 1; k--) {
-              mergedParents += data[headerMapping[`level${k}`]];
+              let parent = data[headerMapping[`level${k}`]].trim();
+              parent = mixin.toTitleCaseSpace(parent);
+              parent = parent.toLowerCase();
+              mergedParents += parent;
             }
             if (levelNumber.toString().length < 2) {
               var namespaceMod = `${namespace}00${levelNumber}`;
@@ -2565,13 +2577,19 @@ module.exports = () => ({
               if (data[headerMapping[topLevelName]] && parentFound == false) {
                 let mergedGrandParents = '';
                 for (let k = topLevel - 1; k >= 1; k--) {
-                  mergedGrandParents += data[headerMapping[`level${k}`]];
+                  let grandParent = data[headerMapping[`level${k}`]].trim();
+                  grandParent = mixin.toTitleCaseSpace(grandParent);
+                  grandParent = grandParent.toLowerCase();
+                  mergedGrandParents += grandParent;
                 }
                 parent = data[headerMapping[topLevelName]].trim();
+                parent = mixin.toTitleCaseSpace(parent);
+                parent = parent.toLowerCase();
+                let namespaceMod;
                 if (topLevel.toString().length < 2) {
-                  var namespaceMod = `${namespace}00${topLevel}`;
+                  namespaceMod = `${namespace}00${topLevel}`;
                 } else {
-                  var namespaceMod = `${namespace}0${topLevel}`;
+                  namespaceMod = `${namespace}0${topLevel}`;
                 }
                 parentUUID = uuid5(parent + mergedGrandParents, namespaceMod);
                 parentFound = true;
@@ -2636,13 +2654,13 @@ module.exports = () => ({
             promises.push(new Promise((resolve, reject) => {
               this.saveLocations(tmpBundle, database, () => {
                 countRow += tmpBundle.entry.length;
-                const percent = parseFloat((countRow * 100 / totalRows).toFixed(2));
+                const percent = parseFloat((countRow * 100 / totalRows).toFixed(1));
                 const uploadReqPro = JSON.stringify({
                   status: '3/3 Writing Uploaded data into server',
                   error: null,
                   percent,
                 });
-                redisClient.set(uploadRequestId, uploadReqPro);
+                redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
 
                 resolve();
               });
@@ -2658,7 +2676,7 @@ module.exports = () => ({
               error: null,
               percent: 100,
             });
-            redisClient.set(uploadRequestId, uploadReqPro);
+            redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
             callback();
           });
         });

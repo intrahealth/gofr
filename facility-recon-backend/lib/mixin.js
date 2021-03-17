@@ -9,12 +9,13 @@ const config = require('./config');
 
 module.exports = function () {
   return {
-    /**
-     *
-     * @param {Array} tasks
-     */
-    getRoleByTasks(tasks, callback) {
-
+    isFloat(val) {
+      val = parseFloat(val);
+      return +val === val && (!isFinite(val) || !!(val % 1));
+    },
+    isInt(val) {
+      val = Number(val);
+      return val === +val && isFinite(val) && !(val % 1);
     },
     getLatestFacilityRequest(extensions, type, username) {
       const facilityUpdateRequestURI = this.getCodesysteURI('facilityUpdateRequest');
@@ -78,7 +79,7 @@ module.exports = function () {
         return str;
       }
       str = str.toLowerCase().split(' ').map(word => word.replace(word[0], word[0].toUpperCase())).join('');
-      return str.toLowerCase();
+      return str
     },
     toTitleCaseSpace(str) {
       if (!str) {
@@ -144,14 +145,22 @@ module.exports = function () {
           let rowMarkedInvalid = false;
           let index = 0;
           async.eachSeries(levels, (level, nxtLevel) => {
-            if (headerMapping[level] === null ||
-              headerMapping[level] === 'null' ||
-              headerMapping[level] === undefined ||
-              !headerMapping[level]) {
+            if (headerMapping[level] === null
+              || headerMapping[level] === 'null'
+              || headerMapping[level] === undefined
+              || !headerMapping[level]) {
               return nxtLevel();
             }
             if (data[headerMapping.code] == '') {
               populateData(headerMapping, data, 'Missing Facility ID', invalid);
+              rowMarkedInvalid = true;
+            }
+            if (data[headerMapping.lat] && !this.isFloat(data[headerMapping.lat]) && !this.isInt(data[headerMapping.lat])) {
+              populateData(headerMapping, data, 'Invalid Characters In latitude', invalid);
+              rowMarkedInvalid = true;
+            }
+            if (data[headerMapping.long] && !this.isFloat(data[headerMapping.long]) && !this.isInt(data[headerMapping.long])) {
+              populateData(headerMapping, data, 'Invalid Characters In longitude', invalid);
               rowMarkedInvalid = true;
             }
             if (index === 0) {
@@ -170,13 +179,13 @@ module.exports = function () {
               }
             }
             if (!rowMarkedInvalid) {
-              if (data[headerMapping[level]] === null ||
-                data[headerMapping[level]] === undefined ||
-                data[headerMapping[level]] === false ||
-                !data[headerMapping[level]] ||
-                data[headerMapping[level]] === '' ||
-                !isNaN(headerMapping[level]) ||
-                data[headerMapping[level]] == 0) {
+              if (data[headerMapping[level]] === null
+                || data[headerMapping[level]] === undefined
+                || data[headerMapping[level]] === false
+                || !data[headerMapping[level]]
+                || data[headerMapping[level]] === ''
+                || !isNaN(headerMapping[level])
+                || data[headerMapping[level]] == 0) {
                 const reason = `${headerMapping[level]} is blank`;
                 populateData(headerMapping, data, reason, invalid);
               } else {
@@ -184,11 +193,11 @@ module.exports = function () {
               }
             }
           }, () => {
-            if (data[headerMapping.facility] === null ||
-              data[headerMapping.facility] === undefined ||
-              data[headerMapping.facility] === false ||
-              data[headerMapping.facility] === '' ||
-              data[headerMapping.facility] == 0) {
+            if (data[headerMapping.facility] === null
+              || data[headerMapping.facility] === undefined
+              || data[headerMapping.facility] === false
+              || data[headerMapping.facility] === ''
+              || data[headerMapping.facility] == 0) {
               const reason = `${headerMapping.facility} is blank`;
               populateData(headerMapping, data, reason, invalid);
             }
@@ -198,7 +207,7 @@ module.exports = function () {
 
       function populateData(headerMapping, data, reason, invalid) {
         const row = {};
-        async.each(headerMapping, (header, nxtHeader) => {
+        for (const header of headerMapping) {
           if (header == 'null') {
             return nxtHeader();
           }
@@ -206,12 +215,10 @@ module.exports = function () {
             return nxtHeader();
           }
           row[header] = data[header];
-          return nxtHeader();
-        }, () => {
-          invalid.push({
-            data: row,
-            reason,
-          });
+        }
+        invalid.push({
+          data: row,
+          reason,
         });
       }
     },

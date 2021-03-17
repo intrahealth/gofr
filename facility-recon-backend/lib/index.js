@@ -1,3 +1,5 @@
+
+
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
@@ -61,19 +63,19 @@ const cleanReqPath = function (req, res, next) {
   return next();
 };
 const jwtValidator = function (req, res, next) {
-  if (req.method == 'OPTIONS' ||
-    (req.query.hasOwnProperty('authDisabled') && req.query.authDisabled) ||
-    req.path == '/authenticate/' ||
-    req.path == '/getSignupConf' ||
-    req.path == '/getGeneralConfig' ||
-    req.path == '/addUser/' ||
-    req.path.startsWith('/progress') ||
-    req.path == '/' ||
-    req.path.startsWith('/static/js') ||
-    req.path.startsWith('/static/config.json') ||
-    req.path.startsWith('/static/css') ||
-    req.path.startsWith('/static/img') ||
-    req.path.startsWith('/favicon.ico')
+  if (req.method == 'OPTIONS'
+    || (req.query.hasOwnProperty('authDisabled') && req.query.authDisabled)
+    || req.path == '/authenticate/'
+    || req.path == '/getSignupConf'
+    || req.path == '/getGeneralConfig'
+    || req.path == '/addUser/'
+    || req.path.startsWith('/progress')
+    || req.path == '/'
+    || req.path.startsWith('/static/js')
+    || req.path.startsWith('/static/config.json')
+    || req.path.startsWith('/static/css')
+    || req.path.startsWith('/static/img')
+    || req.path.startsWith('/favicon.ico')
   ) {
     return next();
   }
@@ -144,17 +146,17 @@ if (cluster.isMaster) {
       if (data.length == 0) {
         winston.info('Default user not found, adding now ...');
         const roles = [{
-            name: 'Admin',
-            tasks: [],
-          },
-          {
-            name: 'Data Manager',
-            tasks: [],
-          },
-          {
-            name: 'Guest',
-            tasks: [],
-          },
+          name: 'Admin',
+          tasks: [],
+        },
+        {
+          name: 'Data Manager',
+          tasks: [],
+        },
+        {
+          name: 'Guest',
+          tasks: [],
+        },
         ];
         models.RolesModel.collection.insertMany(roles, (err, data) => {
           models.RolesModel.find({
@@ -286,7 +288,7 @@ if (cluster.isMaster) {
 
   cluster.on('exit', (worker, code, signal) => {
     console.log(`Worker ${worker.process.pid} died with code: ${code}, and signal: ${signal}`);
-    delete(workers[worker.process.pid]);
+    delete (workers[worker.process.pid]);
     console.log('Starting a new worker');
     const newworker = cluster.fork();
     workers[newworker.process.pid] = newworker;
@@ -473,15 +475,15 @@ if (cluster.isMaster) {
                             for (const dt of data) {
                               emails.push(dt.email);
                             }
-                            const subject = 'New account creation request'
+                            const subject = 'New account creation request';
                             const emailText = `There is a new request to create an account on facility registry with username ${fields.userName}, please go and approve`;
                             mail.send(subject, emailText, emails, () => {
 
                             });
                           }
-                        })
+                        });
                       }
-                    })
+                    });
                   }
                   winston.info('User created successfully');
                   res.status(200).json({
@@ -1666,12 +1668,12 @@ if (cluster.isMaster) {
     const source2DB = req.params.source2 + source2Owner;
     const recoLevel = req.params.level;
     const statusRequestId = `mappingStatus${clientId}`;
-    statusResData = JSON.stringify({
+    const statusResData = JSON.stringify({
       status: '1/2 - Loading Source2 and Source1 Data',
       error: null,
       percent: null,
     });
-    redisClient.set(statusRequestId, statusResData);
+    redisClient.set(statusRequestId, statusResData, 'EX', 1200);
 
     const source2LocationReceived = new Promise((resolve, reject) => {
       mcsd.getLocationChildren({
@@ -1732,10 +1734,12 @@ if (cluster.isMaster) {
       source2,
       source1Owner,
       source2Owner,
+      id,
     } = req.query;
     let {
       source1LimitOrgId,
       source2LimitOrgId,
+      getPotential,
     } = req.query;
     if (!source1LimitOrgId) {
       source1LimitOrgId = topOrgId;
@@ -1751,6 +1755,11 @@ if (cluster.isMaster) {
     } catch (error) {
       winston.error(error);
     }
+    try {
+      getPotential = JSON.parse(getPotential);
+    } catch (error) {
+      winston.error(error);
+    }
     // remove parent contraint for the first level
     if (recoLevel == 2) {
       parentConstraint = false;
@@ -1763,7 +1772,9 @@ if (cluster.isMaster) {
         error: 'Missing source1 or source2 or reconciliation Level or userID',
       });
     } else {
-      res.status(200).send();
+      if (!id) {
+        res.status(200).send();
+      }
       winston.info('Getting scores');
       const {
         orgid,
@@ -1777,7 +1788,7 @@ if (cluster.isMaster) {
         error: null,
         percent: null,
       });
-      redisClient.set(scoreRequestId, scoreResData);
+      redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
       async.parallel({
         source2Locations(callback) {
           const dbSource2 = source2 + source2Owner;
@@ -1806,6 +1817,19 @@ if (cluster.isMaster) {
             parent: source1LimitOrgId,
           }, (mcsdSource1) => {
             mcsdSource1All = mcsdSource1;
+            if (id) {
+              const locations = mcsdSource1.entry.filter(entry => entry.resource.id == id);
+              const mcsdSource1Locations = {};
+              if (locations.length > 0) {
+                mcsdSource1Locations.total = 1;
+                mcsdSource1Locations.entry = [];
+                mcsdSource1Locations.entry = mcsdSource1Locations.entry.concat(locations);
+                mcsdSource1Locations.total = 1;
+              } else {
+                mcsdSource1Locations.total = 0;
+              }
+              return callback(null, mcsdSource1Locations);
+            }
             mcsd.filterLocations(mcsdSource1, source1LimitOrgId, recoLevel, mcsdSource1Level => callback(false, mcsdSource1Level));
           });
         },
@@ -1830,7 +1854,8 @@ if (cluster.isMaster) {
             recoLevel,
             totalSource1Levels,
             clientId,
-            parentConstraint, (scoreResults, source2Unmatched, totalAllMapped, totalAllFlagged, totalAllIgnored, totalAllNoMatch) => {
+            parentConstraint,
+            getPotential, (scoreResults, source2Unmatched, totalAllMapped, totalAllFlagged, totalAllIgnored, totalAllNoMatch) => {
               const source1TotalAllNotMapped = (mcsdSource1All.entry.length - 1) - totalAllMapped;
               const responseData = {
                 scoreResults,
@@ -1852,7 +1877,7 @@ if (cluster.isMaster) {
                 responseData,
                 stage: 'last',
               });
-              redisClient.set(scoreRequestId, scoreResData);
+              redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
               winston.info('Score results sent back');
             },
           );
@@ -1870,6 +1895,7 @@ if (cluster.isMaster) {
             totalSource1Levels,
             clientId,
             parentConstraint,
+            getPotential,
             (scoreResults, source2Unmatched, totalAllMapped, totalAllFlagged, totalAllIgnored, totalAllNoMatch) => {
               const source1TotalAllNotMapped = (mcsdSource1All.entry.length - 1) - totalAllMapped;
               const responseData = {
@@ -1892,7 +1918,10 @@ if (cluster.isMaster) {
                 responseData,
                 stage: 'last',
               });
-              redisClient.set(scoreRequestId, scoreResData);
+              redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
+              if (id) {
+                res.status(200).json(scoreResData);
+              }
               winston.info('Score results sent back');
             },
           );
@@ -2016,18 +2045,18 @@ if (cluster.isMaster) {
           }, (error, response) => {
             // remove unmapped levels
             const levels1 = Object.keys(levelMapping1);
-            async.each(levels1, (level, nxtLevel) => {
+            for (const level of levels1) {
               if (!levelMapping1[level] || levelMapping1[level] == 'null' || levelMapping1[level] == 'undefined' || levelMapping1[level] == 'false') {
                 delete levelMapping1[level];
               }
-            });
+            }
 
             const levels2 = Object.keys(levelMapping2);
-            async.each(levels2, (level, nxtLevel) => {
+            for (const level of levels2) {
               if (!levelMapping2[level] || levelMapping2[level] == 'null' || levelMapping2[level] == 'undefined' || levelMapping2[level] == 'false') {
                 delete levelMapping2[level];
               }
-            });
+            }
             // end of removing unmapped levels
 
             // get level of a facility
@@ -2123,14 +2152,13 @@ if (cluster.isMaster) {
                       mcsd.getLocationParentsFromData(thisMatched[0]['source 2 ID'], response.source2mCSD, 'names', (parents) => {
                         parents = parents.slice(0, parents.length - 1);
                         parents.reverse();
-                        async.eachOf(parentsFields2, (parent, key, nxtParnt) => {
+                        for (const key in parentsFields2) {
+                          const parent = parentsFields2[key];
                           thisMatched2[parent] = parents[key];
-                          return nxtParnt();
-                        }, () => {
-                          thisMatched2.Status = thisMatched[0].Status;
-                          thisMatched2.Comments = thisMatched[0].Comments;
-                          return callback(null, thisMatched2);
-                        });
+                        }
+                        thisMatched2.Status = thisMatched[0].Status;
+                        thisMatched2.Comments = thisMatched[0].Comments;
+                        return callback(null, thisMatched2);
                       });
                     },
                   }, (error, respo) => {
@@ -2260,22 +2288,20 @@ if (cluster.isMaster) {
 
         // get level of a facility
         const levelsArr1 = [];
-        async.eachOf(levelMapping1, (level, key, nxtLevel) => {
+        for (const key in levelMapping1) {
           if (key.startsWith('level')) {
             levelsArr1.push(parseInt(key.replace('level', '')));
           }
-          return nxtLevel();
-        });
+        }
         const source1FacilityLevel = levelsArr1.length + 1;
         levelsArr1.push(source1FacilityLevel);
 
         const levelsArr2 = [];
-        async.eachOf(levelMapping2, (level, key, nxtLevel) => {
+        for (const key in levelMapping2) {
           if (key.startsWith('level')) {
             levelsArr2.push(parseInt(key.replace('level', '')));
           }
-          return nxtLevel();
-        });
+        }
         const source2FacilityLevel = levelsArr2.length + 1;
         levelsArr2.push(source2FacilityLevel);
         // end of getting level of a facility
@@ -2334,7 +2360,8 @@ if (cluster.isMaster) {
               let thisFields = [];
               const parentsFields = [];
               thisFields = thisFields.concat(fields);
-              async.eachOf(levelMapping2, (level, key, nxtLevel) => {
+              for (const key in levelMapping2) {
+                const level = levelMapping2[key];
                 if (!key.startsWith('level')) {
                   return nxtLevel();
                 }
@@ -2345,7 +2372,7 @@ if (cluster.isMaster) {
                 }
                 parentsFields.push(level);
                 thisFields.push(level);
-              });
+              }
               mcsd.filterLocations(response.source2mCSD, source2LimitOrgId, level, (mcsdLevel) => {
                 scores.getUnmatched(response.source2mCSD, mcsdLevel, mappingDB, true, 'source2', parentsFields, (unmatched, mcsdUnmatched) => {
                   if (unmatched.length > 0) {
@@ -2667,10 +2694,9 @@ if (cluster.isMaster) {
         winston.error({
           error: 'Missing Source1 ID',
         });
-        res.status(500).json({
+        return res.status(500).json({
           error: 'Missing Source1 ID',
         });
-        return;
       }
       const {
         userID,
@@ -2863,11 +2889,11 @@ if (cluster.isMaster) {
           return callback(true, false);
         }
 
-        if (configData.hasOwnProperty('config') &&
-          configData.config.hasOwnProperty('generalConfig') &&
-          configData.config.generalConfig.hasOwnProperty('recoProgressNotification') &&
-          configData.config.generalConfig.recoProgressNotification.enabled &&
-          configData.config.generalConfig.recoProgressNotification.url
+        if (configData.hasOwnProperty('config')
+          && configData.config.hasOwnProperty('generalConfig')
+          && configData.config.generalConfig.hasOwnProperty('recoProgressNotification')
+          && configData.config.generalConfig.recoProgressNotification.enabled
+          && configData.config.generalConfig.recoProgressNotification.url
         ) {
           const {
             url,
@@ -3308,7 +3334,7 @@ if (cluster.isMaster) {
         error: null,
         percent: null,
       });
-      redisClient.set(uploadRequestId, uploadReqPro);
+      redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
       if (!Array.isArray(expectedLevels)) {
         winston.error('Invalid config data for key Levels ');
         res.status(400).json({
@@ -3322,8 +3348,7 @@ if (cluster.isMaster) {
         res.status(400).json({
           error: 'Please submit CSV file for facility reconciliation',
         });
-        res.end();
-        return;
+        return res.end();
       }
       const fileName = Object.keys(files)[0];
       winston.info('validating CSV File');
@@ -3332,7 +3357,7 @@ if (cluster.isMaster) {
         error: null,
         percent: null,
       });
-      redisClient.set(uploadRequestId, uploadReqPro);
+      redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
       mixin.validateCSV(files[fileName].path, fields, (valid, invalid) => {
         if (invalid.length > 0) {
           winston.error('Uploaded CSV is invalid (has either duplicated IDs or empty levels/facility),execution stopped');
@@ -3346,11 +3371,11 @@ if (cluster.isMaster) {
 
         winston.info('CSV File Passed Validation');
         uploadReqPro = JSON.stringify({
-          status: '3/3 Uploading of DB started',
+          status: '3/3 Uploading of data started',
           error: null,
           percent: null,
         });
-        redisClient.set(uploadRequestId, uploadReqPro);
+        redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
         winston.info('Creating HAPI server now');
         hapi.createServer(database, (err) => {
           if (err) {

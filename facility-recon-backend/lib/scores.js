@@ -21,7 +21,6 @@ const mixin = require('./mixin')();
 const config = require('./config');
 const mcsd = require('./mcsd')();
 
-const topOrgId = config.getConf('mCSD:fakeOrgId');
 const topOrgName = config.getConf('mCSD:fakeOrgName');
 
 module.exports = function () {
@@ -46,6 +45,7 @@ module.exports = function () {
       const scoreResults = [];
       const matchBrokenCode = config.getConf('mapping:matchBrokenCode');
       const maxSuggestions = config.getConf('matchResults:maxSuggestions');
+      const topOrgId1 = mixin.getTopOrgId(source1DB);
 
       if (mcsdSource2.total == 0) {
         winston.error('No Source2 data found for this orgunit');
@@ -88,10 +88,8 @@ module.exports = function () {
             winston.error(err);
           }
         }
-
         if (!useCachedParents) {
           winston.info('Populating parents');
-
           for (const entry of mcsdSource2.entry) {
             if (entry.resource.hasOwnProperty('partOf')) {
               source2ParentNames[entry.resource.id] = [];
@@ -103,7 +101,6 @@ module.exports = function () {
                 async.each(parents, (parent, parentCallback) => {
                   const parentIdentifier = URI(config.getConf('mCSD:url'))
                     .segment(source2DB)
-                    .segment('fhir')
                     .segment('Location')
                     .segment(parent.id)
                     .toString();
@@ -153,7 +150,12 @@ module.exports = function () {
               matchBroken = true;
             }
           }
-          this.matchStatus(mcsdMapped, source1Id, (match) => {
+          const source1Identifier = URI(config.getConf('mCSD:url'))
+            .segment(source1DB)
+            .segment('Location')
+            .segment(source1Id)
+            .toString();
+          this.matchStatus(mcsdMapped, source1Identifier, (match) => {
             // if this Source1 Org is already mapped
             if (match) {
               const noMatchCode = config.getConf('mapping:noMatchCode');
@@ -262,7 +264,7 @@ module.exports = function () {
                     source1Parents = parents;
                     let fakeLocationExist = false;
                     async.eachSeries(parents, (parent, nxtParent) => {
-                      if (parent.id == topOrgId) {
+                      if (parent.id == topOrgId1) {
                         fakeLocationExist = true;
                       }
                       source1ParentNames.push(
@@ -275,9 +277,9 @@ module.exports = function () {
                     }, () => {
                       if (!fakeLocationExist) {
                         source1ParentNames.push(topOrgName);
-                        source1ParentIds.push(topOrgId);
+                        source1ParentIds.push(topOrgId1);
                         source1Parents.push({
-                          id: topOrgId,
+                          id: topOrgId1,
                           text: topOrgName,
                         });
                       }
@@ -301,11 +303,10 @@ module.exports = function () {
                 thisRanking.exactMatch = {};
                 let source2Filtered;
                 if (parentConstraint.enabled) {
-                  source2Filtered = mcsdSource2.entry.filter(entry => source2MappedParentIds[entry.resource.id].includes(source1ParentIds[0]));
+                  source2Filtered = mcsdSource2.entry.filter(entry => source2MappedParentIds[entry.resource.id].includes(mixin.getMappingId(source1ParentIds[0])));
                 } else {
                   source2Filtered = mcsdSource2.entry;
                 }
-
                 let noNeedToSave = true;
                 const promises2 = [];
                 for (let x = 0; x < source2Filtered.length; x++) {
@@ -315,7 +316,6 @@ module.exports = function () {
                     const id = source2Entry.resource.id;
                     const source2Identifier = URI(config.getConf('mCSD:url'))
                       .segment(source2DB)
-                      .segment('fhir')
                       .segment('Location')
                       .segment(id)
                       .toString();
@@ -330,7 +330,7 @@ module.exports = function () {
                         return resolve();
                       }
                       let parentsDiffer = false;
-                      if (!source2MappedParentIds[source2Entry.resource.id].includes(source1ParentIds[0]) && recoLevel != 2) {
+                      if (!source2MappedParentIds[source2Entry.resource.id].includes(mixin.getMappingId(source1ParentIds[0])) && recoLevel != 2) {
                         parentsDiffer = true;
                         matchComments.push('Parents differ');
                       }
@@ -366,9 +366,6 @@ module.exports = function () {
                           recoLevel,
                           totalLevels,
                         });
-                        // mcsd.saveMatch(source1Id, source2Entry.resource.id, source1DB, source2DB, mappingDB, recoLevel, totalLevels, 'match', true, false, () => {
-                        //   updateDataSavingPercent();
-                        // });
                         totalAllMapped += 1;
                         source2MatchedIDs.push(source2Entry.resource.id);
                         // we will need to break here and start processing nxt Source1
@@ -523,6 +520,8 @@ module.exports = function () {
       const scoreResults = [];
       const matchBrokenCode = config.getConf('mapping:matchBrokenCode');
       const maxSuggestions = config.getConf('matchResults:maxSuggestions');
+      const topOrgId1 = mixin.getTopOrgId(source1DB);
+
       if (mcsdSource2.total == 0) {
         winston.error('No Source2 data found for this orgunit');
         return callback();
@@ -572,7 +571,6 @@ module.exports = function () {
             const entry = mcsdSource2.entry[i];
             const source2Identifier = URI(config.getConf('mCSD:url'))
               .segment(source2DB)
-              .segment('fhir')
               .segment('Location')
               .segment(entry.resource.id)
               .toString();
@@ -594,7 +592,6 @@ module.exports = function () {
                 async.each(parents, (parent, parentCallback) => {
                   const parentIdentifier = URI(config.getConf('mCSD:url'))
                     .segment(source2DB)
-                    .segment('fhir')
                     .segment('Location')
                     .segment(parent.id)
                     .toString();
@@ -655,7 +652,12 @@ module.exports = function () {
               matchBroken = true;
             }
           }
-          this.matchStatus(mcsdMapped, source1Id, (match) => {
+          const source1Identifier = URI(config.getConf('mCSD:url'))
+            .segment(source1DB)
+            .segment('Location')
+            .segment(source1Id)
+            .toString();
+          this.matchStatus(mcsdMapped, source1Identifier, (match) => {
             // if this Source1 Org is already mapped
             let thisRanking = {};
             if (match) {
@@ -779,7 +781,7 @@ module.exports = function () {
                 thisRanking = {};
                 const source1BuildingId = source1Entry.resource.id;
                 let parents;
-                if (source1Parents[source1Parents.length - 1].id == topOrgId) {
+                if (source1Parents[source1Parents.length - 1].id == topOrgId1) {
                   parents = source1ParentNames.slice(0, source1Parents.length - 1);
                 } else {
                   parents = source1ParentNames;
@@ -797,7 +799,7 @@ module.exports = function () {
                 thisRanking.exactMatch = {};
                 let source2Filtered;
                 if (parentConstraint.enabled) {
-                  source2Filtered = mcsdSource2.entry.filter(entry => source2MappedParentIds[entry.resource.id].includes(source1ParentIds[0]));
+                  source2Filtered = mcsdSource2.entry.filter(entry => source2MappedParentIds[entry.resource.id].includes(mixin.getMappingId(source1ParentIds[0])));
                 } else {
                   source2Filtered = mcsdSource2.entry;
                 }
@@ -820,7 +822,7 @@ module.exports = function () {
                     return source2Callback();
                   }
                   let parentsDiffer = false;
-                  if (!source2MappedParentIds[source2Entry.resource.id].includes(source1ParentIds[0]) && recoLevel != 2) {
+                  if (!source2MappedParentIds[source2Entry.resource.id].includes(mixin.getMappingId(source1ParentIds[0])) && recoLevel != 2) {
                     parentsDiffer = true;
                     matchComments.push('Parents differ');
                   }

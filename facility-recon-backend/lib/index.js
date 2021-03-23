@@ -1,5 +1,4 @@
 
-
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
@@ -62,6 +61,7 @@ const cleanReqPath = function (req, res, next) {
   req.url = req.url.replace('//', '/');
   return next();
 };
+
 const jwtValidator = function (req, res, next) {
   if (req.method == 'OPTIONS'
     || (req.query.hasOwnProperty('authDisabled') && req.query.authDisabled)
@@ -130,7 +130,6 @@ app.use('/FR/', FRRouter);
 https.globalAgent.maxSockets = 32;
 http.globalAgent.maxSockets = 32;
 
-const topOrgId = config.getConf('mCSD:fakeOrgId');
 const topOrgName = config.getConf('mCSD:fakeOrgName');
 
 if (cluster.isMaster) {
@@ -186,10 +185,9 @@ if (cluster.isMaster) {
     });
 
     // check if FR DB Exists
-    const defaultDB = config.getConf('hapi:defaultDBName');
-    const requestsDB = config.getConf('hapi:requestsDBName');
-    let url = URI(config.getConf('mCSD:url')).segment(defaultDB).segment('fhir').segment('Location')
-      .toString();
+    const defaultDB = config.getConf('mCSD:registryDB');
+    const requestsDB = config.getConf('mCSD:requestsDB');
+    let url = URI(config.getConf('mCSD:url')).segment(defaultDB).segment('Location').toString();
     const options = {
       url,
     };
@@ -197,82 +195,49 @@ if (cluster.isMaster) {
     request.get(options, (err, res, body) => {
       if (!res) {
         winston.error('It appears that FHIR server is not running, quiting GOFR now ...');
-        process.exit()
+        process.exit();
       }
       if (res.statusCode === 404) {
-        async.series({
-          createDefaultDB: (callback) => {
-            hapi.createServer(defaultDB, (err) => {
-              if (err) {
-                winston.error(err);
-              } else {
-                createFakeOrgID(defaultDB);
-              }
-              callback(null);
-            });
+        async.series([
+          (callback) => {
+            hapi.addTenancy({
+              id: 100,
+              name: defaultDB,
+              description: 'Core Database',
+            }).then(() => callback(null)).catch(error => callback(error));
           },
-          createRequestsDB: (callback) => {
-            hapi.createServer(requestsDB, (err) => {
-              if (err) {
-                winston.error(err);
-              } else {
-                createFakeOrgID(requestsDB);
-              }
-              callback(null);
-            });
+          (callback) => {
+            hapi.addTenancy({
+              id: 101,
+              name: requestsDB,
+              description: 'Requests Database',
+            }).then(() => callback(null)).catch(error => callback(error));
           },
-        }, () => {
-          // launch
-          defaultSetups.initialize();
-        });
+        ], (error) => {
+          if(error) {
+            winston.error(error);
+            Promise.exit();
+          }
+          // check if FR has fake org id
+          Promise.all([
+            mcsd.createFakeOrgID(requestsDB),
+            mcsd.createFakeOrgID(defaultDB),
+          ]).then(() => {
+            defaultSetups.initialize();
+          }).catch((error) => {
+            winston.error(error);
+          });
+        })
       } else {
         // check if FR has fake org id
-        createFakeOrgID(requestsDB);
-        createFakeOrgID(defaultDB);
+        Promise.all([
+          mcsd.createFakeOrgID(requestsDB),
+          mcsd.createFakeOrgID(defaultDB),
+        ]).catch((error) => {
+          winston.error(error);
+        });
       }
     });
-
-    function createFakeOrgID(database) {
-      mcsd.getLocationByID(database, topOrgId, false, (results) => {
-        if (results.entry.length === 0) {
-          winston.info('Fake Org ID does not exist into the FR Database, Creating now');
-          const resource = {};
-          resource.resourceType = 'Location';
-          resource.name = topOrgName;
-          resource.id = topOrgId;
-          resource.identifier = [{
-            system: 'https://digitalhealth.intrahealth.org/id',
-            value: topOrgId,
-          }];
-          resource.physicalType = {
-            coding: [{
-              system: 'http://hl7.org/fhir/location-physical-type',
-              code: 'jdn',
-              display: 'Jurisdiction',
-            }],
-            text: 'Jurisdiction',
-          };
-          const fhirDoc = {};
-          fhirDoc.entry = [];
-          fhirDoc.type = 'batch';
-          fhirDoc.resourceType = 'Bundle';
-          fhirDoc.entry.push({
-            resource,
-            request: {
-              method: 'PUT',
-              url: `Location/${topOrgId}`,
-            },
-          });
-          mcsd.saveLocations(fhirDoc, database, (err, res) => {
-            if (err) {
-              winston.error(err);
-            } else {
-              winston.info('Fake Org Id Created Successfully');
-            }
-          });
-        }
-      });
-    }
   });
 
   const numWorkers = require('os').cpus().length;
@@ -322,7 +287,7 @@ if (cluster.isMaster) {
 
   app.get('/doubleMapping/:db', (req, res) => {
     winston.info('Received a request to check Source1 Locations that are double mapped');
-    const source1DB = req.params.db;
+    const source1DB = mixin.toTitleCase(req.params.db);
     const mappingDB = config.getConf('mapping:dbPrefix') + req.params.db;
     async.parallel({
       source1Data(callback) {
@@ -808,7 +773,7 @@ if (cluster.isMaster) {
                 res.status(500).send('An error has occured while getting data source');
                 return;
               }
-              winston.info(`returning list of data sources`);
+              winston.info('returning list of data sources');
               res.status(200).json(sources);
             });
           });
@@ -1185,14 +1150,15 @@ if (cluster.isMaster) {
     let source1LimitOrgId = sourcesLimitOrgId.source1LimitOrgId;
     let source2LimitOrgId = sourcesLimitOrgId.source2LimitOrgId;
 
+    const source1 = mixin.toTitleCase(req.params.source1 + source1Owner);
+    const source2 = mixin.toTitleCase(req.params.source2 + source2Owner);
+
     if (!source1LimitOrgId) {
-      source1LimitOrgId = topOrgId;
+      source1LimitOrgId = mixin.getTopOrgId(source1);
     }
     if (!source2LimitOrgId) {
-      source2LimitOrgId = topOrgId;
+      source2LimitOrgId = mixin.getTopOrgId(source2);
     }
-    const source1 = req.params.source1 + source1Owner;
-    const source2 = req.params.source2 + source2Owner;
     async.parallel({
       Source1Levels(callback) {
         mcsd.countLevels(source1, source1LimitOrgId, (err, source1TotalLevels) => {
@@ -1283,9 +1249,10 @@ if (cluster.isMaster) {
 
   app.get('/getLevelData/:source/:sourceOwner/:level', (req, res) => {
     const sourceOwner = req.params.sourceOwner;
-    const db = req.params.source + sourceOwner;
+    const db = mixin.toTitleCase(req.params.source + sourceOwner);
     const level = req.params.level;
     const levelData = [];
+    const topOrgId = mixin.getTopOrgId(db);
     mcsd.getLocations(db, (mcsdData) => {
       mcsd.filterLocations(mcsdData, topOrgId, level, (mcsdLevelData) => {
         async.each(mcsdLevelData.entry, (data, nxtData) => {
@@ -1304,7 +1271,7 @@ if (cluster.isMaster) {
   app.post('/editLocation', (req, res) => {
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
-      const db = fields.source + fields.sourceOwner;
+      const db = mixin.toTitleCase(fields.source + fields.sourceOwner);
       const id = fields.locationId;
       const name = fields.locationName;
       const parent = fields.locationParent;
@@ -1347,8 +1314,8 @@ if (cluster.isMaster) {
     } else {
       const source1Owner = req.params.source1Owner;
       const source2Owner = req.params.source2Owner;
-      const source1 = req.params.source1 + source1Owner;
-      const source2 = req.params.source2 + source2Owner;
+      const source1 = mixin.toTitleCase(req.params.source1 + source1Owner);
+      const source2 = mixin.toTitleCase(req.params.source2 + source2Owner);
       winston.info(`Checking if data available for ${source1} and ${source2}`);
       async.parallel({
         source1Availability(callback) {
@@ -1461,7 +1428,6 @@ if (cluster.isMaster) {
           fields.name,
           fields.sourceOwner,
           fields.clientId,
-          topOrgId,
           topOrgName,
           false,
           full,
@@ -1491,7 +1457,6 @@ if (cluster.isMaster) {
           fields.name,
           fields.sourceOwner,
           fields.clientId,
-          topOrgId,
           topOrgName,
         );
       });
@@ -1510,7 +1475,7 @@ if (cluster.isMaster) {
       id,
     } = req.query;
     if (!sourceLimitOrgId) {
-      sourceLimitOrgId = topOrgId;
+      sourceLimitOrgId = mixin.getTopOrgId(source + sourceOwner);
     }
     if (!id) {
       id = sourceLimitOrgId;
@@ -1524,7 +1489,7 @@ if (cluster.isMaster) {
       });
     } else {
       winston.info(`Fetching Locations For ${source}`);
-      const db = source + sourceOwner;
+      const db = mixin.toTitleCase(source + sourceOwner);
       const locationReceived = new Promise((resolve, reject) => {
         mcsd.getLocationChildren({
           database: db,
@@ -1563,9 +1528,9 @@ if (cluster.isMaster) {
     let {
       parentID,
     } = req.params;
-    const db = source + sourceOwner;
+    const db = mixin.toTitleCase(source + sourceOwner);
     if (!parentID) {
-      parentID = topOrgId;
+      parentID = mixin.getTopOrgId(db);
     }
     winston.info(`Received a request to get immediate children of ${parentID}`);
     const children = [];
@@ -1607,7 +1572,8 @@ if (cluster.isMaster) {
       let {
         sourceLimitOrgId,
       } = req.params;
-      const db = source + sourceOwner;
+      const db = mixin.toTitleCase(source + sourceOwner);
+      const topOrgId = mixin.getTopOrgId(db);
       if (!sourceLimitOrgId) {
         sourceLimitOrgId = topOrgId;
       }
@@ -1659,14 +1625,14 @@ if (cluster.isMaster) {
       source1LimitOrgId,
       source2LimitOrgId,
     } = req.query;
+    const source1DB = mixin.toTitleCase(req.params.source1 + source1Owner);
+    const source2DB = mixin.toTitleCase(req.params.source2 + source2Owner);
     if (!source1LimitOrgId) {
-      source1LimitOrgId = topOrgId;
+      source1LimitOrgId = mixin.getTopOrgId(source1DB);
     }
     if (!source2LimitOrgId) {
-      source2LimitOrgId = topOrgId;
+      source2LimitOrgId = mixin.getTopOrgId(source2DB);
     }
-    const source1DB = req.params.source1 + source1Owner;
-    const source2DB = req.params.source2 + source2Owner;
     const recoLevel = req.params.level;
     const statusRequestId = `mappingStatus${clientId}`;
     const statusResData = JSON.stringify({
@@ -1708,7 +1674,7 @@ if (cluster.isMaster) {
         });
       });
     });
-    const mappingDB = req.params.source1 + userID + req.params.source2;
+    const mappingDB = mixin.toTitleCase(req.params.source1 + userID + req.params.source2);
     const mappingLocationReceived = new Promise((resolve, reject) => {
       mcsd.getLocations(mappingDB, (mcsdMapped) => {
         resolve(mcsdMapped);
@@ -1743,10 +1709,10 @@ if (cluster.isMaster) {
       getPotential,
     } = req.query;
     if (!source1LimitOrgId) {
-      source1LimitOrgId = topOrgId;
+      source1LimitOrgId = mixin.getTopOrgId(mixin.toTitleCase(source1 + source1Owner));
     }
     if (!source2LimitOrgId) {
-      source2LimitOrgId = topOrgId;
+      source2LimitOrgId = mixin.getTopOrgId(mixin.toTitleCase(source2 + source2Owner));
     }
     let {
       parentConstraint,
@@ -1792,7 +1758,7 @@ if (cluster.isMaster) {
       redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
       async.parallel({
         source2Locations(callback) {
-          const dbSource2 = source2 + source2Owner;
+          const dbSource2 = mixin.toTitleCase(source2 + source2Owner);
           mcsd.getLocationChildren({
             database: dbSource2,
             parent: source2LimitOrgId,
@@ -1812,7 +1778,7 @@ if (cluster.isMaster) {
           });
         },
         source1Loations(callback) {
-          const dbSource1 = source1 + source1Owner;
+          const dbSource1 = mixin.toTitleCase(source1 + source1Owner);
           mcsd.getLocationChildren({
             database: dbSource1,
             parent: source1LimitOrgId,
@@ -1835,13 +1801,13 @@ if (cluster.isMaster) {
           });
         },
         mappingData(callback) {
-          const mappingDB = source1 + userID + source2;
+          const mappingDB = mixin.toTitleCase(source1 + userID + source2);
           mcsd.getLocations(mappingDB, mcsdMapped => callback(false, mcsdMapped));
         },
       }, (error, results) => {
-        const source1DB = source1 + source1Owner;
-        const source2DB = source2 + source2Owner;
-        const mappingDB = source1 + userID + source2;
+        const source1DB = mixin.toTitleCase(source1 + source1Owner);
+        const source2DB = mixin.toTitleCase(source2 + source2Owner);
+        const mappingDB = mixin.toTitleCase(source1 + userID + source2);
         if (recoLevel == totalSource1Levels) {
           scores.getBuildingsScores(
             results.source1Loations,
@@ -1945,14 +1911,16 @@ if (cluster.isMaster) {
       source1LimitOrgId,
       source2LimitOrgId,
     } = req.query;
-    const source1DB = req.query.source1 + source1Owner;
-    const source2DB = req.query.source2 + source2Owner;
-    const mappingDB = req.query.source1 + userID + req.query.source2;
+    const source1DB = mixin.toTitleCase(req.query.source1 + source1Owner);
+    const source2DB = mixin.toTitleCase(req.query.source2 + source2Owner);
+    const mappingDB = mixin.toTitleCase(req.query.source1 + userID + req.query.source2);
+    const topOrgId1 = mixin.getTopOrgId(source1DB);
+    const topOrgId2 = mixin.getTopOrgId(source2DB);
     if (!source1LimitOrgId) {
-      source1LimitOrgId = topOrgId;
+      source1LimitOrgId = topOrgId1;
     }
     if (!source2LimitOrgId) {
-      source2LimitOrgId = topOrgId;
+      source2LimitOrgId = topOrgId2;
     }
     const matched = [];
 
@@ -2123,7 +2091,7 @@ if (cluster.isMaster) {
               thisFields = thisFields.concat(['Status', 'Comments']);
               // end of pushing other headers
               const levelMatched = [];
-              mcsd.filterLocations(response.source1mCSD, topOrgId, level, (mcsdLevel) => {
+              mcsd.filterLocations(response.source1mCSD, topOrgId1, level, (mcsdLevel) => {
                 async.each(mcsdLevel.entry, (source1Entry, nxtEntry) => {
                   const thisMatched = matched.filter(mapped => mapped['source 1 ID'] === source1Entry.resource.id);
 
@@ -2209,15 +2177,17 @@ if (cluster.isMaster) {
       source1LimitOrgId,
       source2LimitOrgId,
     } = req.query;
-    const source1DB = req.query.source1 + source1Owner;
-    const source2DB = req.query.source2 + source2Owner;
+    const source1DB = mixin.toTitleCase(req.query.source1 + source1Owner);
+    const source2DB = mixin.toTitleCase(req.query.source2 + source2Owner);
     const levelMapping1 = JSON.parse(req.query.levelMapping1);
     const levelMapping2 = JSON.parse(req.query.levelMapping2);
+    const topOrgId1 = mixin.getTopOrgId(source1DB);
+    const topOrgId2 = mixin.getTopOrgId(source2DB);
     if (!source1LimitOrgId) {
-      source1LimitOrgId = topOrgId;
+      source1LimitOrgId = topOrgId1;
     }
     if (!source2LimitOrgId) {
-      source2LimitOrgId = topOrgId;
+      source2LimitOrgId = topOrgId2;
     }
 
     if (type == 'FHIR') {
@@ -2263,7 +2233,7 @@ if (cluster.isMaster) {
       fields.push('id');
       fields.push('name');
       const levels = Object.keys(levelMapping1);
-      const mappingDB = req.query.source1 + userID + req.query.source2;
+      const mappingDB = mixin.toTitleCase(req.query.source1 + userID + req.query.source2);
 
       async.parallel({
         source1mCSD(callback) {
@@ -2436,9 +2406,9 @@ if (cluster.isMaster) {
         source2Owner,
         flagComment,
       } = fields;
-      const source1DB = fields.source1DB + source1Owner;
-      const source2DB = fields.source2DB + source2Owner;
-      const mappingDB = fields.source1DB + userID + fields.source2DB;
+      const source1DB = mixin.toTitleCase(fields.source1DB + source1Owner);
+      const source2DB = mixin.toTitleCase(fields.source2DB + source2Owner);
+      const mappingDB = mixin.toTitleCase(fields.source1DB + userID + fields.source2DB);
       if (!source1Id || !source2Id) {
         winston.error({
           error: 'Missing either Source1 ID or Source2 ID or both',
@@ -2501,7 +2471,7 @@ if (cluster.isMaster) {
     const {
       userID,
     } = req.params;
-    const mappingDB = req.params.source1 + userID + req.params.source2;
+    const mappingDB = mixin.toTitleCase(req.params.source1 + userID + req.params.source2);
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
       const {
@@ -2570,9 +2540,9 @@ if (cluster.isMaster) {
       source2Owner,
       type,
     } = req.params;
-    const source1DB = req.params.source1 + source1Owner;
-    const source2DB = req.params.source2 + source2Owner;
-    const mappingDB = req.params.source1 + userID + req.params.source2;
+    const source1DB = mixin.toTitleCase(req.params.source1 + source1Owner);
+    const source2DB = mixin.toTitleCase(req.params.source2 + source2Owner);
+    const mappingDB = mixin.toTitleCase(req.params.source1 + userID + req.params.source2);
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
       const {
@@ -2637,8 +2607,8 @@ if (cluster.isMaster) {
     }
     const userID = req.params.userID;
     const source1Owner = req.params.source1Owner;
-    const source1DB = req.params.source1 + source1Owner;
-    const mappingDB = req.params.source1 + userID + req.params.source2;
+    const source1DB = mixin.toTitleCase(req.params.source1 + source1Owner);
+    const mappingDB = mixin.toTitleCase(req.params.source1 + userID + req.params.source2);
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
       winston.info(`Received break match request for ${fields.source1Id}`);
@@ -2706,7 +2676,7 @@ if (cluster.isMaster) {
         userID,
         type,
       } = req.params;
-      const mappingDB = req.params.source1 + userID + req.params.source2;
+      const mappingDB = mixin.toTitleCase(req.params.source1 + userID + req.params.source2);
 
       let uri;
       if (mongoUser && mongoPasswd) {
@@ -2745,7 +2715,7 @@ if (cluster.isMaster) {
       source2,
       userID,
     } = req.params;
-    const mappingDB = source1 + userID + source2;
+    const mappingDB = mixin.toTitleCase(source1 + userID + source2);
 
     let uri;
     if (mongoUser && mongoPasswd) {
@@ -2811,7 +2781,7 @@ if (cluster.isMaster) {
       source2,
       userID,
     } = req.params;
-    const mappingDB = source1 + userID + source2;
+    const mappingDB = mixin.toTitleCase(source1 + userID + source2);
 
     let uri;
     if (mongoUser && mongoPasswd) {
@@ -2937,7 +2907,7 @@ if (cluster.isMaster) {
       source2,
       userID,
     } = req.params;
-    const mappingDB = source1 + userID + source2;
+    const mappingDB = mixin.toTitleCase(source1 + userID + source2);
     let uri;
     if (mongoUser && mongoPasswd) {
       uri = `mongodb://${mongoUser}:${mongoPasswd}@${mongoHost}:${mongoPort}/${mappingDB}`;
@@ -3082,16 +3052,11 @@ if (cluster.isMaster) {
     } = req.params;
     const name = mixin.toTitleCase(req.params.name);
     winston.info(`Received request to delete data source with id ${id}`);
-    const dbName = name + userID;
-    hapi.deleteServer(dbName, (err) => {
-      if (err) {
-        res.status(500).json({
-          error: 'Unexpected error occured while deleting data source,please retry',
-        });
-        winston.error(err);
-        return;
-      }
+    const dbName = mixin.toTitleCase(name + userID);
+    hapi.deleteTenancy({ name: dbName }).then(() => {
       mongo.deleteDataSource(id, name, sourceOwner, userID, (err, response) => {
+        const baseUrl = URI(config.getConf('mCSD:url')).segment(dbName);
+        mcsd.cleanCache(`url_${baseUrl.toString()}`, true);
         if (err) {
           res.status(500).json({
             error: 'Unexpected error occured while deleting data source,please retry',
@@ -3103,6 +3068,9 @@ if (cluster.isMaster) {
           });
         }
       });
+    }).catch((err) => {
+      winston.error(err);
+      return res.status(500).json({ error: 'Unexpected error occured while deleting data source,please retry' });
     });
   });
 
@@ -3168,13 +3136,11 @@ if (cluster.isMaster) {
       } catch (error) {
         winston.error(error);
       }
-      const database = mixin.toTitleCase(JSON.parse(fields.source1).name) + JSON.parse(fields.source1).userID._id + mixin.toTitleCase(JSON.parse(fields.source2).name);
-      hapi.createServer(database, (err) => {
-        if (err) {
-          return res.status(400).json({
-            error: 'An expected error occured',
-          });
-        }
+      const database = mixin.toTitleCase(JSON.parse(fields.source1).name + JSON.parse(fields.source1).userID._id + JSON.parse(fields.source2).name);
+      hapi.addTenancy({ name: database, description: 'mapping data source' }).then(async () => {
+        await mcsd.createFakeOrgID(database).catch((err) => {
+          winston.error(err);
+        })
         mongo.addDataSourcePair(fields, (error, errMsg, results) => {
           if (error) {
             if (errMsg) {
@@ -3186,8 +3152,8 @@ if (cluster.isMaster) {
               error: errMsg,
             });
           } else {
-            const db1 = mixin.toTitleCase(JSON.parse(fields.source1).name) + JSON.parse(fields.source1).userID._id;
-            const db2 = mixin.toTitleCase(JSON.parse(fields.source2).name) + JSON.parse(fields.source2).userID._id;
+            const db1 = mixin.toTitleCase(JSON.parse(fields.source1).name + JSON.parse(fields.source1).userID._id);
+            const db2 = mixin.toTitleCase(JSON.parse(fields.source2).name + JSON.parse(fields.source2).userID._id);
             async.series({
               levelMapping1(callback) {
                 mongo.getLevelMapping(db1, levelMapping => callback(false, levelMapping));
@@ -3201,6 +3167,9 @@ if (cluster.isMaster) {
             });
           }
         });
+      }).catch((err) => {
+        winston.error(err);
+        return res.status(500).json({ error: 'An expected error occured' });
       });
     });
   });
@@ -3211,21 +3180,26 @@ if (cluster.isMaster) {
       pairId,
       userID,
     } = req.query;
-    const source1Name = mixin.toTitleCase(req.query.source1Name);
-    const source2Name = mixin.toTitleCase(req.query.source2Name);
-    const dbName = source1Name + userID + source2Name;
-    hapi.deleteServer(dbName, (err) => {
-      if (err) {
-        winston.error(err);
-        return res.send(500).send(err);
-      }
-      mongo.deleteSourcePair(pairId, dbName, (err, data) => {
+    const mappingDB = mixin.toTitleCase(req.query.source1Name + userID + req.query.source2Name);
+    const src1DB = mixin.toTitleCase(req.query.source1Name + userID);
+    const src2DB = mixin.toTitleCase(req.query.source2Name + userID);
+    hapi.deleteTenancy({ name: mappingDB }).then(() => {
+      mongo.deleteSourcePair(pairId, mappingDB, (err, data) => {
+        const mappingUrl = URI(config.getConf('mCSD:url')).segment(mappingDB);
+        const src1Url = URI(config.getConf('mCSD:url')).segment(src1DB);
+        const src2Url = URI(config.getConf('mCSD:url')).segment(src2DB);
+        mcsd.cleanCache(`url_${mappingUrl.toString()}`, true);
+        mcsd.cleanCache(`url_${src1Url.toString()}`, true);
+        mcsd.cleanCache(`url_${src2Url.toString()}`, true);
         if (err) {
           winston.error(err);
           return res.send(500).send(err);
         }
         res.status(200).send();
       });
+    }).catch((err) => {
+      winston.error(err);
+      return res.send(500).send(err);
     });
   });
 
@@ -3327,7 +3301,7 @@ if (cluster.isMaster) {
         });
         return;
       }
-      const database = mixin.toTitleCase(fields.csvName) + fields.userID;
+      const database = mixin.toTitleCase(fields.csvName + fields.userID);
       const expectedLevels = config.getConf('levels');
       const {
         clientId,
@@ -3381,16 +3355,7 @@ if (cluster.isMaster) {
         });
         redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
         winston.info('Creating HAPI server now');
-        hapi.createServer(database, (err) => {
-          if (err) {
-            uploadReqPro = JSON.stringify({
-              status: 'Error',
-              error: 'An error has occured, upload cancelled',
-              percent: null,
-            });
-            redisClient.set(uploadRequestId, uploadReqPro);
-            return;
-          }
+        hapi.addTenancy({ name: database, description: 'reco data source' }).then(() => {
           const oldPath = files[fileName].path;
 
           const newPath = `${__dirname}/csvUploads/${fields.userID}+${mixin.toTitleCase(fields.csvName)}+${moment().format()}.csv`;
@@ -3417,6 +3382,14 @@ if (cluster.isMaster) {
             });
             redisClient.set(uploadRequestId, uploadReqPro);
           });
+        }).catch((err) => {
+          winston.error(err);
+          const uploadReqPro = JSON.stringify({
+            status: 'Error',
+            error: 'An error has occured, upload cancelled',
+            percent: null,
+          });
+          redisClient.set(uploadRequestId, uploadReqPro);
         });
       });
     });

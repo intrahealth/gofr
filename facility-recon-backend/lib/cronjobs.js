@@ -11,7 +11,6 @@ const config = require('./config');
 const dhis = require('./dhis')();
 const fhir = require('./fhir')();
 
-const topOrgId = config.getConf('mCSD:fakeOrgId');
 const topOrgName = config.getConf('mCSD:fakeOrgName');
 
 function getCrontime(callback) {
@@ -63,7 +62,6 @@ getCrontime((time) => {
               name,
               sourceOwner,
               clientId,
-              topOrgId,
               topOrgName,
               false,
               false,
@@ -79,7 +77,6 @@ getCrontime((time) => {
               name,
               sourceOwner,
               clientId,
-              topOrgId,
               topOrgName,
             );
           }

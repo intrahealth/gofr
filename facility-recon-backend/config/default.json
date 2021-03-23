@@ -4,9 +4,14 @@
     "port": 3000
   },
   "mCSD": {
+    "url": "http://localhost:8081/hapi5/fhir",
+    "username": "",
+    "password": "",
     "fakeOrgId": "eac583d2-d1ba-11e8-a8d5-f2801f1b9fd1",
     "fakeOrgName": "Taifafeki",
-    "cacheTime": 1200
+    "cacheTime": 1200,
+    "registryDB": "facilityregistry",
+    "requestsDB": "facilityregistryrequests"
   },
   "dbArchives": {
     "maxArchives": 2
@@ -108,22 +113,5 @@
   }, {
     "uri": "http://codesystem.digitalhealth.intrahealth.org/facilityaddrequest",
     "name": "facilityAddRequest"
-  }],
-  "hapi": {
-    "DBUser": "hapi",
-    "DBPassword": "hapi",
-    "defaultDBName": "gofr_empty",
-    "requestsDBName": "gofrrequests_empty",
-    "fhirVersion": "R4",
-    "DBDependencyGrpID": "org.postgresql",
-    "DBDependencyArtfactID": "postgresql",
-    "DBDriver": "org.postgresql.Driver",
-    "DBDialect": "org.hibernate.dialect.PostgreSQL95Dialect",
-    "serverStarterPath": "/home/ally/hapi-fhir-jpaserver-starter",
-    "tomcatPath": "/opt/tomcat"
-  },
-  "pg": {
-    "user": "gofr",
-    "password": "gofr"
-  }
+  }]
 }

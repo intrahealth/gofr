@@ -26,7 +26,7 @@ const credentials = {
 
 module.exports = function () {
   return {
-    sync(host, username, password, name, sourceOwner, clientId, topOrgId, topOrgName, reset, full, dousers, doservices) {
+    sync(host, username, password, name, sourceOwner, clientId, topOrgName, reset, full, dousers, doservices) {
       const dhis2URL = url.parse(host);
       const auth = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
       credentials.dhis2URL = dhis2URL;
@@ -34,7 +34,7 @@ module.exports = function () {
       credentials.auth = auth;
       credentials.name = name;
       credentials.sourceOwner = sourceOwner;
-      credentials.topOrgId = topOrgId;
+      credentials.topOrgId = mixin.getTopOrgId(name + sourceOwner);
       credentials.topOrgName = topOrgName;
 
       if (reset) {
@@ -237,7 +237,7 @@ function processOrgUnit(metadata, hasKey) {
     clientId,
   } = credentials;
 
-  const database = mixin.toTitleCase(name) + credentials.sourceOwner;
+  const database = mixin.toTitleCase(name + credentials.sourceOwner);
   let counter = 0;
   const max = metadata.organisationUnits.length;
   // adding the fake orgid as the top orgid
@@ -446,7 +446,7 @@ function setLastUpdate(hasKey, lastUpdate) {
     dhis2URL,
   } = credentials;
   const userID = credentials.sourceOwner;
-  const database = mixin.toTitleCase(name) + userID;
+  const database = mixin.toTitleCase(name + userID);
   winston.info('setting lastupdated time');
   const req = (dhis2URL.protocol == 'https:' ? https : http).request({
     hostname: dhis2URL.hostname,

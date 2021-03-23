@@ -12,7 +12,7 @@ const mcsd = require('../mcsd')();
 const config = require('../config');
 const mixin = require('../mixin')();
 
-const topOrgId = config.getConf('mCSD:fakeOrgId');
+const topOrgId = mixin.getTopOrgId(config.getConf('mCSD:registryDB'));
 
 router.post('/addService', (req, res) => {
   winston.info('Received a request to add a new service');
@@ -32,7 +32,7 @@ router.post('/addJurisdiction', (req, res) => {
   winston.info('Received a request to add a new Jurisdiction');
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields, files) => {
-    const defaultDB = config.getConf('hapi:defaultDBName');
+    const defaultDB = config.getConf('mCSD:registryDB');
     fields.database = defaultDB;
     mcsd.addJurisdiction(fields, (error, id) => {
       if (error) {
@@ -40,7 +40,7 @@ router.post('/addJurisdiction', (req, res) => {
         res.status(500).send(error);
         return;
       }
-      const requestsDB = config.getConf('hapi:requestsDBName');
+      const requestsDB = config.getConf('mCSD:requestsDB');
       fields.database = requestsDB;
       fields.id = id;
       mcsd.addJurisdiction(fields, (error) => {
@@ -206,7 +206,7 @@ router.get('/getBuildings', (req, res) => {
   } = req.query;
   let database;
   if (action === 'request' && requestCategory === 'requestsList') {
-    database = config.getConf('hapi:requestsDBName');
+    database = config.getConf('mCSD:requestsDB');
   }
   const filters = {
     parent: jurisdiction,

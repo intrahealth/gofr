@@ -32,7 +32,6 @@ if (ops && ops.conf) {
   const environment = nconf.get('NODE_ENV') || 'development';
   nconf.file('environment', path.resolve(`${global.appRoot}/config`, `${environment}.json`));
   nconf.file('default', path.resolve(`${global.appRoot}/config`, 'default.json'));
-  // nconf.file('custom', path.resolve(`${global.appRoot}/config`, 'default_multiple_instances.json'))
 }
 
 if (ops && ops.createIndexes) {
@@ -48,12 +47,14 @@ function setConf(key, value) {
 }
 
 setConf('DB_HOST', process.env.DB_HOST || 'localhost');
-setConf('DB_NAME', process.env.DB_NAME || 'GOFR_NEW1');
+setConf('DB_NAME', process.env.DB_NAME || 'GOFR');
 setConf('DB_USER', process.env.DB_USER || '');
 setConf('DB_PASSWORD', process.env.DB_PASSWORD || '');
 setConf('DB_PORT', process.env.DB_PORT || '27017');
 setConf('REDIS_HOST', process.env.REDIS_HOST || '127.0.0.1');
-setConf('mCSD:url', process.env.HEARTH_URL || 'http://localhost:8081');
+if (process.env.FHIR_BASE_URL) {
+  setConf('mCSD:url', process.env.FHIR_BASE_URL);
+}
 setConf('server:port', process.env.GOFR_PORT || getConf('server:port'));
 
 exports.getConf = getConf;

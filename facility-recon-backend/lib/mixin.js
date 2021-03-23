@@ -2,6 +2,7 @@
 /* eslint-disable func-names */
 require('./init');
 const winston = require('winston');
+const uuid5 = require('uuid/v5');
 const csv = require('fast-csv');
 const async = require('async');
 const moment = require('moment');
@@ -16,6 +17,12 @@ module.exports = function () {
     isInt(val) {
       val = Number(val);
       return val === +val && isFinite(val) && !(val % 1);
+    },
+    getTopOrgId(dbname) {
+      return uuid5(dbname, '16b229bc-eba5-4e99-abec-aaa0d1462583');
+    },
+    getMappingId(id) {
+      return uuid5(id.toString(), '16b229bc-eba5-4e99-abec-aaa0d1462583');
     },
     getLatestFacilityRequest(extensions, type, username) {
       const facilityUpdateRequestURI = this.getCodesysteURI('facilityUpdateRequest');
@@ -79,7 +86,7 @@ module.exports = function () {
         return str;
       }
       str = str.toLowerCase().split(' ').map(word => word.replace(word[0], word[0].toUpperCase())).join('');
-      return str
+      return str;
     },
     toTitleCaseSpace(str) {
       if (!str) {

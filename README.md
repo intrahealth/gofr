@@ -1,12 +1,14 @@
-# Facility Reconciliation Tool
+# Global Open Facility Registry (GOFR)
 
-https://facility-recon.readthedocs.io/en/latest/
+This is the main repository for the next iteration of GOFR, which is based on the original codebase of the [Facility Reconciliation Tool](https://github.com/openhie/facility-recon).
 
-This tool enables matching of facility lists between different sources. It has a pluggable architecture to enable a myriad of data sources and matching algorithms.
+The [design document](https://docs.google.com/document/d/1LGzwyxDzH6BmnVn94-V2waCmr0igIhZxxTHD-wnBX50) outlines the next steps in the creation of GOFR based on community feedback.
+
+If you have ZenHub installed, you may view the [2021 roadmap](https://github.com/intrahealth/gofr/blob/master/LICENSE#workspaces/gofr-60495960906eba0017c751ea/roadmap?repos=346409080).
 
 ## Features
+* GUI that provides value-add based on HAPI FHIR Server as the backend.
 * CSV, DHIS2, and FHIR servers as data sources.
-* Both automatic and manual matching, including monitoring the status of existing matches.
 * Supports nested lists, ie. facilities that are administrative hierarchies like state->county->hospital.
 * An API and backend engine that use [FHIR](https://www.hl7.org/fhir/location.html)) Location resources based on the [mCSD](http://wiki.ihe.net/index.php/Mobile_Care_Services_Discovery_(mCSD)) profile.
 * Modular system to extend algorithms for matching.
@@ -14,7 +16,7 @@ This tool enables matching of facility lists between different sources. It has a
 ## Contributing and Community
 - For announcements and discussions, join the [Facility Registry Google Group](https://groups.google.com/forum/#!forum/facility-registry).
 - For open monthly discussions, join the [OpenHIE Facility Registry Community](https://wiki.ohie.org/display/SUB/Facility+Registry+Community).
-- Search through or create an issue in the [GitHub Repository](https://github.com/openhie/facility-recon/issues).
+- Search through or create an [issue](https://github.com/intrahealth/gofr/issues).
 
 ## License
-The Facility Reconciliation Tool is distributed under the Apache 2.0 license.
+GOFR is distributed under the Apache 2.0 license.

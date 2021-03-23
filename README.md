@@ -10,7 +10,7 @@ If you have ZenHub installed, you may view the [2021 roadmap](https://github.com
 * GUI that provides value-add based on HAPI FHIR Server as the backend.
 * CSV, DHIS2, and FHIR servers as data sources.
 * Supports nested lists, ie. facilities that are administrative hierarchies like state->county->hospital.
-* An API and backend engine that use [FHIR](https://www.hl7.org/fhir/location.html)) Location resources based on the [mCSD](http://wiki.ihe.net/index.php/Mobile_Care_Services_Discovery_(mCSD)) profile.
+* An API and backend engine that use [FHIR](https://www.hl7.org/fhir/location.html) Location resources based on the [mCSD](http://wiki.ihe.net/index.php/Mobile_Care_Services_Discovery_(mCSD)) profile.
 * Modular system to extend algorithms for matching.
 
 ## Contributing and Community

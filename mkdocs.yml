@@ -1,0 +1,67 @@
+# Project information
+site_name: "GOFR Documentation"
+site_description: "GOFR Documentation"
+site_author: "IntraHealth"
+site_url: "https://github.com/intrahealth/gofr"
+
+# Repository
+repo_name: "intrahealth/gofr"
+repo_url: "https://github.com/intrahealth/gofr"
+
+# Copyright
+copyright: "Copyright &copy; 2021 IntraHealth International"
+
+# Theme
+theme:
+  name: "material"
+  palette:
+    primary: "indigo"
+    accent: "indigo"
+  language: "en"
+  font:
+    text: "Roboto"
+    code: "Roboto Mono"
+  features:
+    - navigation.expand
+    # - navigation.tabs
+    - toc.integrate
+
+nav:
+  - Welcome to GOFR!:
+    - 'index.md'
+  - Getting started:
+    - 'getting_started/getting_started.md'
+    - 'getting_started/demo_site.md'
+    - 'getting_started/using_docker.md'
+  - Working with FHIR:
+    - 'working_with_fhir/understanding_fhir.md'
+    - 'working_with_fhir/mcsd.md'
+  - Server administration:
+    - 'server_administration/server_administration.md'
+
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - toc:
+      toc_depth : "3"
+  - footnotes
+  
+# https://github.com/zhaoterryy/mkdocs-pdf-export-plugin not working
+plugins:
+  - search
+  - git-revision-date-localized
+  - mknotebooks
+  # - pdf-export:
+  #     combined: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/intrahealth/gofr
+
+
+# theme:
+# logo: 'images/logo.png' must be 128x128
+# logo:
+#   icon: 'menu_book'

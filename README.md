@@ -14,6 +14,7 @@ If you have ZenHub installed, you may view the [2021 roadmap](https://github.com
 * Modular system to extend algorithms for matching.
 
 ## Contributing and Community
+- For immediate support, join the [#gofr](https://ihris.slack.com/archives/C01P3BX8FA7) channel on the iHRIS Slack team.
 - For announcements and discussions, join the [Facility Registry Google Group](https://groups.google.com/forum/#!forum/facility-registry).
 - For open monthly discussions, join the [OpenHIE Facility Registry Community](https://wiki.ohie.org/display/SUB/Facility+Registry+Community).
 - Search through or create an [issue](https://github.com/intrahealth/gofr/issues).

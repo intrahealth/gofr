@@ -15,12 +15,12 @@ copyright: "Copyright &copy; 2021 IntraHealth International"
 theme:
   name: "material"
   palette:
-    primary: "indigo"
+    primary: "Noto Sans HK"
     accent: "indigo"
   language: "en"
   font:
     text: "Roboto"
-    code: "Roboto Mono"
+    code: "Monaco"
   features:
     - navigation.expand
     # - navigation.tabs
@@ -34,7 +34,7 @@ nav:
     - 'getting_started/demo_site.md'
     - 'getting_started/using_docker.md'
   - Working with FHIR:
-    - 'working_with_fhir/understanding_fhir.md'
+    - 'working_with_fhir/working_with_fhir.md'
     - 'working_with_fhir/mcsd.md'
   - Server administration:
     - 'server_administration/server_administration.md'

@@ -7,7 +7,7 @@ FHIR describes both a REST API based on common requests/queries and more than 13
 
 ## Simple FHIR example
 
-As a simple introduction, consider the following snippet. Here are the key takeaways:
+As a simple introduction, consider the following snippet from [here](https://www.hl7.org/fhir/location-examples-general.json.html). Here are the key takeaways:
 
 * Its `resourceType` is bundle, meaning it can contain multiple resources, and of different types. This bundle is of type collection, meaning it just for reference.
 * It has two entries, meaning individual resources, both of `resourceType` is location.

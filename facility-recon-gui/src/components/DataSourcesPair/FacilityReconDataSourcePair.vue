@@ -20,7 +20,7 @@
               dark
               @click.native="confirmPairDeleteDialog = false"
             >
-              <v-icon>close</v-icon>
+              <v-icon>mdi-close</v-icon>
             </v-btn>
           </v-toolbar>
           <v-card-text>
@@ -71,7 +71,7 @@
             dark
           >
             <v-toolbar-title>
-              <v-icon>info</v-icon> Pair creation limit
+              <v-icon>mdi-information</v-icon> Pair creation limit
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -79,7 +79,7 @@
               dark
               @click.native="pairLimitWarn = false"
             >
-              <v-icon>close</v-icon>
+              <v-icon>mdi-close</v-icon>
             </v-btn>
           </v-toolbar>
           <v-card-text>
@@ -108,7 +108,7 @@
             dark
           >
             <v-toolbar-title>
-              <v-icon>info</v-icon> Data sources has different level counts, please map Levels to proceed
+              <v-icon>mdi-information</v-icon> Data sources has different level counts, please map Levels to proceed
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -116,7 +116,7 @@
               dark
               @click.native="closeLevelMappingDialog"
             >
-              <v-icon>close</v-icon>
+              <v-icon>mdi-close</v-icon>
             </v-btn>
           </v-toolbar>
           <v-card-text>
@@ -125,25 +125,24 @@
               :items="source1Levels"
             >
               <template
-                slot="items"
-                slot-scope="props"
+                v-slot:item="{ item }"
               >
                 <tr>
-                  <td>{{props.item.text}}</td>
+                  <td>{{item.text}}</td>
                   <td>
-                    <template v-if='pairLevelsMapping[props.item.value]'>
-                      {{$store.state.levelMapping.source2[pairLevelsMapping[props.item.value]]}}
+                    <template v-if='pairLevelsMapping[item.value]'>
+                      {{$store.state.levelMapping.source2[pairLevelsMapping[item.value]]}}
                       <v-icon
                         small
-                        @click="clearMappingSelection(props.item.value)"
-                      >close</v-icon>
+                        @click="clearMappingSelection(item.value)"
+                      >mdi-close</v-icon>
                     </template>
                     <v-select
                       v-else
                       :items="source2Levels"
                       clearable
-                      v-model="pairLevelsMapping[props.item.value]"
-                      @change="mappingSelected(props.item.value)"
+                      v-model="pairLevelsMapping[item.value]"
+                      @change="mappingSelected(item.value)"
                     ></v-select>
                   </td>
                 </tr>
@@ -153,17 +152,17 @@
           <v-card-actions>
             <v-btn
               color="error"
-              round
+              rounded
               @click="closeLevelMappingDialog"
             >
-              <v-icon left>cancel</v-icon> Cancel
+              <v-icon left>mdi-cancel</v-icon> Cancel
             </v-btn>
             <v-spacer></v-spacer>
             <v-btn
               color="primary"
-              round
+              rounded
             >
-              <v-icon left>save</v-icon>Save Mapping
+              <v-icon left>mdi-content-save</v-icon>Save Mapping
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -182,7 +181,7 @@
             dark
           >
             <v-toolbar-title>
-              <v-icon>info</v-icon> About this page
+              <v-icon>mdi-information</v-icon> About this page
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -190,7 +189,7 @@
               dark
               @click.native="helpDialog = false"
             >
-              <v-icon>close</v-icon>
+              <v-icon>mdi-close</v-icon>
             </v-btn>
           </v-toolbar>
           <v-card-text>
@@ -218,13 +217,13 @@
               dark
               @click.native="shareDialog = false"
             >
-              <v-icon>close</v-icon>
+              <v-icon>mdi-close</v-icon>
             </v-btn>
           </v-toolbar>
           <v-card-text>
             <v-text-field
               v-model="searchUsers"
-              append-icon="search"
+              append-icon="mdi-magnify"
               label="Search"
               single-line
               hide-details
@@ -236,18 +235,17 @@
               class="elevation-1"
             >
               <template
-                slot="items"
-                slot-scope="props"
+                v-slot:item="{ item }"
               >
-                <tr v-if="props.item.userName !== $store.state.auth.username">
+                <tr v-if="item.userName !== $store.state.auth.username">
                   <td>
                     <v-checkbox
                       v-model="sharedUsers"
-                      :value="props.item._id"
+                      :value="item._id"
                     ></v-checkbox>
-                  <td>{{props.item.userName}}</td>
-                  <td>{{props.item.firstName}}</td>
-                  <td>{{props.item.surname}}</td>
+                  <td>{{item.userName}}</td>
+                  <td>{{item.firstName}}</td>
+                  <td>{{item.surname}}</td>
                 </tr>
               </template>
             </v-data-table>
@@ -261,7 +259,7 @@
               <v-icon
                 dark
                 left
-              >cancel</v-icon>Cancel
+              >mdi-cancel</v-icon>Cancel
             </v-btn>
             <v-spacer></v-spacer>
             <v-btn
@@ -269,7 +267,7 @@
               dark
               @click.native="share('', 'saveShare')"
             >
-              <v-icon left>share</v-icon>Share
+              <v-icon left>mdi-share-variant-outline</v-icon>Share
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -283,15 +281,19 @@
           text-xs-right
         >
           <v-tooltip top>
-            <v-btn
-              flat
-              icon
-              color="primary"
-              @click="helpDialog = true"
-              slot="activator"
-            >
-              <v-icon>help</v-icon>
-            </v-btn>
+            <template v-slot:activator="{ on }">
+              <v-btn
+                class="mx-1"
+                fab
+                dark
+                x-small
+                color="primary"
+                @click="helpDialog = true"
+                v-on="on"
+              >
+                <v-icon>mdi-help</v-icon>
+              </v-btn>
+            </template>
             <span>Help</span>
           </v-tooltip>
         </v-flex>
@@ -311,12 +313,8 @@
               </v-toolbar>
             </v-card-title>
             <v-card-text style="float: center">
-              <v-layout
-                row
-                wrap
-                style="float: center"
-              >
-                <v-flex xs6>
+              <v-row>
+                <v-col>
                   <v-data-table
                     :headers="source1Headers"
                     :items="$store.state.dataSources"
@@ -329,25 +327,26 @@
                       indeterminate
                     ></v-progress-linear>
                     <template
-                      slot="items"
-                      slot-scope="props"
+                      v-slot:item="{ item }"
                     >
-                      <v-radio-group
-                        v-model='source1'
-                        style="height: 5px"
-                      >
-                        <td>
-                          <v-radio
-                            :value="props.item"
-                            color="blue"
-                          ></v-radio>
-                        </td>
-                      </v-radio-group>
-                      <td>{{props.item.name}}</td>
+                      <tr>
+                        <v-radio-group
+                          v-model='source1'
+                          style="height: 5px"
+                        >
+                          <td>
+                            <v-radio
+                              :value="item"
+                              color="blue"
+                            ></v-radio>
+                          </td>
+                        </v-radio-group>
+                        <td>{{item.name}}</td>
+                      </tr>
                     </template>
                   </v-data-table>
-                </v-flex>
-                <v-flex xs6>
+                </v-col>
+                <v-col>
                   <v-data-table
                     :headers="source2Headers"
                     :items="dataSources2"
@@ -360,42 +359,43 @@
                       indeterminate
                     ></v-progress-linear>
                     <template
-                      slot="items"
-                      slot-scope="props"
+                      v-slot:item="{ item }"
                     >
-                      <v-radio-group
-                        v-model='source2'
-                        style="height: 5px"
-                      >
-                        <td>
-                          <v-radio
-                            :value="props.item"
-                            color="blue"
-                          ></v-radio>
-                        </td>
-                      </v-radio-group>
-                      <td>{{props.item.name}}</td>
+                      <tr>
+                        <v-radio-group
+                          v-model='source2'
+                          style="height: 5px"
+                        >
+                          <td>
+                            <v-radio
+                              :value="item"
+                              color="blue"
+                            ></v-radio>
+                          </td>
+                        </v-radio-group>
+                        <td>{{item.name}}</td>
+                      </tr>
                     </template>
                   </v-data-table>
-                </v-flex>
-              </v-layout>
+                </v-col>
+              </v-row>
             </v-card-text>
             <v-card-actions>
               <v-btn
                 color="error"
-                round
+                rounded
                 @click="reset"
               >
-                <v-icon left>refresh</v-icon> Reset
+                <v-icon left>mdi-refresh</v-icon> Reset
               </v-btn>
               <v-spacer></v-spacer>
               <v-btn
                 :disabled='!canCreatePair'
                 color="primary"
-                round
+                rounded
                 @click="checkLevels"
               >
-                <v-icon left>save</v-icon> Save
+                <v-icon left>mdi-content-save</v-icon> Save
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -414,7 +414,7 @@
                 <v-spacer></v-spacer>
                 <v-text-field
                   v-model="searchPairs"
-                  append-icon="search"
+                  append-icon="mdi-magnify"
                   label="Search"
                   single-line
                   hide-details
@@ -434,34 +434,35 @@
                   indeterminate
                 ></v-progress-linear>
                 <template
-                  slot="items"
-                  slot-scope="props"
+                  v-slot:item="{ item }"
                 >
-                  <td>{{props.item.source1.name}} - {{props.item.source2.name}}</td>
-                  <td>{{props.item.userID.userName}}</td>
-                  <v-radio-group
-                    v-model='activeDataSourcePair'
-                    style="height: 5px"
-                  >
-                    <td>
-                      <v-radio
-                        :value="props.item"
-                        color="blue"
-                      ></v-radio>
-                    </td>
-                  </v-radio-group>
-                  <td>
-                    {{props.item.shared.users | mergeUsers}}
-                  </td>
-                  <td v-if='props.item.userID._id === $store.state.auth.userID'>
-                    <v-btn
-                      flat
-                      color="primary"
-                      @click="share(props.item, 'showDialog')"
+                  <tr>
+                    <td>{{item.source1.name}} - {{item.source2.name}}</td>
+                    <td>{{item.userID.userName}}</td>
+                    <v-radio-group
+                      v-model='activeDataSourcePair'
+                      style="height: 5px"
                     >
-                      <v-icon>share</v-icon>Share
-                    </v-btn>
-                  </td>
+                      <td>
+                        <v-radio
+                          :value="item"
+                          color="blue"
+                        ></v-radio>
+                      </td>
+                    </v-radio-group>
+                    <td>
+                      {{item.shared.users | mergeUsers}}
+                    </td>
+                    <td v-if='item.userID._id === $store.state.auth.userID'>
+                      <v-btn
+                        text
+                        color="primary"
+                        @click="share(item, 'showDialog')"
+                      >
+                        <v-icon>mdi-share-variant-outline</v-icon>Share
+                      </v-btn>
+                    </td>
+                  </tr>
                 </template>
               </v-data-table>
             </v-card-text>
@@ -469,18 +470,18 @@
               <v-btn
                 :disabled="!canDeletePair"
                 color="error"
-                round
+                rounded
                 @click="confirmDeletePair"
               >
-                <v-icon left>delete</v-icon>Delete Pair
+                <v-icon left>mdi-delete</v-icon>Delete Pair
               </v-btn>
               <v-spacer></v-spacer>
               <v-btn
                 color="primary"
-                round
+                rounded
                 @click="activatePair"
               >
-                <v-icon left>save</v-icon>Activate Pair
+                <v-icon left>mdi-content-save</v-icon>Activate Pair
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -494,7 +495,6 @@ import axios from 'axios'
 import { eventBus } from '@/main'
 import { generalMixin } from '@/mixins/generalMixin'
 import { dataSourcePairMixin } from './dataSourcePairMixin'
-const backendServer = process.env.BACKEND_SERVER
 export default {
   mixins: [generalMixin, dataSourcePairMixin],
   data () {
@@ -567,7 +567,7 @@ export default {
     deletePair () {
       this.confirmPairDeleteDialog = false
       let query = `pairId=${this.activeDataSourcePair._id}&userID=${this.activeDataSourcePair.owner.id}&source1Name=${this.activeDataSourcePair.source1.name}&source2Name=${this.activeDataSourcePair.source2.name}`
-      axios.delete(backendServer + '/deleteSourcePair?' + query).then((resp) => {
+      axios.delete('/deleteSourcePair?' + query).then(() => {
         this.$store.state.errorTitle = 'Pair Deletion'
         this.$store.state.errorDescription = 'Pair deleted successfully'
         this.$store.state.dialogError = true
@@ -589,7 +589,7 @@ export default {
       this.$store.state.dynamicProgress = true
       this.$store.state.progressTitle = 'Reseting Data Source Pairs'
       let userID = this.$store.state.auth.userID
-      axios.get(backendServer + '/resetDataSourcePair/' + userID).then((response) => {
+      axios.get('/resetDataSourcePair/' + userID).then(() => {
         eventBus.$emit('getDataSourcePair')
         this.$store.state.dynamicProgress = false
         this.alertSuccess = true
@@ -615,7 +615,7 @@ export default {
         source2Owner: this.source2.userID._id
       })
       axios
-        .get(backendServer + '/countLevels/' + source1 + '/' + source2 + '/' + sourcesOwner + '/' + sourcesLimitOrgId)
+        .get('/countLevels/' + source1 + '/' + source2 + '/' + sourcesOwner + '/' + sourcesLimitOrgId)
         .then(levels => {
           if (levels.data.totalSource1Levels === 1) {
             this.$store.state.errorTitle = 'No data for you'
@@ -691,7 +691,7 @@ export default {
         formData.append('orgId', this.$store.state.dhis.user.orgId)
         this.$store.state.loadingServers = true
         this.shareDialog = false
-        axios.post(backendServer + '/shareSourcePair', formData, {
+        axios.post('/shareSourcePair', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -705,7 +705,7 @@ export default {
       }
     },
     getUsers () {
-      axios.get(backendServer + '/getUsers').then((response) => {
+      axios.get('/getUsers').then((response) => {
         this.users = response.data
       })
     }

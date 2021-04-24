@@ -245,7 +245,7 @@
           dark
         >
           <v-toolbar-title>
-            <v-icon>info</v-icon> About this page
+            <v-icon>mdi-information</v-icon> About this page
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn
@@ -253,7 +253,7 @@
             dark
             @click.native="helpDialog = false"
           >
-            <v-icon>close</v-icon>
+            <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card-text>
@@ -275,15 +275,19 @@
         text-xs-right
       >
         <v-tooltip top>
-          <v-btn
-            flat
-            icon
-            color="primary"
-            @click="helpDialog = true"
-            slot="activator"
-          >
-            <v-icon>help</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              class="mx-1"
+              fab
+              dark
+              x-small
+              color="primary"
+              @click="helpDialog = true"
+              v-on="on"
+            >
+              <v-icon>mdi-help</v-icon>
+            </v-btn>
+          </template>
           <span>Help</span>
         </v-tooltip>
       </v-flex>
@@ -324,77 +328,76 @@
             >
               Remote Sources
             </v-toolbar>
-            <v-spacer></v-spacer>
           </v-card-title>
           <v-card-actions>
             <v-btn
               color="primary"
               @click="sync('full')"
-              round
+              rounded
               v-if="remoteServers.length > 0"
             >
-              <v-icon left>sync</v-icon>Force Full Sync
+              <v-icon left>mdi-sync</v-icon>Force Full Sync
             </v-btn>
             <v-btn
               color="primary"
               @click="sync('full')"
-              round
+              rounded
               disabled
               v-else
             >
-              <v-icon left>sync</v-icon>Force Full Sync
+              <v-icon left>mdi-sync</v-icon>Force Full Sync
             </v-btn>
             <v-btn
               color="primary lighten-1"
               @click="sync('update')"
-              round
+              rounded
               v-if="remoteServers.length > 0"
             >
-              <v-icon left>sync</v-icon>Sync (Update)
+              <v-icon left>mdi-sync</v-icon>Sync (Update)
             </v-btn>
             <v-btn
               color="primary lighten-1"
               @click="sync('update')"
-              round
+              rounded
               disabled
               v-else
             >
-              <v-icon left>sync</v-icon>Sync (Update)
+              <v-icon left>mdi-sync</v-icon>Sync (Update)
             </v-btn>
             <v-spacer></v-spacer>
             <v-btn
               color="success"
               @click="editDataSource"
-              round
+              rounded
               v-if="remoteServers.length > 0"
             >
-              <v-icon left>edit</v-icon>Edit
+              <v-icon left>mdi-pencil</v-icon>Edit
             </v-btn>
             <v-btn
               color="success"
               @click="editDataSource"
-              round
+              rounded
               disabled
               v-else
             >
-              <v-icon left>edit</v-icon>Edit
+              <v-icon left>mdi-pencil</v-icon>Edit
             </v-btn>
             <v-btn
               color="error"
               @click="validateDelete"
-              round
+              rounded
               v-if="remoteServers.length > 0"
             >
-              <v-icon left>delete</v-icon>Delete
+              <v-icon left>mdi-delete</v-icon>Delete
             </v-btn>
             <v-btn
               color="error"
               @click="validateDelete"
-              round
+              rounded
               disabled
               v-else
             >
-              <v-icon left>delete</v-icon>Delete
+              <v-icon left>mdi-delete</v-icon>Delete
             </v-btn>
           </v-card-actions>
           <v-card-text>
@@ -411,43 +414,44 @@
                 indeterminate
               ></v-progress-linear>
               <template
-                slot="items"
-                slot-scope="props"
+                v-slot:item="{ item }"
               >
-                <v-radio-group
-                  v-model='server'
-                  style="height: 5px"
-                >
-                  <td>
-                    <v-radio
-                      :value="props.item"
-                      color="blue"
-                    ></v-radio>
-                  </td>
-                </v-radio-group>
-                <td>{{props.item.name}}</td>
-                <td>{{props.item.host}}</td>
-                <td>{{props.item.sourceType}}</td>
-                <td>{{props.item.username}}</td>
-                <td v-if="props.item.username">*****</td>
-                <td v-else></td>
-                <td>{{props.item.lastUpdate}}</td>
-                <td>{{props.item.userID.userName}}</td>
-                <td>
-                  {{props.item.shared.users | mergeUsers}}
-                </td>
-                <td>
-                  {{props.item.createdTime}}
-                </td>
-                <td v-if='props.item.userID._id === $store.state.auth.userID'>
-                  <v-btn
-                    color="success"
-                    flat
-                    @click="share(props.item, 'showDialog')"
+                <tr>
+                  <v-radio-group
+                    v-model='server'
+                    style="height: 5px"
                   >
-                    <v-icon>share</v-icon> Share
-                  </v-btn>
-                </td>
+                    <td>
+                      <v-radio
+                        :value="item"
+                        color="blue"
+                      ></v-radio>
+                    </td>
+                  </v-radio-group>
+                  <td>{{item.name}}</td>
+                  <td>{{item.host}}</td>
+                  <td>{{item.sourceType}}</td>
+                  <td>{{item.username}}</td>
+                  <td v-if="item.username">*****</td>
+                  <td v-else></td>
+                  <td>{{item.lastUpdate}}</td>
+                  <td>{{item.userID.userName}}</td>
+                  <td>
+                    {{item.shared.users | mergeUsers}}
+                  </td>
+                  <td>
+                    {{item.createdTime}}
+                  </td>
+                  <td v-if='item.userID._id === $store.state.auth.userID'>
+                    <v-btn
+                      color="success"
+                      flat
+                      @click="share(item, 'showDialog')"
+                    >
+                      <v-icon>mdi-share-variant-outline</v-icon> Share
+                    </v-btn>
+                  </td>
+                </tr>
               </template>
             </v-data-table>
           </v-card-text>
@@ -461,44 +465,46 @@
           </v-card-title>
           <v-card-actions>
             <v-tooltip top>
-              <v-btn
-                color="success"
-                @click="exportCSV"
-                round
-                v-if="uploadedSources.length > 0"
-                slot="activator"
-              >
-                <v-icon left>file_copy</v-icon>Export
-              </v-btn>
-              <v-btn
-                color="success"
-                @click="exportCSV"
-                round
-                disabled
-                v-else
-                slot="activator"
-              >
-                <v-icon left>file_copy</v-icon>Export
-              </v-btn>
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  color="success"
+                  @click="exportCSV"
+                  rounded
+                  v-if="uploadedSources.length > 0"
+                  v-on="on"
+                >
+                  <v-icon left>mdi-file-document-multiple</v-icon>Export
+                </v-btn>
+                <v-btn
+                  color="success"
+                  @click="exportCSV"
+                  rounded
+                  disabled
+                  v-else
+                  v-on="on"
+                >
+                  <v-icon left>mdi-file-document-multiple</v-icon>Export
+                </v-btn>
+              </template>
               <span>Export Original CSV</span>
             </v-tooltip>
             <v-spacer></v-spacer>
             <v-btn
               color="error"
               @click="validateDelete"
-              round
+              rounded
               v-if="uploadedSources.length > 0"
             >
-              <v-icon left>delete</v-icon>Delete
+              <v-icon left>mdi-delete</v-icon>Delete
             </v-btn>
             <v-btn
               color="error"
               @click="validateDelete"
-              round
+              rounded
               disabled
               v-else
             >
-              <v-icon left>delete</v-icon>Delete
+              <v-icon left>mdi-delete</v-icon>Delete
             </v-btn>
           </v-card-actions>
           <v-card-text>
@@ -515,37 +521,38 @@
                 indeterminate
               ></v-progress-linear>
               <template
-                slot="items"
-                slot-scope="props"
+                v-slot:item="{ item }"
               >
-                <v-radio-group
-                  v-model='server'
-                  style="height: 5px"
-                >
-                  <td>
-                    <v-radio
-                      :value="props.item"
-                      color="blue"
-                    ></v-radio>
-                  </td>
-                </v-radio-group>
-                <td>{{props.item.name}}</td>
-                <td>{{props.item.userID.userName}}</td>
-                <td>
-                  {{props.item.shared.users | mergeUsers}}
-                </td>
-                <td>
-                  {{props.item.createdTime}}
-                </td>
-                <td v-if='props.item.userID._id === $store.state.auth.userID'>
-                  <v-btn
-                    color="success"
-                    flat
-                    @click="share(props.item, 'showDialog')"
+                <tr>
+                  <v-radio-group
+                    v-model='server'
+                    style="height: 5px"
                   >
-                    <v-icon>share</v-icon> Share
-                  </v-btn>
-                </td>
+                    <td>
+                      <v-radio
+                        :value="item"
+                        color="blue"
+                      ></v-radio>
+                    </td>
+                  </v-radio-group>
+                  <td>{{item.name}}</td>
+                  <td>{{item.userID.userName}}</td>
+                  <td>
+                    {{item.shared.users | mergeUsers}}
+                  </td>
+                  <td>
+                    {{item.createdTime}}
+                  </td>
+                  <td v-if='item.userID._id === $store.state.auth.userID'>
+                    <v-btn
+                      color="success"
+                      text
+                      @click="share(item, 'showDialog')"
+                    >
+                      <v-icon>mdi-share-variant-outline</v-icon> Share
+                    </v-btn>
+                  </td>
+                </tr>
               </template>
             </v-data-table>
           </v-card-text>
@@ -566,14 +573,11 @@
 </template>
 
 <script>
-import FacilityReconUpload from './FacilityReconUpload'
-import FacilityReconRemoteSources from './FacilityReconRemoteSources'
 import RemoteSync from './RemoteSync'
 import { generalMixin } from '../../mixins/generalMixin'
 import { eventBus } from '../../main'
 import axios from 'axios'
 import LiquorTree from 'liquor-tree'
-const backendServer = process.env.BACKEND_SERVER
 export default {
   mixins: [generalMixin],
   data () {
@@ -673,7 +677,7 @@ export default {
         this.selectedComponent = 'FacilityReconRemoteSources'
       }
     },
-    editDataSource (server) {
+    editDataSource () {
       if (!this.server.name) {
         this.$store.state.dialogError = true
         this.$store.state.errorTitle = 'Info'
@@ -704,7 +708,7 @@ export default {
       formData.append('id', this.server._id)
       formData.append('clientId', clientId)
       this.editDialog = false
-      axios.post(backendServer + '/addDataSource', formData, {
+      axios.post('/addDataSource', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -732,7 +736,7 @@ export default {
       this.deleteConfirm = false
       let userID = this.$store.state.auth.userID
       let sourceOwner = this.server.userID._id
-      axios.get(backendServer + `/deleteDataSource/${this.server._id}/${this.server.name}/${sourceOwner}/${userID}`).then((resp) => {
+      axios.get(`/deleteDataSource/${this.server._id}/${this.server.name}/${sourceOwner}/${userID}`).then(() => {
         this.server = {}
         eventBus.$emit('getDataSources')
       })
@@ -784,7 +788,7 @@ export default {
         formData.append('limitLocationId', this.limitLocationId)
         this.$store.state.loadingServers = true
         this.shareDialog = false
-        axios.post(backendServer + '/shareDataSource', formData, {
+        axios.post('/shareDataSource', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -810,7 +814,7 @@ export default {
       let userID = this.shareSource.userID._id
       this.loadingLocationTree = true
       let source = this.toTitleCase(this.shareSource.name)
-      axios.get(backendServer + '/getTree/' + source + '/' + userID).then((hierarchy) => {
+      axios.get('/getTree/' + source + '/' + userID).then((hierarchy) => {
         if (hierarchy.data) {
           this.locationTree = [{
             text: 'Select location to limit sharing',
@@ -822,7 +826,7 @@ export default {
       })
     },
     getUsers () {
-      axios.get(backendServer + '/getUsers').then((response) => {
+      axios.get('/getUsers').then((response) => {
         this.users = response.data
       })
     },
@@ -834,7 +838,7 @@ export default {
         return
       }
       let sourceOwner = this.server.userID._id
-      axios.get(backendServer + '/getUploadedCSV/' + sourceOwner + '/' + this.server.name).then((resp) => {
+      axios.get('/getUploadedCSV/' + sourceOwner + '/' + this.server.name).then((resp) => {
         let blob = new Blob([resp.data])
         if (window.navigator.msSaveOrOpenBlob) {
           window.navigator.msSaveBlob(blob, `${this.server.name}.csv`)
@@ -900,8 +904,6 @@ export default {
     }
   },
   components: {
-    'FacilityReconUpload': FacilityReconUpload,
-    'FacilityReconRemoteSources': FacilityReconRemoteSources,
     'appRemoteSync': RemoteSync,
     'liquor-tree': LiquorTree
   },

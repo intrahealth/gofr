@@ -1,12 +1,11 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable func-names */
-require('./init');
-const winston = require('winston');
 const uuid5 = require('uuid/v5');
 const csv = require('fast-csv');
 const async = require('async');
 const moment = require('moment');
 const config = require('./config');
+const logger = require('./winston');
 
 module.exports = function () {
   return {
@@ -97,7 +96,7 @@ module.exports = function () {
     },
     getIdFromIdentifiers(identifier, system) {
       if (!Array.isArray(identifier)) {
-        winston.error('Identifier submitted is not an array');
+        logger.error('Identifier submitted is not an array');
         return false;
       }
       const matchedIdentifier = identifier.find(identifier => identifier.system === system);

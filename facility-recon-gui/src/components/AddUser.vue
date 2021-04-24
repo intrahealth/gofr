@@ -32,13 +32,13 @@
               @change="$v.firstName.$touch()"
               :error-messages="firstnameErrors"
               v-model="firstName"
-              box
+              filled
               color="deep-purple"
               label="First Name*"
             />
             <v-text-field
               v-model="otherName"
-              box
+              filled
               color="deep-purple"
               label="Middle Names"
             />
@@ -48,7 +48,7 @@
               @change="$v.surname.$touch()"
               :error-messages="surnameErrors"
               v-model="surname"
-              box
+              filled
               color="deep-purple"
               label="Surname*"
             />
@@ -59,7 +59,7 @@
               @input="validatePhone"
               :error-messages="phoneErrors"
               v-model="phone"
-              box
+              filled
               color="deep-purple"
               label="Phone*"
             />
@@ -70,7 +70,7 @@
               @input="validateEmail"
               :error-messages="emailErrors"
               v-model="email"
-              box
+              filled
               color="deep-purple"
               label="Email*"
             />
@@ -80,7 +80,7 @@
               @change="$v.surname.$touch()"
               :error-messages="usernameErrors"
               v-model="userName"
-              box
+              filled
               color="deep-purple"
               label="Username*"
             />
@@ -92,7 +92,7 @@
                 v-if='type.required'
                 required
                 v-model="customFields[name]"
-                box
+                filled
                 color="deep-purple"
                 :label="type.display"
               />
@@ -100,7 +100,7 @@
                 v-else
                 required
                 v-model="customFields[name]"
-                box
+                filled
                 color="deep-purple"
                 :label="type.display"
               />
@@ -112,7 +112,7 @@
               :error-messages="passwordErrors"
               v-model="password"
               type="password"
-              box
+              filled
               color="deep-purple"
               label="Password*"
             />
@@ -123,7 +123,7 @@
               :error-messages="retype_passwordErrors"
               v-model="retype_password"
               type="password"
-              box
+              filled
               color="deep-purple"
               label="Re-type Password*"
             />
@@ -136,17 +136,17 @@
               @blur="$v.role.$touch()"
               @change="$v.role.$touch()"
               :error-messages="roleErrors"
-              box
+              filled
               label="Role*"
             ></v-select>
           </v-form>
           <v-divider />
           <v-card-actions>
             <v-btn
-              flat
+              text
               @click="$store.state.baseRouterViewKey++"
             >
-              <v-icon>clear</v-icon>Clear
+              <v-icon>mdi-close</v-icon>Clear
             </v-btn>
             <v-spacer />
             <v-btn
@@ -156,7 +156,7 @@
               color="deep-purple accent-4"
               depressed
             >
-              <v-icon left>language</v-icon>Add
+              <v-icon left>mdi-web</v-icon>Add
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -170,7 +170,6 @@ import axios from 'axios'
 import { required } from 'vuelidate/lib/validators'
 import { generalMixin } from '../mixins/generalMixin'
 
-const backendServer = process.env.BACKEND_SERVER
 export default {
   mixins: [generalMixin],
   validations: {
@@ -243,7 +242,7 @@ export default {
       for (let field in this.customFields) {
         formData.append(field, this.customFields[field])
       }
-      axios.post(backendServer + '/addUser/', formData, {
+      axios.post('/addUser/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

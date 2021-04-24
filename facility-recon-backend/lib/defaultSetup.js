@@ -1,7 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 require('./connection');
-require('./init');
-const winston = require('winston');
+const logger = require('./winston');
 const models = require('./models');
 
 function initializeTasks() {
@@ -95,7 +94,7 @@ function initializeTasks() {
     const taskModel = new models.TasksModel(task);
     taskModel.save((err, data) => {
       if (err) {
-        winston.error('An error has occured while adding default tasks');
+        logger.error('An error has occured while adding default tasks');
       }
     });
   }

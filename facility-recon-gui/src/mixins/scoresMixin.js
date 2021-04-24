@@ -3,7 +3,6 @@ import { generalMixin } from './generalMixin'
 import { eventBus } from '../main'
 
 const CancelToken = axios.CancelToken
-const backendServer = process.env.BACKEND_SERVER
 export const scoresMixin = {
   mixins: [generalMixin],
   data () {
@@ -45,7 +44,7 @@ export const scoresMixin = {
       }
       this.$store.state.scoresProgressData.progressReqTimer = setInterval(this.scoreProgressCheckTimeout, time)
       const clientId = this.$store.state.clientId
-      axios.get(backendServer + '/progress/scoreResults/' + clientId, {
+      axios.get('/progress/scoreResults/' + clientId, {
         cancelToken: this.$store.state.scoresProgressData.cancelTokenSource.token
       }).then((scoreProgress) => {
         clearInterval(this.$store.state.scoresProgressData.progressReqTimer)
@@ -161,7 +160,7 @@ export const scoresMixin = {
         } else {
           this.checkScoreProgress()
         }
-      }).catch((thrown) => {
+      }).catch(() => {
         if (this.$store.state.scoresProgressData.requestCancelled) {
           this.$store.state.scoresProgressData.requestCancelled = false
         } else {
@@ -175,7 +174,7 @@ export const scoresMixin = {
       this.$store.state.scoreSavingProgressData.cancelTokenSource = CancelToken.source()
       this.$store.state.scoreSavingProgressData.progressReqTimer = setInterval(this.scoreSavingProgressCheckTimeout, 10000)
       const clientId = this.$store.state.clientId
-      axios.get(backendServer + '/progress/scoreSavingStatus/' + clientId, {
+      axios.get('/progress/scoreSavingStatus/' + clientId, {
         cancelToken: this.$store.state.scoreSavingProgressData.cancelTokenSource.token
       }).then((scoreSavingStatus) => {
         clearInterval(this.$store.state.scoreSavingProgressData.progressReqTimer)
@@ -205,7 +204,7 @@ export const scoresMixin = {
         } else {
           this.checkScoreSavingStatus()
         }
-      }).catch((thrown) => {
+      }).catch(() => {
         if (this.$store.state.scoreSavingProgressData.requestCancelled) {
           this.$store.state.scoreSavingProgressData.requestCancelled = false
         } else {
@@ -269,7 +268,7 @@ export const scoresMixin = {
       let parentConstraint = JSON.stringify(this.$store.state.config.generalConfig.reconciliation.parentConstraint)
       let path = `source1=${source1}&source2=${source2}&source1Owner=${source1Owner}&source2Owner=${source2Owner}&source1LimitOrgId=${source1LimitOrgId}&source2LimitOrgId=${source2LimitOrgId}&totalSource1Levels=${totalSource1Levels}&totalSource2Levels=${totalSource2Levels}`
       path += `&recoLevel=${recoLevel}&clientId=${clientId}&userID=${userID}&parentConstraint=` + parentConstraint + '&getPotential=' + getPotential
-      axios.get(backendServer + '/reconcile/?' + path).then(() => {
+      axios.get('/reconcile/?' + path).then(() => {
         this.checkScoreProgress()
       })
       // this.$store.state.scoresProgressData.scoreProgressTimer = setInterval(this.checkScoreProgress, 2000)

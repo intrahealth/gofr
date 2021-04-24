@@ -30,7 +30,7 @@
                       @change="$v.name.$touch()"
                       :error-messages="nameErrors"
                       v-model="name"
-                      box
+                      filled
                       color="deep-purple"
                       label="Name *"
                     />
@@ -40,7 +40,7 @@
                     <v-text-field
                       required
                       v-model="code"
-                      box
+                      filled
                       color="deep-purple"
                       label="Code"
                     />
@@ -54,52 +54,56 @@
                 >
                   <v-flex xs5>
                     <v-tooltip top>
-                      <v-select
-                        multiple
-                        multi-line
-                        item-text="display"
-                        item-value="code"
-                        :items="serviceCategoriesConcept"
-                        v-model="serviceCategories"
-                        label="Service Category"
-                        slot="activator"
-                      >
-                        <template v-slot:selection="{ item, index }">
-                          <v-chip v-if="index < 2">
-                            <span>{{ item.display }}</span>
-                          </v-chip>
-                          <span
-                            v-if="index === 2"
-                            class="grey--text caption"
-                          >(+{{ serviceCategories.length - 2 }} others)</span>
-                        </template>
-                      </v-select>
+                      <template v-slot:activator="{ on }">
+                        <v-select
+                          multiple
+                          multi-line
+                          item-text="display"
+                          item-value="code"
+                          :items="serviceCategoriesConcept"
+                          v-model="serviceCategories"
+                          label="Service Category"
+                          v-on="on"
+                        >
+                          <template v-slot:selection="{ item, index }">
+                            <v-chip v-if="index < 2">
+                              <span>{{ item.display }}</span>
+                            </v-chip>
+                            <span
+                              v-if="index === 2"
+                              class="grey--text caption"
+                            >(+{{ serviceCategories.length - 2 }} others)</span>
+                          </template>
+                        </v-select>
+                      </template>
                       <span>Broad category of service being performed or delivered</span>
                     </v-tooltip>
                   </v-flex>
                   <v-spacer></v-spacer>
                   <v-flex xs5>
                     <v-tooltip top>
-                      <v-select
-                        multiple
-                        multi-line
-                        item-text="display"
-                        item-value="code"
-                        :items="serviceTypesConcept"
-                        v-model="serviceTypes"
-                        label="Service Type"
-                        slot="activator"
-                      >
-                        <template v-slot:selection="{ item, index }">
-                          <v-chip v-if="index < 2">
-                            <span>{{ item.display }}</span>
-                          </v-chip>
-                          <span
-                            v-if="index === 2"
-                            class="grey--text caption"
-                          >(+{{ serviceTypes.length - 2 }} others)</span>
-                        </template>
-                      </v-select>
+                      <template v-slot:activator="{ on }">
+                        <v-select
+                          multiple
+                          multi-line
+                          item-text="display"
+                          item-value="code"
+                          :items="serviceTypesConcept"
+                          v-model="serviceTypes"
+                          label="Service Type"
+                          v-on="on"
+                        >
+                          <template v-slot:selection="{ item, index }">
+                            <v-chip v-if="index < 2">
+                              <span>{{ item.display }}</span>
+                            </v-chip>
+                            <span
+                              v-if="index === 2"
+                              class="grey--text caption"
+                            >(+{{ serviceTypes.length - 2 }} others)</span>
+                          </template>
+                        </v-select>
+                      </template>
                       <span>Type of service that may be delivered or performed</span>
                     </v-tooltip>
                   </v-flex>
@@ -112,52 +116,56 @@
                 >
                   <v-flex xs5>
                     <v-tooltip top>
-                      <v-select
-                        multiple
-                        multi-line
-                        item-text="display"
-                        item-value="code"
-                        :items="referralMethodsConcept"
-                        v-model="referralMethods"
-                        label="Referral Methods"
-                        slot="activator"
-                      >
-                        <template v-slot:selection="{ item, index }">
-                          <v-chip v-if="index < 2">
-                            <span>{{ item.display }}</span>
-                          </v-chip>
-                          <span
-                            v-if="index === 2"
-                            class="grey--text caption"
-                          >(+{{ referralMethods.length - 2 }} others)</span>
-                        </template>
-                      </v-select>
+                      <template v-slot:activator="{ on }">
+                        <v-select
+                          multiple
+                          multi-line
+                          item-text="display"
+                          item-value="code"
+                          :items="referralMethodsConcept"
+                          v-model="referralMethods"
+                          label="Referral Methods"
+                          v-on="on"
+                        >
+                          <template v-slot:selection="{ item, index }">
+                            <v-chip v-if="index < 2">
+                              <span>{{ item.display }}</span>
+                            </v-chip>
+                            <span
+                              v-if="index === 2"
+                              class="grey--text caption"
+                            >(+{{ referralMethods.length - 2 }} others)</span>
+                          </template>
+                        </v-select>
+                      </template>
                       <span>Ways that the service accepts referrals</span>
                     </v-tooltip>
                   </v-flex>
                   <v-spacer></v-spacer>
                   <v-flex xs5>
                     <v-tooltip top>
-                      <v-select
-                        multiple
-                        multi-line
-                        item-text="display"
-                        item-value="code"
-                        :items="specialtiesConcept"
-                        v-model="specialties"
-                        label="Specialties"
-                        slot="activator"
-                      >
-                        <template v-slot:selection="{ item, index }">
-                          <v-chip v-if="index < 2">
-                            <span>{{ item.display }}</span>
-                          </v-chip>
-                          <span
-                            v-if="index === 2"
-                            class="grey--text caption"
-                          >(+{{ specialties.length - 2 }} others)</span>
-                        </template>
-                      </v-select>
+                      <template v-slot:activator="{ on }">
+                        <v-select
+                          multiple
+                          multi-line
+                          item-text="display"
+                          item-value="code"
+                          :items="specialtiesConcept"
+                          v-model="specialties"
+                          label="Specialties"
+                          v-on="on"
+                        >
+                          <template v-slot:selection="{ item, index }">
+                            <v-chip v-if="index < 2">
+                              <span>{{ item.display }}</span>
+                            </v-chip>
+                            <span
+                              v-if="index === 2"
+                              class="grey--text caption"
+                            >(+{{ specialties.length - 2 }} others)</span>
+                          </template>
+                        </v-select>
+                      </template>
                       <span>Specialties handled by the HealthcareService</span>
                     </v-tooltip>
                   </v-flex>
@@ -170,52 +178,56 @@
                 >
                   <v-flex xs5>
                     <v-tooltip top>
-                      <v-select
-                        multiple
-                        multi-line
-                        item-text="display"
-                        item-value="code"
-                        :items="serviceEligibilitiesConcept"
-                        v-model="serviceEligibilities"
-                        label="Service Eligibility"
-                        slot="activator"
-                      >
-                        <template v-slot:selection="{ item, index }">
-                          <v-chip v-if="index < 2">
-                            <span>{{ item.display }}</span>
-                          </v-chip>
-                          <span
-                            v-if="index === 2"
-                            class="grey--text caption"
-                          >(+{{ serviceEligibilities.length - 2 }} others)</span>
-                        </template>
-                      </v-select>
+                      <template v-slot:activator="{ on }">
+                        <v-select
+                          multiple
+                          multi-line
+                          item-text="display"
+                          item-value="code"
+                          :items="serviceEligibilitiesConcept"
+                          v-model="serviceEligibilities"
+                          label="Service Eligibility"
+                          v-on="on"
+                        >
+                          <template v-slot:selection="{ item, index }">
+                            <v-chip v-if="index < 2">
+                              <span>{{ item.display }}</span>
+                            </v-chip>
+                            <span
+                              v-if="index === 2"
+                              class="grey--text caption"
+                            >(+{{ serviceEligibilities.length - 2 }} others)</span>
+                          </template>
+                        </v-select>
+                      </template>
                       <span>Specific eligibility requirements required to use the service</span>
                     </v-tooltip>
                   </v-flex>
                   <v-spacer></v-spacer>
                   <v-flex xs5>
                     <v-tooltip top>
-                      <v-select
-                        multiple
-                        multi-line
-                        item-text="display"
-                        item-value="code"
-                        :items="languagesConcept"
-                        v-model="languages"
-                        label="Communication Language"
-                        slot="activator"
-                      >
-                        <template v-slot:selection="{ item, index }">
-                          <v-chip v-if="index < 2">
-                            <span>{{ item.display }}</span>
-                          </v-chip>
-                          <span
-                            v-if="index === 2"
-                            class="grey--text caption"
-                          >(+{{ languages.length - 2 }} others)</span>
-                        </template>
-                      </v-select>
+                      <template v-slot:activator="{ on }">
+                        <v-select
+                          multiple
+                          multi-line
+                          item-text="display"
+                          item-value="code"
+                          :items="languagesConcept"
+                          v-model="languages"
+                          label="Communication Language"
+                          v-on="on"
+                        >
+                          <template v-slot:selection="{ item, index }">
+                            <v-chip v-if="index < 2">
+                              <span>{{ item.display }}</span>
+                            </v-chip>
+                            <span
+                              v-if="index === 2"
+                              class="grey--text caption"
+                            >(+{{ languages.length - 2 }} others)</span>
+                          </template>
+                        </v-select>
+                      </template>
                       <span>The language that this service is offered in</span>
                     </v-tooltip>
                   </v-flex>
@@ -228,52 +240,56 @@
                 >
                   <v-flex xs5>
                     <v-tooltip top>
-                      <v-select
-                        multiple
-                        multi-line
-                        item-text="display"
-                        item-value="code"
-                        :items="programsConcept"
-                        v-model="programs"
-                        label="Programs"
-                        slot="activator"
-                      >
-                        <template v-slot:selection="{ item, index }">
-                          <v-chip v-if="index < 2">
-                            <span>{{ item.display }}</span>
-                          </v-chip>
-                          <span
-                            v-if="index === 2"
-                            class="grey--text caption"
-                          >(+{{ programs.length - 2 }} others)</span>
-                        </template>
-                      </v-select>
+                      <template v-slot:activator="{ on }">
+                        <v-select
+                          multiple
+                          multi-line
+                          item-text="display"
+                          item-value="code"
+                          :items="programsConcept"
+                          v-model="programs"
+                          label="Programs"
+                          v-on="on"
+                        >
+                          <template v-slot:selection="{ item, index }">
+                            <v-chip v-if="index < 2">
+                              <span>{{ item.display }}</span>
+                            </v-chip>
+                            <span
+                              v-if="index === 2"
+                              class="grey--text caption"
+                            >(+{{ programs.length - 2 }} others)</span>
+                          </template>
+                        </v-select>
+                      </template>
                       <span>Programs that this service is applicable to</span>
                     </v-tooltip>
                   </v-flex>
                   <v-spacer></v-spacer>
                   <v-flex xs5>
                     <v-tooltip top>
-                      <v-select
-                        multiple
-                        multi-line
-                        item-text="display"
-                        item-value="code"
-                        :items="serviceCharacteristicsConcept"
-                        v-model="serviceCharacteristics"
-                        label="Characteristics"
-                        slot="activator"
-                      >
-                        <template v-slot:selection="{ item, index }">
-                          <v-chip v-if="index < 2">
-                            <span>{{ item.display }}</span>
-                          </v-chip>
-                          <span
-                            v-if="index === 2"
-                            class="grey--text caption"
-                          >(+{{ serviceCharacteristics.length - 2 }} others)</span>
-                        </template>
-                      </v-select>
+                      <template v-slot:activator="{ on }">
+                        <v-select
+                          multiple
+                          multi-line
+                          item-text="display"
+                          item-value="code"
+                          :items="serviceCharacteristicsConcept"
+                          v-model="serviceCharacteristics"
+                          label="Characteristics"
+                          v-on="on"
+                        >
+                          <template v-slot:selection="{ item, index }">
+                            <v-chip v-if="index < 2">
+                              <span>{{ item.display }}</span>
+                            </v-chip>
+                            <span
+                              v-if="index === 2"
+                              class="grey--text caption"
+                            >(+{{ serviceCharacteristics.length - 2 }} others)</span>
+                          </template>
+                        </v-select>
+                      </template>
                       <span>Collection of characteristics (attributes)</span>
                     </v-tooltip>
                   </v-flex>
@@ -281,26 +297,28 @@
               </v-flex>
               <v-flex>
                 <v-tooltip top>
-                  <v-select
-                    multiple
-                    multi-line
-                    item-text="display"
-                    item-value="code"
-                    :items="serviceProvisionConditionsConcept"
-                    v-model="serviceProvisionConditions"
-                    label="Service Provision Conditions"
-                    slot="activator"
-                  >
-                    <template v-slot:selection="{ item, index }">
-                      <v-chip v-if="index < 2">
-                        <span>{{ item.display }}</span>
-                      </v-chip>
-                      <span
-                        v-if="index === 2"
-                        class="grey--text caption"
-                      >(+{{ serviceProvisionConditions.length - 2 }} others)</span>
-                    </template>
-                  </v-select>
+                  <template v-slot:activator="{ on }">
+                    <v-select
+                      multiple
+                      multi-line
+                      item-text="display"
+                      item-value="code"
+                      :items="serviceProvisionConditionsConcept"
+                      v-model="serviceProvisionConditions"
+                      label="Service Provision Conditions"
+                      v-on="on"
+                    >
+                      <template v-slot:selection="{ item, index }">
+                        <v-chip v-if="index < 2">
+                          <span>{{ item.display }}</span>
+                        </v-chip>
+                        <span
+                          v-if="index === 2"
+                          class="grey--text caption"
+                        >(+{{ serviceProvisionConditions.length - 2 }} others)</span>
+                      </template>
+                    </v-select>
+                  </template>
                   <span>Conditions under which service is available/offered</span>
                 </v-tooltip>
               </v-flex>
@@ -352,7 +370,7 @@
                                 v-model="availableTime[key].mainFields.daysOfWeek"
                                 label="Available days of the week"
                               >
-                                <template v-slot:selection="{ item, index }">
+                                <template v-slot:selection="{ item }">
                                   <v-chip>
                                     <span>{{ item.text }}</span>
                                   </v-chip>
@@ -385,10 +403,8 @@
                                 :close-on-content-click="false"
                                 :nudge-right="40"
                                 :return-value.sync="availableTime[key].mainFields.availableStartTime"
-                                lazy
                                 transition="scale-transition"
                                 offset-y
-                                full-width
                                 max-width="290px"
                                 min-width="290px"
                               >
@@ -397,7 +413,7 @@
                                     :disabled="availableTime[key].mainFields.allDay"
                                     v-model="availableTime[key].mainFields.availableStartTime"
                                     label="Available start time"
-                                    prepend-icon="access_time"
+                                    prepend-icon="mdi-clock-outline"
                                     clearable
                                     @click:clear="clearStartTime(key)"
                                     readonly
@@ -408,7 +424,6 @@
                                   v-if="availableTime[key].otherFields.timeMenuStart"
                                   v-model="availableTime[key].mainFields.availableStartTime"
                                   format="24hr"
-                                  full-width
                                   @click:minute="validateStartTime(key)"
                                 ></v-time-picker>
                               </v-menu>
@@ -421,10 +436,8 @@
                                 :close-on-content-click="false"
                                 :nudge-right="40"
                                 :return-value.sync="availableTime[key].mainFields.availableEndTime"
-                                lazy
                                 transition="scale-transition"
                                 offset-y
-                                full-width
                                 max-width="290px"
                                 min-width="290px"
                               >
@@ -433,7 +446,7 @@
                                     :disabled="availableTime[key].mainFields.allDay"
                                     v-model="availableTime[key].mainFields.availableEndTime"
                                     label="Available end time"
-                                    prepend-icon="access_time"
+                                    prepend-icon="mdi-clock-outline"
                                     clearable
                                     @click:clear="clearEndTime(key)"
                                     readonly
@@ -444,7 +457,6 @@
                                   v-if="availableTime[key].otherFields.timeMenuEnd"
                                   v-model="availableTime[key].mainFields.availableEndTime"
                                   format="24hr"
-                                  full-width
                                   @click:minute="validateEndTime(key)"
                                 ></v-time-picker>
                               </v-menu>
@@ -462,14 +474,19 @@
                       <v-spacer></v-spacer>
                       <v-flex xs1>
                         <v-tooltip top>
-                          <v-btn
-                            icon
-                            color="primary"
-                            @click="addAvailableTime"
-                            slot="activator"
-                          >
-                            <v-icon>add</v-icon>
-                          </v-btn>
+                          <template v-slot:activator="{ on }">
+                            <v-btn
+                              class="mx-1"
+                              fab
+                              dark
+                              x-small
+                              color="primary"
+                              @click="addAvailableTime"
+                              v-on="on"
+                            >
+                              <v-icon>mdi-plus</v-icon>
+                            </v-btn>
+                          </template>
                           <span>Add more availability for this service</span>
                         </v-tooltip>
                       </v-flex>
@@ -505,13 +522,15 @@
                           >
                             <v-flex>
                               <v-tooltip top>
-                                <v-text-field
-                                  v-model="notAvailable[key].mainFields.description"
-                                  label="Description"
-                                  @input="validateUnavailabilityDescr(key)"
-                                  id="id"
-                                  slot="activator"
-                                ></v-text-field>
+                                <template v-slot:activator="{ on }">
+                                  <v-text-field
+                                    v-model="notAvailable[key].mainFields.description"
+                                    label="Description"
+                                    @input="validateUnavailabilityDescr(key)"
+                                    id="id"
+                                    v-on="on"
+                                  ></v-text-field>
+                                </template>
                                 <span>Reason presented to the user explaining why time not available</span>
                               </v-tooltip>
                             </v-flex>
@@ -533,7 +552,6 @@
                                 v-model="notAvailable[key].otherFields.dateMenuStart"
                                 :return-value.sync="notAvailable[key].mainFields.during.startDisplay"
                                 :close-on-content-click="false"
-                                full-width
                                 max-width="290"
                               >
                                 <template v-slot:activator="{ on }">
@@ -560,7 +578,6 @@
                                 v-model="notAvailable[key].otherFields.dateMenuEnd"
                                 :return-value.sync="notAvailable[key].mainFields.during.endDisplay"
                                 :close-on-content-click="false"
-                                full-width
                                 max-width="290"
                               >
                                 <template v-slot:activator="{ on }">
@@ -593,14 +610,19 @@
                       <v-spacer></v-spacer>
                       <v-flex xs1>
                         <v-tooltip top>
-                          <v-btn
-                            icon
-                            color="primary"
-                            @click="addUnavailableTime"
-                            slot="activator"
-                          >
-                            <v-icon>add</v-icon>
-                          </v-btn>
+                          <template v-slot:activator="{ on }">
+                            <v-btn
+                              class="mx-1"
+                              fab
+                              dark
+                              x-small
+                              color="primary"
+                              @click="addUnavailableTime"
+                              v-on="on"
+                            >
+                              <v-icon>mdi-plus</v-icon>
+                            </v-btn>
+                          </template>
                           <span>Add more service un availability</span>
                         </v-tooltip>
                       </v-flex>
@@ -628,7 +650,7 @@
                           <v-flex xs5>
                             <v-text-field
                               v-model="contact.email"
-                              box
+                              filled
                               color="deep-purple"
                               label="Email"
                             />
@@ -637,7 +659,7 @@
                           <v-flex xs5>
                             <v-text-field
                               v-model="contact.phone"
-                              box
+                              filled
                               color="deep-purple"
                               label="Phone"
                             />
@@ -652,7 +674,7 @@
                           <v-flex xs5>
                             <v-text-field
                               v-model="contact.fax"
-                              box
+                              filled
                               color="deep-purple"
                               label="Fax"
                             />
@@ -661,7 +683,7 @@
                           <v-flex xs5>
                             <v-text-field
                               v-model="contact.website"
-                              box
+                              filled
                               color="deep-purple"
                               label="Website"
                             />
@@ -677,37 +699,43 @@
               <v-divider></v-divider>
               <v-flex>
                 <v-tooltip top>
-                  <v-textarea
-                    outline
-                    label="Comment about this service"
-                    v-model="comment"
-                    slot="activator"
-                  >
-                  </v-textarea>
+                  <template v-slot:activator="{ on }">
+                    <v-textarea
+                      outline
+                      label="Comment about this service"
+                      v-model="comment"
+                      v-on="on"
+                    >
+                    </v-textarea>
+                  </template>
                   <span>Additional description and/or any specific issues not covered elsewhere</span>
                 </v-tooltip>
               </v-flex>
               <v-flex>
                 <v-tooltip top>
-                  <v-textarea
-                    outline
-                    label="Extra details about this service"
-                    v-model="extraDetails"
-                    slot="activator"
-                  >
-                  </v-textarea>
+                  <template v-slot:activator="{ on }">
+                    <v-textarea
+                      outline
+                      label="Extra details about this service"
+                      v-model="extraDetails"
+                      v-on="on"
+                    >
+                    </v-textarea>
+                  </template>
                   <span>Extra details about the service that can't be placed in the other fields</span>
                 </v-tooltip>
               </v-flex>
               <v-flex>
                 <v-tooltip top>
-                  <label slot="activator">Photo for a service</label>
-                  <input
-                    type="file"
-                    @change="previewImage"
-                    accept="image/*"
-                    slot="activator"
-                  >
+                  <template v-slot:activator="{ on }">
+                    <label>Photo for a service</label>
+                    <input
+                      type="file"
+                      @change="previewImage"
+                      accept="image/*"
+                      v-on="on"
+                    >
+                  </template>
                   <span>Facilitates quick identification of the service</span>
                 </v-tooltip>
                 <div
@@ -727,11 +755,13 @@
                 >
                   <v-flex xs5>
                     <v-tooltip top>
-                      <v-switch
-                        label="Appointment Required"
-                        v-model="appointmentRequired"
-                        slot="activator"
-                      ></v-switch>
+                      <template v-slot:activator="{ on }">
+                        <v-switch
+                          label="Appointment Required"
+                          v-model="appointmentRequired"
+                          v-on="on"
+                        ></v-switch>
+                      </template>
                       <span>If an appointment is required for access to this service</span>
                     </v-tooltip>
                   </v-flex>
@@ -748,10 +778,10 @@
           </v-form>
           <v-card-actions>
             <v-btn
-              flat
+              text
               @click="$store.state.baseRouterViewKey++"
             >
-              <v-icon>clear</v-icon>Clear
+              <v-icon>mdi-close</v-icon>Clear
             </v-btn>
             <v-spacer />
             <v-btn
@@ -761,7 +791,7 @@
               color="deep-purple accent-4"
               depressed
             >
-              <v-icon left>add</v-icon>Add
+              <v-icon left>mdi-plus</v-icon>Add
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -775,7 +805,6 @@ import LiquorTree from 'liquor-tree'
 import moment from 'moment'
 import { required } from 'vuelidate/lib/validators'
 import { generalMixin } from '../../mixins/generalMixin'
-const backendServer = process.env.BACKEND_SERVER
 export default {
   mixins: [generalMixin],
   validations: {
@@ -963,11 +992,11 @@ export default {
       formData.append('telecom', JSON.stringify(this.contact))
       formData.append('appointmentRequired', this.appointmentRequired)
       formData.append('active', this.active)
-      axios.post(backendServer + '/FR/addService', formData, {
+      axios.post('/FR/addService', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
-      }).then((response) => {
+      }).then(() => {
         this.$store.state.alert.show = true
         this.$store.state.alert.width = '800px'
         this.$store.state.alert.msg = 'Service added successfully!'
@@ -1106,7 +1135,7 @@ export default {
     }
   },
   created () {
-    this.getTree(true, (err, tree) => {
+    this.getTree(true, true, (err, tree) => {
       if (!err) {
         this.locationHierarchy = tree
       }

@@ -1,4 +1,3 @@
-const winston = require('winston');
 const mongoose = require('mongoose');
 const models = require('./models');
 const config = require('./config');

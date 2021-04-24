@@ -20,7 +20,7 @@
             color="deep-purple accent-4"
             cards
             dark
-            flat
+            text
           >
             <v-card-title class="title font-weight-regular">Add New Remote Source</v-card-title>
             <v-spacer></v-spacer>
@@ -29,7 +29,7 @@
               dark
               @click.native="close()"
             >
-              <v-icon>close</v-icon>
+              <v-icon>mdi-close</v-icon>
             </v-btn>
           </v-toolbar>
           <v-form
@@ -44,7 +44,7 @@
             ></v-select>
             <v-text-field
               v-model="name"
-              box
+              filled
               required
               @blur="ensureNameUnique"
               @input="ensureNameUnique"
@@ -54,20 +54,20 @@
             ></v-text-field>
             <v-text-field
               v-model="host"
-              box
+              filled
               required
               color="deep-purple"
               label="Base URL"
             ></v-text-field>
             <v-text-field
               v-model="username"
-              box
+              filled
               color="deep-purple"
               label="Username"
             ></v-text-field>
             <v-text-field
               v-model="password"
-              box
+              filled
               color="deep-purple"
               label="Password"
               style="min-height: 96px"

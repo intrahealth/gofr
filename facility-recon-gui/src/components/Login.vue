@@ -35,7 +35,7 @@
                 <v-icon
                   x-large
                   color="white"
-                >lock</v-icon>
+                >mdi-lock</v-icon>
               </v-flex>
               <v-flex
                 xs9
@@ -58,7 +58,7 @@
               @change="$v.username.$touch()"
               :error-messages="usernameErrors"
               v-model="username"
-              box
+              filled
               color="deep-purple"
               label="Username"
             />
@@ -69,7 +69,7 @@
               @change="$v.password.$touch()"
               :error-messages="passwordErrors"
               v-model="password"
-              box
+              filled
               type="password"
               color="deep-purple"
               label="Password"
@@ -103,7 +103,6 @@ import axios from 'axios'
 import VueCookies from 'vue-cookies'
 import { uuid } from 'vue-uuid'
 import { eventBus } from '../main'
-const backendServer = process.env.BACKEND_SERVER
 
 export default {
   validations: {
@@ -124,7 +123,7 @@ export default {
       formData.append('username', this.username)
       formData.append('password', this.password)
       axios
-        .post(backendServer + '/authenticate/', formData, {
+        .post('/authenticate/', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -184,7 +183,7 @@ export default {
     }
   },
   created () {
-    axios.get(backendServer + '/getSignupConf').then(resp => {
+    axios.get('/getSignupConf').then(resp => {
       if (resp.data) {
         this.signupEnabled = true
         this.$store.state.signupFields = resp.data.allSignupFields

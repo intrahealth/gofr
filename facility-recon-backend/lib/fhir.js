@@ -1,9 +1,7 @@
-require('./init');
 const request = require('request');
 const URI = require('urijs');
 const uuid4 = require('uuid/v4');
 const async = require('async');
-const winston = require('winston');
 const redis = require('redis');
 
 const redisClient = redis.createClient({
@@ -15,6 +13,7 @@ const mcsd = require('./mcsd')();
 const mixin = require('./mixin')();
 const models = require('./models');
 const config = require('./config');
+const logger = require('./winston');
 
 module.exports = function () {
   return {
@@ -62,7 +61,7 @@ module.exports = function () {
               try {
                 body = JSON.parse(body);
               } catch (error) {
-                winston.error(error);
+                logger.error(error);
                 return callback(false, false);
               }
               locations.entry = locations.entry.concat(body.entry);
@@ -112,7 +111,7 @@ module.exports = function () {
             };
             request.put(options, (err, res, body) => {
               if (err) {
-                winston.error('An error occured while saving the top org of hierarchy, this will cause issues with reconciliation');
+                logger.error('An error occured while saving the top org of hierarchy, this will cause issues with reconciliation');
               }
             });
             async.each(locations.entry, (entry, nxtEntry) => {
@@ -149,7 +148,7 @@ module.exports = function () {
                 return nxtEntry();
               }
             }, () => {
-              winston.info(`Done syncing FHIR Server ${host}`);
+              logger.info(`Done syncing FHIR Server ${host}`);
               setLastUpdated(lastUpdated, database);
               const fhirSyncRequest = JSON.stringify({
                 status: 'Done',
@@ -180,7 +179,7 @@ module.exports = function () {
           if (data && data.lastUpdated) {
             return callback(data.lastUpdated);
           }
-          winston.info(`Last updated details not found for ${database}`);
+          logger.info(`Last updated details not found for ${database}`);
           return callback(false);
         });
       });
@@ -209,10 +208,10 @@ function setLastUpdated(lastUpdated, database) {
         });
         MetaData.save((err, data) => {
           if (err) {
-            winston.error(err);
-            winston.error('Failed to add lastUpdated');
+            logger.error(err);
+            logger.error('Failed to add lastUpdated');
           } else {
-            winston.info('Last Updated time added successfully');
+            logger.info('Last Updated time added successfully');
           }
         });
       } else {
@@ -220,10 +219,10 @@ function setLastUpdated(lastUpdated, database) {
           lastUpdated,
         }, (err, data) => {
           if (err) {
-            winston.error(err);
-            winston.error('Failed to update lastUpdated');
+            logger.error(err);
+            logger.error('Failed to update lastUpdated');
           } else {
-            winston.info(`Last Updated time for ${database} updated successfully to ${lastUpdated}`);
+            logger.info(`Last Updated time for ${database} updated successfully to ${lastUpdated}`);
           }
         });
       }

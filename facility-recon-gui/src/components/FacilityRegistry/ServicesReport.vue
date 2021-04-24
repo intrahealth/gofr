@@ -112,33 +112,33 @@
                       <v-card class="grey lighten-3">
                         <v-card-text>
                           <template v-for="(availableTime, id) in service.availableTime">
-                            Days of the week: {{availableTime.daysOfWeek | translateDays}} <br>
+                            Days of the week: {{availableTime.daysOfWeek | translateDays}}
                             Available All Day:
-                            <label
+                            <p
                               v-if="availableTime.allDay"
                               :key="'allDayYes'+id"
                             >
                               Yes
-                            </label>
-                            <label
+                            </p>
+                            <p
                               :key="'allDayNo'+id"
                               v-else
                             >
                               No
-                            </label><br>
-                            <label
+                            </p>
+                            <p
                               v-if="availableTime.availableStartTime"
                               :key="'startTime'+id"
                             >
-                              Available Start Time: {{availableTime.availableStartTime}} <br>
-                            </label>
-                            <label
+                              Available Start Time: {{availableTime.availableStartTime}}
+                            </p>
+                            <p
                               v-if="availableTime.availableEndTime"
                               :key="'endTime'+id"
                             >
-                              Available End Time: {{availableTime.availableEndTime}} <br>
-                            </label>
-                            <v-divider></v-divider>
+                              Available End Time: {{availableTime.availableEndTime}}
+                            </p>
+                            <v-divider :key="'divider'+id"></v-divider>
                           </template>
                         </v-card-text>
                       </v-card>
@@ -153,13 +153,13 @@
                       <v-card class="grey lighten-3">
                         <v-card-text>
                           <template v-for="(notAvailable, id) in service.notAvailable">
-                            Description: {{notAvailable.description}} <br>
-                            <label
+                            Description: {{notAvailable.description}}
+                            <p
                               v-if="notAvailable.during && (notAvailable.during.start || notAvailable.during.end)"
                               :key="'unavailable'+id"
                             >
                               Dates Unavailable: {{notAvailable.during.start | formatDate}} to {{notAvailable.during.end | formatDate}}
-                            </label>
+                            </p>
                             <v-divider :key="'unAvDivider'+id"></v-divider>
                           </template>
                         </v-card-text>
@@ -207,8 +207,8 @@
                   </template>
                   <v-card class="grey lighten-3">
                     <v-card-text>
-                      <template v-for="location in service.location">
-                        {{location.name}}<br>
+                      <template v-for="(location, id) in service.location">
+                        {{location.name}}<br :key="id">
                       </template>
                     </v-card-text>
                   </v-card>
@@ -267,7 +267,7 @@
                               v-else
                               :key="id"
                             >{{telecom.system}}</label>
-                            : {{telecom.value}} <br>
+                            : {{telecom.value}} <br :key="'br'+id">
                           </template>
                         </v-card-text>
                       </v-card>
@@ -921,7 +921,6 @@
 <script>
 import axios from 'axios'
 import moment from 'moment'
-const backendServer = process.env.BACKEND_SERVER
 export default {
   data () {
     return {
@@ -1014,9 +1013,9 @@ export default {
     }
   },
   methods: {
-    expandAll (value) {
+    expandAll () {
       if (this.expand) {
-        this.panel = [...Array(20).keys()].map(_ => true)
+        this.panel = [...Array(20).keys()].map(() => true)
       } else {
         this.panel = []
       }
@@ -1046,7 +1045,7 @@ export default {
         getResource,
         id
       }
-      axios.get(backendServer + '/FR/getServices', { params }).then((services) => {
+      axios.get('/FR/getServices', { params }).then((services) => {
         return callback(services)
       }).catch((err) => {
         console.log(err)

@@ -14,36 +14,36 @@
             Select file type to download
           </v-toolbar-title>
           <v-spacer></v-spacer>
-          <v-icon @click='closeDownloadDialog'>close</v-icon>
+          <v-icon @click='closeDownloadDialog'>mdi-close</v-icon>
         </v-toolbar>
         <v-card-text>
 
         </v-card-text>
         <v-card-actions>
           <v-btn
-            round
+            rounded
             color="info"
             @click='downloadMatched'
           >
-            <v-icon left>file_copy</v-icon>
+            <v-icon left>mdi-file-multiple-outline</v-icon>
             Matched
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
-            round
+            rounded
             color="info"
             @click='downloadSource1Unmatched'
           >
-            <v-icon left>file_copy</v-icon>
+            <v-icon left>mdi-file-multiple-outline</v-icon>
             Source1 Unmatched
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
-            round
+            rounded
             color="info"
             @click='downloadSource2Unmatched'
           >
-            <v-icon left>file_copy</v-icon>
+            <v-icon left>mdi-file-multiple-outline</v-icon>
             Source2 Unmatched
           </v-btn>
         </v-card-actions>
@@ -56,11 +56,11 @@
       <v-flex xs6>
         <v-btn
           color="success"
-          round
+          rounded
           small
           @click='csvExport'
         >
-          <v-icon left>file_copy</v-icon>
+          <v-icon left>mdi-file-multiple-outline</v-icon>
           <v-progress-circular
             v-if='loadingCSV'
             indeterminate
@@ -72,11 +72,11 @@
       <v-flex xs6>
         <v-btn
           color="success"
-          round
+          rounded
           small
           @click='fhirExport'
         >
-          <v-icon left>file_copy</v-icon>
+          <v-icon left>mdi-file-multiple-outline</v-icon>
           <v-progress-circular
             v-if='loadingFHIR'
             indeterminate
@@ -92,7 +92,6 @@
 import axios from 'axios'
 import { scoresMixin } from '../mixins/scoresMixin'
 import { generalMixin } from '../mixins/generalMixin'
-const backendServer = process.env.BACKEND_SERVER
 export default {
   mixins: [scoresMixin, generalMixin],
   data () {
@@ -136,7 +135,7 @@ export default {
         levelMapping1,
         levelMapping2
       }
-      return axios.get(backendServer + '/matchedLocations', { params })
+      return axios.get('/matchedLocations', { params })
     },
     unMatchedLocations (type) {
       let userID = this.$store.state.activePair.userID._id
@@ -161,7 +160,7 @@ export default {
         levelMapping1,
         levelMapping2
       }
-      return axios.get(backendServer + '/unmatchedLocations', { params })
+      return axios.get('/unmatchedLocations', { params })
     },
     csvExport () {
       this.loadingCSV = true

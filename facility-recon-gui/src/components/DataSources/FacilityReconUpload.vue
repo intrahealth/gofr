@@ -24,7 +24,7 @@
             dark
             @click.native="closeDialog('FacilityReconView')"
           >
-            <v-icon left>list</v-icon>
+            <v-icon left>mdi-format-list-bulleted-square</v-icon>
             View Data
           </v-btn>
         </v-card-actions>
@@ -42,7 +42,7 @@
           dark
         >
           <v-toolbar-title>
-            <v-icon>error</v-icon>Data Upload was not successful,review below invalid rows in your CSV
+            <v-icon>mdi-close-circle</v-icon>Data Upload was not successful,review below invalid rows in your CSV
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn
@@ -50,7 +50,7 @@
             dark
             @click.native="closeInvalidRows()"
           >
-            <v-icon>close</v-icon>
+            <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card-text>
@@ -64,7 +64,10 @@
               slot="items"
               slot-scope="props"
             >
-              <td v-for='header in invalidRowsHeader'>{{props.item[header.value]}}</td>
+              <td
+                v-for='header in invalidRowsHeader'
+                :key="header.value"
+              >{{props.item[header.value]}}</td>
             </template>
           </v-data-table>
         </v-card-text>
@@ -203,7 +206,7 @@
             icon
             @click.native="closeUploadWindow()"
           >
-            <v-icon>close</v-icon>
+            <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-stepper-header>
         <v-stepper-items>
@@ -230,14 +233,16 @@
                   </v-card-title>
                   <v-card-text>
                     <v-tooltip top>
-                      <v-checkbox
-                        v-if="$store.state.dhis.user.orgId"
-                        :disabled="shareWithAll"
-                        slot="activator"
-                        color="primary"
-                        label="Share with other users of the same org unit as yours"
-                        v-model="shareToSameOrgid"
-                      ></v-checkbox>
+                      <template v-slot:activator="{ on }">
+                        <v-checkbox
+                          v-if="$store.state.dhis.user.orgId"
+                          :disabled="shareWithAll"
+                          v-on="on"
+                          color="primary"
+                          label="Share with other users of the same org unit as yours"
+                          v-model="shareToSameOrgid"
+                        ></v-checkbox>
+                      </template>
                       <span>
                         Share this dataset with all other users that are on the same org unit as you
                       </span>
@@ -251,14 +256,16 @@
                     >
                     </v-checkbox>
                     <v-tooltip top>
-                      <v-checkbox
-                        v-if="shareWithAll && $store.state.dhis.user.orgId"
-                        slot="activator"
-                        color="primary"
-                        label="Limit orgs sharing by user orgid"
-                        v-model="limitShareByOrgId"
-                      >
-                      </v-checkbox>
+                      <template v-slot:activator="{ on }">
+                        <v-checkbox
+                          v-if="shareWithAll && $store.state.dhis.user.orgId"
+                          v-on="on"
+                          color="primary"
+                          label="Limit orgs sharing by user orgid"
+                          v-model="limitShareByOrgId"
+                        >
+                        </v-checkbox>
+                      </template>
                       <span>
                         if activated, other users will see locations (including location children) that has the same location id as their location id
                       </span>
@@ -281,198 +288,205 @@
           </v-stepper-content>
           <v-stepper-content step="2">
             <b>Map an appropriate CSV header against those on the app.</b>
-            <v-container fluid>
-              <v-layout
-                row
-                wrap
-                ref="form"
-                v-model="valid"
-              >
-                <v-flex xs6>
-                  <v-subheader>Facility*</v-subheader>
-                </v-flex>
-                <v-flex xs6>
-                  <v-select
-                    :items="filteredItemFacility"
-                    v-model="facility"
-                    @blur="$v.facility.$touch()"
-                    @change="$v.facility.$touch()"
-                    :error-messages="facilityErrors"
-                    label="Select"
-                    required
-                    single-line
-                    clearable
-                  >
-                  </v-select>
-                </v-flex>
-                <v-flex xs6>
-                  <v-subheader>Code*</v-subheader>
-                </v-flex>
-                <v-flex xs6>
-                  <v-select
-                    :items="filteredItemCode"
-                    v-model="code"
-                    @blur="$v.code.$touch()"
-                    @change="$v.code.$touch()"
-                    :error-messages="codeErrors"
-                    label="Select"
-                    required
-                    single-line
-                    clearable
-                  >
-                  </v-select>
-                </v-flex>
-                <v-flex xs6>
-                  <v-subheader>Latitude</v-subheader>
-                </v-flex>
-                <v-flex xs6>
-                  <v-select
-                    :items="filteredItemLat"
-                    v-model="lat"
-                    label="Select"
-                    single-line
-                    clearable
-                  >
-                  </v-select>
-                </v-flex>
-                <v-flex xs6>
-                  <v-subheader>Longitude</v-subheader>
-                </v-flex>
-                <v-flex xs6>
-                  <v-select
-                    :items="filteredItemLong"
-                    v-model="long"
-                    label="Select"
-                    single-line
-                    clearable
-                  >
-                  </v-select>
-                </v-flex>
-                <template>
-                  <v-flex xs6>
-                    <v-subheader>Level 1</v-subheader>
-                  </v-flex>
-                  <v-flex xs6>
-                    <v-select
-                      :items="filteredItemLevel1"
-                      v-model="level1"
-                      label="Select"
-                      single-line
-                      clearable
-                    >
-                    </v-select>
-                  </v-flex>
-                </template>
-                <template>
-                  <v-flex xs6>
-                    <v-subheader>Level 2</v-subheader>
-                  </v-flex>
-                  <v-flex xs6>
-                    <v-select
-                      :items="filteredItemLevel2"
-                      v-model="level2"
-                      label="Select"
-                      single-line
-                      clearable
-                    >
-                    </v-select>
-                  </v-flex>
-                </template>
-                <template v-if='showLevel3'>
-                  <v-flex xs6>
-                    <v-subheader>Level 3</v-subheader>
-                  </v-flex>
-                  <v-flex xs6>
-                    <v-select
-                      :items="filteredItemLevel3"
-                      v-model="level3"
-                      label="Select"
-                      single-line
-                      clearable
-                    >
-                    </v-select>
-                  </v-flex>
-                </template>
-                <template v-if='showLevel4'>
-                  <v-flex xs6>
-                    <v-subheader>Level 4</v-subheader>
-                  </v-flex>
-                  <v-flex xs6>
-                    <v-select
-                      :items="filteredItemLevel4"
-                      v-model="level4"
-                      label="Select"
-                      single-line
-                      clearable
-                    >
-                    </v-select>
-                  </v-flex>
-                </template>
-                <template v-if='showLevel5'>
-                  <v-flex xs6>
-                    <v-subheader>Level 5</v-subheader>
-                  </v-flex>
-                  <v-flex xs6>
-                    <v-select
-                      :items="filteredItemLevel5"
-                      v-model="level5"
-                      label="Select"
-                      single-line
-                      clearable
-                    >
-                    </v-select>
-                  </v-flex>
-                </template>
-                <template v-if='showLevel6'>
-                  <v-flex xs6>
-                    <v-subheader>Level 6</v-subheader>
-                  </v-flex>
-                  <v-flex xs6>
-                    <v-select
-                      :items="filteredItemLevel6"
-                      v-model="level6"
-                      label="Select"
-                      single-line
-                      clearable
-                    >
-                    </v-select>
-                  </v-flex>
-                </template>
-                <template v-if='showLevel7'>
-                  <v-flex xs6>
-                    <v-subheader>Level 7</v-subheader>
-                  </v-flex>
-                  <v-flex xs6>
-                    <v-select
-                      :items="filteredItemLevel7"
-                      v-model="level7"
-                      label="Select"
-                      single-line
-                      clearable
-                    >
-                    </v-select>
-                  </v-flex>
-                </template>
-                <v-layout
-                  row
-                  wrap
+            <v-layout
+              row
+              wrap
+              ref="form"
+              v-model="valid"
+            >
+              <v-flex xs6>
+                <v-subheader>Facility*</v-subheader>
+              </v-flex>
+              <v-flex xs6>
+                <v-select
+                  :items="filteredItemFacility"
+                  v-model="facility"
+                  @blur="$v.facility.$touch()"
+                  @change="$v.facility.$touch()"
+                  :error-messages="facilityErrors"
+                  label="Select"
+                  required
+                  single-line
+                  clearable
                 >
-                  <v-spacer></v-spacer>
-                  <v-tooltip top>
-                    <v-btn
-                      v-if='!showLevel7'
-                      color="success"
-                      slot="activator"
-                      icon
-                      @click="showMoreLevel"
-                    >
-                      <v-icon>add</v-icon>
-                    </v-btn>
-                    <span>Add More Level</span>
-                  </v-tooltip>
-                </v-layout>
-              </v-layout>
-            </v-container>
+                </v-select>
+              </v-flex>
+              <v-flex xs6>
+                <v-subheader>Code*</v-subheader>
+              </v-flex>
+              <v-flex xs6>
+                <v-select
+                  :items="filteredItemCode"
+                  v-model="code"
+                  @blur="$v.code.$touch()"
+                  @change="$v.code.$touch()"
+                  :error-messages="codeErrors"
+                  label="Select"
+                  required
+                  single-line
+                  clearable
+                >
+                </v-select>
+              </v-flex>
+              <v-flex xs6>
+                <v-subheader>Latitude</v-subheader>
+              </v-flex>
+              <v-flex xs6>
+                <v-select
+                  :items="filteredItemLat"
+                  v-model="lat"
+                  label="Select"
+                  single-line
+                  clearable
+                >
+                </v-select>
+              </v-flex>
+              <v-flex xs6>
+                <v-subheader>Longitude</v-subheader>
+              </v-flex>
+              <v-flex xs6>
+                <v-select
+                  :items="filteredItemLong"
+                  v-model="long"
+                  label="Select"
+                  single-line
+                  clearable
+                >
+                </v-select>
+              </v-flex>
+              <template>
+                <v-flex xs6>
+                  <v-subheader>Level 1</v-subheader>
+                </v-flex>
+                <v-flex xs6>
+                  <v-select
+                    :items="filteredItemLevel1"
+                    v-model="level1"
+                    label="Select"
+                    single-line
+                    clearable
+                  >
+                  </v-select>
+                </v-flex>
+              </template>
+              <template>
+                <v-flex xs6>
+                  <v-subheader>Level 2</v-subheader>
+                </v-flex>
+                <v-flex xs6>
+                  <v-select
+                    :items="filteredItemLevel2"
+                    v-model="level2"
+                    label="Select"
+                    single-line
+                    clearable
+                  >
+                  </v-select>
+                </v-flex>
+              </template>
+              <template v-if='showLevel3'>
+                <v-flex xs6>
+                  <v-subheader>Level 3</v-subheader>
+                </v-flex>
+                <v-flex xs6>
+                  <v-select
+                    :items="filteredItemLevel3"
+                    v-model="level3"
+                    label="Select"
+                    single-line
+                    clearable
+                  >
+                  </v-select>
+                </v-flex>
+              </template>
+              <template v-if='showLevel4'>
+                <v-flex xs6>
+                  <v-subheader>Level 4</v-subheader>
+                </v-flex>
+                <v-flex xs6>
+                  <v-select
+                    :items="filteredItemLevel4"
+                    v-model="level4"
+                    label="Select"
+                    single-line
+                    clearable
+                  >
+                  </v-select>
+                </v-flex>
+              </template>
+              <template v-if='showLevel5'>
+                <v-flex xs6>
+                  <v-subheader>Level 5</v-subheader>
+                </v-flex>
+                <v-flex xs6>
+                  <v-select
+                    :items="filteredItemLevel5"
+                    v-model="level5"
+                    label="Select"
+                    single-line
+                    clearable
+                  >
+                  </v-select>
+                </v-flex>
+              </template>
+              <template v-if='showLevel6'>
+                <v-flex xs6>
+                  <v-subheader>Level 6</v-subheader>
+                </v-flex>
+                <v-flex xs6>
+                  <v-select
+                    :items="filteredItemLevel6"
+                    v-model="level6"
+                    label="Select"
+                    single-line
+                    clearable
+                  >
+                  </v-select>
+                </v-flex>
+              </template>
+              <template v-if='showLevel7'>
+                <v-flex xs6>
+                  <v-subheader>Level 7</v-subheader>
+                </v-flex>
+                <v-flex xs6>
+                  <v-select
+                    :items="filteredItemLevel7"
+                    v-model="level7"
+                    label="Select"
+                    single-line
+                    clearable
+                  >
+                  </v-select>
+                </v-flex>
+              </template>
+            </v-layout>
+            <v-layout
+              row
+              wrap
+            >
+              <v-spacer></v-spacer>
+              <v-flex xs1>
+                <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn
+                    v-if='!showLevel7'
+                    class="mx-14"
+                    fab
+                    dark
+                    small
+                    color="primary"
+                    v-on="on"
+                    @click="showMoreLevel"
+                  >
+                    <v-icon dark>
+                      mdi-plus
+                    </v-icon>
+                  </v-btn>
+                </template>
+                <span>Add More Level</span>
+              </v-tooltip>
+              </v-flex>
+            </v-layout>
             <v-layout
               row
               wrap
@@ -501,12 +515,10 @@
 
 <script>
 import axios from 'axios'
-import Dialogs from './dialogs'
 import { dataSourcesMixin } from './dataSourcesMixin'
 import { generalMixin } from '../../mixins/generalMixin'
 import { required } from 'vuelidate/lib/validators'
 import { eventBus } from '../../main'
-const backendServer = process.env.BACKEND_SERVER
 
 export default {
   mixins: [dataSourcesMixin, generalMixin],
@@ -530,7 +542,7 @@ export default {
       confirmMsg: '',
       file: '',
       uploadedFileName: '',
-      e1: 0,
+      e1: 1,
       facility: null,
       code: null,
       lat: null,
@@ -614,7 +626,7 @@ export default {
     },
     checkUploadProgress () {
       const clientId = this.$store.state.clientId
-      axios.get(backendServer + '/progress/uploadProgress/' + clientId).then((uploadProgress) => {
+      axios.get('/progress/uploadProgress/' + clientId).then((uploadProgress) => {
         if (!uploadProgress.data || (!uploadProgress.data.status && !uploadProgress.data.percent && !uploadProgress.data.error)) {
           this.$store.state.uploadRunning = false
           this.uploadPrepaProgr = false
@@ -702,7 +714,7 @@ export default {
       this.password = ''
       this.name = this.uploadName
 
-      axios.post(backendServer + '/uploadCSV',
+      axios.post('/uploadCSV',
         formData,
         {
           headers: {
@@ -716,7 +728,7 @@ export default {
             }
           }.bind(this)
         }
-      ).then((data) => {
+      ).then(() => {
         // this.UploadProgressTimer = setInterval(this.checkUploadProgress, 1000)
         this.checkUploadProgress()
       }).catch((err) => {
@@ -789,9 +801,6 @@ export default {
         this.showLevel7 = true
       }
     }
-  },
-  components: {
-    'appDialogs': Dialogs
   },
   computed: {
     facilityErrors () {

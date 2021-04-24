@@ -1,12 +1,13 @@
 <template>
+  <v-container grid-list-xs>
 
+  </v-container>
 </template>
 
 <script>
 import axios from 'axios'
 import { eventBus } from '@/main'
 import { generalMixin } from '@/mixins/generalMixin'
-const backendServer = process.env.BACKEND_SERVER
 export default {
   mixins: [generalMixin],
   methods: {
@@ -57,7 +58,7 @@ export default {
         roleID = role.value
         roleText = role.text
       }
-      axios.get(backendServer + '/getUser/' + dhis2User.data.userCredentials.username).then((user) => {
+      axios.get('/getUser/' + dhis2User.data.userCredentials.username).then((user) => {
         if (user.data.userID) {
           this.$store.state.auth.username = dhis2User.data.userCredentials.username
           this.$store.state.auth.userID = user.data.userID
@@ -73,12 +74,12 @@ export default {
           formData.append('userName', dhis2User.data.userCredentials.username)
           formData.append('surname', dhis2User.data.surname)
           formData.append('role', roleID)
-          axios.post(backendServer + '/addUser', formData, {
+          axios.post('/addUser', formData, {
             headers: {
               'Content-Type': 'multipart/form-data'
             }
-          }).then((data) => {
-            axios.get(backendServer + '/getUser/' + dhis2User.data.userCredentials.username).then((user) => {
+          }).then(() => {
+            axios.get('/getUser/' + dhis2User.data.userCredentials.username).then((user) => {
               if (user.data.userID) {
                 this.$store.state.auth.username = dhis2User.data.userCredentials.username
                 this.$store.state.auth.userID = user.data.userID

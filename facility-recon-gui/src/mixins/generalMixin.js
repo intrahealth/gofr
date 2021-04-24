@@ -2,7 +2,6 @@ import axios from 'axios'
 import {
   eventBus
 } from '@/main'
-const backendServer = process.env.BACKEND_SERVER
 export const generalMixin = {
   data () {
     return {
@@ -66,10 +65,11 @@ export const generalMixin = {
           return callback(err, null)
         })
     },
-    getTree (includeBuilding, callback) {
-      axios.get(backendServer + '/FR/getTree', {
+    getTree (includeBuilding, recursive = true, callback) {
+      axios.get('/FR/getTree', {
         params: {
-          includeBuilding
+          includeBuilding,
+          recursive
         }
       }).then((hierarchy) => {
         if (hierarchy.data) {
@@ -82,7 +82,6 @@ export const generalMixin = {
     },
     clearProgress (type) {
       axios.get(
-        backendServer +
         '/clearProgress/' +
         type +
         '/' +
@@ -93,17 +92,15 @@ export const generalMixin = {
       let defaultGenerConfig = JSON.stringify(
         this.$store.state.config.generalConfig
       )
-      axios
-        .get(backendServer + '/getGeneralConfig?defaultGenerConfig=' + defaultGenerConfig)
-        .then(config => {
-          if (config) {
-            this.$store.state.config.generalConfig = config.data
-          }
-          return callback()
-        })
-        .catch(() => {
-          return callback()
-        })
+      axios.get('/getGeneralConfig?defaultGenerConfig=' + defaultGenerConfig).then(config => {
+        if (config) {
+          this.$store.state.config.generalConfig = config.data
+        }
+        return callback()
+      })
+      .catch(() => {
+        return callback()
+      })
     },
     toTitleCase (str) {
       return str
@@ -274,7 +271,7 @@ export const generalMixin = {
     },
     getRoles () {
       axios
-        .get(backendServer + '/getRoles')
+        .get('/getRoles')
         .then(roles => {
           for (let role of roles.data) {
             this.roles.push({
@@ -290,7 +287,7 @@ export const generalMixin = {
     },
     getTasks () {
       axios
-        .get(backendServer + '/getTasks')
+        .get('/getTasks')
         .then(tasks => {
           this.tasks = tasks.data
         })
@@ -310,7 +307,7 @@ export const generalMixin = {
         endPoint = '/updateUserConfig'
       }
       axios
-        .post(backendServer + endPoint, formData, {
+        .post(endPoint, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }

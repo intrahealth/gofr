@@ -1,5 +1,3 @@
-require('../init');
-const winston = require('winston');
 const fs = require('fs');
 const csv = require('fast-csv');
 const async = require('async');
@@ -9,6 +7,7 @@ const uuid4 = require('uuid/v4');
 const mixin = require('../mixin')();
 const mcsd = require('../mcsd')();
 const config = require('../config');
+const logger = require('./winston');
 const codesystem = require('../../terminologies/gofr-codesystem.json');
 
 const mapping = {

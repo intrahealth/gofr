@@ -1,7 +1,7 @@
 <template>
   <ul id="menu">
     <li class="parent"><a href="#">
-        <v-icon>spellcheck</v-icon> {{$t('App.menu.facilityRecon.msg')}}
+        <v-icon>mdi-spellcheck</v-icon> {{$t('App.menu.facilityRecon.msg')}}
       </a>
       <ul class="child">
         <li class="parent">
@@ -12,43 +12,47 @@
             <v-icon
               color="black"
               left
-            >sync</v-icon>{{ $t('App.menu.dataSourcesParent.msg')}} <v-icon
+            >mdi-sync</v-icon>{{ $t('App.menu.dataSourcesParent.msg')}} <v-icon
               color="black"
               small
               class="menuArrow"
-            >play_arrow</v-icon>
+            >mdi-play</v-icon>
           </a>
           <ul class="child">
             <v-list class="lastMenu">
               <v-tooltip right>
-                <v-list-tile
-                  to="AddDataSources"
-                  slot="activator"
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >cloud_upload</v-icon>
-                    {{ $t('App.menu.addDataSources.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="AddDataSources"
+                    v-on="on"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-cloud-upload</v-icon>
+                      {{ $t('App.menu.addDataSources.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.addDataSources.tooltip')}}</span>
               </v-tooltip>
             </v-list>
             <v-list class="lastMenu">
               <v-tooltip right>
-                <v-list-tile
-                  to="ViewDataSources"
-                  slot="activator"
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >list</v-icon>{{ $t('App.menu.viewDataSources.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="ViewDataSources"
+                    v-on="on"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.viewDataSources.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.viewDataSources.tooltip')}}</span>
               </v-tooltip>
             </v-list>
@@ -56,19 +60,21 @@
         </li>
         <v-list :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length===0,lastMenu: true }">
           <v-tooltip right>
-            <v-list-tile
-              slot="activator"
-              to="view"
-              color="white"
-              :disabled="Object.keys($store.state.activePair.source1).length===0"
-            >
-              <v-list-tile-title class="menuText">
-                <v-icon
-                  left
-                  color="black"
-                >list</v-icon>{{ $t('App.menu.view.msg')}}
-              </v-list-tile-title>
-            </v-list-tile>
+            <template v-slot:activator="{ on }">
+              <v-list-item
+                v-on="on"
+                to="view"
+                color="white"
+                :disabled="Object.keys($store.state.activePair.source1).length===0"
+              >
+                <v-list-item-title class="menuText">
+                  <v-icon
+                    left
+                    color="black"
+                  >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.view.msg')}}
+                </v-list-item-title>
+              </v-list-item>
+            </template>
             <span>{{ $t('App.menu.view.tooltip') }}</span>
           </v-tooltip>
         </v-list>
@@ -80,61 +86,67 @@
             <v-icon
               left
               color="black"
-            >compare_arrows</v-icon>{{ $t('App.menu.reconcile.msg')}} <v-icon
+            >mdi-compare-horizontal</v-icon>{{ $t('App.menu.reconcile.msg')}} <v-icon
               color="black"
               small
               class="menuArrow"
-            >play_arrow</v-icon>
+            >mdi-play</v-icon>
           </a>
           <ul class="child">
             <v-list :class="{ disabledMenu: $store.state.dataSources.length <= 1 || $store.state.dataSourcePairs.length <= 0,lastMenu: true }">
               <v-tooltip right>
-                <v-list-tile
-                  to="dataSourcesPair"
-                  slot="activator"
-                  :disabled="$store.state.dataSources.length <= 1 || $store.state.dataSourcePairs.length <= 0"
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >filter_2</v-icon>{{ $t('App.menu.createPair.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="dataSourcesPair"
+                    v-on="on"
+                    :disabled="$store.state.dataSources.length <= 1 || $store.state.dataSourcePairs.length <= 0"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-numeric-2-box-multiple-outline</v-icon>{{ $t('App.menu.createPair.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.createPair.tooltip')}}</span>
               </v-tooltip>
             </v-list>
             <v-list :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length === 0,lastMenu: true }">
               <v-tooltip right>
-                <v-list-tile
-                  to="scores"
-                  slot="activator"
-                  :disabled='Object.keys($store.state.activePair.source1).length === 0'
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >find_in_page</v-icon>{{ $t('App.menu.reconcile.msg') }}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="scores"
+                    v-on="on"
+                    :disabled='Object.keys($store.state.activePair.source1).length === 0'
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-book-search</v-icon>{{ $t('App.menu.reconcile.msg') }}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.reconcile.tooltip') }}</span>
               </v-tooltip>
             </v-list>
             <v-list :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length===0,lastMenu: true }">
               <v-tooltip right>
-                <v-list-tile
-                  to="recoStatus"
-                  slot="activator"
-                  :disabled='Object.keys($store.state.activePair.source1).length === 0'
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >dashboard</v-icon> {{ $t('App.menu.recoStatus.msg') }}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="recoStatus"
+                    v-on="on"
+                    :disabled='Object.keys($store.state.activePair.source1).length === 0'
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-view-dashboard</v-icon> {{ $t('App.menu.recoStatus.msg') }}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.recoStatus.tooltip') }}</span>
               </v-tooltip>
             </v-list>
@@ -144,7 +156,7 @@
     </li>
     <li class="parent">
       <a href="#">
-        <v-icon>location_on</v-icon>{{ $t('App.menu.facilityRegistry.msg')}}
+        <v-icon>mdi-map-marker</v-icon>{{ $t('App.menu.facilityRegistry.msg')}}
       </a>
       <ul class="child">
         <v-list
@@ -152,18 +164,39 @@
           v-if="tasksVerification.canAdd('AddJurisdiction')"
         >
           <v-tooltip right>
-            <v-list-tile
-              to="AddJurisdiction"
-              slot="activator"
-            >
-              <v-list-tile-title class="menuText">
-                <v-icon
-                  left
-                  color="black"
-                >home_work</v-icon>{{ $t('App.menu.addJurisdiction.msg')}}
-              </v-list-tile-title>
-            </v-list-tile>
+            <template v-slot:activator="{ on }">
+              <v-list-item
+                to="AddJurisdiction"
+                v-on="on"
+              >
+                <v-list-item-title class="menuText">
+                  <v-icon
+                    left
+                    color="black"
+                  >mdi-home-city</v-icon>{{ $t('App.menu.addJurisdiction.msg')}}
+                </v-list-item-title>
+              </v-list-item>
+            </template>
             <span>{{ $t('App.menu.addJurisdiction.tooltip')}}</span>
+          </v-tooltip>
+        </v-list>
+        <v-list class="lastMenu">
+          <v-tooltip right>
+            <template v-slot:activator="{ on }">
+              <v-list-item
+                to="AddFacilityTest"
+                v-on="on"
+              >
+                <v-list-item-title class="menuText">
+                  <v-icon
+                    left
+                    color="black"
+                  >mdi-home-city</v-icon>
+                  Test Add Facility
+                </v-list-item-title>
+              </v-list-item>
+            </template>
+            <span>{{ $t('App.menu.addDataSources.tooltip')}}</span>
           </v-tooltip>
         </v-list>
         <v-list
@@ -171,17 +204,19 @@
           v-if="tasksVerification.canAdd('AddFacility')"
         >
           <v-tooltip right>
-            <v-list-tile
-              to="AddFacility"
-              slot="activator"
-            >
-              <v-list-tile-title class="menuText">
-                <v-icon
-                  left
-                  color="black"
-                >house</v-icon>{{ $t('App.menu.addFacility.msg')}}
-              </v-list-tile-title>
-            </v-list-tile>
+            <template v-slot:activator="{ on }">
+              <v-list-item
+                to="AddFacility"
+                v-on="on"
+              >
+                <v-list-item-title class="menuText">
+                  <v-icon
+                    left
+                    color="black"
+                  >mdi-hospital-building</v-icon>{{ $t('App.menu.addFacility.msg')}}
+                </v-list-item-title>
+              </v-list-item>
+            </template>
             <span>{{ $t('App.menu.addFacility.tooltip')}}</span>
           </v-tooltip>
         </v-list>
@@ -190,17 +225,19 @@
           v-if="tasksVerification.canAdd('AddService')"
         >
           <v-tooltip right>
-            <v-list-tile
-              to="AddService"
-              slot="activator"
-            >
-              <v-list-tile-title class="menuText">
-                <v-icon
-                  left
-                  color="black"
-                >room_service</v-icon>{{ $t('App.menu.addService.msg')}}
-              </v-list-tile-title>
-            </v-list-tile>
+            <template v-slot:activator="{ on }">
+              <v-list-item
+                to="AddService"
+                v-on="on"
+              >
+                <v-list-item-title class="menuText">
+                  <v-icon
+                    left
+                    color="black"
+                  >mdi-room-service</v-icon>{{ $t('App.menu.addService.msg')}}
+                </v-list-item-title>
+              </v-list-item>
+            </template>
             <span>{{ $t('App.menu.addService.tooltip')}}</span>
           </v-tooltip>
         </v-list>
@@ -215,165 +252,183 @@
             <v-icon
               left
               color="black"
-            >add</v-icon>
+            >mdi-book-alphabet</v-icon>
             {{ $t('App.menu.healthServiceTerminologies.msg')}}
             <v-icon
               color="black"
               small
               class="menuArrow"
-            >play_arrow</v-icon>
+            >mdi-play-arrow</v-icon>
           </a>
           <ul class="child">
             <v-list class="lastMenu">
               <v-tooltip right>
-                <v-list-tile
-                  to="/AddCodeSystem?type=serviceCategories&displayText=Service Categorie"
-                  slot="activator"
-                  v-if="tasksVerification.canAdd('AddCodeSystem')"
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >add</v-icon>{{ $t('App.menu.addServiceCategory.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/AddCodeSystem?type=serviceCategories&displayText=Service Categorie"
+                    v-on="on"
+                    v-if="tasksVerification.canAdd('AddCodeSystem')"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-book-alphabet</v-icon>{{ $t('App.menu.addServiceCategory.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.addServiceCategory.tooltip')}}</span>
               </v-tooltip>
             </v-list>
             <v-list class="lastMenu">
               <v-tooltip right>
-                <v-list-tile
-                  to="/AddCodeSystem?type=serviceTypes&displayText=Service Type"
-                  slot="activator"
-                  v-if="tasksVerification.canAdd('AddCodeSystem')"
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >add</v-icon>{{ $t('App.menu.addServiceType.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/AddCodeSystem?type=serviceTypes&displayText=Service Type"
+                    v-on="on"
+                    v-if="tasksVerification.canAdd('AddCodeSystem')"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-book-alphabet</v-icon>{{ $t('App.menu.addServiceType.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.addServiceType.tooltip')}}</span>
               </v-tooltip>
             </v-list>
             <v-list class="lastMenu">
               <v-tooltip right>
-                <v-list-tile
-                  to="/AddCodeSystem?type=specialties&displayText=Specialty"
-                  slot="activator"
-                  v-if="tasksVerification.canAdd('AddCodeSystem')"
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >add</v-icon>{{ $t('App.menu.addServiceSpecialty.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/AddCodeSystem?type=specialties&displayText=Specialty"
+                    v-on="on"
+                    v-if="tasksVerification.canAdd('AddCodeSystem')"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-book-alphabet</v-icon>{{ $t('App.menu.addServiceSpecialty.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.addServiceSpecialty.tooltip')}}</span>
               </v-tooltip>
             </v-list>
             <v-list class="lastMenu">
               <v-tooltip right>
-                <v-list-tile
-                  to="/AddCodeSystem?type=serviceEligibilities&displayText=Service Eligibility"
-                  slot="activator"
-                  v-if="tasksVerification.canAdd('AddCodeSystem')"
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >add</v-icon>{{ $t('App.menu.addServiceEligibility.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/AddCodeSystem?type=serviceEligibilities&displayText=Service Eligibility"
+                    v-on="on"
+                    v-if="tasksVerification.canAdd('AddCodeSystem')"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-book-alphabet</v-icon>{{ $t('App.menu.addServiceEligibility.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.addServiceEligibility.tooltip')}}</span>
               </v-tooltip>
             </v-list>
             <v-list class="lastMenu">
               <v-tooltip right>
-                <v-list-tile
-                  to="/AddCodeSystem?type=languages&displayText=Language"
-                  slot="activator"
-                  v-if="tasksVerification.canAdd('AddCodeSystem')"
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >add</v-icon>{{ $t('App.menu.addLanguage.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/AddCodeSystem?type=languages&displayText=Language"
+                    v-on="on"
+                    v-if="tasksVerification.canAdd('AddCodeSystem')"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-book-alphabet</v-icon>{{ $t('App.menu.addLanguage.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.addLanguage.tooltip')}}</span>
               </v-tooltip>
             </v-list>
             <v-list class="lastMenu">
               <v-tooltip right>
-                <v-list-tile
-                  to="/AddCodeSystem?type=referralMethods&displayText=Referral Methods"
-                  slot="activator"
-                  v-if="tasksVerification.canAdd('AddCodeSystem')"
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >add</v-icon>{{ $t('App.menu.addReferralMethod.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/AddCodeSystem?type=referralMethods&displayText=Referral Methods"
+                    v-on="on"
+                    v-if="tasksVerification.canAdd('AddCodeSystem')"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-book-alphabet</v-icon>{{ $t('App.menu.addReferralMethod.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.addReferralMethod.tooltip')}}</span>
               </v-tooltip>
             </v-list>
             <v-list class="lastMenu">
               <v-tooltip right>
-                <v-list-tile
-                  to="/AddCodeSystem?type=programs&displayText=Program"
-                  slot="activator"
-                  v-if="tasksVerification.canAdd('AddCodeSystem')"
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >add</v-icon>{{ $t('App.menu.addProgram.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/AddCodeSystem?type=programs&displayText=Program"
+                    v-on="on"
+                    v-if="tasksVerification.canAdd('AddCodeSystem')"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-book-alphabet</v-icon>{{ $t('App.menu.addProgram.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.addProgram.tooltip')}}</span>
               </v-tooltip>
             </v-list>
             <v-list class="lastMenu">
               <v-tooltip right>
-                <v-list-tile
+                <template v-slot:activator="{ on }">
+                <v-list-item
                   to="/AddCodeSystem?type=serviceCharacteristics&displayText=Service Characteristics"
-                  slot="activator"
+                  v-on="on"
                   v-if="tasksVerification.canAdd('AddCodeSystem')"
                 >
-                  <v-list-tile-title class="menuText">
+                  <v-list-item-title class="menuText">
                     <v-icon
                       left
                       color="black"
-                    >add</v-icon>{{ $t('App.menu.addCharacteristic.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
+                    >mdi-book-alphabet</v-icon>{{ $t('App.menu.addCharacteristic.msg')}}
+                  </v-list-item-title>
+                </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.addCharacteristic.tooltip')}}</span>
               </v-tooltip>
             </v-list>
             <v-list class="lastMenu">
               <v-tooltip right>
-                <v-list-tile
-                  to="/AddCodeSystem?type=serviceProvisionConditions&displayText=Service Provision Condition"
-                  slot="activator"
-                  v-if="tasksVerification.canAdd('AddCodeSystem')"
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >add</v-icon>{{ $t('App.menu.addServiceProvisionCondition.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/AddCodeSystem?type=serviceProvisionConditions&displayText=Service Provision Condition"
+                    v-on="on"
+                    v-if="tasksVerification.canAdd('AddCodeSystem')"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-book-alphabet</v-icon>{{ $t('App.menu.addServiceProvisionCondition.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.addServiceProvisionCondition.tooltip')}}</span>
               </v-tooltip>
             </v-list>
@@ -384,46 +439,50 @@
             <v-icon
               left
               color="black"
-            >call_made</v-icon>
+            >mdi-call-made</v-icon>
             {{ $t('App.menu.facilityRequests.msg')}}
             <v-icon
               color="black"
               small
               class="menuArrow"
-            >play_arrow</v-icon>
+            >mdi-play-arrow</v-icon>
           </a>
           <ul class="child">
             <v-list class="lastMenu">
               <v-tooltip right>
-                <v-list-tile
-                  v-if="tasksVerification.canAdd('RequestBuildingAddition')"
-                  to="RequestBuildingAddition"
-                  slot="activator"
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >call_made</v-icon>{{ $t('App.menu.requestNewFacility.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    v-if="tasksVerification.canAdd('RequestBuildingAddition')"
+                    to="RequestBuildingAddition"
+                    v-on="on"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-call-made</v-icon>{{ $t('App.menu.requestNewFacility.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.requestNewFacility.tooltip')}}</span>
               </v-tooltip>
             </v-list>
             <v-list class="lastMenu">
               <v-tooltip right>
-                <v-list-tile
-                  v-if="tasksVerification.canAdd('RequestUpdateBuildingDetails')"
-                  to="RequestUpdateBuildingDetails"
-                  slot="activator"
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >call_made</v-icon>{{ $t('App.menu.requestUpdateFacility.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    v-if="tasksVerification.canAdd('RequestUpdateBuildingDetails')"
+                    to="RequestUpdateBuildingDetails"
+                    v-on="on"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-call-made</v-icon>{{ $t('App.menu.requestUpdateFacility.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.requestUpdateFacility.tooltip')}}</span>
               </v-tooltip>
             </v-list>
@@ -435,44 +494,46 @@
             <v-icon
               left
               color="black"
-            >list</v-icon>
+            >mdi-format-list-bulleted-square</v-icon>
             {{ $t('App.menu.facilityRegReports.msg')}}
             <v-icon
               color="black"
               small
               class="menuArrow"
-            >play_arrow</v-icon>
+            >mdi-play-arrow</v-icon>
           </a>
           <ul class="child">
             <v-list
               class="lastMenu"
               v-if="tasksVerification.canView('FacilitiesReport')"
             >
-              <v-list-tile to="FacilitiesReport">
-                <v-list-tile-title class="menuText">
+              <v-list-item to="FacilitiesReport">
+                <v-list-item-title class="menuText">
                   <v-icon
                     left
                     color="black"
-                  >list</v-icon>{{ $t('App.menu.facilitiesReport.msg')}}
-                </v-list-tile-title>
-              </v-list-tile>
+                  >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.facilitiesReport.msg')}}
+                </v-list-item-title>
+              </v-list-item>
             </v-list>
             <v-list
               class="lastMenu"
               v-if="tasksVerification.canView('NewFacilitiesRequestsReport')"
             >
               <v-tooltip right>
-                <v-list-tile
-                  to="NewFacilitiesRequestsReport"
-                  slot="activator"
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >list</v-icon>{{ $t('App.menu.newFacilitiesRequestsReport.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="NewFacilitiesRequestsReport"
+                    v-on="on"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.newFacilitiesRequestsReport.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.newFacilitiesRequestsReport.tooltip')}}</span>
               </v-tooltip>
             </v-list>
@@ -481,49 +542,53 @@
               v-if="tasksVerification.canView('FacilitiesUpdateRequestsReport')"
             >
               <v-tooltip right>
-                <v-list-tile
-                  to="FacilitiesUpdateRequestsReport"
-                  slot="activator"
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >list</v-icon>{{ $t('App.menu.facilitiesUpdateRequestsReport.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
-                <span>{{ $t('App.menu.facilitiesUpdateRequestsReport.tooltip')}}</span>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="FacilitiesUpdateRequestsReport"
+                    v-on="on"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.facilitiesUpdateRequestsReport.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                  <span>{{ $t('App.menu.facilitiesUpdateRequestsReport.tooltip')}}</span>
+                </template>
               </v-tooltip>
             </v-list>
             <v-list
               class="lastMenu"
               v-if="tasksVerification.canView('ServicesReport')"
             >
-              <v-list-tile to="ServicesReport">
-                <v-list-tile-title class="menuText">
+              <v-list-item to="ServicesReport">
+                <v-list-item-title class="menuText">
                   <v-icon
                     left
                     color="black"
-                  >list</v-icon>{{ $t('App.menu.servicesReport.msg')}}
-                </v-list-tile-title>
-              </v-list-tile>
+                  >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.servicesReport.msg')}}
+                </v-list-item-title>
+              </v-list-item>
             </v-list>
             <v-list
               class="lastMenu"
               v-if="tasksVerification.canView('FacilitiesReport')"
             >
               <v-tooltip right>
-                <v-list-tile
-                  to="History"
-                  slot="activator"
-                >
-                  <v-list-tile-title class="menuText">
-                    <v-icon
-                      left
-                      color="black"
-                    >list</v-icon>{{ $t('App.menu.historyReport.msg')}}
-                  </v-list-tile-title>
-                </v-list-tile>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="History"
+                    v-on="on"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.historyReport.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
                 <span>{{ $t('App.menu.historyReport.tooltip')}}</span>
               </v-tooltip>
             </v-list>
@@ -533,93 +598,99 @@
     </li>
     <li class="parent">
       <a href="#">
-        <v-icon>perm_identity</v-icon>{{ $t('App.menu.account.msg')}}
+        <v-icon>mdi-account-outline</v-icon>{{ $t('App.menu.account.msg')}}
       </a>
       <ul class="child">
         <v-list class="lastMenu">
           <v-tooltip right>
-            <v-list-tile
-              to="addUser"
-              slot="activator"
-              v-if='$store.state.auth.role === "Admin"'
-            >
-              <v-list-tile-title class="menuText">
-                <v-icon
-                  left
-                  color="black"
-                >perm_identity</v-icon>{{ $t('App.menu.addUser.msg')}}
-              </v-list-tile-title>
-            </v-list-tile>
+            <template v-slot:activator="{ on }">
+              <v-list-item
+                to="addUser"
+                v-on="on"
+                v-if='$store.state.auth.role === "Admin"'
+              >
+                <v-list-item-title class="menuText">
+                  <v-icon
+                    left
+                    color="black"
+                  >mdi-account-outline</v-icon>{{ $t('App.menu.addUser.msg')}}
+                </v-list-item-title>
+              </v-list-item>
+            </template>
             <span>{{ $t('App.menu.addUser.tooltip')}}</span>
           </v-tooltip>
         </v-list>
         <v-list class="lastMenu">
           <v-tooltip right>
-            <v-list-tile
-              to="usersList"
-              slot="activator"
-              v-if='$store.state.auth.role === "Admin"'
-            >
-              <v-list-tile-title class="menuText">
-                <v-icon
-                  left
-                  color="black"
-                >perm_identity</v-icon>{{ $t('App.menu.usersList.msg')}}
-              </v-list-tile-title>
-            </v-list-tile>
+            <template v-slot:activator="{ on }">
+              <v-list-item
+                to="usersList"
+                v-on="on"
+                v-if='$store.state.auth.role === "Admin"'
+              >
+                <v-list-item-title class="menuText">
+                  <v-icon
+                    left
+                    color="black"
+                  >mdi-account-outline</v-icon>{{ $t('App.menu.usersList.msg')}}
+                </v-list-item-title>
+              </v-list-item>
+            </template>
             <span>{{ $t('App.menu.usersList.tooltip')}}</span>
           </v-tooltip>
         </v-list>
         <v-list class="lastMenu">
           <v-tooltip right>
-            <v-list-tile
-              to="rolesManagement"
-              slot="activator"
-              v-if='$store.state.auth.role === "Admin"'
-            >
-              <v-list-tile-title class="menuText">
-                <v-icon
-                  left
-                  color="black"
-                >perm_identity</v-icon>{{ $t('App.menu.rolesManagement.msg')}}
-              </v-list-tile-title>
-            </v-list-tile>
+            <template v-slot:activator="{ on }">
+              <v-list-item
+                to="rolesManagement"
+                v-on="on"
+                v-if='$store.state.auth.role === "Admin"'
+              >
+                <v-list-item-title class="menuText">
+                  <v-icon
+                    left
+                    color="black"
+                  >mdi-account-outline</v-icon>{{ $t('App.menu.rolesManagement.msg')}}
+                </v-list-item-title>
+              </v-list-item>
+            </template>
             <span>{{ $t('App.menu.rolesManagement.tooltip')}}</span>
           </v-tooltip>
         </v-list>
         <v-list class="lastMenu">
-          <v-list-tile to="changePassword">
-            <v-list-tile-title class="menuText">
+          <v-list-item to="changePassword">
+            <v-list-item-title class="menuText">
               <v-icon
                 left
                 color="black"
-              >perm_identity</v-icon>{{ $t('App.menu.changePassword.msg')}}
-            </v-list-tile-title>
-          </v-list-tile>
+              >mdi-account-outline</v-icon>{{ $t('App.menu.changePassword.msg')}}
+            </v-list-item-title>
+          </v-list-item>
         </v-list>
       </ul>
     </li>
     <li class="parent">
-      <v-list-tile
+      <v-list-item
         to="configure"
-        slot="activator"
         v-if='!$store.state.denyAccess'
         class="newClass"
       >
-        <v-icon>settings</v-icon> {{ $t('App.menu.configure.msg') }}
-      </v-list-tile>
+        <v-list-item-title>
+          <v-icon>mdi-cog</v-icon> {{ $t('App.menu.configure.msg') }}
+        </v-list-item-title>
+      </v-list-item>
     </li>
     <li class="parent">
-      <v-list-tile
+      <v-list-item
         to="logout"
-        slot="activator"
         v-if='!$store.state.denyAccess && !$store.state.config.generalConfig.authDisabled'
         class="newClass"
       >
-        <v-list-tile-title>
-          <v-icon>logout</v-icon> {{ $t('App.menu.logout.msg') }}
-        </v-list-tile-title>
-      </v-list-tile>
+        <v-list-item-title>
+          <v-icon>mdi-logout</v-icon> {{ $t('App.menu.logout.msg') }}
+        </v-list-item-title>
+      </v-list-item>
     </li>
   </ul>
 </template>

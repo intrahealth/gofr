@@ -1,30 +1,13 @@
-// The Vue build version to load with the `import` command
-// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
-import App from './App'
+import App from './App.vue'
 import router from './router'
-import Vuetify from 'vuetify'
-import Vuelidate from 'vuelidate'
-import 'vuetify/dist/vuetify.min.css'
+import {store} from './store/store'
+import i18n from './i18n'
+import vuetify from './plugins/vuetify';
+import vuelidate from 'vuelidate'
 import axios from 'axios'
 import guiConfig from '../config/config.json'
-import {
-  store
-} from './store/store'
-import i18n from './i18n'
-
-Vue.use(Vuelidate)
-Vue.use(Vuetify, {
-  theme: {
-    primary: '#3F51B5',
-    secondary: '#7986CB',
-    accent: '#9c27b0',
-    error: '#f44336',
-    warning: '#ffeb3b',
-    info: '#2196f3',
-    success: '#4caf50'
-  }
-})
+Vue.use(vuelidate)
 
 Vue.config.productionTip = false
 
@@ -39,7 +22,7 @@ function getDHIS2StoreConfig (callback) {
       callback(response.data)
       // if BACKEND_URL is missing then set it
       if (!response.data.BACKEND_SERVER) {
-        let url = process.env.BACKEND_SERVER || guiConfig.BACKEND_SERVER
+        let url = process.env.BACKEND_SERVER || guiConfig.BACKEND_HOST
         let config = {
           BACKEND_SERVER: url
         }
@@ -85,21 +68,22 @@ getDHIS2StoreConfig((storeConfig) => {
       genConfig.data = {}
     }
     new Vue({
-      el: '#app',
       router,
       store,
-
-      components: {
-        App
-      },
+      i18n,
+      vuetify,
       data () {
         return {
           config: genConfig.data
         }
       },
-
-      i18n,
-      template: '<App :generalConfig="config" />'
-    })
+      render: function (createElement) {
+        return createElement(App, {
+          props: {
+            generalConfig: this.config
+          }
+        })
+      }
+    }).$mount('#app')
   })
 })

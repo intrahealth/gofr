@@ -1,7 +1,19 @@
 {
   "server": {
     "hostname": "0.0.0.0",
-    "port": 3000
+    "port": 4000
+  },
+  "defaults": {
+    "components": {
+      "date-time": {
+        "minValueDateTime": "1920-01-01",
+        "maxValueDateTime": "2030-01-01"
+      },
+      "date": {
+        "minValueDate": "1920-01-01",
+        "maxValueDate": "2030-01-01"
+      }
+    }
   },
   "mCSD": {
     "url": "http://localhost:8081/hapi5/fhir",

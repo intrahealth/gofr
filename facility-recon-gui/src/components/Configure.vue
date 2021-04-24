@@ -19,7 +19,7 @@
             dark
             @click.native="autoDisableSingleDatasource('cancel')"
           >
-            <v-icon>close</v-icon>
+            <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card-text>
@@ -70,7 +70,7 @@
             :disabled='!$store.state.config.generalConfig.externalAuth.adminRole || dhis2Roles.length === 0'
             @click="saveConfiguration('generalConfig', 'authDisabled')"
           >
-            <v-icon left>save</v-icon>
+            <v-icon left>mdi-content-save</v-icon>
             Save
           </v-btn>
         </v-card-actions>
@@ -102,7 +102,7 @@
             dark
             @click.native="closeDatasourceDialog"
           >
-            <v-icon>close</v-icon>
+            <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
         This lists only those datasets that have been shared to all users
@@ -120,25 +120,26 @@
               indeterminate
             ></v-progress-linear>
             <template
-              slot="items"
-              slot-scope="props"
+              v-slot:item="{ item }"
             >
-              <v-radio-group
-                v-model='fixSource2To'
-                style="height: 5px"
-              >
+              <tr>
+                <v-radio-group
+                  v-model='fixSource2To'
+                  style="height: 5px"
+                >
+                  <td>
+                    <v-radio
+                      :value="item._id"
+                      color="blue"
+                    ></v-radio>
+                  </td>
+                </v-radio-group>
+                <td>{{item.name}}</td>
+                <td>{{item.userID.userName}}</td>
                 <td>
-                  <v-radio
-                    :value="props.item._id"
-                    color="blue"
-                  ></v-radio>
+                  {{item.createdTime}}
                 </td>
-              </v-radio-group>
-              <td>{{props.item.name}}</td>
-              <td>{{props.item.userID.userName}}</td>
-              <td>
-                {{props.item.createdTime}}
-              </td>
+              </tr>
             </template>
           </v-data-table>
         </v-card-text>
@@ -147,7 +148,7 @@
             color="error"
             @click="closeDatasourceDialog"
           >
-            <v-icon left>cancel</v-icon>
+            <v-icon left>mdi-cancel</v-icon>
             Cancel
           </v-btn>
           <v-spacer></v-spacer>
@@ -156,7 +157,7 @@
             :disabled='!fixSource2To || sharedToAllDatasets.length === 0'
             @click="savefixSource2To"
           >
-            <v-icon left>save</v-icon>
+            <v-icon left>mdi-content-save</v-icon>
             Save
           </v-btn>
         </v-card-actions>
@@ -248,31 +249,34 @@
                 >
                 </v-switch>
                 <v-tooltip top>
-                  <v-switch
-                    @change="displayDatasourceDialog"
-                    color="primary"
-                    label="Select a data source to serve as Source 2 for all reconciliation"
-                    v-model="$store.state.config.generalConfig.reconciliation.fixSource2"
-                    slot="activator"
-                  >
-                  </v-switch>
+                  <template v-slot:activator="{ on }">
+                    <v-switch
+                      @change="displayDatasourceDialog"
+                      color="primary"
+                      label="Select a data source to serve as Source 2 for all reconciliation"
+                      v-model="$store.state.config.generalConfig.reconciliation.fixSource2"
+                      v-on="on"
+                    />
+                  </template>
                   <span>This will limit users to perform reconciliations against the chosen data source</span>
                 </v-tooltip>
-                <template v-if='$store.state.config.generalConfig.reconciliation.fixSource2'>
-                  Source2 Limited To: <v-chip>{{fixedSource2To}}</v-chip>
-                  <v-tooltip top>
-                    <v-btn
-                      fab
-                      dark
-                      color="primary"
-                      small
-                      @click="displayDatasourceDialog"
-                      slot="activator"
-                    >
-                      <v-icon dark>list</v-icon>
-                    </v-btn>
-                    <span>Change dataset</span>
-                  </v-tooltip>
+                <template v-slot:activator="{ on }">
+                  <template v-if='$store.state.config.generalConfig.reconciliation.fixSource2'>
+                    Source2 Limited To: <v-chip>{{fixedSource2To}}</v-chip>
+                      <v-tooltip top>
+                        <v-btn
+                          fab
+                          dark
+                          color="primary"
+                          small
+                          @click="displayDatasourceDialog"
+                          v-on="on"
+                        >
+                          <v-icon dark>mdi-format-list-bulleted</v-icon>
+                        </v-btn>
+                        <span>Change dataset</span>
+                      </v-tooltip>
+                  </template>
                 </template>
                 <v-switch
                   @change="singleDatasource"
@@ -454,7 +458,7 @@
                           v-if='moreFields'
                           @click='addMoreFields'
                         >
-                          <v-icon left>save</v-icon> Save
+                          <v-icon left>mdi-content-save</v-icon> Save
                         </v-btn>
                         <v-btn
                           color="error"
@@ -462,7 +466,7 @@
                           v-if='moreFields'
                           @click='moreFields = false'
                         >
-                          <v-icon left>close</v-icon> Cancel
+                          <v-icon left>mdi-close</v-icon> Cancel
                         </v-btn>
                       </v-flex>
                     </v-layout>
@@ -495,27 +499,28 @@
                     <v-data-table
                       :headers="cronDataSourceHeaders"
                       :items="remoteDatasets"
-                      hide-actions
+                      hide-default-footer
                       class="elevation-1"
                       pagination.sync="pagination"
                     >
                       <template
-                        slot="items"
-                        slot-scope="props"
+                        v-slot:item="{ item }"
                       >
-                        <td>{{props.item.name}}</td>
-                        <td>{{props.item.userID.userName}}</td>
-                        <td>
-                          {{props.item.createdTime}}
-                        </td>
-                        <td>
-                          <v-switch
-                            @change="controlDatasetsCronjobs(props.item)"
-                            color="primary"
-                            v-model="datasetsAutosyncState[props.item._id]"
-                          >
-                          </v-switch>
-                        </td>
+                        <tr>
+                          <td>{{item.name}}</td>
+                          <td>{{item.userID.userName}}</td>
+                          <td>
+                            {{item.createdTime}}
+                          </td>
+                          <td>
+                            <v-switch
+                              @change="controlDatasetsCronjobs(item)"
+                              color="primary"
+                              v-model="datasetsAutosyncState[item._id]"
+                            >
+                            </v-switch>
+                          </td>
+                        </tr>
                       </template>
                     </v-data-table>
                   </v-card-text>
@@ -532,21 +537,21 @@
                         <v-text-field
                           label="SMTP Host"
                           v-model="smtp.host"
-                          box
+                          filled
                         ></v-text-field>
                       </v-flex>
                       <v-flex>
                         <v-text-field
                           label="SMTP Port"
                           v-model="smtp.port"
-                          box
+                          filled
                         ></v-text-field>
                       </v-flex>
                       <v-flex>
                         <v-text-field
                           label="SMTP Username"
                           v-model="smtp.username"
-                          box
+                          filled
                         ></v-text-field>
                       </v-flex>
                       <v-flex>
@@ -554,8 +559,8 @@
                           type="password"
                           label="SMTP Password"
                           v-model="smtp.password"
-                          browser-autocomplete='new-password'
-                          box
+                          autocomplete='new-password'
+                          filled
                         ></v-text-field>
                       </v-flex>
                       <v-flex>
@@ -577,7 +582,7 @@
                               color="primary"
                               @click="saveSMTP"
                             >
-                              <v-icon>save</v-icon>Save
+                              <v-icon>mdi-content-save</v-icon>Save
                             </v-btn>
                           </v-flex>
                         </v-layout>
@@ -636,7 +641,7 @@
                               color="primary"
                               @click="recoProgressNotificationChanged"
                             >
-                              <v-icon>save</v-icon>Save
+                              <v-icon>mdi-content-save</v-icon>Save
                             </v-btn>
                           </v-flex>
                         </v-layout>
@@ -667,7 +672,6 @@ import { eventBus } from '@/main'
 import VueCookies from 'vue-cookies'
 import { required } from 'vuelidate/lib/validators'
 import { generalMixin } from '@/mixins/generalMixin'
-const backendServer = process.env.BACKEND_SERVER
 export default {
   mixins: [generalMixin],
   validations: {
@@ -728,7 +732,7 @@ export default {
       let formData = new FormData()
       formData.append('id', dataset._id)
       formData.append('enabled', this.datasetsAutosyncState[dataset._id])
-      axios.post(backendServer + '/updateDatasetAutosync', formData)
+      axios.post('/updateDatasetAutosync', formData)
     },
     checkDatasetsAdditionWays (way) {
       if (this.$store.state.config.generalConfig.datasetsAdditionWays.length === 0) {
@@ -847,7 +851,7 @@ export default {
       formData.append('username', this.smtp.username)
       formData.append('password', this.smtp.password)
       formData.append('secured', this.smtp.secured)
-      axios.post(backendServer + '/saveSMTP', formData, formData, {
+      axios.post('/saveSMTP', formData, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -885,7 +889,7 @@ export default {
         formData.append('fieldRequired', required)
         formData.append('form', 'signup')
         axios
-          .post(backendServer + '/addFormField', formData, {
+          .post('/addFormField', formData, {
             headers: {
               'Content-Type': 'multipart/form-data'
             }
@@ -957,12 +961,12 @@ export default {
       formData.append('userID', this.$store.state.auth.userID)
 
       axios
-        .post(backendServer + '/addDataSource', formData, {
+        .post('/addDataSource', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         })
-        .then(response => {
+        .then(() => {
           eventBus.$emit('runRemoteSync')
         })
     },
@@ -993,7 +997,7 @@ export default {
     }
   },
   created () {
-    axios.get(backendServer + '/getSMTP').then((response) => {
+    axios.get('/getSMTP').then((response) => {
       if (response && response.data) {
         this.smtp.host = response.data.host
         this.smtp.port = response.data.port
@@ -1038,6 +1042,16 @@ export default {
       this.notification_username = this.$store.state.config.generalConfig.recoProgressNotification.username
       this.notification_password = this.$store.state.config.generalConfig.recoProgressNotification.password
     }
+
+    for (let sources of this.$store.state.dataSources) {
+      if (sources.source === 'syncServer') {
+        if (sources.enableAutosync) {
+          this.datasetsAutosyncState[sources._id] = true
+        } else {
+          this.datasetsAutosyncState[sources._id] = false
+        }
+      }
+    }
   },
   computed: {
     fixedSource2To () {
@@ -1067,11 +1081,6 @@ export default {
       let servers = []
       for (let sources of this.$store.state.dataSources) {
         if (sources.source === 'syncServer') {
-          if (sources.enableAutosync) {
-            this.datasetsAutosyncState[sources._id] = true
-          } else {
-            this.datasetsAutosyncState[sources._id] = false
-          }
           servers.push(sources)
         }
       }

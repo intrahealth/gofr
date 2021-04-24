@@ -14,56 +14,37 @@
       </v-alert>
     </template>
     <template v-if='!$store.state.denyAccess & !$store.state.uploadRunning'>
-      <v-layout column>
-        <v-flex
-          xs1
-          text-xs-right
-        >
-          <v-dialog
-            v-model="helpDialog"
-            scrollable
-            persistent
-            :overlay="false"
-            max-width="700px"
-            transition="dialog-transition"
+      <v-dialog
+        v-model="helpDialog"
+        scrollable
+        persistent
+        :overlay="false"
+        max-width="700px"
+        transition="dialog-transition"
+      >
+        <v-card>
+          <v-toolbar
+            color="primary"
+            dark
           >
-            <v-card>
-              <v-toolbar
-                color="primary"
-                dark
-              >
-                <v-toolbar-title>
-                  <v-icon>info</v-icon> About this page
-                </v-toolbar-title>
-                <v-spacer></v-spacer>
-                <v-btn
-                  icon
-                  dark
-                  @click.native="helpDialog = false"
-                >
-                  <v-icon>close</v-icon>
-                </v-btn>
-              </v-toolbar>
-              <v-card-text>
-                This page let you view dat you have uploaded or synchronized from a remote server
-                <v-list>1. Use the tree to filter grid data</v-list>
-              </v-card-text>
-            </v-card>
-          </v-dialog>
-          <v-tooltip top>
+            <v-toolbar-title>
+              <v-icon>mdi-information</v-icon> About this page
+            </v-toolbar-title>
+            <v-spacer></v-spacer>
             <v-btn
-              flat
               icon
-              color="primary"
-              @click="helpDialog = true"
-              slot="activator"
+              dark
+              @click.native="helpDialog = false"
             >
-              <v-icon>help</v-icon>
+              <v-icon>mdi-close</v-icon>
             </v-btn>
-            <span>Help</span>
-          </v-tooltip>
-        </v-flex>
-      </v-layout>
+          </v-toolbar>
+          <v-card-text>
+            This page let you view dat you have uploaded or synchronized from a remote server
+            <v-list>1. Use the tree to filter grid data</v-list>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
       <v-dialog
         persistent
         transition="scale-transition"
@@ -176,6 +157,25 @@
           </v-flex>
         </v-layout>
       </v-dialog>
+      <v-row>
+        <v-spacer></v-spacer>
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              class="mx-1"
+              fab
+              dark
+              x-small
+              color="primary"
+              @click="helpDialog = true"
+              v-on="on"
+            >
+              <v-icon>mdi-help</v-icon>
+            </v-btn>
+          </template>
+          <span>Help</span>
+        </v-tooltip>
+      </v-row>
       <v-layout
         row
         wrap
@@ -247,10 +247,10 @@
                   :headers="source1GridHeader"
                   :items="source1Grid"
                   :search="searchSource1"
-                  :pagination.sync="source1Pagination"
-                  :total-items="totalSource1Records"
+                  :options="source1Pagination"
+                  :server-items-length="totalSource1Records"
                   :loading="loadingSource1"
-                  hide-actions
+                  hide-default-footer
                   class="elevation-1"
                 >
                   <template
@@ -311,10 +311,10 @@
                   :headers="source2GridHeader"
                   :items="source2Grid"
                   :search="searchSource2"
-                  :pagination.sync="source2Pagination"
-                  :total-items="totalSource2Records"
+                  :options="source2Pagination"
+                  :server-items-length="totalSource2Records"
                   :loading="loadingSource2"
-                  hide-actions
+                  hide-default-footer
                   class="elevation-1"
                 >
                   <template
@@ -367,7 +367,7 @@
             dark
             @click='$router.push({name:"FacilityReconScores"})'
           >
-            <v-icon>find_in_page</v-icon>
+            <v-icon left>mdi-file-find</v-icon>
             Reconcile
           </v-btn>
         </v-flex>
@@ -382,7 +382,6 @@ import axios from 'axios'
 import { required } from 'vuelidate/lib/validators'
 import { scoresMixin } from '../mixins/scoresMixin'
 import { generalMixin } from '../mixins/generalMixin'
-const backendServer = process.env.BACKEND_SERVER
 
 export default {
   validations: {
@@ -483,11 +482,11 @@ export default {
       formData.append('locationId', this.editLocationId)
       formData.append('locationName', this.editLocationName)
       formData.append('locationParent', this.editLocationParent)
-      axios.post(backendServer + '/editLocation', formData, {
+      axios.post('/editLocation', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
-      }).then((response) => {
+      }).then(() => {
         this.editDialog = false
         this.getSource1Grid(false)
         this.getSource2Grid(false)
@@ -520,7 +519,7 @@ export default {
         this.confirmDelete = false
         let userID = this.$store.state.activePair.userID._id
         let query = `id=${this.deleteLocationData.id}&sourceId=${this.deleteSource.sourceId}&sourceName=${this.deleteSource.sourceName}&userID=${userID}&sourceOwner=${this.sourceOwner}`
-        axios.delete(backendServer + `/deleteLocation?${query}`).then((resp) => {
+        axios.delete(`/deleteLocation?${query}`).then(() => {
           if (this.deleteSource.name === 'source1') {
             this.getSource1Grid(false)
           } else {
@@ -530,7 +529,7 @@ export default {
       }
     },
     getLevelData (level) {
-      axios.get(backendServer + '/getLevelData/' + this.editSource + '/' + this.sourceOwner + '/' + level).then((data) => {
+      axios.get('/getLevelData/' + this.editSource + '/' + this.sourceOwner + '/' + level).then((data) => {
         this.editParents = data.data
       })
     },
@@ -547,7 +546,7 @@ export default {
       let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
       let userID = this.$store.state.activePair.userID._id
       let path = `/hierarchy?source=${this.source1}&start=${this.source1Start}&count=${this.source1Count}&id=${id}&userID=${userID}&sourceOwner=${source1Owner}&sourceLimitOrgId=${source1LimitOrgId}`
-      axios.get(backendServer + path).then((hierarchy) => {
+      axios.get(path).then((hierarchy) => {
         this.loadingSource1Grid = false
         if (hierarchy.data) {
           const { sortBy, descending } = this.source1Pagination
@@ -601,7 +600,7 @@ export default {
       let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
       let userID = this.$store.state.activePair.userID._id
       let path = `/hierarchy?source=${this.source2}&start=${this.source2Start}&count=${this.source2Count}&id=${id}&userID=${userID}&sourceOwner=${source2Owner}&sourceLimitOrgId=${source2LimitOrgId}`
-      axios.get(backendServer + path).then((hierarchy) => {
+      axios.get(path).then((hierarchy) => {
         this.loadingSource2Grid = false
         if (hierarchy.data) {
           const { sortBy, descending } = this.source2Pagination
@@ -650,7 +649,7 @@ export default {
       let source2Owner = this.getDatasourceOwner().source2Owner
       let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
       this.loadingSource2Tree = true
-      axios.get(backendServer + '/getTree/' + this.source2 + '/' + source2Owner + '/' + source2LimitOrgId).then((hierarchy) => {
+      axios.get('/getTree/' + this.source2 + '/' + source2Owner + '/' + source2LimitOrgId).then((hierarchy) => {
         this.loadingSource2Tree = false
         if (hierarchy.data) {
           this.source2Tree = hierarchy.data
@@ -659,7 +658,7 @@ export default {
       let source1Owner = this.getDatasourceOwner().source1Owner
       let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
       this.loadingSource1Tree = true
-      axios.get(backendServer + '/getTree/' + this.source1 + '/' + source1Owner + '/' + source1LimitOrgId).then((hierarchy) => {
+      axios.get('/getTree/' + this.source1 + '/' + source1Owner + '/' + source1LimitOrgId).then((hierarchy) => {
         this.loadingSource1Tree = false
         if (hierarchy.data) {
           this.source1Tree = hierarchy.data

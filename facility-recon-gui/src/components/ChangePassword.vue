@@ -18,7 +18,7 @@
             color="deep-purple accent-4"
             cards
             dark
-            flat
+            filled
           >
             <v-card-title class="title font-weight-regular">Change Password</v-card-title>
           </v-toolbar>
@@ -33,7 +33,7 @@
               :error-messages="oldPasswordErrors"
               v-model="oldPassword"
               type="password"
-              box
+              filled
               color="deep-purple"
               label="Old Password"
             />
@@ -44,7 +44,7 @@
               :error-messages="passwordErrors"
               v-model="password"
               type="password"
-              box
+              filled
               color="deep-purple"
               label="Password"
             />
@@ -55,7 +55,7 @@
               :error-messages="retype_passwordErrors"
               v-model="retype_password"
               type="password"
-              box
+              filled
               color="deep-purple"
               label="Re-type Password"
             />
@@ -63,10 +63,10 @@
           <v-divider />
           <v-card-actions>
             <v-btn
-              flat
+              filled
               @click="$store.state.baseRouterViewKey++"
             >
-              <v-icon>clear</v-icon>Clear
+              <v-icon>mdi-close</v-icon>Clear
             </v-btn>
             <v-spacer />
             <v-btn
@@ -76,7 +76,7 @@
               color="deep-purple accent-4"
               depressed
             >
-              <v-icon left>how_to_reg</v-icon>Change
+              <v-icon left>mdi-find-replace</v-icon>Change
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -88,7 +88,6 @@
 <script>
 import axios from 'axios'
 import { required } from 'vuelidate/lib/validators'
-const backendServer = process.env.BACKEND_SERVER
 
 export default {
   validations: {
@@ -116,7 +115,7 @@ export default {
       let formData = new FormData()
       formData.append('password', this.password)
       formData.append('id', this.$store.state.auth.userID)
-      axios.post(backendServer + '/changePassword/', formData, {
+      axios.post('/changePassword/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -141,7 +140,7 @@ export default {
       let formData = new FormData()
       formData.append('username', this.$store.state.auth.username)
       formData.append('password', this.oldPassword)
-      axios.post(backendServer + '/authenticate/', formData, {
+      axios.post('/authenticate/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

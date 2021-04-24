@@ -23,7 +23,7 @@
               <v-text-field
                 v-if="jurisdictionHierarchy.length > 0"
                 v-model="searchJurisdiction"
-                append-icon="search"
+                append-icon="mdi-magnify"
                 label="Search Jurisdiction"
                 single-line
                 hide-details
@@ -82,7 +82,7 @@
                                 @change="$v.name.$touch()"
                                 :error-messages="nameErrors"
                                 v-model="name"
-                                box
+                                filled
                                 color="deep-purple"
                                 label="Name"
                               />
@@ -91,7 +91,7 @@
                             <v-flex xs5>
                               <v-text-field
                                 v-model="alt_name"
-                                box
+                                filled
                                 color="deep-purple"
                                 label="Alternative Name"
                               />
@@ -107,7 +107,7 @@
                               <v-text-field
                                 required
                                 v-model="code"
-                                box
+                                filled
                                 color="deep-purple"
                                 label="Code"
                               />
@@ -155,7 +155,7 @@
                             <v-flex xs5>
                               <v-text-field
                                 v-model="lat"
-                                box
+                                filled
                                 color="deep-purple"
                                 label="Latitude"
                               />
@@ -165,7 +165,7 @@
                               <v-text-field
                                 required
                                 v-model="long"
-                                box
+                                filled
                                 color="deep-purple"
                                 label="Longitude"
                               />
@@ -190,7 +190,7 @@
                                     <v-flex xs5>
                                       <v-text-field
                                         v-model="contact.email"
-                                        box
+                                        filled
                                         color="deep-purple"
                                         label="Email"
                                       />
@@ -199,7 +199,7 @@
                                     <v-flex xs5>
                                       <v-text-field
                                         v-model="contact.phone"
-                                        box
+                                        filled
                                         color="deep-purple"
                                         label="Phone"
                                       />
@@ -214,7 +214,7 @@
                                     <v-flex xs5>
                                       <v-text-field
                                         v-model="contact.fax"
-                                        box
+                                        filled
                                         color="deep-purple"
                                         label="Fax"
                                       />
@@ -223,7 +223,7 @@
                                     <v-flex xs5>
                                       <v-text-field
                                         v-model="contact.website"
-                                        box
+                                        filled
                                         color="deep-purple"
                                         label="Website"
                                       />
@@ -247,10 +247,10 @@
                     </v-form>
                     <v-card-actions>
                       <v-btn
-                        flat
+                        text
                         @click="$store.state.baseRouterViewKey++"
                       >
-                        <v-icon>clear</v-icon>Clear
+                        <v-icon>mdi-close</v-icon>Clear
                       </v-btn>
                       <v-spacer />
                       <v-btn
@@ -260,7 +260,7 @@
                         color="deep-purple accent-4"
                         depressed
                       >
-                        <v-icon left>language</v-icon>
+                        <v-icon left>mdi-content-save</v-icon>
                         <template v-if="action === 'request'">
                           Send Request
                         </template>
@@ -291,7 +291,6 @@
 import axios from 'axios'
 import LiquorTree from 'liquor-tree'
 import { required } from 'vuelidate/lib/validators'
-const backendServer = process.env.BACKEND_SERVER
 export default {
   validations: {
     name: { required }
@@ -366,7 +365,7 @@ export default {
     getTree () {
       this.loadingTree = true
       this.jurisdictionHierarchy = []
-      axios.get(backendServer + '/FR/getTree').then((hierarchy) => {
+      axios.get('/FR/getTree').then((hierarchy) => {
         this.loadingTree = false
         if (hierarchy.data) {
           this.jurisdictionHierarchy = hierarchy.data
@@ -404,11 +403,11 @@ export default {
         formData.append('description', this.description)
       }
       formData.append('parent', this.activeJurisdiction.id)
-      axios.post(backendServer + '/FR/addBuilding', formData, {
+      axios.post('/FR/addBuilding', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
-      }).then((response) => {
+      }).then(() => {
         this.$store.state.alert.show = true
         this.$store.state.alert.width = '600px'
         this.$store.state.alert.msg = 'Facility added successfully!'

@@ -1,23 +1,5 @@
 <template>
   <v-container fluid>
-    <v-alert
-      style="width: 500px"
-      v-model="alertSuccess"
-      type="success"
-      dismissible
-      transition="scale-transition"
-    >
-      {{alertMsg}}
-    </v-alert>
-    <v-alert
-      style="width: 500px"
-      v-model="alertFail"
-      type="error"
-      dismissible
-      transition="scale-transition"
-    >
-      {{alertMsg}}
-    </v-alert>
     <v-dialog
       v-model="approveUserDialog"
       persistent
@@ -33,7 +15,7 @@
         <v-icon
           @click="approveUserDialog = false"
           style="cursor: pointer"
-        >close</v-icon>
+        >mdi-close</v-icon>
       </v-toolbar>
       <v-card>
         <v-card-title primary-title>
@@ -82,7 +64,7 @@
                 @blur="$v.role.$touch()"
                 @change="$v.role.$touch()"
                 :error-messages="roleErrors"
-                box
+                filled
                 label="Role"
               ></v-select>
             </v-flex>
@@ -93,7 +75,7 @@
             color="error"
             @click="changeStatus('Rejected')"
           >
-            <v-icon>clear</v-icon>Reject
+            <v-icon left>mdi-cancel</v-icon>Reject
           </v-btn>
           <v-spacer />
           <v-btn
@@ -103,11 +85,31 @@
             color="deep-purple accent-4"
             depressed
           >
-            <v-icon left>language</v-icon>Approve
+            <v-icon left>mdi-check-circle</v-icon>Approve
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <center>
+      <v-alert
+        style="width: 500px"
+        v-model="alertSuccess"
+        type="success"
+        dismissible
+        transition="scale-transition"
+      >
+        {{alertMsg}}
+      </v-alert>
+      <v-alert
+        style="width: 500px"
+        v-model="alertFail"
+        type="error"
+        dismissible
+        transition="scale-transition"
+      >
+        {{alertMsg}}
+      </v-alert>
+    </center>
     <v-card
       color="cyan lighten-5"
       width="1500px"
@@ -125,7 +127,7 @@
           <v-spacer></v-spacer>
           <v-text-field
             v-model="searchUsers"
-            append-icon="search"
+            append-icon="mdi-magnify"
             label="Search"
             single-line
             hide-details
@@ -147,44 +149,44 @@
             indeterminate
           ></v-progress-linear>
           <template
-            slot="items"
-            slot-scope="props"
+            v-slot:item="{ item }"
           >
-            <td>{{props.item.firstName}}</td>
-            <td>{{props.item.surname}}</td>
-            <td>{{props.item.otherName}}</td>
-            <td>{{props.item.phone}}</td>
-            <td>{{props.item.email}}</td>
-            <td>{{props.item.userName}}</td>
-            <td v-if='props.item.role'>{{props.item.role.name}}</td>
+            <td>{{item.firstName}}</td>
+            <td>{{item.surname}}</td>
+            <td>{{item.otherName}}</td>
+            <td>{{item.phone}}</td>
+            <td>{{item.email}}</td>
+            <td>{{item.userName}}</td>
+            <td v-if='item.role'>{{item.role.name}}</td>
             <td v-else></td>
-            <td>{{props.item.status}}</td>
-            <td v-if='props.item.status === "Pending" || props.item.status === "Rejected"'>
+            <td>{{item.status}}</td>
+            <td v-if='item.status === "Pending" || item.status === "Rejected"'>
               <v-btn
                 color="success"
                 small
-                @click="displayApprovalDialog(props.item)"
+                @click="displayApprovalDialog(item)"
               >Approve/Reject</v-btn>
             </td>
             <td v-else>
               <v-btn
                 small
                 color="error"
-                v-if='props.item.status === "Active"'
-                @click="accountAction('Inactive', props.item)"
+                v-if='item.status === "Active"'
+                @click="accountAction('Inactive', item)"
               >Deactivate</v-btn>
               <v-btn
                 small
                 color="success"
                 v-else
-                @click="accountAction('Active', props.item)"
+                @click="accountAction('Active', item)"
               >Activate</v-btn>
+              |
               <v-btn
                 small
                 color="error"
-                @click="accountAction('reset', props.item)"
+                @click="accountAction('reset', item)"
               >
-                <v-icon left>refresh</v-icon> Reset Password
+                <v-icon left>mdi-refresh</v-icon> Reset Password
               </v-btn>
             </td>
           </template>
@@ -197,8 +199,6 @@
 import axios from 'axios'
 import { required } from 'vuelidate/lib/validators'
 import { generalMixin } from '../mixins/generalMixin'
-
-const backendServer = process.env.BACKEND_SERVER
 
 export default {
   mixins: [generalMixin],
@@ -238,7 +238,7 @@ export default {
       formData.append('role', this.role)
       formData.append('status', status)
       formData.append('id', this.user._id)
-      axios.post(backendServer + '/processUserAccoutRequest/', formData, {
+      axios.post('/processUserAccoutRequest/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -262,7 +262,7 @@ export default {
       formData.append('password', this.password)
       this.users = []
       this.loadingUsers = true
-      axios.get(backendServer + '/getUsers/').then((users) => {
+      axios.get('/getUsers/').then((users) => {
         this.loadingUsers = false
         this.users = users.data
       }).catch((err) => {
@@ -278,11 +278,11 @@ export default {
       formData.append('id', id)
       if (action === 'Active' || action === 'Inactive') {
         formData.append('status', action)
-        axios.post(backendServer + '/changeAccountStatus', formData, {
+        axios.post('/changeAccountStatus', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
-        }).then((resp) => {
+        }).then(() => {
           this.alertSuccess = true
           if (action === 'Active') {
             this.alertMsg = 'Account activated successfully'
@@ -297,11 +297,11 @@ export default {
         })
       } else if (action === 'reset') {
         formData.append('surname', user.surname)
-        axios.post(backendServer + '/resetPassword', formData, {
+        axios.post('/resetPassword', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
-        }).then((resp) => {
+        }).then(() => {
           this.alertSuccess = true
           this.alertMsg = 'Password reseted successfully'
           this.getUsers()

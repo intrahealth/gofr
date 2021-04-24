@@ -14,7 +14,7 @@
           dark
         >
           <v-toolbar-title>
-            <v-icon>info</v-icon> About this page
+            <v-icon>mdi-information</v-icon> About this page
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn
@@ -22,7 +22,7 @@
             dark
             @click.native="helpDialog = false"
           >
-            <v-icon>close</v-icon>
+            <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card-text>
@@ -102,21 +102,23 @@
         text-xs-right
       >
         <v-tooltip top>
-          <v-btn
-            flat
-            icon
-            color="primary"
-            @click="helpDialog = true"
-            slot="activator"
-          >
-            <v-icon>help</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              class="mx-1"
+              fab
+              dark
+              x-small
+              color="primary"
+              @click="helpDialog = true"
+              v-on="on"
+            >
+              <v-icon>mdi-help</v-icon>
+            </v-btn>
+          </template>
           <span>Help</span>
         </v-tooltip>
       </v-flex>
-    </v-layout>
-    <v-layout column>
-      <v-flex>
+      <v-flex xs12>
         <component
           :is="selectedComponent"
           v-if='addDataSource'

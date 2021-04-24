@@ -3,12 +3,10 @@
 /* eslint-disable guard-for-in */
 /* eslint-disable no-param-reassign */
 /* eslint-disable consistent-return */
-require('./init');
 const request = require('request');
 const URI = require('urijs');
 const uuid5 = require('uuid/v5');
 const uuid4 = require('uuid/v4');
-const winston = require('winston');
 const async = require('async');
 const csv = require('fast-csv');
 const isJSON = require('is-json');
@@ -21,6 +19,7 @@ const mail = require('./mail')();
 const mongo = require('./mongo')();
 const mixin = require('./mixin')();
 const config = require('./config');
+const logger = require('./winston');
 const codesystem = require('../terminologies/gofr-codesystem.json');
 
 const topOrgName = config.getConf('mCSD:fakeOrgName');
@@ -175,7 +174,7 @@ module.exports = () => ({
     let services;
     redisClient.get(`url_${baseUrl}`, (error, results) => {
       if (results) {
-        winston.info(`Getting ${baseUrl} from cache`);
+        logger.info(`Getting ${baseUrl} from cache`);
         return callback(results);
       }
       services = {
@@ -187,7 +186,7 @@ module.exports = () => ({
         started = resultsSt;
       });
       if (started) {
-        winston.info(`getServices is in progress will try again in 10 seconds.${baseUrl}`);
+        logger.info(`getServices is in progress will try again in 10 seconds.${baseUrl}`);
         setTimeout(() => {
           this.getLocations({
             database,
@@ -197,7 +196,7 @@ module.exports = () => ({
         return;
       }
       redisClient.set(`started_${baseUrl}`, '');
-      winston.info(`Getting ${baseUrl} from server`);
+      logger.info(`Getting ${baseUrl} from server`);
       async.doWhilst(
         (callback) => {
           const options = {
@@ -214,7 +213,7 @@ module.exports = () => ({
             }
             body = JSON.parse(body);
             if (body.total == 0 && body.entry && body.entry.length > 0) {
-              winston.error('Non mCSD data returned');
+              logger.error('Non mCSD data returned');
               this.cleanCache(`started_${baseUrl}`, true);
               return callback(false, false);
             }
@@ -231,7 +230,7 @@ module.exports = () => ({
         () => url != false,
         () => {
           if (services.entry.length > 1) {
-            winston.info(`Saving ${baseUrl} to cache`);
+            logger.info(`Saving ${baseUrl} to cache`);
             redisClient.set(`url_${baseUrl}`, JSON.stringify(services), 'EX', config.getConf('mCSD:cacheTime'));
           }
           this.cleanCache(`started_${baseUrl}`, true);
@@ -251,11 +250,11 @@ module.exports = () => ({
         try {
           locations = JSON.parse(results);
         } catch (err) {
-          winston.error(err);
+          logger.error(err);
         }
       }
       if (locations) {
-        winston.info(`Getting ${baseUrl} from cache`);
+        logger.info(`Getting ${baseUrl} from cache`);
         return callback(locations);
       }
       locations = {
@@ -267,14 +266,14 @@ module.exports = () => ({
         started = resultsSt;
       });
       if (started) {
-        winston.info(`getLocations is in progress will try again in 10 seconds.${baseUrl}`);
+        logger.info(`getLocations is in progress will try again in 10 seconds.${baseUrl}`);
         setTimeout(() => {
           this.getLocations(database, callback);
         }, 10000);
         return;
       }
       redisClient.set(`started_${baseUrl}`, '');
-      winston.info(`Getting ${baseUrl} from server`);
+      logger.info(`Getting ${baseUrl} from server`);
       async.doWhilst(
         (callback) => {
           const options = {
@@ -291,7 +290,7 @@ module.exports = () => ({
             }
             body = JSON.parse(body);
             if (!body.resourceType) {
-              winston.error('Non mCSD data returned');
+              logger.error('Non mCSD data returned');
               this.cleanCache(`started_${baseUrl}`, true);
               return callback(null, false);
             }
@@ -308,10 +307,10 @@ module.exports = () => ({
         () => url !== false,
         () => {
           if (locations.entry.length > 1) {
-            winston.info(`Saving ${baseUrl} to cache`);
+            logger.info(`Saving ${baseUrl} to cache`);
             redisClient.set(`url_${baseUrl}`, JSON.stringify(locations), 'EX', config.getConf('mCSD:cacheTime'));
           } else {
-            winston.info(`Not more than 1 entry for ${baseUrl} so not caching.`);
+            logger.info(`Not more than 1 entry for ${baseUrl} so not caching.`);
           }
           this.cleanCache(`started_${baseUrl}`, true);
           return callback(locations);
@@ -432,7 +431,7 @@ module.exports = () => ({
     const locations = {
       entry: [],
     };
-    winston.info(`Getting ${url} from server`);
+    logger.info(`Getting ${url} from server`);
     async.doWhilst(
       (doCallback) => {
         const options = {
@@ -448,7 +447,7 @@ module.exports = () => ({
           }
           body = JSON.parse(body);
           if (body.total == 0 && body.entry && body.entry.length > 0) {
-            winston.error('Non mCSD data returned');
+            logger.error('Non mCSD data returned');
             return doCallback(false, false);
           }
           if (!body.entry || body.entry.length === 0) {
@@ -539,7 +538,7 @@ module.exports = () => ({
         let long = null;
         let lat = null;
         if (!body.entry || body.entry.length === 0) {
-          winston.error('Empty mcsd data received, this wasnt expected');
+          logger.error('Empty mcsd data received, this wasnt expected');
           return callback(parents);
         }
         if (body.entry[0].resource.hasOwnProperty('position')) {
@@ -563,7 +562,7 @@ module.exports = () => ({
         } else if (details == 'names') {
           parents.push(body.entry[0].resource.name);
         } else {
-          winston.error('parent details (either id,names or all) to be returned not specified');
+          logger.error('parent details (either id,names or all) to be returned not specified');
         }
 
         // stop after we reach the topOrg which is the country
@@ -649,7 +648,7 @@ module.exports = () => ({
         } else if (details == 'names') {
           parents.push(entry.resource.name);
         } else {
-          winston.error('parent details (either id,names or all) to be returned not specified');
+          logger.error('parent details (either id,names or all) to be returned not specified');
         }
 
         if (entry.resource.hasOwnProperty('partOf')
@@ -744,7 +743,7 @@ module.exports = () => ({
         tmpArr.splice(0, totalElements);
         return nxtLoop();
       }).catch((err) => {
-        winston.error(err);
+        logger.error(err);
       });
     }, () => {
       callback(mcsdLevelNumber);
@@ -824,7 +823,7 @@ module.exports = () => ({
         fhir.entry = fhir.entry.concat(location.entry[0]);
         this.saveLocations(fhir, db, (err, res) => {
           if (err) {
-            winston.error(err);
+            logger.error(err);
           }
           callback(err);
         });
@@ -888,7 +887,7 @@ module.exports = () => ({
     });
     this.saveLocations(fhir, database, (err, res) => {
       if (err) {
-        winston.error(err);
+        logger.error(err);
       }
       callback(err, resource.id);
     });
@@ -1092,7 +1091,7 @@ module.exports = () => ({
           });
         }
       } catch (error) {
-        winston.error(error);
+        logger.error(error);
       }
       if (resource.telecom.length === 0) {
         delete resource.telecom;
@@ -1151,7 +1150,7 @@ module.exports = () => ({
       });
       this.saveLocations(fhir, '', (err, res) => {
         if (err) {
-          winston.error(err);
+          logger.error(err);
         }
         callback(err);
       });
@@ -1172,11 +1171,11 @@ module.exports = () => ({
       },
     ], (error, response) => {
       if (error) {
-        winston.error('An error has occured while trying to get a resource ID');
+        logger.error('An error has occured while trying to get a resource ID');
         return callback(error);
       }
       if (!response || !Array.isArray(response) || (response[0] && (!response[0].entry || !Array.isArray(response[0].entry)))) {
-        winston.error('invalid response received');
+        logger.error('invalid response received');
         return callback('invalid response received');
       }
       let LocationResource;
@@ -1396,7 +1395,7 @@ module.exports = () => ({
           }
         }
       } catch (error) {
-        winston.error(error);
+        logger.error(error);
       }
       if (fields.description) {
         LocationResource.description = fields.description;
@@ -1530,7 +1529,7 @@ module.exports = () => ({
       });
       this.saveLocations(fhir, database, (err, body) => {
         if (err) {
-          winston.error(err);
+          logger.error(err);
         }
         if (!err && fields.action === 'request' && fields.requestCategory !== 'requestsList') {
           const requestingUsername = fields.username;
@@ -1592,18 +1591,18 @@ module.exports = () => ({
     const database = config.getConf('mCSD:requestsDB');
     this.getLocationByID(database, id, true, (location) => {
       if (!location || !location.entry || location.entry.length === 0) {
-        winston.error(`No location with id ${id} found`);
+        logger.error(`No location with id ${id} found`);
         return callback(`No location with id ${id} found`);
       }
       const requestLocationResource = location.entry.find(entry => entry.resource.resourceType === 'Location');
       const requestOrganizationResource = location.entry.find(entry => entry.resource.resourceType === 'Organization');
       if (!requestLocationResource) {
-        winston.error(`No location resource with id ${id} found`);
+        logger.error(`No location resource with id ${id} found`);
         return callback(`No location resource with id ${id} found`);
       }
       const requestExtension = mixin.getLatestFacilityRequest(requestLocationResource.resource.extension, requestType);
       if (!requestExtension || !Array.isArray(requestExtension)) {
-        winston.error('Request extension cant be found, stop changing status');
+        logger.error('Request extension cant be found, stop changing status');
         return callback(true);
       }
       for (const i in requestExtension) {
@@ -1645,7 +1644,7 @@ module.exports = () => ({
         if (updatingResourceID) {
           this.getLocationByID('', updatingResourceID, true, (regLoc) => {
             if (!regLoc || !regLoc.entry || regLoc.entry.length === 0) {
-              winston.error(`No location with id ${updatingResourceID} found`);
+              logger.error(`No location with id ${updatingResourceID} found`);
               return callback(`No location with id ${updatingResourceID} found`);
             }
             const registryLocationResource = regLoc.entry.find(entry => entry.resource.resourceType === 'Location');
@@ -1693,7 +1692,7 @@ module.exports = () => ({
               updateRegistry: (callback) => {
                 this.saveLocations(registryBundle, '', (err, res) => {
                   if (err) {
-                    winston.error(err);
+                    logger.error(err);
                     return callback(err);
                   }
                   return callback(null);
@@ -1702,7 +1701,7 @@ module.exports = () => ({
               updateRequests: (callback) => {
                 this.saveLocations(requestsBundle, database, (err, res) => {
                   if (err) {
-                    winston.error(err);
+                    logger.error(err);
                     return callback(err);
                   }
                   return callback(null);
@@ -1770,7 +1769,7 @@ module.exports = () => ({
           updateRegistry: (callback) => {
             this.saveLocations(registryBundle, '', (err, res) => {
               if (err) {
-                winston.error(err);
+                logger.error(err);
                 return callback(err);
               }
               return callback(null);
@@ -1779,7 +1778,7 @@ module.exports = () => ({
           updateRequests: (callback) => {
             this.saveLocations(requestsBundle, database, (err, res) => {
               if (err) {
-                winston.error(err);
+                logger.error(err);
                 return callback(err);
               }
               return callback(null);
@@ -1801,7 +1800,7 @@ module.exports = () => ({
         });
         this.saveLocations(requestsBundle, database, (err, res) => {
           if (err) {
-            winston.error(err);
+            logger.error(err);
             return callback(err);
           }
           return callback(null);
@@ -1818,7 +1817,7 @@ module.exports = () => ({
   }, callback) {
     const codeSyst = mixin.getCodesysteURI(codeSystemType);
     if (!codeSyst) {
-      winston.error(`Code system type ${codeSystemType} not found on the config file`);
+      logger.error(`Code system type ${codeSystemType} not found on the config file`);
       return callback(true);
     }
     const codeSystemURI = codeSyst.uri;
@@ -1861,7 +1860,7 @@ module.exports = () => ({
       });
       this.saveLocations(fhir, '', (err, res) => {
         if (err) {
-          winston.error(err);
+          logger.error(err);
         }
         callback(err);
       });
@@ -1887,7 +1886,7 @@ module.exports = () => ({
       this.cleanCache(`url_${urlPrefix.toString()}`, true);
       this.cleanCache('parents', true);
       if (err) {
-        winston.error(err);
+        logger.error(err);
         return callback(err);
       }
       return callback();
@@ -1954,7 +1953,7 @@ module.exports = () => ({
         if (results.entry.length > 0) {
           return resolve();
         }
-        winston.info('Fake Org ID does not exist into the FR Database, Creating now');
+        logger.info('Fake Org ID does not exist into the FR Database, Creating now');
         const resource = {};
         resource.resourceType = 'Location';
         resource.name = topOrgName;
@@ -1986,7 +1985,7 @@ module.exports = () => ({
           if (err) {
             reject(err);
           } else {
-            winston.info('Fake Org Id Created Successfully');
+            logger.info('Fake Org Id Created Successfully');
             resolve();
           }
         });
@@ -2012,12 +2011,12 @@ module.exports = () => ({
     };
     request.post(options, (err, res, body) => {
       if (res.statusCode === 404) {
-        winston.error(body);
-        winston.error('Looks like the mapping DB does not exist, cant save this location');
+        logger.error(body);
+        logger.error('Looks like the mapping DB does not exist, cant save this location');
         return callback('Failed to save', null);
       }
       if (err) {
-        winston.error(err);
+        logger.error(err);
         return callback(err);
       }
       this.cleanCache(`url_${url}/Location`, true);
@@ -2030,13 +2029,13 @@ module.exports = () => ({
       redisClient.keys(`${key}*`, (err, keys) => {
         for (const key1 of keys) {
           redisClient.DEL(key1, (err, res) => {
-            winston.info(`DELETING ${key1} from cache because something was modified.`);
+            logger.info(`DELETING ${key1} from cache because something was modified.`);
           });
         }
       });
     } else {
       redisClient.DEL(key, () => {
-        winston.info(`DELETING ${key} from cache because something was modified.`);
+        logger.info(`DELETING ${key} from cache because something was modified.`);
       });
     }
   },
@@ -2063,7 +2062,7 @@ module.exports = () => ({
           .toString();
         me.getLocationByIdentifier(mappingDB, source2Identifier, (mapped) => {
           if (mapped.entry.length > 0) {
-            winston.error('Attempting to map already mapped location');
+            logger.error('Attempting to map already mapped location');
             return callback(null, 'This location was already mapped, recalculate scores to update the level you are working on');
           }
           return callback(null, null);
@@ -2072,7 +2071,7 @@ module.exports = () => ({
       source1Mapped(callback) {
         me.getLocationByID(mappingDB, source1Id, false, (mapped) => {
           if (mapped.entry.length > 0) {
-            winston.error('Attempting to map already mapped location');
+            logger.error('Attempting to map already mapped location');
             return callback(null, 'This location was already mapped, recalculate scores to update the level you are working on');
           }
           return callback(null, null);
@@ -2113,7 +2112,7 @@ module.exports = () => ({
 
       this.getLocationByID(mappingDB, res.source1Parents[0], false, (mapped1) => {
         if (!isJSON(JSON.stringify(mapped1))) {
-          winston.error(`Non JSON results returned ${JSON.stringify(mapped1)}`);
+          logger.error(`Non JSON results returned ${JSON.stringify(mapped1)}`);
           return callback(true, false);
         }
         if (mapped1.entry.length > 0) {
@@ -2282,7 +2281,7 @@ module.exports = () => ({
           this.cleanCache(`url_${url_prefix.toString()}`, true);
           this.cleanCache(`parents${recoLevel}${source2DB}`);
           if (err) {
-            winston.error(err);
+            logger.error(err);
           }
           callback(err, matchComments);
         });
@@ -2328,13 +2327,13 @@ module.exports = () => ({
         this.cleanCache(`url_${url_prefix.toString()}`, true);
         this.cleanCache('parents', true);
         if (err) {
-          winston.error(err);
+          logger.error(err);
           return callback(err);
         }
         // saving new
         this.saveLocations(flagged, mappingDB, (err, res) => {
           if (err) {
-            winston.error(err);
+            logger.error(err);
           }
           return callback(err);
         });
@@ -2353,7 +2352,7 @@ module.exports = () => ({
       source1Mapped(callback) {
         me.getLocationByID(mappingDB, mappingId, false, (mapped) => {
           if (mapped.entry.length > 0) {
-            winston.error('Attempting to mark an already mapped location as no match');
+            logger.error('Attempting to mark an already mapped location as no match');
             return callback(null, 'This location was already mapped, recalculate scores to update the level you are working on');
           }
           return callback(null, null);
@@ -2366,7 +2365,7 @@ module.exports = () => ({
       }
       me.getLocationByID(source1DB, source1Id, false, (mcsd) => {
         if (mcsd.entry.length === 0) {
-          winston.error(`Location with ID ${source1Id} not found on the mCSD DB, this isnt expected, please cross check`);
+          logger.error(`Location with ID ${source1Id} not found on the mCSD DB, this isnt expected, please cross check`);
           return callback(true);
         }
         const fhir = {};
@@ -2442,7 +2441,7 @@ module.exports = () => ({
         me.saveLocations(fhir, mappingDB, (err, res) => {
           this.cleanCache(`url_${url_prefix.toString()}`, true);
           if (err) {
-            winston.error(err);
+            logger.error(err);
           }
           callback(err);
         });
@@ -2534,7 +2533,7 @@ module.exports = () => ({
     request.delete(options, (err, res, body) => {
       this.cleanCache(`url_${url_prefix.toString()}`, true);
       if (err) {
-        winston.error(err);
+        logger.error(err);
       }
       callback(err);
     });
@@ -2585,7 +2584,7 @@ module.exports = () => ({
             percent,
           });
           redisClient.set(uploadRequestId, uploadReqPro);
-          winston.error(`Skipped ${JSON.stringify(data)}`);
+          logger.error(`Skipped ${JSON.stringify(data)}`);
           return;
         }
         for (const invalidChar of invalidIDChars) {
@@ -2927,7 +2926,7 @@ module.exports = () => ({
           if (lookup[id]) {
             lookup[id].children.push(...addLater[id]);
           } else {
-            winston.error(`Couldn't find ${id} in tree.`);
+            logger.error(`Couldn't find ${id} in tree.`);
           }
         }
       }

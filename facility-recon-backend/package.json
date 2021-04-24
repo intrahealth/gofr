@@ -66,7 +66,8 @@
     "uniqid": "^5.0.3",
     "urijs": "^1.19.1",
     "uuid": "^3.2.1",
-    "winston": "^2.4.2",
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.2",
     "xml2js": "^0.4.19"
   },
   "devDependencies": {

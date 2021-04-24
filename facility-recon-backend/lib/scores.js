@@ -6,7 +6,6 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable guard-for-in */
 /* eslint-disable func-names */
-const winston = require('winston');
 const async = require('async');
 const URI = require('urijs');
 const levenshtein = require('fast-levenshtein');
@@ -20,6 +19,7 @@ const lodash = require('lodash');
 const mixin = require('./mixin')();
 const config = require('./config');
 const mcsd = require('./mcsd')();
+const logger = require('./winston');
 
 const topOrgName = config.getConf('mCSD:fakeOrgName');
 
@@ -48,11 +48,11 @@ module.exports = function () {
       const topOrgId1 = mixin.getTopOrgId(source1DB);
 
       if (mcsdSource2.total == 0) {
-        winston.error('No Source2 data found for this orgunit');
+        logger.error('No Source2 data found for this orgunit');
         return callback();
       }
       if (mcsdSource1.total == 0) {
-        winston.error('No Source1 data found');
+        logger.error('No Source1 data found');
         return callback();
       }
       const totalSource1Records = mcsdSource1.entry.length;
@@ -75,8 +75,8 @@ module.exports = function () {
 
       redisClient.get(`parents${recoLevel}${source2DB}`, (error, results) => {
         if (error) {
-          winston.error(error);
-          winston.error(`An error has occured while getting parents for ${source2DB}`);
+          logger.error(error);
+          logger.error(`An error has occured while getting parents for ${source2DB}`);
         } else if (results) {
           try {
             results = JSON.parse(results);
@@ -85,11 +85,11 @@ module.exports = function () {
             source2MappedParentNames = results.source2MappedParentNames;
             source2ParentNames = results.source2ParentNames;
           } catch (err) {
-            winston.error(err);
+            logger.error(err);
           }
         }
         if (!useCachedParents) {
-          winston.info('Populating parents');
+          logger.info('Populating parents');
           for (const entry of mcsdSource2.entry) {
             if (entry.resource.hasOwnProperty('partOf')) {
               source2ParentNames[entry.resource.id] = [];
@@ -131,14 +131,14 @@ module.exports = function () {
                     source2Parents.source2MappedParentNames = source2MappedParentNames;
                     source2Parents.source2ParentNames = source2ParentNames;
                     redisClient.set(`parents${recoLevel}${source2DB}`, JSON.stringify(source2Parents), 'EX', 1200);
-                    winston.info('Done populating parents');
+                    logger.info('Done populating parents');
                   }
                 });
               });
             }
           }
         }
-        winston.info('Calculating scores now');
+        logger.info('Calculating scores now');
         count = 0;
         async.eachSeries(mcsdSource1.entry, (source1Entry, source1Callback) => {
           // check if this Source1 Orgid is mapped
@@ -439,7 +439,7 @@ module.exports = function () {
                   return source1Callback();
                 });
               }).catch((err) => {
-                winston.error(err);
+                logger.error(err);
               });
             }
           });
@@ -523,11 +523,11 @@ module.exports = function () {
       const topOrgId1 = mixin.getTopOrgId(source1DB);
 
       if (mcsdSource2.total == 0) {
-        winston.error('No Source2 data found for this orgunit');
+        logger.error('No Source2 data found for this orgunit');
         return callback();
       }
       if (mcsdSource1.total == 0) {
-        winston.error('No Source1 data found');
+        logger.error('No Source1 data found');
         return callback();
       }
       const totalSource1Records = mcsdSource1.entry.length;
@@ -551,8 +551,8 @@ module.exports = function () {
 
       redisClient.get(`parents${recoLevel}${source2DB}`, (error, results) => {
         if (error) {
-          winston.error(error);
-          winston.error(`An error has occured while getting parents for ${source2DB}`);
+          logger.error(error);
+          logger.error(`An error has occured while getting parents for ${source2DB}`);
         } else if (results) {
           try {
             results = JSON.parse(results);
@@ -561,12 +561,12 @@ module.exports = function () {
             source2MappedParentNames = results.source2MappedParentNames;
             source2ParentNames = results.source2ParentNames;
           } catch (err) {
-            winston.error(err);
+            logger.error(err);
           }
         }
 
         if (!useCachedParents) {
-          winston.info('Populating parents');
+          logger.info('Populating parents');
           for (let i = 0, len = mcsdSource2.entry.length; i < len; i++) {
             const entry = mcsdSource2.entry[i];
             const source2Identifier = URI(config.getConf('mCSD:url'))
@@ -622,7 +622,7 @@ module.exports = function () {
                     source2Parents.source2MappedParentNames = source2MappedParentNames;
                     source2Parents.source2ParentNames = source2ParentNames;
                     redisClient.set(`parents${recoLevel}${source2DB}`, JSON.stringify(source2Parents), 'EX', 1200);
-                    winston.info('Done populating parents');
+                    logger.info('Done populating parents');
                   }
                 });
               });
@@ -632,7 +632,7 @@ module.exports = function () {
 
         // clear mcsdSource2All
         mcsdSource2All = {};
-        winston.info('Calculating scores now');
+        logger.info('Calculating scores now');
         count = 0;
         async.eachSeries(mcsdSource1.entry, (source1Entry, source1Callback) => {
           // check if this Source1 Orgid is mapped
@@ -1040,7 +1040,7 @@ module.exports = function () {
                   return source1Callback();
                 });
               }).catch((err) => {
-                winston.error(err);
+                logger.error(err);
               });
             }
           });
@@ -1102,12 +1102,12 @@ module.exports = function () {
       }
     },
     matchStatus(mcsdMapped, id, callback) {
-      if (mcsdMapped.length === 0 || !mcsdMapped) {
+      if (!mcsdMapped || !mcsdMapped.entry || mcsdMapped.entry.length === 0) {
         return callback();
       }
       const status = mcsdMapped.entry.find(
         entry => entry.resource.id === id
-        || (entry.resource.hasOwnProperty('identifier') && entry.resource.identifier.find(identifier => identifier.value === id)),
+        || (entry.resource.hasOwnProperty('identifier') && entry.resource.identifier.find(identifier => identifier.value.split('/Location/')[1] === id)),
       );
       return callback(status);
     },
@@ -1130,15 +1130,13 @@ module.exports = function () {
           if (filteredEntry.resource.id === fakeOrgId) {
             return filteredCallback();
           }
-          let matched;
-          if (source === 'source2') {
-            matched = mappedLocations.entry.find((entry) => {
-              const matchedSource2Id = mixin.getIdFromIdentifiers(entry.resource.identifier, 'https://digitalhealth.intrahealth.org/source2');
-              return matchedSource2Id === filteredEntry.resource.id;
-            });
-          } else if (source === 'source1') {
-            matched = mappedLocations.entry.find(entry => entry.resource.id === filteredEntry.resource.id);
+          let srcURI;
+          if (source === 'source1') {
+            srcURI = 'https://digitalhealth.intrahealth.org/source1';
+          } else if (source === 'source2') {
+            srcURI = 'https://digitalhealth.intrahealth.org/source2';
           }
+          const matched = mappedLocations.entry.find(entry => mixin.getIdFromIdentifiers(entry.resource.identifier, srcURI) === filteredEntry.resource.id);
           let status;
           let noMatch;
           let ignored;
@@ -1172,9 +1170,12 @@ module.exports = function () {
             if (getmCSD) {
               // deep copy filteredEntry before modifying it
               const copiedEntry = JSON.parse(JSON.stringify(filteredEntry));
-              const parent = copiedEntry.resource.partOf.reference;
+              let parent;
+              if (copiedEntry.resource.partOf && copiedEntry.resource.partOf.reference) {
+                parent = copiedEntry.resource.partOf.reference;
+              }
               // remove fakeID
-              if (parent.endsWith(fakeOrgId)) {
+              if (parent && parent.endsWith(fakeOrgId)) {
                 delete copiedEntry.resource.partOf;
               }
               if (newTag) {

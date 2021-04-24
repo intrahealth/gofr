@@ -17,7 +17,7 @@
             <v-text-field
               v-if="jurisdictionHierarchy.length > 0"
               v-model="searchJurisdiction"
-              append-icon="search"
+              append-icon="mdi-magnify"
               label="Search Jurisdiction"
               single-line
               hide-details
@@ -81,24 +81,24 @@
                         @change="$v.name.$touch()"
                         :error-messages="nameErrors"
                         v-model="name"
-                        box
+                        filled
                         color="deep-purple"
                         label="Name"
                       />
                       <v-text-field
                         required
                         v-model="code"
-                        box
+                        filled
                         color="deep-purple"
                         label="Code"
                       />
                     </v-form>
                     <v-card-actions>
                       <v-btn
-                        flat
+                        text
                         @click="$refs.form.reset()"
                       >
-                        <v-icon>clear</v-icon>Clear
+                        <v-icon>mdi-close</v-icon>Clear
                       </v-btn>
                       <v-spacer />
                       <v-btn
@@ -108,7 +108,7 @@
                         color="deep-purple accent-4"
                         depressed
                       >
-                        <v-icon left>language</v-icon>Add
+                        <v-icon left>mdi-content-save</v-icon>Add
                       </v-btn>
                     </v-card-actions>
                   </v-card>
@@ -125,7 +125,6 @@
 import axios from 'axios'
 import LiquorTree from 'liquor-tree'
 import { required } from 'vuelidate/lib/validators'
-const backendServer = process.env.BACKEND_SERVER
 export default {
   validations: {
     name: { required }
@@ -147,7 +146,7 @@ export default {
     getTree () {
       this.jurisdictionHierarchy = []
       this.loadingTree = true
-      axios.get(backendServer + '/FR/getTree').then((hierarchy) => {
+      axios.get('/FR/getTree').then((hierarchy) => {
         this.loadingTree = false
         if (hierarchy.data) {
           this.jurisdictionHierarchy = hierarchy.data
@@ -164,11 +163,11 @@ export default {
       if (this.activeJurisdiction.id) {
         formData.append('parent', this.activeJurisdiction.id)
       }
-      axios.post(backendServer + '/FR/addJurisdiction', formData, {
+      axios.post('/FR/addJurisdiction', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
-      }).then((response) => {
+      }).then(() => {
         this.alertSuccess = true
         this.alertMsg = 'Jurisdiction added successfully!'
         this.$refs.form.reset()

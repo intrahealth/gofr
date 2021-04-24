@@ -56,7 +56,7 @@
             dark
           >
             <v-toolbar-title>
-              <v-icon>info</v-icon> About this page
+              <v-icon>mdi-information</v-icon> About this page
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -64,7 +64,7 @@
               dark
               @click.native="helpDialog = false"
             >
-              <v-icon>close</v-icon>
+              <v-icon>mdi-close</v-icon>
             </v-btn>
           </v-toolbar>
           <v-card-text>
@@ -85,376 +85,392 @@
         xs1
         text-xs-right
       >
-        <v-layout
-          row
-          wrap
-        >
-          <v-flex xs3>
+        <v-row>
+          <v-col cols="3">
             <appRecoExport></appRecoExport>
-          </v-flex>
-          <v-flex xs9>
+          </v-col>
+          <v-spacer></v-spacer>
+          <v-col cols="1">
             <v-tooltip top>
-              <v-btn
-                flat
-                icon
-                color="primary"
-                @click="helpDialog = true"
-                slot="activator"
-              >
-                <v-icon>help</v-icon>
-              </v-btn>
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  class="mx-1"
+                  fab
+                  dark
+                  x-small
+                  color="primary"
+                  @click="helpDialog = true"
+                  v-on="on"
+                >
+                  <v-icon>mdi-help</v-icon>
+                </v-btn>
+              </template>
               <span>Help</span>
             </v-tooltip>
-          </v-flex>
-        </v-layout>
+          </v-col>
+        </v-row>
       </v-flex>
     </v-layout>
+    <v-row>
+      <v-col cols="1">
+        <b>All Levels</b>
+      </v-col>
+      <v-spacer></v-spacer>
+      <v-col cols="1">
+        <b>{{currentLevelText}} Only</b>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <v-chip
+          color="green"
+          text-color='white'
+          style='height:138px;width:137px'
+        >
+          <v-layout column>
+            <v-flex xs1>
+              <b>Source 1 Matched</b>
+            </v-flex>
+            <v-flex
+              xs1
+              align-center
+            >
+              <center>
+                <b>{{$store.state.totalAllMapped}}/{{$store.state.source1TotalAllRecords}}</b>
+              </center>
+            </v-flex>
+            <v-flex xs1>
+              <center>
+                <v-progress-circular
+                  :rotate="-90"
+                  :size="65"
+                  :width="8"
+                  :value="source1PercentMapped"
+                  color="yellow"
+                >
+                  <font color="white">
+                    <b>{{ source1PercentMapped }}%</b>
+                  </font>
+                </v-progress-circular>
+              </center>
+            </v-flex>
+          </v-layout>
+        </v-chip>
+      </v-col>
+      <v-col>
+        <v-chip
+          color="green"
+          text-color='white'
+          style='height:138px;width:137px'
+        >
+          <v-layout column>
+            <v-flex xs1>
+              <b>Source 1 No Match</b>
+            </v-flex>
+            <v-flex
+              xs1
+              align-center
+            >
+              <center>
+                <b>{{$store.state.totalAllNoMatch}}/{{$store.state.source1TotalAllRecords}}</b>
+              </center>
+            </v-flex>
+            <v-flex xs1>
+              <center>
+                <v-progress-circular
+                  :rotate="-90"
+                  :size="65"
+                  :width="8"
+                  :value="source1PercentNoMatch"
+                  color="yellow"
+                >
+                  <font color="white">
+                    <b>{{ source1PercentNoMatch }}%</b>
+                  </font>
+                </v-progress-circular>
+              </center>
+            </v-flex>
+          </v-layout>
+        </v-chip>
+      </v-col>
+      <v-col>
+        <v-chip
+          color="green"
+          text-color='white'
+          style='height:138px;width:137px'
+        >
+          <v-layout column>
+            <v-flex xs1>
+              <b>Source 1 Flagged</b>
+            </v-flex>
+            <v-flex
+              xs1
+              align-center
+            >
+              <center>
+                <b>{{$store.state.totalAllFlagged}}/{{$store.state.source1TotalAllRecords}}</b>
+              </center>
+            </v-flex>
+            <v-flex xs1>
+              <center>
+                <v-progress-circular
+                  :rotate="-90"
+                  :size="65"
+                  :width="8"
+                  :value="source1PercentFlagged"
+                  color="yellow"
+                >
+                  <font color="white">
+                    <b>{{ source1PercentFlagged }}%</b>
+                  </font>
+                </v-progress-circular>
+              </center>
+            </v-flex>
+          </v-layout>
+        </v-chip>
+      </v-col>
+      <v-col>
+        <v-chip
+          color="green"
+          text-color='white'
+          style='height:138px;width:137px'
+        >
+          <v-layout column>
+            <v-flex xs1>
+              <b>Source 2 Matched</b>
+            </v-flex>
+            <v-flex
+              xs1
+              align-center
+            >
+              <center>
+                <b>{{$store.state.totalAllMapped}}/{{$store.state.source2TotalAllRecords}}</b>
+              </center>
+            </v-flex>
+            <v-flex xs1>
+              <center>
+                <v-progress-circular
+                  :rotate="-90"
+                  :size="65"
+                  :width="8"
+                  :value="source2PercentMapped"
+                  color="green"
+                >
+                  <font color="white">
+                    <b>{{ source2PercentMapped }}%</b>
+                  </font>
+                </v-progress-circular>
+              </center>
+            </v-flex>
+          </v-layout>
+        </v-chip>
+      </v-col>
+      <v-col>
+        <v-chip
+          color="green"
+          text-color='white'
+          style='height:138px;width:137px'
+        >
+          <v-layout column>
+            <v-flex xs1>
+              <b>Source 2 Flagged</b>
+            </v-flex>
+            <v-flex
+              xs1
+              align-center
+            >
+              <center>
+                <b>{{$store.state.totalAllFlagged}}/{{$store.state.source2TotalAllRecords}}</b>
+              </center>
+            </v-flex>
+            <v-flex xs1>
+              <center>
+                <v-progress-circular
+                  :rotate="-90"
+                  :size="65"
+                  :width="8"
+                  :value="source2PercentFlagged"
+                  color="yellow"
+                >
+                  <font color="white">
+                    <b>{{ source2PercentFlagged }}%</b>
+                  </font>
+                </v-progress-circular>
+              </center>
+            </v-flex>
+          </v-layout>
+        </v-chip>
+      </v-col>
+      <v-spacer></v-spacer>
+      <v-col>
+        <v-chip
+          color="cyan"
+          text-color='black'
+          style='height:138px;width:137px'
+        >
+          <v-layout column>
+            <v-flex xs1>
+              <b>Source 1 Matched</b>
+            </v-flex>
+            <v-flex
+              xs1
+              align-center
+            >
+              <center>
+                <b>{{totalMapped}}/{{totalRecords}}</b>
+              </center>
+            </v-flex>
+            <v-flex xs1>
+              <center>
+                <v-progress-circular
+                  :rotate="-90"
+                  :size="65"
+                  :width="8"
+                  :value="source1PercentMappedLevel"
+                  color="yellow"
+                >
+                  <font color="black">
+                    <b>{{ source1PercentMappedLevel }}%</b>
+                  </font>
+                </v-progress-circular>
+              </center>
+            </v-flex>
+          </v-layout>
+        </v-chip>
+      </v-col>
+      <v-col>
+        <v-chip
+          color="cyan"
+          text-color='black'
+          style='height:138px;width:137px'
+        >
+          <v-layout column>
+            <v-flex xs1>
+              <b>Source 1 No Match</b>
+            </v-flex>
+            <v-flex
+              xs1
+              align-center
+            >
+              <center>
+                <b>{{totalNoMatch}}/{{totalRecords}}</b>
+              </center>
+            </v-flex>
+            <v-flex xs1>
+              <center>
+                <v-progress-circular
+                  :rotate="-90"
+                  :size="65"
+                  :width="8"
+                  :value="source1PercentNoMatchLevel"
+                  color="yellow"
+                >
+                  <font color="black">
+                    <b>{{ source1PercentNoMatchLevel }}%</b>
+                  </font>
+                </v-progress-circular>
+              </center>
+            </v-flex>
+          </v-layout>
+        </v-chip>
+      </v-col>
+      <v-col>
+        <v-chip
+          color="cyan"
+          text-color='black'
+          style='height:138px;width:137px'
+        >
+          <v-layout column>
+            <v-flex xs1>
+              <b>Source 1 Flagged</b>
+            </v-flex>
+            <v-flex
+              xs1
+              align-center
+            >
+              <center>
+                <b>{{totalFlagged}}/{{totalRecords}}</b>
+              </center>
+            </v-flex>
+            <v-flex xs1>
+              <center>
+                <v-progress-circular
+                  :rotate="-90"
+                  :size="65"
+                  :width="8"
+                  :value="source1PercentFlagged"
+                  color="yellow"
+                >
+                  <font color="black">
+                    <b>{{ source1PercentFlagged }}%</b>
+                  </font>
+                </v-progress-circular>
+              </center>
+            </v-flex>
+          </v-layout>
+        </v-chip>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="3">
+        <v-text-field
+          v-model="searchMatched"
+          append-icon="mdi-magnify"
+          label="Search"
+          single-line
+          hide-details
+        ></v-text-field>
+      </v-col>
+      <v-spacer></v-spacer>
+      <v-col cols="3">
+        <template v-if="$store.state.activePair.userID._id === $store.state.auth.userID || $store.state.auth.role == 'Admin'">
+          <v-btn
+            color="success"
+            rounded
+            @click='markRecoDone'
+            v-if="$store.state.recoStatus !== 'Done'"
+          >
+            <v-icon>mdi-lock</v-icon>Mark Reconciliation As Done
+          </v-btn>
+          <v-btn
+            color="success"
+            rounded
+            @click='markRecoUnDone'
+            v-if="$store.state.recoStatus === 'Done' && $store.state.auth.role == 'Admin'"
+          >
+            <v-icon left>mdi-lock-open-variant</v-icon>Mark Reconciliation As UnDone
+          </v-btn>
+        </template>
+      </v-col>
+      <v-spacer></v-spacer>
+      <v-col>
+        <v-select
+          :items="locationLevels"
+          v-model="recoLevel"
+          :item-value='locationLevels.value'
+          :item-name='locationLevels.text'
+          label="Level"
+          class="input-group--focused"
+          height='1'
+          full-width
+          @change="levelChanged"
+          single-line
+        >
+        </v-select>
+      </v-col>
+    </v-row>
     <v-layout column>
       <v-flex xs1>
         <v-layout
           row
           wrap
         >
-          <v-flex xs6>
-            <b>All Levels</b>
-          </v-flex>
-          <v-spacer></v-spacer>
           <v-flex xs3>
-            <b>{{currentLevelText}} Only</b>
-          </v-flex>
-        </v-layout>
-      </v-flex>
-      <v-flex xs1>
-        <v-layout
-          row
-          wrap
-        >
-          <v-flex xs1>
-            <v-chip
-              color="green"
-              text-color='white'
-              style='height:138px;width:137px'
-            >
-              <v-layout column>
-                <v-flex xs1>
-                  <b>Source 1 Matched</b>
-                </v-flex>
-                <v-flex
-                  xs1
-                  align-center
-                >
-                  <center>
-                    <b>{{$store.state.totalAllMapped}}/{{$store.state.source1TotalAllRecords}}</b>
-                  </center>
-                </v-flex>
-                <v-flex xs1>
-                  <center>
-                    <v-progress-circular
-                      :rotate="-90"
-                      :size="65"
-                      :width="8"
-                      :value="source1PercentMapped"
-                      color="yellow"
-                    >
-                      <font color="white">
-                        <b>{{ source1PercentMapped }}%</b>
-                      </font>
-                    </v-progress-circular>
-                  </center>
-                </v-flex>
-              </v-layout>
-            </v-chip>
-          </v-flex>
 
-          <v-flex xs1>
-            <v-chip
-              color="green"
-              text-color='white'
-              style='height:138px;width:137px'
-            >
-              <v-layout column>
-                <v-flex xs1>
-                  <b>Source 1 No Match</b>
-                </v-flex>
-                <v-flex
-                  xs1
-                  align-center
-                >
-                  <center>
-                    <b>{{$store.state.totalAllNoMatch}}/{{$store.state.source1TotalAllRecords}}</b>
-                  </center>
-                </v-flex>
-                <v-flex xs1>
-                  <center>
-                    <v-progress-circular
-                      :rotate="-90"
-                      :size="65"
-                      :width="8"
-                      :value="source1PercentNoMatch"
-                      color="yellow"
-                    >
-                      <font color="white">
-                        <b>{{ source1PercentNoMatch }}%</b>
-                      </font>
-                    </v-progress-circular>
-                  </center>
-                </v-flex>
-              </v-layout>
-            </v-chip>
-          </v-flex>
-          <v-flex xs1>
-            <v-chip
-              color="green"
-              text-color='white'
-              style='height:138px;width:137px'
-            >
-              <v-layout column>
-                <v-flex xs1>
-                  <b>Source 1 Flagged</b>
-                </v-flex>
-                <v-flex
-                  xs1
-                  align-center
-                >
-                  <center>
-                    <b>{{$store.state.totalAllFlagged}}/{{$store.state.source1TotalAllRecords}}</b>
-                  </center>
-                </v-flex>
-                <v-flex xs1>
-                  <center>
-                    <v-progress-circular
-                      :rotate="-90"
-                      :size="65"
-                      :width="8"
-                      :value="source1PercentFlagged"
-                      color="yellow"
-                    >
-                      <font color="white">
-                        <b>{{ source1PercentFlagged }}%</b>
-                      </font>
-                    </v-progress-circular>
-                  </center>
-                </v-flex>
-              </v-layout>
-            </v-chip>
-          </v-flex>
-          <v-flex xs1>
-            <v-chip
-              color="green"
-              text-color='white'
-              style='height:138px;width:137px'
-            >
-              <v-layout column>
-                <v-flex xs1>
-                  <b>Source 2 Matched</b>
-                </v-flex>
-                <v-flex
-                  xs1
-                  align-center
-                >
-                  <center>
-                    <b>{{$store.state.totalAllMapped}}/{{$store.state.source2TotalAllRecords}}</b>
-                  </center>
-                </v-flex>
-                <v-flex xs1>
-                  <center>
-                    <v-progress-circular
-                      :rotate="-90"
-                      :size="65"
-                      :width="8"
-                      :value="source2PercentMapped"
-                      color="green"
-                    >
-                      <font color="white">
-                        <b>{{ source2PercentMapped }}%</b>
-                      </font>
-                    </v-progress-circular>
-                  </center>
-                </v-flex>
-              </v-layout>
-            </v-chip>
-          </v-flex>
-          <v-flex xs1>
-            <v-chip
-              color="green"
-              text-color='white'
-              style='height:138px;width:137px'
-            >
-              <v-layout column>
-                <v-flex xs1>
-                  <b>Source 2 Flagged</b>
-                </v-flex>
-                <v-flex
-                  xs1
-                  align-center
-                >
-                  <center>
-                    <b>{{$store.state.totalAllFlagged}}/{{$store.state.source2TotalAllRecords}}</b>
-                  </center>
-                </v-flex>
-                <v-flex xs1>
-                  <center>
-                    <v-progress-circular
-                      :rotate="-90"
-                      :size="65"
-                      :width="8"
-                      :value="source2PercentFlagged"
-                      color="yellow"
-                    >
-                      <font color="white">
-                        <b>{{ source2PercentFlagged }}%</b>
-                      </font>
-                    </v-progress-circular>
-                  </center>
-                </v-flex>
-              </v-layout>
-            </v-chip>
-          </v-flex>
-          <v-spacer></v-spacer>
-          <v-flex xs1>
-            <v-chip
-              color="cyan"
-              text-color='black'
-              style='height:138px;width:137px'
-            >
-              <v-layout column>
-                <v-flex xs1>
-                  <b>Source 1 Matched</b>
-                </v-flex>
-                <v-flex
-                  xs1
-                  align-center
-                >
-                  <center>
-                    <b>{{totalMapped}}/{{totalRecords}}</b>
-                  </center>
-                </v-flex>
-                <v-flex xs1>
-                  <center>
-                    <v-progress-circular
-                      :rotate="-90"
-                      :size="65"
-                      :width="8"
-                      :value="source1PercentMappedLevel"
-                      color="yellow"
-                    >
-                      <font color="black">
-                        <b>{{ source1PercentMappedLevel }}%</b>
-                      </font>
-                    </v-progress-circular>
-                  </center>
-                </v-flex>
-              </v-layout>
-            </v-chip>
-          </v-flex>
-          <v-flex xs1>
-            <v-chip
-              color="cyan"
-              text-color='black'
-              style='height:138px;width:137px'
-            >
-              <v-layout column>
-                <v-flex xs1>
-                  <b>Source 1 No Match</b>
-                </v-flex>
-                <v-flex
-                  xs1
-                  align-center
-                >
-                  <center>
-                    <b>{{totalNoMatch}}/{{totalRecords}}</b>
-                  </center>
-                </v-flex>
-                <v-flex xs1>
-                  <center>
-                    <v-progress-circular
-                      :rotate="-90"
-                      :size="65"
-                      :width="8"
-                      :value="source1PercentNoMatchLevel"
-                      color="yellow"
-                    >
-                      <font color="black">
-                        <b>{{ source1PercentNoMatchLevel }}%</b>
-                      </font>
-                    </v-progress-circular>
-                  </center>
-                </v-flex>
-              </v-layout>
-            </v-chip>
-          </v-flex>
-          <v-flex xs1>
-            <v-chip
-              color="cyan"
-              text-color='black'
-              style='height:138px;width:137px'
-            >
-              <v-layout column>
-                <v-flex xs1>
-                  <b>Source 1 Flagged</b>
-                </v-flex>
-                <v-flex
-                  xs1
-                  align-center
-                >
-                  <center>
-                    <b>{{totalFlagged}}/{{totalRecords}}</b>
-                  </center>
-                </v-flex>
-                <v-flex xs1>
-                  <center>
-                    <v-progress-circular
-                      :rotate="-90"
-                      :size="65"
-                      :width="8"
-                      :value="source1PercentFlagged"
-                      color="yellow"
-                    >
-                      <font color="black">
-                        <b>{{ source1PercentFlagged }}%</b>
-                      </font>
-                    </v-progress-circular>
-                  </center>
-                </v-flex>
-              </v-layout>
-            </v-chip>
-          </v-flex>
-        </v-layout>
-      </v-flex>
-      <v-flex xs1>
-        <v-layout
-          row
-          wrap
-        >
-          <v-flex xs3>
-            <v-text-field
-              v-model="searchMatched"
-              append-icon="search"
-              label="Search"
-              single-line
-              hide-details
-            ></v-text-field>
           </v-flex>
           <v-spacer></v-spacer>
           <v-flex xs2>
-            <template v-if="$store.state.activePair.userID._id === $store.state.auth.userID || $store.state.auth.role == 'Admin'">
-              <v-btn
-                color="success"
-                round
-                @click='markRecoDone'
-                v-if="$store.state.recoStatus !== 'Done'"
-              >
-                <v-icon>lock</v-icon>Mark Reconciliation As Done
-              </v-btn>
-              <v-btn
-                color="success"
-                round
-                @click='markRecoUnDone'
-                v-if="$store.state.recoStatus === 'Done' && $store.state.auth.role == 'Admin'"
-              >
-                <v-icon>lock_open</v-icon>Mark Reconciliation As UnDone
-              </v-btn>
-            </template>
+
           </v-flex>
           <v-spacer></v-spacer>
           <v-flex
@@ -463,19 +479,7 @@
             md2
             right
           >
-            <v-select
-              :items="locationLevels"
-              v-model="recoLevel"
-              :item-value='locationLevels.value'
-              :item-name='locationLevels.text'
-              label="Level"
-              class="input-group--focused"
-              height='1'
-              full-width
-              @change="levelChanged"
-              single-line
-            >
-            </v-select>
+
           </v-flex>
         </v-layout>
       </v-flex>
@@ -485,7 +489,7 @@
           centered
           grow
           dark
-          color="cyan"
+          background-color="cyan"
         >
           <v-tabs-slider color="red"></v-tabs-slider>
           <v-tab key="match">
@@ -493,35 +497,35 @@
             <v-icon
               color="white"
               right
-            >thumb_up</v-icon>
+            >mdi-thumb-up</v-icon>
           </v-tab>
           <v-tab key="notMapped">
             Source 1 Not Mapped ({{totalNotMapped}})
             <v-icon
               color="white"
               right
-            >thumb_down</v-icon>
+            >mdi-thumb-down</v-icon>
           </v-tab>
           <v-tab key="nomatch">
             Source 1 NO MATCH ({{totalNoMatch}})
             <v-icon
               color="white"
               right
-            >thumb_down</v-icon>
+            >mdi-thumb-down</v-icon>
           </v-tab>
           <v-tab key="ignore">
             Source 1 IGNORED ({{totalIgnore}})
             <v-icon
               color="white"
               right
-            >thumb_down</v-icon>
+            >mdi-thumb-down</v-icon>
           </v-tab>
           <v-tab key="flagged">
             FLAGGED ({{totalFlagged}})
             <v-icon
               color="white"
               right
-            >notification_important</v-icon>
+            >mdi-bell</v-icon>
           </v-tab>
           <v-tab-item key="match">
             <v-data-table
@@ -609,7 +613,6 @@
           </v-tab-item>
         </v-tabs>
       </v-flex>
-      </v-flex>
     </v-layout>
   </v-container>
 </template>
@@ -618,7 +621,6 @@
 import { scoresMixin } from '../mixins/scoresMixin'
 import axios from 'axios'
 import ReconciliationExport from './ReconciliationExport'
-const backendServer = process.env.BACKEND_SERVER
 export default {
   mixins: [scoresMixin],
   data () {
@@ -656,7 +658,7 @@ export default {
   methods: {
     checkMappingStatusProgress () {
       const clientId = this.$store.state.clientId
-      axios.get(backendServer + '/progress/mappingStatus/' + clientId).then((mappingStatusProgress) => {
+      axios.get('/progress/mappingStatus/' + clientId).then((mappingStatusProgress) => {
         if (mappingStatusProgress.data === null ||
           mappingStatusProgress.data === undefined ||
           mappingStatusProgress.data === false
@@ -709,7 +711,7 @@ export default {
       this.mappingStatusDialog = true
       this.progressType = 'indeterminate'
       let path = `/mappingStatus/${this.source1}/${this.source2}/${source1Owner}/${source2Owner}/${this.recoLevel}/${totalSource2Levels}/${totalSource1Levels}/${clientId}/${userID}?source1LimitOrgId=${source1LimitOrgId}&source2LimitOrgId=${source2LimitOrgId}`
-      axios.get(backendServer + path).then((mappingStatus) => {
+      axios.get(path).then((mappingStatus) => {
         this.mappingData = mappingStatus.data
       })
       this.mappingStatusProgressTimer = setInterval(this.checkMappingStatusProgress, 500)
@@ -722,7 +724,7 @@ export default {
       this.$store.state.progressTitle = 'Marking reconciliation as Done'
       this.$store.state.dynamicProgress = true
       let userID = this.$store.state.activePair.userID._id
-      axios.get(backendServer + '/markRecoDone/' + this.source1 + '/' + this.source2 + '/' + userID).then((status) => {
+      axios.get('/markRecoDone/' + this.source1 + '/' + this.source2 + '/' + userID).then((status) => {
         this.$store.state.dynamicProgress = false
         if (status.data.status) {
           this.$store.state.recoStatus = status.data.status
@@ -740,7 +742,7 @@ export default {
       let userID = this.$store.state.activePair.userID._id
       this.$store.state.progressTitle = 'Marking reconciliation as Un Done'
       this.$store.state.dynamicProgress = true
-      axios.get(backendServer + '/markRecoUnDone/' + this.source1 + '/' + this.source2 + '/' + userID).then((status) => {
+      axios.get('/markRecoUnDone/' + this.source1 + '/' + this.source2 + '/' + userID).then((status) => {
         this.$store.state.dynamicProgress = false
         if (status.data.status) {
           this.$store.state.recoStatus = status.data.status

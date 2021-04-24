@@ -2,7 +2,6 @@ import {
   eventBus
 } from '../../main'
 import axios from 'axios'
-const backendServer = process.env.BACKEND_SERVER
 export const dataSourcesMixin = {
   data () {
     return {
@@ -42,7 +41,7 @@ export const dataSourcesMixin = {
       var serverExists = this.$store.state.dataSources.find((dataSource) => {
         return dataSource.host === this.host
       })
-      axios.post(backendServer + '/addDataSource', formData, {
+      axios.post('/addDataSource', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

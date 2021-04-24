@@ -1,8 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-param-reassign */
 /* eslint-disable consistent-return */
-require('../init');
-const winston = require('winston');
 const express = require('express');
 const formidable = require('formidable');
 const async = require('async');
@@ -11,32 +9,33 @@ const router = express.Router();
 const mcsd = require('../mcsd')();
 const config = require('../config');
 const mixin = require('../mixin')();
+const logger = require('../winston');
 
 const topOrgId = mixin.getTopOrgId(config.getConf('mCSD:registryDB'));
 
 router.post('/addService', (req, res) => {
-  winston.info('Received a request to add a new service');
+  logger.info('Received a request to add a new service');
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields, files) => {
     mcsd.addService(fields, (error) => {
       if (error) {
         res.status(400).send(error);
       } else {
-        winston.info('New Jurisdiction added successfully');
+        logger.info('New Jurisdiction added successfully');
         res.status(200).send();
       }
     });
   });
 });
 router.post('/addJurisdiction', (req, res) => {
-  winston.info('Received a request to add a new Jurisdiction');
+  logger.info('Received a request to add a new Jurisdiction');
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields, files) => {
     const defaultDB = config.getConf('mCSD:registryDB');
     fields.database = defaultDB;
     mcsd.addJurisdiction(fields, (error, id) => {
       if (error) {
-        winston.error(error);
+        logger.error(error);
         res.status(500).send(error);
         return;
       }
@@ -45,10 +44,10 @@ router.post('/addJurisdiction', (req, res) => {
       fields.id = id;
       mcsd.addJurisdiction(fields, (error) => {
         if (error) {
-          winston.error(error);
+          logger.error(error);
           res.status(500).send(error);
         } else {
-          winston.info('New Jurisdiction added successfully');
+          logger.info('New Jurisdiction added successfully');
           res.status(200).send();
         }
       });
@@ -57,14 +56,14 @@ router.post('/addJurisdiction', (req, res) => {
 });
 
 router.post('/addBuilding', (req, res) => {
-  winston.info('Received a request to add a new Building');
+  logger.info('Received a request to add a new Building');
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields, files) => {
     mcsd.addBuilding(fields, (error) => {
       if (error) {
         res.status(500).send(error);
       } else {
-        winston.info('New Building added successfully');
+        logger.info('New Building added successfully');
         res.status(200).send();
       }
     });
@@ -72,7 +71,7 @@ router.post('/addBuilding', (req, res) => {
 });
 
 router.post('/changeBuildingRequestStatus', (req, res) => {
-  winston.info('Received a request to change building request status');
+  logger.info('Received a request to change building request status');
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields, files) => {
     const {
@@ -86,10 +85,10 @@ router.post('/changeBuildingRequestStatus', (req, res) => {
       requestType,
     }, (error) => {
       if (error) {
-        winston.error('An error has occured while changing request status');
+        logger.error('An error has occured while changing request status');
         res.status(500).send(error);
       } else {
-        winston.info('Building Request Status Changed Successfully');
+        logger.info('Building Request Status Changed Successfully');
         res.status(200).send();
       }
     });
@@ -122,7 +121,7 @@ router.get('/getLocationNames', (req, res) => {
 });
 
 router.get('/getServices', (req, res) => {
-  winston.info('Received a request to get list of service offered by facilities');
+  logger.info('Received a request to get list of service offered by facilities');
   const {
     id,
     getResource,
@@ -196,7 +195,7 @@ router.get('/getServices', (req, res) => {
 });
 
 router.get('/getBuildings', (req, res) => {
-  winston.info('Received a request to get list of buildings');
+  logger.info('Received a request to get list of buildings');
   const {
     jurisdiction,
     action,
@@ -218,7 +217,7 @@ router.get('/getBuildings', (req, res) => {
     if (err) {
       res.status(500).send(err);
     } else {
-      winston.info('Returning a list of facilities');
+      logger.info('Returning a list of facilities');
       const buildingsTable = [];
       async.each(buildings, (building, nxtBuilding) => {
         let requestExtension;
@@ -371,14 +370,14 @@ router.get('/getBuildings', (req, res) => {
 });
 
 router.post('/addCodeSystem', (req, res) => {
-  winston.info('Received a request to add code system');
+  logger.info('Received a request to add code system');
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields, files) => {
     mcsd.addCodeSystem(fields, (error) => {
       if (error) {
         res.status(500).send(error);
       } else {
-        winston.info('New code system added successfully');
+        logger.info('New code system added successfully');
         res.status(200).send();
       }
     });
@@ -386,7 +385,7 @@ router.post('/addCodeSystem', (req, res) => {
 });
 
 router.get('/getCodeSystem', (req, res) => {
-  winston.info('Received a request to get code system');
+  logger.info('Received a request to get code system');
   const {
     codeSystemType,
   } = req.query;
@@ -395,7 +394,7 @@ router.get('/getCodeSystem', (req, res) => {
   if (codeSyst) {
     codeSystemURI = codeSyst.uri;
   } else {
-    winston.warn(`Codesystem URI ${codeSystemType} was not found on the configuration`);
+    logger.warn(`Codesystem URI ${codeSystemType} was not found on the configuration`);
     return res.status(401).send();
   }
   mcsd.getCodeSystem({
@@ -411,7 +410,7 @@ router.get('/getCodeSystem', (req, res) => {
 });
 
 router.get('/getTree', (req, res) => {
-  winston.info('Received a request to get location tree');
+  logger.info('Received a request to get location tree');
   let {
     sourceLimitOrgId,
     includeBuilding,
@@ -422,14 +421,14 @@ router.get('/getTree', (req, res) => {
   if (includeBuilding && typeof includeBuilding === 'string') {
     includeBuilding = JSON.parse(includeBuilding);
   }
-  winston.info('Fetching FR Locations');
+  logger.info('Fetching FR Locations');
   async.parallel({
     locationChildren(callback) {
       mcsd.getLocationChildren({
         parent: sourceLimitOrgId,
       },
       (mcsdData) => {
-        winston.info('Done Fetching FR Locations');
+        logger.info('Done Fetching FR Locations');
         return callback(false, mcsdData);
       });
     },
@@ -441,7 +440,7 @@ router.get('/getTree', (req, res) => {
     },
   },
   (error, response) => {
-    winston.info('Creating FR Tree');
+    logger.info('Creating FR Tree');
     mcsd.createTree(response.locationChildren, sourceLimitOrgId, includeBuilding, (tree) => {
       if (sourceLimitOrgId !== topOrgId && response.parentDetails.entry) {
         tree = {
@@ -450,7 +449,7 @@ router.get('/getTree', (req, res) => {
           children: tree,
         };
       }
-      winston.info('Done Creating FR Tree');
+      logger.info('Done Creating FR Tree');
       res.status(200).json(tree);
     });
   });

@@ -1,5 +1,7 @@
 <template>
-  
+  <v-container grid-list-xs>
+
+  </v-container>
 </template>
 <script>
 import VueCookies from 'vue-cookies'

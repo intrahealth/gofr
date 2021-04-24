@@ -45,7 +45,7 @@ export default {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
-      }).then((syncRes) => {
+      }).then(() => {
         this.syncProgressTimer = setInterval(this.checkSyncProgress, 1000)
       }).catch((err) => {
         this.$store.state.dialogError = true

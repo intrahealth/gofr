@@ -1,8 +1,6 @@
 /* eslint-disable no-underscore-dangle */
-require('./init');
 require('./connection');
 const cron = require('node-cron');
-const winston = require('winston');
 const async = require('async');
 const uuid4 = require('uuid/v4');
 const mongo = require('./mongo')();
@@ -10,13 +8,14 @@ const models = require('./models');
 const config = require('./config');
 const dhis = require('./dhis')();
 const fhir = require('./fhir')();
+const logger = require('./winston');
 
 const topOrgName = config.getConf('mCSD:fakeOrgName');
 
 function getCrontime(callback) {
   mongo.getGeneralConfig((err, resData) => {
     if (err) {
-      winston.error(err);
+      logger.error(err);
       return callback();
     }
     const data = JSON.parse(JSON.stringify(resData));
@@ -37,12 +36,12 @@ getCrontime((time) => {
     time = '*/15 * * * *';
   }
   cron.schedule(time, () => {
-    winston.info('Running cronjob for auto data source sync');
+    logger.info('Running cronjob for auto data source sync');
     models.DataSourcesModel.find({}, (err, data) => {
       const dataSources = JSON.parse(JSON.stringify(data));
       async.eachSeries(dataSources, (dtSrc, nxtDtSrc) => {
         if (dtSrc.enableAutosync && dtSrc.source === 'syncServer') {
-          winston.info(`Running auto sync for ${dtSrc.name}`);
+          logger.info(`Running auto sync for ${dtSrc.name}`);
           const {
             name,
             host,
@@ -83,7 +82,7 @@ getCrontime((time) => {
         }
         return nxtDtSrc();
       }, () => {
-        winston.info('Done running cronjob for auto data source sync');
+        logger.info('Done running cronjob for auto data source sync');
       });
     });
   });

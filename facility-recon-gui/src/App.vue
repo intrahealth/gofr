@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-toolbar
+    <v-app-bar
       color="primary"
       dark
       app
@@ -21,8 +21,8 @@
       <v-toolbar-items>
 
       </v-toolbar-items>
-    </v-toolbar>
-    <v-content>
+    </v-app-bar>
+    <v-main>
       <v-dialog
         v-model="$store.state.dynamicProgress"
         persistent
@@ -61,7 +61,7 @@
               dark
               @click.native="$store.state.dialogError = false"
             >
-              <v-icon>close</v-icon>
+              <v-icon>mdi-close</v-icon>
             </v-btn>
           </v-toolbar>
           <v-card-text>
@@ -94,42 +94,52 @@
           </v-card-text>
         </v-card>
       </v-dialog>
-      <v-layout
-        row
-        wrap
-      >
-        <v-flex xs6>
+      <v-row>
+        <v-col>
           <template v-if="Object.keys($store.state.activePair.source1).length > 0 && !$store.state.denyAccess">
             {{ $t('App.source') }} 1: <b>{{$store.state.activePair.source1.name}}</b>, &nbsp; &nbsp; {{ $t('App.source') }} 2: <b>{{$store.state.activePair.source2.name}}</b>,
             &nbsp; &nbsp; Recon Status: <v-icon
               small
               v-if="$store.state.recoStatus === 'in-progress'"
-            >lock_open</v-icon>
+            >mdi-lock-open-variant-outline</v-icon>
             <v-icon
               small
               v-else
-            >lock</v-icon> <b>{{$store.state.recoStatus}}</b>
+            >mdi-lock-outline</v-icon> <b>{{$store.state.recoStatus}}</b>
           </template>
-        </v-flex>
-        <v-spacer></v-spacer>
-        <v-flex xs1>
+        </v-col>
+        <v-col cols="2">
           <v-select
             :items="locales"
             v-model="locale"
           ></v-select>
+        </v-col>
+      </v-row>
+      <center>
+        <v-alert
+          :style="{width: $store.state.alert.width}"
+          v-model="$store.state.alert.show"
+          :type="$store.state.alert.type"
+          :dismissible="$store.state.alert.dismisible"
+          :transition="$store.state.alert.transition"
+        >
+          {{$store.state.alert.msg}}
+        </v-alert>
+      </center>
+      <v-layout
+        row
+        wrap
+      >
+        <v-flex xs4>
+
+        </v-flex>
+        <v-spacer></v-spacer>
+        <v-flex xs1>
+
         </v-flex>
       </v-layout>
-      <v-alert
-        :style="{width: $store.state.alert.width}"
-        v-model="$store.state.alert.show"
-        :type="$store.state.alert.type"
-        :dismissible="$store.state.alert.dismisible"
-        :transition="$store.state.alert.transition"
-      >
-        {{$store.state.alert.msg}}
-      </v-alert>
       <router-view :key='"baseRouterViewKey" + $store.state.baseRouterViewKey'></router-view>
-    </v-content>
+    </v-main>
     <v-footer
       dark
       color="primary"
@@ -152,7 +162,6 @@ import VueCookies from 'vue-cookies'
 import {
   tasksVerification
 } from './modules/tasksVerification'
-const backendServer = process.env.BACKEND_SERVER
 
 export default {
   mixins: [dataSourcePairMixin, scoresMixin, generalMixin],
@@ -207,7 +216,6 @@ export default {
       let sourcesOwner = this.getDatasourceOwner()
       axios
         .get(
-          backendServer +
           '/uploadAvailable/' +
           source1 +
           '/' +
@@ -248,7 +256,7 @@ export default {
       let sourcesOwner = JSON.stringify(this.getDatasourceOwner())
       let sourcesLimitOrgId = JSON.stringify(this.getLimitOrgIdOnActivePair())
       axios
-        .get(backendServer + '/countLevels/' + source1 + '/' + source2 + '/' + sourcesOwner + '/' + sourcesLimitOrgId)
+        .get('/countLevels/' + source1 + '/' + source2 + '/' + sourcesOwner + '/' + sourcesLimitOrgId)
         .then(levels => {
           this.$store.state.levelMapping.source1 = levels.data.levelMapping.levelMapping1
           this.$store.state.levelMapping.source2 = levels.data.levelMapping.levelMapping2
@@ -276,7 +284,6 @@ export default {
       let userID = this.$store.state.activePair.userID._id
       axios
         .get(
-          backendServer +
           '/recoStatus/' +
           source1 +
           '/' +
@@ -290,7 +297,6 @@ export default {
           } else {
             axios
               .get(
-                backendServer +
                 '/markRecoUnDone/' +
                 source1 +
                 '/' +
@@ -319,7 +325,7 @@ export default {
       let role = this.$store.state.auth.role
       let orgId = this.$store.state.dhis.user.orgId
       axios
-        .get(backendServer + '/getDataSources/' + userID + '/' + role + '/' + orgId)
+        .get('/getDataSources/' + userID + '/' + role + '/' + orgId)
         .then(response => {
           this.$store.state.loadingServers = false
           this.$store.state.dataSources = response.data.servers
@@ -333,7 +339,7 @@ export default {
     getUserConfig () {
       let userID = this.$store.state.auth.userID
       axios
-        .get(backendServer + '/getUserConfig/' + userID)
+        .get('/getUserConfig/' + userID)
         .then(config => {
           if (config.data) {
             this.$store.state.config.userConfig = { ...this.$store.state.config.userConfig, ...config.data }
@@ -356,7 +362,7 @@ export default {
         this.$store.state.initializingApp = true
       }
       axios
-        .get(backendServer + '/getDataSourcePair/' + userID + '/' + this.$store.state.dhis.user.orgId)
+        .get('/getDataSourcePair/' + userID + '/' + this.$store.state.dhis.user.orgId)
         .then(response => {
           this.$store.state.dataSourcePairs = response.data
           let activeSource = this.getActiveDataSourcePair()
@@ -466,11 +472,9 @@ export default {
       this.$store.state.auth.role = VueCookies.get('role')
       this.$store.state.auth.tasks = JSON.parse(VueCookies.get('tasks'))
       this.$store.state.signupFields = VueCookies.get('signupFields')
-      this.$store.state.customSignupFields = VueCookies.get(
-        'customSignupFields'
-      )
+      this.$store.state.customSignupFields = VueCookies.get('customSignupFields')
       if (!this.$store.state.config.generalConfig.authDisabled) {
-        axios.get(backendServer + '/isTokenActive/').then(response => {
+        axios.get('/isTokenActive/').then(() => {
           // will come here only if the token is active
           this.$store.state.clientId = uuid.v4()
           this.$store.state.initializingApp = true

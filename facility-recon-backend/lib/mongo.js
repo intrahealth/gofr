@@ -1,8 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable func-names */
-require('./init');
 require('./connection');
-const winston = require('winston');
 const crypto = require('crypto');
 const fsFinder = require('fs-finder');
 const fs = require('fs-extra');
@@ -16,6 +14,7 @@ const models = require('./models');
 const schemas = require('./schemas');
 const mixin = require('./mixin')();
 const config = require('./config');
+const logger = require('./winston');
 
 const mongoUser = config.getConf('DB_USER');
 const mongoPasswd = config.getConf('DB_PASSWORD');
@@ -38,8 +37,8 @@ module.exports = function () {
       query.select('_id');
       query.exec((err, data) => {
         if (err) {
-          winston.error(err);
-          winston.error('An error has occured while getting tasks by name');
+          logger.error(err);
+          logger.error('An error has occured while getting tasks by name');
         }
         return callback(err, data);
       });
@@ -57,8 +56,8 @@ module.exports = function () {
       query.select('_id name');
       query.exec((err, data) => {
         if (err) {
-          winston.error(err);
-          winston.error('An error has occured while getting roles by tasks');
+          logger.error(err);
+          logger.error('An error has occured while getting roles by tasks');
         }
         return callback(err, data);
       });
@@ -75,8 +74,8 @@ module.exports = function () {
       });
       query.exec((err, data) => {
         if (err) {
-          winston.error(err);
-          winston.error('An error has occured while getting roles by tasks');
+          logger.error(err);
+          logger.error('An error has occured while getting roles by tasks');
         }
         return callback(err, data);
       });
@@ -93,8 +92,8 @@ module.exports = function () {
       });
       query.exec((err, data) => {
         if (err) {
-          winston.error(err);
-          winston.error('An error has occured while getting roles by tasks');
+          logger.error(err);
+          logger.error('An error has occured while getting roles by tasks');
         }
         return callback(err, data);
       });
@@ -102,14 +101,14 @@ module.exports = function () {
     getSMTP(callback) {
       models.SMTPModel.findOne({}, (err, data) => {
         if (err) {
-          winston.error(err);
+          logger.error(err);
           return callback(err, data);
         }
         return callback(err, data);
       });
     },
     saveLevelMapping(levelData, database, callback) {
-      winston.info('saving level data');
+      logger.info('saving level data');
       const levels = Object.keys(levelData);
       const dbLevel = {};
       async.each(levels, (level, nxtLevel) => {
@@ -131,7 +130,7 @@ module.exports = function () {
         useNewUrlParser: true,
       });
       connection.on('error', () => {
-        winston.error(`An error occured while connecting to DB ${database}`);
+        logger.error(`An error occured while connecting to DB ${database}`);
       });
       connection.once('open', () => {
         connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
@@ -143,11 +142,11 @@ module.exports = function () {
             MetaData.save((err, data) => {
               connection.close();
               if (err) {
-                winston.error(err);
-                winston.error('Failed to save level data');
+                logger.error(err);
+                logger.error('Failed to save level data');
                 return callback(err, '');
               }
-              winston.info('Level data saved successfully');
+              logger.info('Level data saved successfully');
               return callback(err, 'successful');
             });
           } else {
@@ -156,11 +155,11 @@ module.exports = function () {
             }, (err, data) => {
               connection.close();
               if (err) {
-                winston.error(err);
-                winston.error('Failed to save level data');
+                logger.error(err);
+                logger.error('Failed to save level data');
                 return callback(err, '');
               }
-              winston.info('Level data saved successfully');
+              logger.info('Level data saved successfully');
               return callback(err, 'successful');
             });
           }
@@ -178,7 +177,7 @@ module.exports = function () {
         useNewUrlParser: true,
       });
       connection.on('error', () => {
-        winston.error(`An error occured while connecting to DB ${database}`);
+        logger.error(`An error occured while connecting to DB ${database}`);
       });
       connection.once('open', () => {
         connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
@@ -186,7 +185,7 @@ module.exports = function () {
           if (data && data.levelMapping) {
             return callback(data.levelMapping);
           }
-          winston.info(`No level mapping data for ${database}`);
+          logger.info(`No level mapping data for ${database}`);
           return callback(false);
         });
       });
@@ -201,8 +200,8 @@ module.exports = function () {
         }],
       }, (err, data) => {
         if (err) {
-          winston.error(err);
-          winston.error('Unexpected error occured,please retry');
+          logger.error(err);
+          logger.error('Unexpected error occured,please retry');
           return callback('Unexpected error occured,please retry', null);
         }
         if (!data) {
@@ -225,8 +224,8 @@ module.exports = function () {
           });
           syncServer.save((err, data) => {
             if (err) {
-              winston.error(err);
-              winston.error('Unexpected error occured,please retry');
+              logger.error(err);
+              logger.error('Unexpected error occured,please retry');
               return callback('Unexpected error occured,please retry', null);
             }
             return callback(false, password);
@@ -248,8 +247,8 @@ module.exports = function () {
             'shareToAll.limitByUserLocation': fields.limitByUserLocation,
           }, (err, data) => {
             if (err) {
-              winston.error(err);
-              winston.error('Unexpected error occured,please retry');
+              logger.error(err);
+              logger.error('Unexpected error occured,please retry');
               return callback('Unexpected error occured,please retry');
             }
             return callback(false, password);
@@ -268,7 +267,7 @@ module.exports = function () {
         password,
       }, (err, data) => {
         if (err) {
-          winston.error(err);
+          logger.error(err);
           return callback('Unexpected error occured,please retry');
         }
         return callback(false, password);
@@ -280,7 +279,7 @@ module.exports = function () {
         enableAutosync: state,
       }, (err, data) => {
         if (err) {
-          winston.error(err);
+          logger.error(err);
           return callback('Unexpected error occured,please retry');
         }
         return callback(false, data);
@@ -333,8 +332,8 @@ module.exports = function () {
         .lean()
         .exec({}, (err, pairs) => {
           if (err) {
-            winston.error(err);
-            winston.error('An error has occured while getting data source pairs for mapping DB deletetion');
+            logger.error(err);
+            logger.error('An error has occured while getting data source pairs for mapping DB deletetion');
             return callback(mappingDBs);
           }
           if (pairs) {
@@ -357,16 +356,16 @@ module.exports = function () {
       const datasourceDB = name + sourceOwner;
       this.deleteDB(datasourceDB, (err) => {
         if (err) {
-          winston.error(err);
-          winston.error(`An error has occured while deleting datasource db ${datasourceDB}`);
+          logger.error(err);
+          logger.error(`An error has occured while deleting datasource db ${datasourceDB}`);
         }
       });
       this.getMappingDBs(id, (mappingDBs) => {
         async.eachSeries(mappingDBs, (mappingDB, nxtDB) => {
           this.deleteDB(mappingDB.db, (error) => {
             if (error) {
-              winston.error(error);
-              winston.error(`An error has occured while deleting datasource db ${mappingDB.db}`);
+              logger.error(error);
+              logger.error(`An error has occured while deleting datasource db ${mappingDB.db}`);
             }
             return nxtDB();
           });
@@ -412,7 +411,7 @@ module.exports = function () {
       async.each(path, (file, nxtFile) => {
         fs.unlink(file, (err) => {
           if (err) {
-            winston.error(err);
+            logger.error(err);
           }
           return nxtFile();
         });
@@ -464,7 +463,7 @@ module.exports = function () {
             });
           }, () => {
             if (err) {
-              winston.error(err);
+              logger.error(err);
               return callback('Unexpected error occured,please retry');
             }
             callback(err, sources);
@@ -480,7 +479,7 @@ module.exports = function () {
         .lean()
         .exec({}, (err, data) => {
           if (err) {
-            winston.error(err);
+            logger.error(err);
             return callback('Unexpected error occured,please retry');
           }
           callback(err, data);
@@ -551,7 +550,7 @@ module.exports = function () {
             });
             dataSourcePair.save((err, data) => {
               if (err) {
-                winston.error(err);
+                logger.error(err);
                 return callback(true, false);
               }
               return callback(false, true);
@@ -692,31 +691,31 @@ module.exports = function () {
       }
       const connection = mongoose.createConnection(mongoURI);
       connection.on('error', (err) => {
-        winston.error(err);
-        winston.error(`An error has occured while connecting to db ${db}`);
+        logger.error(err);
+        logger.error(`An error has occured while connecting to db ${db}`);
       });
       connection.on('connected', () => {
         connection.db.dropDatabase((err) => {
           connection.close();
           if (err) {
-            winston.error(err);
+            logger.error(err);
             throw err;
           } else {
-            winston.info(`${db} Dropped`);
+            logger.info(`${db} Dropped`);
           }
           return callback(err);
         });
       });
     },
     restoreDB(archive, db, callback) {
-      winston.info(`Archiving ${db}`);
+      logger.info(`Archiving ${db}`);
       this.archiveDB(db, (err) => {
-        winston.info(`Deleting ${db}`);
+        logger.info(`Deleting ${db}`);
         this.deleteDB(db, (err) => {
           if (err) {
             return callback(err);
           }
-          winston.info('Restoring now ....');
+          logger.info('Restoring now ....');
           const dbList = [];
           dbList.push({
             archive: `${conficonfig.getConf('mapping:dbPrefix')}${db}_${archive}.tar`,
@@ -770,7 +769,7 @@ module.exports = function () {
       async.eachSeries(dbList, (list, nxtList) => {
         const db = list.db;
         const name = list.name;
-        winston.info(`Archiving DB ${db}`);
+        logger.info(`Archiving DB ${db}`);
         let mongoURI;
         if (mongoUser && mongoPasswd) {
           mongoURI = `mongodb://${mongoUser}:${mongoPasswd}@${mongoHost}:${mongoPort}/${db}`;
@@ -791,7 +790,7 @@ module.exports = function () {
             sync: true,
           }, [db]);
         } else {
-          winston.info(`No archive created because no database exists: ${db}`);
+          logger.info(`No archive created because no database exists: ${db}`);
         }
         fs.removeSync(tmpDir.name);
         nxtList();
@@ -852,14 +851,14 @@ module.exports = function () {
             filesDelete.forEach((fileDelete) => {
               fs.unlink(fileDelete, (err) => {
                 if (err) {
-                  winston.error(err);
+                  logger.error(err);
                 }
               });
               const dl = fileDelete.split(db);
               fileDelete = `${dl[0]}${config.getConf('mapping:dbPrefix')}_${db}${dl[1]}`;
               fs.unlink(fileDelete, (err) => {
                 if (err) {
-                  winston.error(err);
+                  logger.error(err);
                 }
               });
             });

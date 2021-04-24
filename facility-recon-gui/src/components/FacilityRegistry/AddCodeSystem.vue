@@ -2,7 +2,7 @@
   <v-container>
     <v-card
       class="pt-4 mx-auto"
-      flat
+      text
       max-width="500"
     >
       <v-card-title primary-title>
@@ -20,7 +20,7 @@
               @change="$v.name.$touch()"
               :error-messages="nameErrors"
               v-model="name"
-              box
+              filled
               color="deep-purple"
               label="Name"
             />
@@ -30,17 +30,17 @@
               @change="$v.code.$touch()"
               :error-messages="codeErrors"
               v-model="code"
-              box
+              filled
               color="deep-purple"
               label="Code"
             />
           </v-form>
           <v-card-actions>
             <v-btn
-              flat
+              text
               @click="$store.state.baseRouterViewKey++"
             >
-              <v-icon>clear</v-icon>Clear
+              <v-icon>mdi-close</v-icon>Clear
             </v-btn>
             <v-spacer />
             <v-btn
@@ -50,7 +50,7 @@
               color="deep-purple accent-4"
               depressed
             >
-              <v-icon left>add</v-icon>Add
+              <v-icon left>mdi-content-save</v-icon>Add
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -61,7 +61,6 @@
 <script>
 import axios from 'axios'
 import { required } from 'vuelidate/lib/validators'
-const backendServer = process.env.BACKEND_SERVER
 export default {
   validations: {
     name: { required },
@@ -80,11 +79,11 @@ export default {
       formData.append('name', this.name)
       formData.append('code', this.code)
       formData.append('codeSystemType', this.codeSystemType)
-      axios.post(backendServer + '/FR/addCodeSystem', formData, {
+      axios.post('/FR/addCodeSystem', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
-      }).then((response) => {
+      }).then(() => {
         this.$store.state.alert.show = true
         this.$store.state.alert.width = '500px'
         this.$store.state.alert.msg = 'Code system added successfully!'

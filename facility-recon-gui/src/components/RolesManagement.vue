@@ -6,7 +6,7 @@
       :items="roles"
       @change="roleSelected"
       single-line
-      box
+      filled
       label="Select Role"
     ></v-select>
     <v-card v-if="role.value">
@@ -17,18 +17,18 @@
         <v-data-table
           :items="tasks"
           height="10px"
-          hide-actions
+          hide-default-footer
         >
-          <template v-slot:items="props">
+          <template v-slot:item="{ item }">
             <tr>
               <td>
                 <v-checkbox
-                  :value="props.item._id"
+                  :value="item._id"
                   v-model="role.tasks"
                 >
                 </v-checkbox>
               </td>
-              <td>{{props.item.display}}</td>
+              <td>{{item.display}}</td>
             </tr>
           </template>
         </v-data-table>
@@ -39,7 +39,7 @@
           color="primary"
           @click="saveRole"
         >
-          <v-icon left>save</v-icon> Save
+          <v-icon left>mdi-content-save</v-icon> Save
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -48,8 +48,6 @@
 <script>
 import axios from 'axios'
 import { generalMixin } from '../mixins/generalMixin'
-
-const backendServer = process.env.BACKEND_SERVER
 
 export default {
   mixins: [generalMixin],
@@ -70,7 +68,7 @@ export default {
       this.$store.state.dynamicProgress = true
       let formData = new FormData()
       formData.append('role', JSON.stringify(this.role))
-      axios.post(backendServer + '/updateRole', formData, {
+      axios.post('/updateRole', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

@@ -3,14 +3,11 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable func-names */
-
-require('./init');
 const cluster = require('cluster');
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const formidable = require('formidable');
-const winston = require('winston');
 const https = require('https');
 const http = require('http');
 const os = require('os');
@@ -40,6 +37,7 @@ const mixin = require('./mixin')();
 const mongo = require('./mongo')();
 const config = require('./config');
 const FRRouter = require('./routes/facilityRegistry');
+const FRConfig = require('./routes/config');
 const mcsd = require('./mcsd')();
 const dhis = require('./dhis')();
 const fhir = require('./fhir')();
@@ -56,6 +54,7 @@ const cryptr = new Cryptr(config.getConf('auth:secret'));
 
 const app = express();
 const server = require('http').createServer(app);
+const logger = require('./winston');
 
 const cleanReqPath = function (req, res, next) {
   req.url = req.url.replace('//', '/');
@@ -80,7 +79,7 @@ const jwtValidator = function (req, res, next) {
     return next();
   }
   if (!req.headers.authorization || req.headers.authorization.split(' ').length !== 2) {
-    winston.error('Token is missing');
+    logger.error('Token is missing');
     res.set('Access-Control-Allow-Origin', '*');
     res.set('WWW-Authenticate', 'Bearer realm="Token is required"');
     res.set('charset', 'utf - 8');
@@ -92,7 +91,7 @@ const jwtValidator = function (req, res, next) {
     const token = req.headers.authorization = tokenArray[1];
     jwt.verify(token, config.getConf('auth:secret'), (err, decoded) => {
       if (err) {
-        winston.warn('Token expired');
+        logger.warn('Token expired');
         res.set('Access-Control-Allow-Origin', '*');
         res.set('WWW-Authenticate', 'Bearer realm="Token expired"');
         res.set('charset', 'utf - 8');
@@ -100,7 +99,7 @@ const jwtValidator = function (req, res, next) {
           error: 'Token expired',
         });
       } else {
-        // winston.info("token is valid")
+        // logger.info("token is valid")
         if (req.path == '/isTokenActive/') {
           res.set('Access-Control-Allow-Origin', '*');
           res.status(200).send(true);
@@ -125,6 +124,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 app.use('/FR/', FRRouter);
+app.use('/config/', FRConfig);
 // socket config - large documents can cause machine to max files open
 
 https.globalAgent.maxSockets = 32;
@@ -143,7 +143,7 @@ if (cluster.isMaster) {
       userName: 'root@gofr.org',
     }).lean().exec((err, data) => {
       if (data.length == 0) {
-        winston.info('Default user not found, adding now ...');
+        logger.info('Default user not found, adding now ...');
         const roles = [{
           name: 'Admin',
           tasks: [],
@@ -173,10 +173,10 @@ if (cluster.isMaster) {
             });
             User.save((err, data) => {
               if (err) {
-                winston.error(err);
-                winston.error('Unexpected error occured,please retry');
+                logger.error(err);
+                logger.error('Unexpected error occured,please retry');
               } else {
-                winston.info('Admin User added successfully');
+                logger.info('Admin User added successfully');
               }
             });
           });
@@ -194,7 +194,7 @@ if (cluster.isMaster) {
     url = false;
     request.get(options, (err, res, body) => {
       if (!res) {
-        winston.error('It appears that FHIR server is not running, quiting GOFR now ...');
+        logger.error('It appears that FHIR server is not running, quiting GOFR now ...');
         process.exit();
       }
       if (res.statusCode === 404) {
@@ -214,8 +214,8 @@ if (cluster.isMaster) {
             }).then(() => callback(null)).catch(error => callback(error));
           },
         ], (error) => {
-          if(error) {
-            winston.error(error);
+          if (error) {
+            logger.error(error);
             Promise.exit();
           }
           // check if FR has fake org id
@@ -225,16 +225,16 @@ if (cluster.isMaster) {
           ]).then(() => {
             defaultSetups.initialize();
           }).catch((error) => {
-            winston.error(error);
+            logger.error(error);
           });
-        })
+        });
       } else {
         // check if FR has fake org id
         Promise.all([
           mcsd.createFakeOrgID(requestsDB),
           mcsd.createFakeOrgID(defaultDB),
         ]).catch((error) => {
-          winston.error(error);
+          logger.error(error);
         });
       }
     });
@@ -260,14 +260,14 @@ if (cluster.isMaster) {
     workers[newworker.process.pid] = newworker;
   });
   cluster.on('message', (worker, message) => {
-    // winston.info(`Master received message from ${worker.process.pid}`);
+    // logger.info(`Master received message from ${worker.process.pid}`);
     if (message.content === 'clean') {
       for (const i in workers) {
         if (workers[i].process.pid !== worker.process.pid) {
           workers[i].send(message);
         }
         // } else {
-        //   winston.info(`Not sending clean message to self: ${i}`);
+        //   logger.info(`Not sending clean message to self: ${i}`);
         // }
       }
     }
@@ -275,7 +275,7 @@ if (cluster.isMaster) {
 } else {
   process.on('message', (message) => {
     if (message.content === 'clean') {
-      // winston.info(`${process.pid} received clean message from master.`);
+      // logger.info(`${process.pid} received clean message from master.`);
       mcsd.cleanCache(message.url, true);
     }
   });
@@ -286,7 +286,7 @@ if (cluster.isMaster) {
   };
 
   app.get('/doubleMapping/:db', (req, res) => {
-    winston.info('Received a request to check Source1 Locations that are double mapped');
+    logger.info('Received a request to check Source1 Locations that are double mapped');
     const source1DB = mixin.toTitleCase(req.params.db);
     const mappingDB = config.getConf('mapping:dbPrefix') + req.params.db;
     async.parallel({
@@ -320,7 +320,7 @@ if (cluster.isMaster) {
           return nxtSource1();
         });
       }, () => {
-        winston.info(`Found ${dupplicated.length} Source1 Locations with Double Matching`);
+        logger.info(`Found ${dupplicated.length} Source1 Locations with Double Matching`);
         res.send(dupplicated);
       });
     });
@@ -329,7 +329,7 @@ if (cluster.isMaster) {
   app.post('/authenticate', (req, res) => {
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
-      winston.info(`Authenticating user ${fields.username}`);
+      logger.info(`Authenticating user ${fields.username}`);
       models.UsersModel.find({
         userName: fields.username,
         $or: [{
@@ -361,7 +361,7 @@ if (cluster.isMaster) {
                 role = roles[0].name;
                 tasks = roles[0].tasks;
               }
-              winston.info(`Successfully Authenticated user ${fields.username}`);
+              logger.info(`Successfully Authenticated user ${fields.username}`);
               res.status(200).json({
                 token,
                 role,
@@ -370,7 +370,7 @@ if (cluster.isMaster) {
               });
             });
           } else {
-            winston.info(`Failed Authenticating user ${fields.username}`);
+            logger.info(`Failed Authenticating user ${fields.username}`);
             res.status(200).json({
               token: null,
               role: null,
@@ -378,7 +378,7 @@ if (cluster.isMaster) {
             });
           }
         } else {
-          winston.info(`Failed Authenticating user ${fields.username}`);
+          logger.info(`Failed Authenticating user ${fields.username}`);
           res.status(200).json({
             token: null,
             role: null,
@@ -390,7 +390,7 @@ if (cluster.isMaster) {
   });
 
   app.post('/addUser', (req, res) => {
-    winston.info('Received a signup request');
+    logger.info('Received a signup request');
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
       models.MetaDataModel.find({
@@ -423,7 +423,7 @@ if (cluster.isMaster) {
               const Users = new models.UsersModel(schemaData);
               Users.save((err, data) => {
                 if (err) {
-                  winston.error(err);
+                  logger.error(err);
                   res.status(500).json({
                     error: 'Internal error occured',
                   });
@@ -451,7 +451,7 @@ if (cluster.isMaster) {
                       }
                     });
                   }
-                  winston.info('User created successfully');
+                  logger.info('User created successfully');
                   res.status(200).json({
                     id: data._id,
                   });
@@ -459,7 +459,7 @@ if (cluster.isMaster) {
               });
             } else {
               if (err) {
-                winston.error(err);
+                logger.error(err);
               }
               res.status(500).json({
                 error: 'Internal error occured',
@@ -468,7 +468,7 @@ if (cluster.isMaster) {
           });
         } else {
           if (err) {
-            winston.error(err);
+            logger.error(err);
           }
           res.status(500).json({
             error: 'Internal error occured',
@@ -479,7 +479,7 @@ if (cluster.isMaster) {
   });
 
   app.post('/updateRole', (req, res) => {
-    winston.info('Received a request to change account status');
+    logger.info('Received a request to change account status');
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields) => {
       let role;
@@ -488,15 +488,15 @@ if (cluster.isMaster) {
       } catch (error) {
         return res.status(500).send('Invalid JSON of roles submitted');
       }
-      winston.info('Received a request to update role');
+      logger.info('Received a request to update role');
       models.RolesModel.findByIdAndUpdate(role.value, {
         $set: {
           tasks: [],
         },
       }, (err, data) => {
         if (err) {
-          winston.error(err);
-          winston.error('An error occured while removing tasks from role');
+          logger.error(err);
+          logger.error('An error occured while removing tasks from role');
           return res.status(500).send();
         }
         models.RolesModel.findByIdAndUpdate(role.value, {
@@ -507,10 +507,10 @@ if (cluster.isMaster) {
           },
         }, (err, data) => {
           if (err) {
-            winston.error(err);
+            logger.error(err);
             res.status(500).send(err);
           } else {
-            winston.info('Role updated successfully');
+            logger.info('Role updated successfully');
             res.status(200).send();
           }
         });
@@ -519,7 +519,7 @@ if (cluster.isMaster) {
   });
 
   app.post('/saveSMTP', (req, res) => {
-    winston.info('Received a request to save SMTP Config');
+    logger.info('Received a request to save SMTP Config');
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields) => {
       models.SMTPModel.findOne({}, (err, data) => {
@@ -538,8 +538,8 @@ if (cluster.isMaster) {
             secured: fields.secured,
           }, (err, data) => {
             if (err) {
-              winston.error(err);
-              winston.error('An error has occured while saving SMTP config');
+              logger.error(err);
+              logger.error('An error has occured while saving SMTP config');
               return res.status(500).send();
             }
             res.status(200).send();
@@ -554,8 +554,8 @@ if (cluster.isMaster) {
           });
           smtp.save((err, data) => {
             if (err) {
-              winston.error(err);
-              winston.error('An error has occured while saving SMTP config');
+              logger.error(err);
+              logger.error('An error has occured while saving SMTP config');
               return res.status(500).send();
             }
             res.status(200).send();
@@ -566,10 +566,10 @@ if (cluster.isMaster) {
   });
 
   app.get('/getSMTP', (req, res) => {
-    winston.info('Received a request to get SMTP Config');
+    logger.info('Received a request to get SMTP Config');
     mongo.getSMTP((err, data) => {
       if (err) {
-        winston.error('An error occured while getting SMTP config');
+        logger.error('An error occured while getting SMTP config');
         return res.status(500).send();
       }
       res.status(200).json(data);
@@ -577,7 +577,7 @@ if (cluster.isMaster) {
   });
 
   app.post('/processUserAccoutRequest', (req, res) => {
-    winston.info('Received a request to change account status');
+    logger.info('Received a request to change account status');
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields) => {
       const {
@@ -592,8 +592,8 @@ if (cluster.isMaster) {
       updates.status = status;
       models.UsersModel.findByIdAndUpdate(id, updates, (err, data) => {
         if (err) {
-          winston.error('An error has occured while changing account status');
-          winston.error(err);
+          logger.error('An error has occured while changing account status');
+          logger.error(err);
           res.status(500).send();
           return;
         }
@@ -607,14 +607,14 @@ if (cluster.isMaster) {
         mail.send(subject, emailText, emails, () => {
 
         });
-        winston.info('Account status has been changed');
+        logger.info('Account status has been changed');
         res.status(200).send();
       });
     });
   });
 
   app.get('/getUser/:userName', (req, res) => {
-    winston.info(`Getting user ${req.params.userName}`);
+    logger.info(`Getting user ${req.params.userName}`);
     models.UsersModel.find({
       userName: req.params.userName,
     }).lean().exec((err, data) => {
@@ -634,7 +634,7 @@ if (cluster.isMaster) {
           });
         });
       } else {
-        winston.info(`User ${req.params.userName} not found`);
+        logger.info(`User ${req.params.userName} not found`);
         res.status(200).json({
           role: null,
           userID: null,
@@ -644,9 +644,9 @@ if (cluster.isMaster) {
   });
 
   app.get('/getUsers', (req, res) => {
-    winston.info('received a request to get users lists');
+    logger.info('received a request to get users lists');
     models.UsersModel.find({}).populate('role').lean().exec((err, users) => {
-      winston.info(`sending back a list of ${users.length} users`);
+      logger.info(`sending back a list of ${users.length} users`);
       res.status(200).json(users);
     });
   });
@@ -654,10 +654,10 @@ if (cluster.isMaster) {
   app.post('/changeAccountStatus', (req, res) => {
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
-      winston.info(`Received a request to ${fields.status} account for userID ${fields.id}`);
+      logger.info(`Received a request to ${fields.status} account for userID ${fields.id}`);
       mongo.changeAccountStatus(fields.status, fields.id, (error, resp) => {
         if (error) {
-          winston.error(error);
+          logger.error(error);
           return res.status(400).send();
         }
         res.status(200).send();
@@ -668,10 +668,10 @@ if (cluster.isMaster) {
   app.post('/resetPassword', (req, res) => {
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
-      winston.info(`Received a request to reset password for userID ${fields.id}`);
+      logger.info(`Received a request to reset password for userID ${fields.id}`);
       mongo.resetPassword(fields.id, bcrypt.hashSync(fields.surname, 8), (error, resp) => {
         if (error) {
-          winston.error(error);
+          logger.error(error);
           return res.status(400).send();
         }
         res.status(200).send();
@@ -682,10 +682,10 @@ if (cluster.isMaster) {
   app.post('/changePassword', (req, res) => {
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
-      winston.info(`Received a request to change password for userID ${fields.id}`);
+      logger.info(`Received a request to change password for userID ${fields.id}`);
       mongo.resetPassword(fields.id, bcrypt.hashSync(fields.password, 8), (error, resp) => {
         if (error) {
-          winston.error(error);
+          logger.error(error);
           return res.status(400).send();
         }
         res.status(200).send();
@@ -694,21 +694,21 @@ if (cluster.isMaster) {
   });
 
   app.post('/shareSourcePair', (req, res) => {
-    winston.info('Received a request to share data source pair');
+    logger.info('Received a request to share data source pair');
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
       fields.users = JSON.parse(fields.users);
       mongo.shareSourcePair(fields.sharePair, fields.users, (err, response) => {
         if (err) {
-          winston.error(err);
-          winston.error('An error occured while sharing data source pair');
+          logger.error(err);
+          logger.error('An error occured while sharing data source pair');
           res.status(500).send('An error occured while sharing data source pair');
         } else {
-          winston.info('Data source pair shared successfully');
+          logger.info('Data source pair shared successfully');
           mongo.getDataSourcePair(fields.userID, fields.orgId, (err, pairs) => {
             if (err) {
-              winston.error(err);
-              winston.error('An error has occured while getting data source pairs');
+              logger.error(err);
+              logger.error('An error has occured while getting data source pairs');
               res.status(500).send('An error has occured while getting data source pairs');
               return;
             }
@@ -753,27 +753,27 @@ if (cluster.isMaster) {
   }
 
   app.post('/shareDataSource', (req, res) => {
-    winston.info('Received a request to share data source');
+    logger.info('Received a request to share data source');
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
       fields.users = JSON.parse(fields.users);
       const limitLocationId = fields.limitLocationId;
       mongo.shareDataSource(fields.shareSource, fields.users, limitLocationId, (err, response) => {
         if (err) {
-          winston.error(err);
-          winston.error('An error occured while sharing data source');
+          logger.error(err);
+          logger.error('An error occured while sharing data source');
           res.status(500).send('An error occured while sharing data source');
         } else {
-          winston.info('Data source shared successfully');
+          logger.info('Data source shared successfully');
           mongo.getDataSources(fields.userID, fields.role, fields.orgId, (err, sources) => {
             getLastUpdateTime(sources, (sources) => {
               if (err) {
-                winston.error(err);
-                winston.error('An error has occured while getting data source');
+                logger.error(err);
+                logger.error('An error has occured while getting data source');
                 res.status(500).send('An error has occured while getting data source');
                 return;
               }
-              winston.info('returning list of data sources');
+              logger.info('returning list of data sources');
               res.status(200).json(sources);
             });
           });
@@ -783,7 +783,7 @@ if (cluster.isMaster) {
   });
 
   app.post('/updateUserConfig', (req, res) => {
-    winston.info('Received updated user configurations');
+    logger.info('Received updated user configurations');
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
       let appConfig;
@@ -807,13 +807,13 @@ if (cluster.isMaster) {
                 },
               }, (err, data) => {
                 if (err) {
-                  winston.error(err);
-                  winston.error('Failed to save new config');
+                  logger.error(err);
+                  logger.error('Failed to save new config');
                   res.status(500).json({
                     error: 'Unexpected error occured,please retry',
                   });
                 } else {
-                  winston.info('New config saved successfully');
+                  logger.info('New config saved successfully');
                   res.status(200).json({
                     status: 'Done',
                   });
@@ -825,13 +825,13 @@ if (cluster.isMaster) {
               });
               MetaData.save((err, data) => {
                 if (err) {
-                  winston.error(err);
-                  winston.error('Failed to save new config');
+                  logger.error(err);
+                  logger.error('Failed to save new config');
                   res.status(500).json({
                     error: 'Unexpected error occured,please retry',
                   });
                 } else {
-                  winston.info('New config saved successfully');
+                  logger.info('New config saved successfully');
                   res.status(200).json({
                     status: 'Done',
                   });
@@ -849,13 +849,13 @@ if (cluster.isMaster) {
             },
           }, (err, data) => {
             if (err) {
-              winston.error(err);
-              winston.error('Failed to save new config');
+              logger.error(err);
+              logger.error('Failed to save new config');
               res.status(500).json({
                 error: 'Unexpected error occured,please retry',
               });
             } else {
-              winston.info('New config saved successfully');
+              logger.info('New config saved successfully');
               res.status(200).json({
                 status: 'Done',
               });
@@ -867,7 +867,7 @@ if (cluster.isMaster) {
   });
 
   app.post('/updateGeneralConfig', (req, res) => {
-    winston.info('Received updated general configurations');
+    logger.info('Received updated general configurations');
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
       let appConfig;
@@ -886,13 +886,13 @@ if (cluster.isMaster) {
           });
           MetaData.save((err, data) => {
             if (err) {
-              winston.error(err);
-              winston.error('Failed to save new config');
+              logger.error(err);
+              logger.error('Failed to save new config');
               res.status(500).json({
                 error: 'Unexpected error occured,please retry',
               });
             } else {
-              winston.info('New config saved successfully');
+              logger.info('New config saved successfully');
               res.status(200).json({
                 status: 'Done',
               });
@@ -908,13 +908,13 @@ if (cluster.isMaster) {
             'config.generalConfig': appConfig.generalConfig,
           }, (err, data) => {
             if (err) {
-              winston.error(err);
-              winston.error('Failed to save new general config');
+              logger.error(err);
+              logger.error('Failed to save new general config');
               res.status(500).json({
                 error: 'Unexpected error occured,please retry',
               });
             } else {
-              winston.info('New general config saved successfully');
+              logger.info('New general config saved successfully');
               res.status(200).json({
                 status: 'Done',
               });
@@ -938,12 +938,12 @@ if (cluster.isMaster) {
         try {
           userConfig = JSON.parse(JSON.stringify(userConfigData));
         } catch (error) {
-          winston.error(error);
+          logger.error(error);
         }
         return userConfig.userID === userID;
       });
       if (err) {
-        winston.error(err);
+        logger.error(err);
         res.status(500).json({
           error: 'internal error occured while getting configurations',
         });
@@ -959,10 +959,10 @@ if (cluster.isMaster) {
 
   app.get('/getGeneralConfig', (req, res) => {
     const defaultGenerConfig = JSON.parse(req.query.defaultGenerConfig);
-    winston.info('Received a request to get general configuration');
+    logger.info('Received a request to get general configuration');
     mongo.getGeneralConfig((err, resData) => {
       if (err) {
-        winston.error(err);
+        logger.error(err);
         res.status(500).json({
           error: 'internal error occured while getting configurations',
         });
@@ -995,7 +995,7 @@ if (cluster.isMaster) {
       try {
         required = JSON.parse(fields.fieldRequired);
       } catch (error) {
-        winston.error(error);
+        logger.error(error);
         required = false;
       }
       const formName = fields.form;
@@ -1003,7 +1003,7 @@ if (cluster.isMaster) {
         'forms.name': formName,
       }, (err, form) => {
         if (err) {
-          winston.error(err);
+          logger.error(err);
           res.status(500).json({
             error: 'internal error occured while getting form fields',
           });
@@ -1060,8 +1060,8 @@ if (cluster.isMaster) {
 
           Promise.all(promises).then((results) => {
             if (results[0]) {
-              winston.error(results[0]);
-              winston.error('Failed to save new field');
+              logger.error(results[0]);
+              logger.error('Failed to save new field');
               res.status(500).json({
                 error: 'Unexpected error occured,please retry',
               });
@@ -1071,13 +1071,13 @@ if (cluster.isMaster) {
               usersFields = Object.assign(usersFields, schemas.usersFields);
               Users = new mongoose.Schema(usersFields);
               models.UsersModel = mongoose.model('Users', Users);
-              winston.info('Field added successfully');
+              logger.info('Field added successfully');
               res.status(200).json({
                 status: 'Done',
               });
             }
           }).catch((err) => {
-            winston.error(err);
+            logger.error(err);
           });
         }
       });
@@ -1089,7 +1089,7 @@ if (cluster.isMaster) {
       'forms.name': 'signup',
     }, (err, form) => {
       if (err) {
-        winston.error(err);
+        logger.error(err);
         res.status(500).json({
           error: 'internal error occured while getting configurations',
         });
@@ -1110,7 +1110,7 @@ if (cluster.isMaster) {
   });
 
   app.get('/getRoles/:id?', (req, res) => {
-    winston.info('Received a request to get roles');
+    logger.info('Received a request to get roles');
     let idFilter;
     if (req.params.id) {
       idFilter = {
@@ -1120,13 +1120,13 @@ if (cluster.isMaster) {
       idFilter = {};
     }
     models.RolesModel.find(idFilter).lean().exec((err, roles) => {
-      winston.info(`sending back a list of ${roles.length} roles`);
+      logger.info(`sending back a list of ${roles.length} roles`);
       res.status(200).json(roles);
     });
   });
 
   app.get('/getTasks/:id?', (req, res) => {
-    winston.info('Received a request to get tasks');
+    logger.info('Received a request to get tasks');
     let idFilter;
     if (req.params.id) {
       idFilter = {
@@ -1136,13 +1136,13 @@ if (cluster.isMaster) {
       idFilter = {};
     }
     models.TasksModel.find(idFilter).lean().exec((err, tasks) => {
-      winston.info(`sending back a list of ${tasks.length} tasks`);
+      logger.info(`sending back a list of ${tasks.length} tasks`);
       res.status(200).json(tasks);
     });
   });
 
   app.get('/countLevels/:source1/:source2/:sourcesOwner/:sourcesLimitOrgId', (req, res) => {
-    winston.info('Received a request to get total levels');
+    logger.info('Received a request to get total levels');
     const sourcesOwner = JSON.parse(req.params.sourcesOwner);
     const source1Owner = sourcesOwner.source1Owner;
     const source2Owner = sourcesOwner.source2Owner;
@@ -1162,13 +1162,13 @@ if (cluster.isMaster) {
     async.parallel({
       Source1Levels(callback) {
         mcsd.countLevels(source1, source1LimitOrgId, (err, source1TotalLevels) => {
-          winston.info(`Received total source1 levels of ${source1TotalLevels}`);
+          logger.info(`Received total source1 levels of ${source1TotalLevels}`);
           return callback(err, source1TotalLevels);
         });
       },
       Source2Levels(callback) {
         mcsd.countLevels(source2, source2LimitOrgId, (err, source2TotalLevels) => {
-          winston.info(`Received total source2 levels of ${source2TotalLevels}`);
+          logger.info(`Received total source2 levels of ${source2TotalLevels}`);
           return callback(err, source2TotalLevels);
         });
       },
@@ -1216,7 +1216,7 @@ if (cluster.isMaster) {
       },
     }, (err, results) => {
       if (err) {
-        winston.error(err);
+        logger.error(err);
         res.status(400).json({
           error: err,
         });
@@ -1304,7 +1304,7 @@ if (cluster.isMaster) {
 
   app.get('/uploadAvailable/:source1/:source2/:source1Owner/:source2Owner', (req, res) => {
     if (!req.params.source1 || !req.params.source2) {
-      winston.error({
+      logger.error({
         error: 'Missing Orgid',
       });
       res.set('Access-Control-Allow-Origin', '*');
@@ -1316,7 +1316,7 @@ if (cluster.isMaster) {
       const source2Owner = req.params.source2Owner;
       const source1 = mixin.toTitleCase(req.params.source1 + source1Owner);
       const source2 = mixin.toTitleCase(req.params.source2 + source2Owner);
-      winston.info(`Checking if data available for ${source1} and ${source2}`);
+      logger.info(`Checking if data available for ${source1} and ${source2}`);
       async.parallel({
         source1Availability(callback) {
           mcsd.getLocations(source1, (source1Data) => {
@@ -1350,7 +1350,7 @@ if (cluster.isMaster) {
 
   app.get('/getArchives/:orgid', (req, res) => {
     if (!req.params.orgid) {
-      winston.error({
+      logger.error({
         error: 'Missing Orgid',
       });
       res.set('Access-Control-Allow-Origin', '*');
@@ -1359,12 +1359,12 @@ if (cluster.isMaster) {
       });
     } else {
       const orgid = req.params.orgid;
-      winston.info(`Getting archived DB for ${orgid}`);
+      logger.info(`Getting archived DB for ${orgid}`);
       mongo.getArchives(orgid, (err, archives) => {
         res.set('Access-Control-Allow-Origin', '*');
         if (err) {
-          winston.error(err);
-          winston.error({
+          logger.error(err);
+          logger.error({
             error: 'Unexpected error has occured',
           });
           res.status(400).json({
@@ -1379,7 +1379,7 @@ if (cluster.isMaster) {
 
   app.post('/restoreArchive/:orgid', (req, res) => {
     if (!req.params.orgid) {
-      winston.error({
+      logger.error({
         error: 'Missing Orgid',
       });
       res.set('Access-Control-Allow-Origin', '*');
@@ -1388,13 +1388,13 @@ if (cluster.isMaster) {
       });
     } else {
       const orgid = req.params.orgid;
-      winston.info(`Restoring archive DB for ${orgid}`);
+      logger.info(`Restoring archive DB for ${orgid}`);
       const form = new formidable.IncomingForm();
       form.parse(req, (err, fields, files) => {
         mongo.restoreDB(fields.archive, orgid, (err) => {
           res.set('Access-Control-Allow-Origin', '*');
           if (err) {
-            winston.error(err);
+            logger.error(err);
             res.status(400).json({
               error: 'Unexpected error occured while restoring the database,please retry',
             });
@@ -1406,13 +1406,13 @@ if (cluster.isMaster) {
   });
 
   app.post('/dhisSync', (req, res) => {
-    winston.info('received request to sync DHIS2 data');
+    logger.info('received request to sync DHIS2 data');
     const form = new formidable.IncomingForm();
     res.status(200).end();
     form.parse(req, (err, fields, files) => {
       mongo.getServer(fields.sourceOwner, fields.name, (err, server) => {
         if (err) {
-          winston.error(err);
+          logger.error(err);
           return res.status(500).send();
         }
         const mode = fields.mode;
@@ -1442,10 +1442,10 @@ if (cluster.isMaster) {
     res.status(200).end();
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
-      winston.info(`Received a request to sync FHIR server ${fields.host}`);
+      logger.info(`Received a request to sync FHIR server ${fields.host}`);
       mongo.getServer(fields.sourceOwner, fields.name, (err, server) => {
         if (err) {
-          winston.error(err);
+          logger.error(err);
           return res.status(500).send();
         }
         server.password = mongo.decrypt(server.password);
@@ -1475,20 +1475,20 @@ if (cluster.isMaster) {
       id,
     } = req.query;
     if (!sourceLimitOrgId) {
-      sourceLimitOrgId = mixin.getTopOrgId(source + sourceOwner);
+      sourceLimitOrgId = mixin.getTopOrgId(mixin.toTitleCase(source + sourceOwner));
     }
     if (!id) {
       id = sourceLimitOrgId;
     }
     if (!source) {
-      winston.error({
+      logger.error({
         error: 'Missing Source',
       });
       res.status(400).json({
         error: 'Missing Source',
       });
     } else {
-      winston.info(`Fetching Locations For ${source}`);
+      logger.info(`Fetching Locations For ${source}`);
       const db = mixin.toTitleCase(source + sourceOwner);
       const locationReceived = new Promise((resolve, reject) => {
         mcsd.getLocationChildren({
@@ -1500,22 +1500,22 @@ if (cluster.isMaster) {
               buildings,
               mcsdData,
             });
-            winston.info(`Done Fetching ${source} Locations`);
+            logger.info(`Done Fetching ${source} Locations`);
           });
         });
       });
 
       locationReceived.then((data) => {
-        winston.info(`Creating ${source} Grid`);
+        logger.info(`Creating ${source} Grid`);
         mcsd.createGrid(id, sourceLimitOrgId, data.buildings, data.mcsdData, start, count, (grid, total) => {
-          winston.info(`Done Creating ${source} Grid`);
+          logger.info(`Done Creating ${source} Grid`);
           res.status(200).json({
             grid,
             total,
           });
         });
       }).catch((err) => {
-        winston.error(err);
+        logger.error(err);
       });
     }
   });
@@ -1532,7 +1532,7 @@ if (cluster.isMaster) {
     if (!parentID) {
       parentID = mixin.getTopOrgId(db);
     }
-    winston.info(`Received a request to get immediate children of ${parentID}`);
+    logger.info(`Received a request to get immediate children of ${parentID}`);
     const children = [];
     mcsd.getImmediateChildren(db, parentID, (err, childrenData) => {
       async.each(childrenData.entry, (child, nxtChild) => {
@@ -1547,7 +1547,7 @@ if (cluster.isMaster) {
         });
         return nxtChild();
       }, () => {
-        winston.info(`Returning a list of children of ${parentID}`);
+        logger.info(`Returning a list of children of ${parentID}`);
         res.status(200).json({
           children,
         });
@@ -1556,9 +1556,9 @@ if (cluster.isMaster) {
   });
 
   app.get('/getTree/:source/:sourceOwner/:sourceLimitOrgId?', (req, res) => {
-    winston.info('Received a request to get location tree');
+    logger.info('Received a request to get location tree');
     if (!req.params.source) {
-      winston.error({
+      logger.error({
         error: 'Missing Data Source',
       });
       res.status(400).json({
@@ -1577,14 +1577,14 @@ if (cluster.isMaster) {
       if (!sourceLimitOrgId) {
         sourceLimitOrgId = topOrgId;
       }
-      winston.info(`Fetching Locations For ${source}`);
+      logger.info(`Fetching Locations For ${source}`);
       async.parallel({
         locationChildren(callback) {
           mcsd.getLocationChildren({
             database: db,
             parent: sourceLimitOrgId,
           }, (mcsdData) => {
-            winston.info(`Done Fetching Locations For ${source}`);
+            logger.info(`Done Fetching Locations For ${source}`);
             return callback(false, mcsdData);
           });
         },
@@ -1595,7 +1595,7 @@ if (cluster.isMaster) {
           mcsd.getLocationByID(db, sourceLimitOrgId, false, details => callback(false, details));
         },
       }, (error, response) => {
-        winston.info(`Creating ${source} Tree`);
+        logger.info(`Creating ${source} Tree`);
         mcsd.createTree(response.locationChildren, sourceLimitOrgId, false, (tree) => {
           if (sourceLimitOrgId !== topOrgId) {
             tree = {
@@ -1604,7 +1604,7 @@ if (cluster.isMaster) {
               children: tree,
             };
           }
-          winston.info(`Done Creating Tree for ${source}`);
+          logger.info(`Done Creating Tree for ${source}`);
           res.status(200).json(tree);
         });
       });
@@ -1612,7 +1612,7 @@ if (cluster.isMaster) {
   });
 
   app.get('/mappingStatus/:source1/:source2/:source1Owner/:source2Owner/:level/:totalSource2Levels/:totalSource1Levels/:clientId/:userID', (req, res) => {
-    winston.info('Getting mapping status');
+    logger.info('Getting mapping status');
     const {
       userID,
       source1Owner,
@@ -1662,7 +1662,7 @@ if (cluster.isMaster) {
         });
       });
     }).catch((err) => {
-      winston.error(err);
+      logger.error(err);
     });
     const source1LocationReceived = new Promise((resolve, reject) => {
       mcsd.getLocationChildren({
@@ -1720,19 +1720,19 @@ if (cluster.isMaster) {
     try {
       parentConstraint = JSON.parse(parentConstraint);
     } catch (error) {
-      winston.error(error);
+      logger.error(error);
     }
     try {
       getPotential = JSON.parse(getPotential);
     } catch (error) {
-      winston.error(error);
+      logger.error(error);
     }
     // remove parent contraint for the first level
     if (recoLevel == 2) {
       parentConstraint = false;
     }
     if (!source1 || !source2 || !recoLevel || !userID) {
-      winston.error({
+      logger.error({
         error: 'Missing source1 or source2 or reconciliation Level or userID',
       });
       res.status(400).json({
@@ -1742,7 +1742,7 @@ if (cluster.isMaster) {
       if (!id) {
         res.status(200).send();
       }
-      winston.info('Getting scores');
+      logger.info('Getting scores');
       const {
         orgid,
       } = req.query;
@@ -1848,7 +1848,7 @@ if (cluster.isMaster) {
               if (id) {
                 res.status(200).json(scoreResData);
               }
-              winston.info('Score results sent back');
+              logger.info('Score results sent back');
             },
           );
         } else {
@@ -1892,7 +1892,7 @@ if (cluster.isMaster) {
               if (id) {
                 res.status(200).json(scoreResData);
               }
-              winston.info('Score results sent back');
+              logger.info('Score results sent back');
             },
           );
         }
@@ -1900,7 +1900,7 @@ if (cluster.isMaster) {
     }
   });
   app.get('/matchedLocations', (req, res) => {
-    winston.info(`Received a request to return matched Locations in ${req.query.type} format for ${req.query.source1}${req.query.source2}`);
+    logger.info(`Received a request to return matched Locations in ${req.query.type} format for ${req.query.source1}${req.query.source2}`);
     const {
       userID,
       source1Owner,
@@ -1934,7 +1934,7 @@ if (cluster.isMaster) {
 
     mcsd.getLocations(mappingDB, (mapped) => {
       if (type === 'FHIR') {
-        winston.info('Sending back matched locations in FHIR specification');
+        logger.info('Sending back matched locations in FHIR specification');
         const mappedmCSD = {
           resourceType: 'Bundle',
           type: 'document',
@@ -1981,10 +1981,9 @@ if (cluster.isMaster) {
           if (noMatch || ignore || flagged) {
             return nxtmCSD();
           }
-          let matchComments;
           let comment;
           if (matchCommentsTag && matchCommentsTag.hasOwnProperty('display')) {
-            comment = matchCommentsTag.display.join(', ');
+            comment = matchCommentsTag.display;
           }
           if (autoMatched) {
             status = 'Automatically Matched';
@@ -1997,11 +1996,22 @@ if (cluster.isMaster) {
           } else {
             source1ID = '';
           }
+          let source2ID = entry.resource.identifier.find(id => id.system === 'https://digitalhealth.intrahealth.org/source2');
+          if (source2ID) {
+            source2ID = source2ID.value.split('/').pop();
+          } else {
+            source2ID = '';
+          }
+
+          let source1Name = '';
+          if (entry.resource.alias) {
+            source1Name = entry.resource.alias.join(', ');
+          }
           matched.push({
-            'source 1 name': entry.resource.alias,
+            'source 1 name': source1Name,
             'source 1 ID': source1ID,
             'source 2 name': entry.resource.name,
-            'source 2 ID': entry.resource.id,
+            'source 2 ID': source2ID,
             Status: status,
             Comments: comment,
           });
@@ -2094,7 +2104,6 @@ if (cluster.isMaster) {
               mcsd.filterLocations(response.source1mCSD, topOrgId1, level, (mcsdLevel) => {
                 async.each(mcsdLevel.entry, (source1Entry, nxtEntry) => {
                   const thisMatched = matched.filter(mapped => mapped['source 1 ID'] === source1Entry.resource.id);
-
                   if (!thisMatched || thisMatched.length === 0) {
                     return nxtEntry();
                   }
@@ -2205,7 +2214,7 @@ if (cluster.isMaster) {
           }, mcsdRes => callback(null, mcsdRes));
         },
       }, (error, response) => {
-        const mappingDB = req.query.source1 + userID + req.query.source2;
+        const mappingDB = mixin.toTitleCase(req.query.source1 + userID + req.query.source2);
         async.parallel({
           source1Unmatched(callback) {
             scores.getUnmatched(response.source1mCSD, response.source1mCSD, mappingDB, true, 'source1', null, (unmatched, mcsdUnmatched) => callback(null, {
@@ -2246,7 +2255,9 @@ if (cluster.isMaster) {
           mcsd.getLocationChildren({
             database: source2DB,
             parent: source2LimitOrgId,
-          }, mcsdRes => callback(null, mcsdRes));
+          }, (mcsdRes) => {
+            callback(null, mcsdRes);
+          });
         },
       }, (error, response) => {
         // remove unmapped levels
@@ -2279,7 +2290,6 @@ if (cluster.isMaster) {
         const source2FacilityLevel = levelsArr2.length + 1;
         levelsArr2.push(source2FacilityLevel);
         // end of getting level of a facility
-
         let unmatchedSource1CSV;
         let unmatchedSource2CSV;
         async.parallel({
@@ -2303,7 +2313,7 @@ if (cluster.isMaster) {
                 thisFields.push(level);
               });
               mcsd.filterLocations(response.source1mCSD, source1LimitOrgId, level, (mcsdLevel) => {
-                scores.getUnmatched(response.source1mCSD, mcsdLevel, mappingDB, true, 'source1', parentsFields, (unmatched, mcsdUnmatched) => {
+                scores.getUnmatched(response.source1mCSD, mcsdLevel, mappingDB, true, 'source1', parentsFields, (unmatched) => {
                   if (unmatched.length > 0) {
                     thisFields.push('status');
                     thisFields.push('comment');
@@ -2334,8 +2344,7 @@ if (cluster.isMaster) {
               let thisFields = [];
               const parentsFields = [];
               thisFields = thisFields.concat(fields);
-              for (const key in levelMapping2) {
-                const level = levelMapping2[key];
+              async.eachOf(levelMapping2, (level, key, nxtLevel) => {
                 if (!key.startsWith('level')) {
                   return nxtLevel();
                 }
@@ -2346,9 +2355,10 @@ if (cluster.isMaster) {
                 }
                 parentsFields.push(level);
                 thisFields.push(level);
-              }
+              });
+
               mcsd.filterLocations(response.source2mCSD, source2LimitOrgId, level, (mcsdLevel) => {
-                scores.getUnmatched(response.source2mCSD, mcsdLevel, mappingDB, true, 'source2', parentsFields, (unmatched, mcsdUnmatched) => {
+                scores.getUnmatched(response.source2mCSD, mcsdLevel, mappingDB, true, 'source2', parentsFields, (unmatched) => {
                   if (unmatched.length > 0) {
                     thisFields.push('status');
                     thisFields.push('comment');
@@ -2381,14 +2391,14 @@ if (cluster.isMaster) {
   });
 
   app.post('/match/:type', (req, res) => {
-    winston.info('Received data for matching');
+    logger.info('Received data for matching');
     const {
       type,
     } = req.params;
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
       if (!fields.source1DB || !fields.source2DB) {
-        winston.error({
+        logger.error({
           error: 'Missing Source1 or Source2',
         });
         res.status(400).json({
@@ -2410,7 +2420,7 @@ if (cluster.isMaster) {
       const source2DB = mixin.toTitleCase(fields.source2DB + source2Owner);
       const mappingDB = mixin.toTitleCase(fields.source1DB + userID + fields.source2DB);
       if (!source1Id || !source2Id) {
-        winston.error({
+        logger.error({
           error: 'Missing either Source1 ID or Source2 ID or both',
         });
         res.status(400).json({
@@ -2428,16 +2438,16 @@ if (cluster.isMaster) {
         useNewUrlParser: true,
       });
       connection.on('error', () => {
-        winston.error(`An error occured while connecting to DB ${mappingDB}`);
+        logger.error(`An error occured while connecting to DB ${mappingDB}`);
       });
       connection.once('open', () => {
         connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
           connection.close();
           if (data && data.recoStatus === 'in-progress') {
             mcsd.saveMatch(source1Id, source2Id, source1DB, source2DB, mappingDB, recoLevel, totalLevels, type, false, flagComment, (err, matchComments) => {
-              winston.info('Done matching');
+              logger.info('Done matching');
               if (err) {
-                winston.error(err);
+                logger.error(err);
                 res.status(400).send({
                   error: err,
                 });
@@ -2458,9 +2468,9 @@ if (cluster.isMaster) {
   });
 
   app.post('/acceptFlag/:source1/:source2/:userID', (req, res) => {
-    winston.info('Received data for marking flag as a match');
+    logger.info('Received data for marking flag as a match');
     if (!req.params.source1 || !req.params.source2) {
-      winston.error({
+      logger.error({
         error: 'Missing Source1 or Source2',
       });
       res.status(400).json({
@@ -2478,7 +2488,7 @@ if (cluster.isMaster) {
         source1Id,
       } = fields;
       if (!source1Id) {
-        winston.error({
+        logger.error({
           error: 'Missing source1Id',
         });
         res.status(400).json({
@@ -2497,7 +2507,7 @@ if (cluster.isMaster) {
         useNewUrlParser: true,
       });
       connection.on('error', () => {
-        winston.error(`An error occured while connecting to DB ${mappingDB}`);
+        logger.error(`An error occured while connecting to DB ${mappingDB}`);
       });
 
       connection.once('open', () => {
@@ -2505,7 +2515,7 @@ if (cluster.isMaster) {
           connection.close();
           if (data.recoStatus === 'in-progress') {
             mcsd.acceptFlag(source1Id, mappingDB, (err) => {
-              winston.info('Done marking flag as a match');
+              logger.info('Done marking flag as a match');
               if (err) {
                 res.status(400).send({
                   error: err,
@@ -2523,9 +2533,9 @@ if (cluster.isMaster) {
   });
 
   app.post('/noMatch/:type/:source1/:source2/:source1Owner/:source2Owner/:userID', (req, res) => {
-    winston.info('Received data for matching');
+    logger.info('Received data for matching');
     if (!req.params.source1 || !req.params.source2) {
-      winston.error({
+      logger.error({
         error: 'Missing Source1 or Source2',
       });
       res.set('Access-Control-Allow-Origin', '*');
@@ -2551,7 +2561,7 @@ if (cluster.isMaster) {
         totalLevels,
       } = fields;
       if (!source1Id) {
-        winston.error({
+        logger.error({
           error: 'Missing either Source1 ID',
         });
         res.set('Access-Control-Allow-Origin', '*');
@@ -2571,14 +2581,14 @@ if (cluster.isMaster) {
         useNewUrlParser: true,
       });
       connection.on('error', () => {
-        winston.error(`An error occured while connecting to DB ${mappingDB}`);
+        logger.error(`An error occured while connecting to DB ${mappingDB}`);
       });
       connection.once('open', () => {
         connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
           connection.close();
           if (!data || data.recoStatus === 'in-progress') {
             mcsd.saveNoMatch(source1Id, source1DB, source2DB, mappingDB, recoLevel, totalLevels, type, (err) => {
-              winston.info('Done matching');
+              logger.info('Done matching');
               if (err) {
                 res.status(400).send({
                   error: 'Un expected error has occured',
@@ -2597,7 +2607,7 @@ if (cluster.isMaster) {
 
   app.post('/breakMatch/:source1/:source2/:source1Owner/:source2Owner/:userID', (req, res) => {
     if (!req.params.source1) {
-      winston.error({
+      logger.error({
         error: 'Missing Source1',
       });
       res.status(400).json({
@@ -2611,7 +2621,7 @@ if (cluster.isMaster) {
     const mappingDB = mixin.toTitleCase(req.params.source1 + userID + req.params.source2);
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
-      winston.info(`Received break match request for ${fields.source1Id}`);
+      logger.info(`Received break match request for ${fields.source1Id}`);
       const source1Id = fields.source1Id;
 
       let uri;
@@ -2624,7 +2634,7 @@ if (cluster.isMaster) {
         useNewUrlParser: true,
       });
       connection.on('error', () => {
-        winston.error(`An error occured while connecting to DB ${mappingDB}`);
+        logger.error(`An error occured while connecting to DB ${mappingDB}`);
       });
       connection.once('open', () => {
         connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
@@ -2632,12 +2642,12 @@ if (cluster.isMaster) {
           if (data.recoStatus === 'in-progress') {
             mcsd.breakMatch(source1Id, mappingDB, source1DB, (err, results) => {
               if (err) {
-                winston.error(err);
+                logger.error(err);
                 return res.status(500).json({
                   error: err,
                 });
               }
-              winston.info(`break match done for ${fields.source1Id}`);
+              logger.info(`break match done for ${fields.source1Id}`);
               res.status(200).send(err);
             });
           } else {
@@ -2652,7 +2662,7 @@ if (cluster.isMaster) {
 
   app.post('/breakNoMatch/:type/:source1/:source2/:userID', (req, res) => {
     if (!req.params.source1 || !req.params.source2) {
-      winston.error({
+      logger.error({
         error: 'Missing Source1',
       });
       res.status(500).json({
@@ -2662,10 +2672,10 @@ if (cluster.isMaster) {
     }
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
-      winston.info(`Received break no match request for ${fields.source1Id}`);
+      logger.info(`Received break no match request for ${fields.source1Id}`);
       const source1Id = fields.source1Id;
       if (!source1Id) {
-        winston.error({
+        logger.error({
           error: 'Missing Source1 ID',
         });
         return res.status(500).json({
@@ -2688,14 +2698,14 @@ if (cluster.isMaster) {
         useNewUrlParser: true,
       });
       connection.on('error', () => {
-        winston.error(`An error occured while connecting to DB ${mappingDB}`);
+        logger.error(`An error occured while connecting to DB ${mappingDB}`);
       });
       connection.once('open', () => {
         connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
           connection.close();
           if (data.recoStatus === 'in-progress') {
             mcsd.breakNoMatch(source1Id, mappingDB, (err) => {
-              winston.info(`break no match done for ${fields.source1Id}`);
+              logger.info(`break no match done for ${fields.source1Id}`);
               res.status(200).send(err);
             });
           } else {
@@ -2709,7 +2719,7 @@ if (cluster.isMaster) {
   });
 
   app.get('/markRecoUnDone/:source1/:source2/:userID', (req, res) => {
-    winston.info(`received a request to mark reconciliation for ${req.params.userID} as undone`);
+    logger.info(`received a request to mark reconciliation for ${req.params.userID} as undone`);
     const {
       source1,
       source2,
@@ -2727,7 +2737,7 @@ if (cluster.isMaster) {
       useNewUrlParser: true,
     });
     connection.on('error', () => {
-      winston.error(`An error occured while connecting to DB ${mappingDB}`);
+      logger.error(`An error occured while connecting to DB ${mappingDB}`);
     });
     connection.once('open', () => {
       connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
@@ -2739,13 +2749,13 @@ if (cluster.isMaster) {
           MetaData.save((err, data) => {
             connection.close();
             if (err) {
-              winston.error(err);
-              winston.error('Failed to save reco status');
+              logger.error(err);
+              logger.error('Failed to save reco status');
               res.status(500).json({
                 error: 'Unexpected error occured,please retry',
               });
             } else {
-              winston.info('Reco status saved successfully');
+              logger.info('Reco status saved successfully');
               res.status(200).json({
                 status: 'in-progress',
               });
@@ -2757,13 +2767,13 @@ if (cluster.isMaster) {
           }, (err, data) => {
             connection.close();
             if (err) {
-              winston.error(err);
-              winston.error('Failed to save reco status');
+              logger.error(err);
+              logger.error('Failed to save reco status');
               res.status(500).json({
                 error: 'Unexpected error occured,please retry',
               });
             } else {
-              winston.info('Reco status saved successfully');
+              logger.info('Reco status saved successfully');
               res.status(200).json({
                 status: 'in-progress',
               });
@@ -2775,7 +2785,7 @@ if (cluster.isMaster) {
   });
 
   app.get('/markRecoDone/:source1/:source2/:userID', (req, res) => {
-    winston.info(`received a request to mark reconciliation for ${req.params.source1}${req.params.source2} as done`);
+    logger.info(`received a request to mark reconciliation for ${req.params.source1}${req.params.source2} as done`);
     const {
       source1,
       source2,
@@ -2793,7 +2803,7 @@ if (cluster.isMaster) {
       useNewUrlParser: true,
     });
     connection.on('error', () => {
-      winston.error(`An error occured while connecting to DB ${mappingDB}`);
+      logger.error(`An error occured while connecting to DB ${mappingDB}`);
     });
     connection.once('open', () => {
       connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
@@ -2805,13 +2815,13 @@ if (cluster.isMaster) {
           MetaData.save((err, data) => {
             connection.close();
             if (err) {
-              winston.error(err);
-              winston.error('Failed to save reco status');
+              logger.error(err);
+              logger.error('Failed to save reco status');
               res.status(500).json({
                 error: 'Unexpected error occured,please retry',
               });
             } else {
-              winston.info('Reco status saved successfully');
+              logger.info('Reco status saved successfully');
               sendNotification((err, not) => {
                 res.status(200).json({
                   status: 'Done',
@@ -2825,13 +2835,13 @@ if (cluster.isMaster) {
           }, (err, data) => {
             connection.close();
             if (err) {
-              winston.error(err);
-              winston.error('Failed to save reco status');
+              logger.error(err);
+              logger.error('Failed to save reco status');
               res.status(500).json({
                 error: 'Unexpected error occured,please retry',
               });
             } else {
-              winston.info('Reco status saved successfully');
+              logger.info('Reco status saved successfully');
               sendNotification((err, not) => {
                 res.status(200).json({
                   status: 'Done',
@@ -2844,12 +2854,12 @@ if (cluster.isMaster) {
     });
 
     function sendNotification(callback) {
-      winston.info('received a request to send notification to endpoint regarding completion of reconciliation');
+      logger.info('received a request to send notification to endpoint regarding completion of reconciliation');
       models.MetaDataModel.findOne({}, {
         'config.generalConfig': 1,
       }, (err, data) => {
         if (err) {
-          winston.error(err);
+          logger.error(err);
           return callback(true, false);
         }
         if (!data) {
@@ -2859,7 +2869,7 @@ if (cluster.isMaster) {
         try {
           configData = JSON.parse(JSON.stringify(data));
         } catch (error) {
-          winston.error(error);
+          logger.error(error);
           return callback(true, false);
         }
 
@@ -2889,7 +2899,7 @@ if (cluster.isMaster) {
           };
           request.post(options, (err, res, body) => {
             if (err) {
-              winston.error(err);
+              logger.error(err);
               return callback(true, false);
             }
             return callback(false, body);
@@ -2918,7 +2928,7 @@ if (cluster.isMaster) {
       useNewUrlParser: true,
     });
     connection.on('error', () => {
-      winston.error(`An error occured while connecting to DB ${mappingDB}`);
+      logger.error(`An error occured while connecting to DB ${mappingDB}`);
     });
     connection.once('open', () => {
       connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
@@ -2944,8 +2954,8 @@ if (cluster.isMaster) {
     const progressRequestId = `${type}${clientId}`;
     redisClient.get(progressRequestId, (error, results) => {
       if (error) {
-        winston.error(error);
-        winston.error(`An error has occured while getting progress for ${type} and clientID ${clientId}`);
+        logger.error(error);
+        logger.error(`An error has occured while getting progress for ${type} and clientID ${clientId}`);
       }
       results = JSON.parse(results);
       res.status(200).json(results);
@@ -2957,7 +2967,7 @@ if (cluster.isMaster) {
       clientId,
       type,
     } = req.params;
-    winston.info(`Clearing progress data for ${type} and clientID ${clientId}`);
+    logger.info(`Clearing progress data for ${type} and clientID ${clientId}`);
     const progressRequestId = `${type}${clientId}`;
     const data = JSON.stringify({
       status: null,
@@ -2967,8 +2977,8 @@ if (cluster.isMaster) {
     });
     redisClient.set(progressRequestId, data, (err, reply) => {
       if (err) {
-        winston.error(err);
-        winston.error(`An error has occured while clearing progress data for ${type} and clientID ${clientId}`);
+        logger.error(err);
+        logger.error(`An error has occured while clearing progress data for ${type} and clientID ${clientId}`);
       }
     });
     res.status(200).send();
@@ -2977,7 +2987,7 @@ if (cluster.isMaster) {
   app.post('/addDataSource', (req, res) => {
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
-      winston.info('Received a request to add a new data source');
+      logger.info('Received a request to add a new data source');
       if (!fields.shareToSameOrgid) {
         fields.shareToSameOrgid = false;
       }
@@ -2992,9 +3002,9 @@ if (cluster.isMaster) {
           res.status(500).json({
             error: 'Unexpected error occured,please retry',
           });
-          winston.error(err);
+          logger.error(err);
         } else {
-          winston.info('Data source saved successfully');
+          logger.info('Data source saved successfully');
           res.status(200).json({
             status: 'done',
             password: response,
@@ -3007,15 +3017,15 @@ if (cluster.isMaster) {
   app.post('/editDataSource', (req, res) => {
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
-      winston.info('Received a request to edit a data source');
+      logger.info('Received a request to edit a data source');
       mongo.editDataSource(fields, (err, response) => {
         if (err) {
           res.status(500).json({
             error: 'Unexpected error occured,please retry',
           });
-          winston.error(err);
+          logger.error(err);
         } else {
-          winston.info('Data source edited sucessfully');
+          logger.info('Data source edited sucessfully');
           res.status(200).json({
             status: 'done',
             password: response,
@@ -3026,7 +3036,7 @@ if (cluster.isMaster) {
   });
 
   app.post('/updateDatasetAutosync', (req, res) => {
-    winston.info('Received a request to edit a data source auto sync');
+    logger.info('Received a request to edit a data source auto sync');
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
       fields.enabled = JSON.parse(fields.enabled);
@@ -3035,9 +3045,9 @@ if (cluster.isMaster) {
           res.status(500).json({
             error: 'Unexpected error occured,please retry',
           });
-          winston.error(err);
+          logger.error(err);
         } else {
-          winston.info('Data source edited sucessfully');
+          logger.info('Data source edited sucessfully');
           res.status(200).send();
         }
       });
@@ -3051,7 +3061,7 @@ if (cluster.isMaster) {
       userID,
     } = req.params;
     const name = mixin.toTitleCase(req.params.name);
-    winston.info(`Received request to delete data source with id ${id}`);
+    logger.info(`Received request to delete data source with id ${id}`);
     const dbName = mixin.toTitleCase(name + userID);
     hapi.deleteTenancy({ name: dbName }).then(() => {
       mongo.deleteDataSource(id, name, sourceOwner, userID, (err, response) => {
@@ -3061,7 +3071,7 @@ if (cluster.isMaster) {
           res.status(500).json({
             error: 'Unexpected error occured while deleting data source,please retry',
           });
-          winston.error(err);
+          logger.error(err);
         } else {
           res.status(200).json({
             status: 'done',
@@ -3069,28 +3079,28 @@ if (cluster.isMaster) {
         }
       });
     }).catch((err) => {
-      winston.error(err);
+      logger.error(err);
       return res.status(500).json({ error: 'Unexpected error occured while deleting data source,please retry' });
     });
   });
 
   app.get('/getDataSources/:userID/:role/:orgId?', (req, res) => {
-    winston.info('received request to get data sources');
+    logger.info('received request to get data sources');
     mongo.getDataSources(req.params.userID, req.params.role, req.params.orgId, (err, servers) => {
       if (err) {
         res.status(500).json({
           error: 'Unexpected error occured,please retry',
         });
-        winston.error(err);
+        logger.error(err);
       } else {
         getLastUpdateTime(servers, (servers) => {
           if (err) {
-            winston.error(err);
-            winston.error('An error has occured while getting data source');
+            logger.error(err);
+            logger.error('An error has occured while getting data source');
             res.status(500).send('An error has occured while getting data source');
             return;
           }
-          winston.info(`returning list of data sources ${JSON.stringify(servers)}`);
+          logger.info(`returning list of data sources ${JSON.stringify(servers)}`);
           res.status(200).json({
             servers,
           });
@@ -3100,13 +3110,13 @@ if (cluster.isMaster) {
   });
 
   app.get('/getDataPairs/:userID', (req, res) => {
-    winston.info('received request to get data sources');
+    logger.info('received request to get data sources');
     mongo.getDataPairs(req.params.userID, (err, pairs) => {
       if (err) {
         res.status(500).json({
           error: 'Unexpected error occured,please retry',
         });
-        winston.error(err);
+        logger.error(err);
       } else {
         res.status(200).json(pairs);
       }
@@ -3114,7 +3124,7 @@ if (cluster.isMaster) {
   });
 
   app.get('/getPairForDatasource/:datasource', (req, res) => {
-    winston.info('Received a request to get pairs associated with a datasource');
+    logger.info('Received a request to get pairs associated with a datasource');
     const id = req.params.datasource;
     mongo.getMappingDBs(id, (pairs) => {
       res.status(200).json(pairs);
@@ -3122,31 +3132,31 @@ if (cluster.isMaster) {
   });
 
   app.post('/addDataSourcePair', (req, res) => {
-    winston.info('Received a request to save data source pairs');
+    logger.info('Received a request to save data source pairs');
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
       try {
         fields.singlePair = JSON.parse(fields.singlePair);
       } catch (error) {
-        winston.error(error);
+        logger.error(error);
       }
 
       try {
         fields.activePairID = JSON.parse(fields.activePairID);
       } catch (error) {
-        winston.error(error);
+        logger.error(error);
       }
       const database = mixin.toTitleCase(JSON.parse(fields.source1).name + JSON.parse(fields.source1).userID._id + JSON.parse(fields.source2).name);
       hapi.addTenancy({ name: database, description: 'mapping data source' }).then(async () => {
         await mcsd.createFakeOrgID(database).catch((err) => {
-          winston.error(err);
-        })
+          logger.error(err);
+        });
         mongo.addDataSourcePair(fields, (error, errMsg, results) => {
           if (error) {
             if (errMsg) {
-              winston.error(errMsg);
+              logger.error(errMsg);
             } else {
-              winston.error(error);
+              logger.error(error);
             }
             res.status(400).json({
               error: errMsg,
@@ -3162,20 +3172,20 @@ if (cluster.isMaster) {
                 mongo.getLevelMapping(db2, levelMapping => callback(false, levelMapping));
               },
             }, (err, mappings) => {
-              winston.info('Data source pair saved successfully');
+              logger.info('Data source pair saved successfully');
               res.status(200).json(JSON.stringify(mappings));
             });
           }
         });
       }).catch((err) => {
-        winston.error(err);
+        logger.error(err);
         return res.status(500).json({ error: 'An expected error occured' });
       });
     });
   });
 
   app.delete('/deleteSourcePair', (req, res) => {
-    winston.info(`Received a request to delete data source pair with id ${req.params.id}`);
+    logger.info(`Received a request to delete data source pair with id ${req.params.id}`);
     const {
       pairId,
       userID,
@@ -3192,29 +3202,29 @@ if (cluster.isMaster) {
         mcsd.cleanCache(`url_${src1Url.toString()}`, true);
         mcsd.cleanCache(`url_${src2Url.toString()}`, true);
         if (err) {
-          winston.error(err);
+          logger.error(err);
           return res.send(500).send(err);
         }
         res.status(200).send();
       });
     }).catch((err) => {
-      winston.error(err);
+      logger.error(err);
       return res.send(500).send(err);
     });
   });
 
   app.post('/activateSharedPair', (req, res) => {
-    winston.info('Received a request to activate shared data source pair');
+    logger.info('Received a request to activate shared data source pair');
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
       mongo.activateSharedPair(fields.pairID, fields.userID, (error, results) => {
         if (error) {
-          winston.error(error);
+          logger.error(error);
           res.status(400).json({
             error: 'Unexpected error occured while activating shared data source pair',
           });
         } else {
-          winston.info('Shared data source pair activated successfully');
+          logger.info('Shared data source pair activated successfully');
           res.status(200).send();
         }
       });
@@ -3222,38 +3232,38 @@ if (cluster.isMaster) {
   });
 
   app.get('/resetDataSourcePair/:userID', (req, res) => {
-    winston.info('Received a request to reset data source pair');
+    logger.info('Received a request to reset data source pair');
     mongo.resetDataSourcePair(req.params.userID, (error, response) => {
       if (error) {
-        winston.error(error);
+        logger.error(error);
         res.status(400).json({
           error: 'Unexpected error occured while saving',
         });
       } else {
-        winston.info('Data source pair reseted successfully');
+        logger.info('Data source pair reseted successfully');
         res.status(200).send();
       }
     });
   });
 
   app.get('/getDataSourcePair/:userID/:orgId?', (req, res) => {
-    winston.info('Received a request to get data source pair');
+    logger.info('Received a request to get data source pair');
     mongo.getDataSourcePair(req.params.userID, req.params.orgId, (err, sourcePair) => {
       if (err) {
-        winston.error('Unexpected error occured while getting data source pairs');
-        winston.error(err);
+        logger.error('Unexpected error occured while getting data source pairs');
+        logger.error(err);
         res.status(400).json({
           error: 'Unexpected error occured while getting data source pairs',
         });
       } else {
-        winston.info('Returning list of data source pairs');
+        logger.info('Returning list of data source pairs');
         res.status(200).json(sourcePair);
       }
     });
   });
 
   app.get('/getUploadedCSV/:sourceOwner/:name', (req, res) => {
-    winston.info('Received a request to export CSV file');
+    logger.info('Received a request to export CSV file');
     const {
       sourceOwner,
     } = req.params;
@@ -3291,9 +3301,9 @@ if (cluster.isMaster) {
   app.post('/uploadCSV', (req, res) => {
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
-      winston.info(`Received Source1 Data with fields Mapping ${JSON.stringify(fields)}`);
+      logger.info(`Received Source1 Data with fields Mapping ${JSON.stringify(fields)}`);
       if (!fields.csvName) {
-        winston.error({
+        logger.error({
           error: 'Missing CSV Name',
         });
         res.status(400).json({
@@ -3314,7 +3324,7 @@ if (cluster.isMaster) {
       });
       redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
       if (!Array.isArray(expectedLevels)) {
-        winston.error('Invalid config data for key Levels ');
+        logger.error('Invalid config data for key Levels ');
         res.status(400).json({
           error: 'Un expected error occured while processing this request',
         });
@@ -3322,14 +3332,14 @@ if (cluster.isMaster) {
         return;
       }
       if (Object.keys(files).length == 0) {
-        winston.error('No file submitted for reconciliation');
+        logger.error('No file submitted for reconciliation');
         res.status(400).json({
           error: 'Please submit CSV file for facility reconciliation',
         });
         return res.end();
       }
       const fileName = Object.keys(files)[0];
-      winston.info('validating CSV File');
+      logger.info('validating CSV File');
       uploadReqPro = JSON.stringify({
         status: '2/3 Validating CSV Data',
         error: null,
@@ -3338,7 +3348,7 @@ if (cluster.isMaster) {
       redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
       mixin.validateCSV(files[fileName].path, fields, (valid, invalid) => {
         if (invalid.length > 0) {
-          winston.error('Uploaded CSV is invalid (has either duplicated IDs or empty levels/facility),execution stopped');
+          logger.error('Uploaded CSV is invalid (has either duplicated IDs or empty levels/facility),execution stopped');
           res.status(400).json({
             error: invalid,
           });
@@ -3347,34 +3357,34 @@ if (cluster.isMaster) {
         }
         res.status(200).end();
 
-        winston.info('CSV File Passed Validation');
+        logger.info('CSV File Passed Validation');
         uploadReqPro = JSON.stringify({
           status: '3/3 Uploading of data started',
           error: null,
           percent: null,
         });
         redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
-        winston.info('Creating HAPI server now');
+        logger.info('Creating HAPI server now');
         hapi.addTenancy({ name: database, description: 'reco data source' }).then(() => {
           const oldPath = files[fileName].path;
 
           const newPath = `${__dirname}/csvUploads/${fields.userID}+${mixin.toTitleCase(fields.csvName)}+${moment().format()}.csv`;
           fs.readFile(oldPath, (err, data) => {
             if (err) {
-              winston.error(err);
+              logger.error(err);
             }
             fs.writeFile(newPath, data, (err) => {
               if (err) {
-                winston.error(err);
+                logger.error(err);
               }
             });
           });
-          winston.info(`Uploading data for ${database} now`);
+          logger.info(`Uploading data for ${database} now`);
           mongo.saveLevelMapping(fields, database, (error, response) => {
 
           });
           mcsd.CSVTomCSD(files[fileName].path, fields, database, clientId, () => {
-            winston.info(`Data upload for ${database} is done`);
+            logger.info(`Data upload for ${database} is done`);
             const uploadReqPro = JSON.stringify({
               status: 'Done',
               error: null,
@@ -3383,7 +3393,7 @@ if (cluster.isMaster) {
             redisClient.set(uploadRequestId, uploadReqPro);
           });
         }).catch((err) => {
-          winston.error(err);
+          logger.error(err);
           const uploadReqPro = JSON.stringify({
             status: 'Error',
             error: 'An error has occured, upload cancelled',
@@ -3425,5 +3435,5 @@ if (cluster.isMaster) {
   });
 
   server.listen(config.getConf('server:port'));
-  winston.info(`Server is running and listening on port ${config.getConf('server:port')}`);
+  logger.info(`Server is running and listening on port ${config.getConf('server:port')}`);
 }

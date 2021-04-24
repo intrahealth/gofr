@@ -17,7 +17,7 @@
           dark
           @click.native="confirm = false"
         >
-          <v-icon>close</v-icon>
+          <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-toolbar>
       <v-card>
@@ -54,7 +54,7 @@
         <v-icon
           @click="editDialog = false"
           style="cursor: pointer"
-        >close</v-icon>
+        >mdi-close</v-icon>
       </v-toolbar>
       <v-card>
         <v-card-text>
@@ -74,7 +74,7 @@
                     @change="$v.name.$touch()"
                     :error-messages="nameErrors"
                     v-model="name"
-                    box
+                    filled
                     color="deep-purple"
                     label="Name"
                   />
@@ -83,7 +83,7 @@
                 <v-flex xs5>
                   <v-text-field
                     v-model="alt_name"
-                    box
+                    filled
                     color="deep-purple"
                     label="Alternative Name"
                   />
@@ -99,7 +99,7 @@
                   <v-text-field
                     required
                     v-model="code"
-                    box
+                    filled
                     color="deep-purple"
                     label="Code"
                   />
@@ -147,7 +147,7 @@
                 <v-flex xs5>
                   <v-text-field
                     v-model="lat"
-                    box
+                    filled
                     color="deep-purple"
                     label="Latitude"
                   />
@@ -157,7 +157,7 @@
                   <v-text-field
                     required
                     v-model="long"
-                    box
+                    filled
                     color="deep-purple"
                     label="Longitude"
                   />
@@ -182,7 +182,7 @@
                         <v-flex xs5>
                           <v-text-field
                             v-model="contact.email"
-                            box
+                            filled
                             color="deep-purple"
                             label="Email"
                           />
@@ -191,7 +191,7 @@
                         <v-flex xs5>
                           <v-text-field
                             v-model="contact.phone"
-                            box
+                            filled
                             color="deep-purple"
                             label="Phone"
                           />
@@ -206,7 +206,7 @@
                         <v-flex xs5>
                           <v-text-field
                             v-model="contact.fax"
-                            box
+                            filled
                             color="deep-purple"
                             label="Fax"
                           />
@@ -215,7 +215,7 @@
                         <v-flex xs5>
                           <v-text-field
                             v-model="contact.website"
-                            box
+                            filled
                             color="deep-purple"
                             label="Website"
                           />
@@ -270,7 +270,7 @@
                       color="error"
                       @click.native="editDialog = false"
                     >
-                      <v-icon left>cancel</v-icon> Cancel
+                      <v-icon left>mdi-cancel</v-icon> Cancel
                     </v-btn>
                   </v-flex>
                   <v-flex
@@ -283,7 +283,7 @@
                       dark
                       @click="saveEdit()"
                     >
-                      <v-icon left>save</v-icon>
+                      <v-icon left>mdi-content-save</v-icon>
                       <template v-if="requestCategory === 'updateRequest'">
                         Send Request
                       </template>
@@ -314,7 +314,7 @@
           <v-flex xs2>
             <v-text-field
               v-model="searchJurisdiction"
-              append-icon="search"
+              append-icon="mdi-magnify"
               label="Search Jurisdiction"
               single-line
               hide-details
@@ -357,7 +357,7 @@
                   <v-flex>
                     <v-text-field
                       v-model="searchBuildings"
-                      append-icon="search"
+                      append-icon="mdi-magnify"
                       label="Search Facility"
                       single-line
                       hide-details
@@ -374,64 +374,80 @@
                   class="elevation-1"
                 >
                   <template
-                    slot="items"
-                    slot-scope="props"
+                    v-slot:item="{ item }"
                   >
-                    <td>
-                      <v-tooltip top>
-                        <v-btn
-                          v-if="canEditBuilding(props.item)"
-                          icon
-                          color="primary"
-                          slot="activator"
-                          @click="edit(props.item)"
+                    <tr>
+                      <td>
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on }">
+                            <v-btn
+                              v-if="canEditBuilding(item)"
+                              class="mx-1"
+                              fab
+                              dark
+                              x-small
+                              color="primary"
+                              v-on="on"
+                              @click="edit(item)"
+                            >
+                              <v-icon>mdi-pencil</v-icon>
+                            </v-btn>
+                          </template>
+                          <span>Edit</span>
+                        </v-tooltip>
+                        <v-tooltip
+                          top
+                          v-if="action === 'request'"
                         >
-                          <v-icon>edit</v-icon>
-                        </v-btn>
-                        <span>Edit</span>
-                      </v-tooltip>
-                      <v-tooltip
-                        top
-                        v-if="action === 'request'"
-                      >
-                        <v-btn
-                          v-if="canChangeRequestStatus(props.item, 'approve')"
-                          icon
-                          color="success"
-                          slot="activator"
-                          @click="changeRequestStatus(props.item, 'approved', true)"
+                          <template v-slot:activator="{ on }">
+                            <v-btn
+                              v-if="canChangeRequestStatus(item, 'approve')"
+                              class="mx-1"
+                              fab
+                              dark
+                              x-small
+                              color="success"
+                              v-on="on"
+                              @click="changeRequestStatus(item, 'approved', true)"
+                            >
+                              <v-icon>mdi-check-circle</v-icon>
+                            </v-btn>
+                          </template>
+                          <span>Approve</span>
+                        </v-tooltip>
+                        <v-tooltip
+                          top
+                          v-if="action === 'request'"
                         >
-                          <v-icon>check_circle</v-icon>
-                        </v-btn>
-                        <span>Approve</span>
-                      </v-tooltip>
-                      <v-tooltip
-                        top
-                        v-if="action === 'request'"
-                      >
-                        <v-btn
-                          v-if="canChangeRequestStatus(props.item, 'reject')"
-                          icon
-                          color="error"
-                          slot="activator"
-                          @click="changeRequestStatus(props.item, 'rejected', true)"
-                        >
-                          <v-icon>cancel</v-icon>
-                        </v-btn>
-                        <span>Reject</span>
-                      </v-tooltip>
-                    </td>
-                    <td>{{props.item.name}}</td>
-                    <td>{{props.item.code}}</td>
-                    <td>{{props.item.parent.name}}</td>
-                    <td>{{props.item.type.text}}</td>
-                    <td>{{props.item.ownership.text}}</td>
-                    <td>{{props.item.status.text}}</td>
-                    <td>{{props.item.lat}}</td>
-                    <td>{{props.item.long}}</td>
-                    <td v-if="action === 'request' && requestCategory === 'requestsList'">
-                      {{props.item.requestStatus}}
-                    </td>
+                          <template v-slot:activator="{ on }">
+                            <v-btn
+                              v-if="canChangeRequestStatus(item, 'reject')"
+                              class="mx-1"
+                              fab
+                              dark
+                              x-small
+                              color="error"
+                              v-on="on"
+                              @click="changeRequestStatus(item, 'rejected', true)"
+                            >
+                              <v-icon>mdi-cancel</v-icon>
+                            </v-btn>
+                          </template>
+                          <span>Reject</span>
+                        </v-tooltip>
+                      </td>
+                      <td>{{item.name}}</td>
+                      <td>{{item.code}}</td>
+                      <td>{{item.parent.name}}</td>
+                      <td>{{item.type.text}}</td>
+                      <td>{{item.ownership.text}}</td>
+                      <td>{{item.status.text}}</td>
+                      <td>{{item.lat}}</td>
+                      <td>{{item.long}}</td>
+                      <td v-if="action === 'request' && requestCategory === 'requestsList'">
+                        {{item.requestStatus}}
+                      </td>
+                    </tr>
                   </template>
                 </v-data-table>
               </v-card-text>
@@ -453,7 +469,6 @@ import { generalMixin } from '../../mixins/generalMixin'
 import {
   tasksVerification
 } from '@/modules/tasksVerification'
-const backendServer = process.env.BACKEND_SERVER
 export default {
   mixins: [generalMixin],
   validations: {
@@ -567,7 +582,7 @@ export default {
         formData.append('id', this.facilityId)
         formData.append('status', this.requestStatus)
         formData.append('requestType', this.requestType)
-        axios.post(backendServer + '/FR/changeBuildingRequestStatus', formData, {
+        axios.post('/FR/changeBuildingRequestStatus', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -620,7 +635,7 @@ export default {
       this.facilities = []
       this.buildings = []
       this.loadingBuildings = true
-      axios.get(backendServer + '/FR/getBuildings', {
+      axios.get('/FR/getBuildings', {
         params: {
           jurisdiction: this.activeJurisdiction.id,
           action: this.action,
@@ -693,11 +708,11 @@ export default {
       this.$store.state.progressTitle = 'Saving Changes'
       this.editDialog = false
       this.$store.state.dynamicProgress = true
-      axios.post(backendServer + '/FR/addBuilding', formData, {
+      axios.post('/FR/addBuilding', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
-      }).then((response) => {
+      }).then(() => {
         this.$store.state.dynamicProgress = false
         this.$store.state.errorTitle = 'Changes Saved'
         this.$store.state.errorDescription = 'Changes saved successfully'
@@ -713,7 +728,7 @@ export default {
   },
   created () {
     this.loadingTree = true
-    this.getTree(false, (err, tree) => {
+    this.getTree(false, false, (err, tree) => {
       if (!err) {
         this.loadingTree = false
         this.jurisdictionHierarchy = tree

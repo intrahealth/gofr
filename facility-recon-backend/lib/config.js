@@ -30,8 +30,8 @@ if (ops && ops.conf) {
   nconf.file(ops.conf);
 } else {
   const environment = nconf.get('NODE_ENV') || 'development';
-  nconf.file('environment', path.resolve(`${global.appRoot}/config`, `${environment}.json`));
-  nconf.file('default', path.resolve(`${global.appRoot}/config`, 'default.json'));
+  nconf.file('environment', path.resolve(`${__dirname}/../config`, `${environment}.json`));
+  nconf.file('default', path.resolve(`${__dirname}/../config`, 'default.json'));
 }
 
 if (ops && ops.createIndexes) {

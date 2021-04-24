@@ -1,9 +1,8 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-shadow */
-require('./init');
 const axios = require('axios');
 const URI = require('urijs');
-const winston = require('winston');
+const logger = require('./winston');
 const config = require('./config');
 
 function getAvailableId() {
@@ -38,7 +37,7 @@ function getAvailableId() {
       try {
         tenancies = JSON.parse(tenancies);
       } catch (error) {
-        winston.error(error);
+        logger.error(error);
         return reject(error);
       }
       tenancies.sort((a, b) => a.id - b.id);
@@ -89,7 +88,7 @@ function saveTenancyId(name, id) {
             try {
               tenancies = JSON.parse(tenancies);
             } catch (error) {
-              winston.error(error);
+              logger.error(error);
               return reject(error);
             }
             let exist = tenancies.find((ten) => {
@@ -184,7 +183,7 @@ function deleteTenancyId(id) {
           try {
             tenancies = JSON.parse(tenancies);
           } catch (error) {
-            winston.error(error);
+            logger.error(error);
             return reject(error);
           }
           const tenInd = tenancies.findIndex(ten => ten.id === id);
@@ -232,7 +231,7 @@ function deleteTenancyId(id) {
 }
 function addTenancy({ id, name, description }) {
   return new Promise((resolve, reject) => {
-    winston.info(`Adding tenancy with name ${name}`);
+    logger.info(`Adding tenancy with name ${name}`);
     const properId = new Promise((res, rej) => {
       if (id) {
         return res();
@@ -279,18 +278,18 @@ function addTenancy({ id, name, description }) {
         data: parameters,
       };
       axios(options).then(() => {
-        winston.info(`Tenancy with name ${name} added successfully`);
+        logger.info(`Tenancy with name ${name} added successfully`);
         saveTenancyId(name, id).then(() => {
           resolve();
         }).catch((err) => {
           reject(err);
         });
       }).catch((err) => {
-        winston.error(err);
+        logger.error(err);
         reject(err);
       });
     }).catch((err) => {
-      winston.error(err);
+      logger.error(err);
       reject(err);
     });
   });
@@ -298,7 +297,7 @@ function addTenancy({ id, name, description }) {
 
 function deleteTenancy({ id, name }) {
   return new Promise((resolve, reject) => {
-    winston.info(`Deleting tenancy with id ${id}`);
+    logger.info(`Deleting tenancy with id ${id}`);
     if (!id && !name) {
       return reject(new Error('Neither tenany id nor name was given'));
     }
@@ -334,7 +333,7 @@ function deleteTenancy({ id, name }) {
         try {
           tenancies = JSON.parse(tenancies);
         } catch (error) {
-          winston.error(error);
+          logger.error(error);
           return rej(error);
         }
         const tenancy = tenancies.find(ten => ten.name === name);
@@ -344,13 +343,13 @@ function deleteTenancy({ id, name }) {
         return res();
       }).catch((err) => {
         if (err.response) {
-          winston.error(err.response.data);
-          winston.error(err.response.status);
-          winston.error(err.response.headers);
+          logger.error(err.response.data);
+          logger.error(err.response.status);
+          logger.error(err.response.headers);
         } else if (error.request) {
-          winston.error(err.request);
+          logger.error(err.request);
         } else {
-          winston.error('Error', err.message);
+          logger.error('Error', err.message);
         }
         return rej();
       });
@@ -384,14 +383,14 @@ function deleteTenancy({ id, name }) {
       };
       axios(options).then(() => {
         deleteTenancyId(id).then(() => {
-          winston.info(`Tenancy with id ${id} deleted successfully`);
+          logger.info(`Tenancy with id ${id} deleted successfully`);
           return resolve();
         }).catch((err) => {
-          winston.error(err);
+          logger.error(err);
           return reject(err);
         });
       }).catch((err) => {
-        winston.error(err);
+        logger.error(err);
         reject(err);
       });
     }).catch((err) => {
@@ -410,8 +409,8 @@ module.exports = {
 //   name: 'dfsddfd',
 //   description: 'Requests Database',
 // }).catch(() => {
-//   winston.error();
+//   logger.error();
 // });
 // deleteTenancy({id:106}).catch((err) => {
-//   winston.error(err)
+//   logger.error(err)
 // })

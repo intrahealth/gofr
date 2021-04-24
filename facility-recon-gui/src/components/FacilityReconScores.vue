@@ -121,19 +121,20 @@
         transition="scale-transition"
         v-model="dialog"
         :width="dialogWidth"
+        height="auto"
       >
-        <v-card :width='dialogWidth'>
+        <v-card :width='dialogWidth' height="auto">
           <v-toolbar
             color="primary"
             dark
           >
             <v-toolbar-title>
-              Matching {{ selectedSource1Name }}
+              Matching {{ selectedSource1Name }} {{dialogWidth}}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-text-field
               v-model="searchPotential"
-              append-icon="search"
+              append-icon="mdi-magnify"
               label="Search"
               single-line
               hide-details
@@ -144,7 +145,7 @@
               dark
               @click.native="back"
             >
-              <v-icon>close</v-icon>
+              <v-icon>mdi-close</v-icon>
             </v-btn>
           </v-toolbar>
           <v-card-title>
@@ -165,12 +166,10 @@
               :headers="potentialHeaders"
               :items="allPotentialMatches"
               :search="searchPotential"
-              :pagination.sync="pagination"
               class="elevation-1"
             >
               <template
                 slot="headers"
-                slot-scope="props"
               >
                 <tr>
                   <template v-for='header in potentialHeaders'>
@@ -184,19 +183,21 @@
                       <v-icon
                         small
                         v-if="sort_arrow == 'up'"
-                      >arrow_upward</v-icon>
+                      >mdi-arrow-up</v-icon>
                       <v-icon
                         small
                         v-else
-                      >arrow_downward</v-icon>
+                      >mdi-arrow-down</v-icon>
                       {{header.text}}
                       <v-tooltip top>
-                        <v-btn
-                          slot="activator"
-                          icon
-                        >
-                          <v-icon>help</v-icon>
-                        </v-btn>
+                        <template v-slot:activator="{ on }">
+                          <v-btn
+                            v-on="on"
+                            icon
+                          >
+                            <v-icon>mdi-help</v-icon>
+                          </v-btn>
+                        </template>
                         <span>The lower the score, the better the match</span>
                       </v-tooltip>
                     </th>
@@ -211,44 +212,48 @@
                 </tr>
               </template>
               <template
-                slot="items"
-                slot-scope="props"
+                v-slot:item="{ item }"
               >
                 <tr>
                   <td>
                     <v-tooltip top>
-                      <v-btn
-                        color="error"
-                        small
-                        @click.native="match('flag', props.item.id, props.item.name, props.item.source2IdHierarchy, props.item.mappedParentName)"
-                        slot="activator"
-                      >
-                        <v-icon
-                          dark
-                          left
-                        >notification_important</v-icon>Flag
-                      </v-btn>
+                      <template v-slot:activator="{ on }">
+                        <v-btn
+                          color="error"
+                          small
+                          @click.native="match('flag', item.id, item.name, item.source2IdHierarchy, item.mappedParentName)"
+                          v-on="on"
+                        >
+                          <v-icon
+                            dark
+                            left
+                          >mdi-bell</v-icon>Flag
+                        </v-btn>
+                      </template>
                       <span>Mark the selected item as a match to be reviewed</span>
                     </v-tooltip>
+                    |
                     <v-tooltip top>
-                      <v-btn
-                        color="primary"
-                        small
-                        dark
-                        @click.native="match('match', props.item.id, props.item.name, props.item.source2IdHierarchy)"
-                        slot="activator"
-                      >
-                        <v-icon left>thumb_up</v-icon>Save Match
-                      </v-btn>
+                      <template v-slot:activator="{ on }">
+                        <v-btn
+                          color="primary"
+                          small
+                          dark
+                          @click.native="match('match', item.id, item.name, item.source2IdHierarchy)"
+                          v-on="on"
+                        >
+                          <v-icon left>mdi-thumb-up</v-icon>Save Match
+                        </v-btn>
+                      </template>
                       <span>Save the selected item as a match</span>
                     </v-tooltip>
                   </td>
-                  <td>{{props.item.name}}</td>
-                  <td>{{props.item.id}}</td>
-                  <td>{{props.item.parents | joinParentsAndReverse}}</td>
-                  <td v-if='$store.state.recoLevel == $store.state.totalSource1Levels'>{{props.item.geoDistance}}</td>
-                  <td>{{props.item.score}}</td>
-                  <td>{{potentialMatchComment(props.item)}}</td>
+                  <td>{{item.name}}</td>
+                  <td>{{item.id}}</td>
+                  <td>{{item.parents | joinParentsAndReverse}}</td>
+                  <td v-if='$store.state.recoLevel == $store.state.totalSource1Levels'>{{item.geoDistance}}</td>
+                  <td>{{item.score}}</td>
+                  <td>{{potentialMatchComment(item)}}</td>
                 </tr>
               </template>
             </v-data-table>
@@ -260,42 +265,51 @@
             >
               <v-flex xs2>
                 <v-tooltip top>
-                  <v-btn
-                    color="green"
-                    dark
-                    @click.native="noMatch('nomatch')"
-                    slot="activator"
-                  >
-                    <v-icon left>thumb_down</v-icon>No Match
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      color="green"
+                      dark
+                      @click.native="noMatch('nomatch')"
+                      v-on="on"
+                    >
+                      <v-icon left>mdi-thumb-down</v-icon>No Match
+                    </v-btn>
+                  </template>
                   <span>Save this Source 1 location as having no match</span>
                 </v-tooltip>
               </v-flex>
               <v-flex xs2>
                 <v-tooltip top>
-                  <v-btn
-                    color="error"
-                    dark
-                    @click.native="noMatch('ignore')"
-                    slot="activator"
-                  >
-                    <v-icon left>thumb_down</v-icon>Ignore
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      color="error"
+                      dark
+                      @click.native="noMatch('ignore')"
+                      v-on="on"
+                    >
+                      <v-icon left>mdi-thumb-down</v-icon>Ignore
+                    </v-btn>
+                  </template>
                   <span>Mark this source 1 location as being ignored</span>
                 </v-tooltip>
               </v-flex>
               <v-flex xs2>
                 <v-tooltip top>
-                  <v-btn
-                    v-if='potentialAvailable'
-                    color="teal darken-6"
-                    style="color: white"
-                    slot="activator"
-                    @click="showAllPotential = !showAllPotential"
-                  >
-                    <template v-if="showAllPotential">Show Scored Suggestions</template>
-                    <template v-else>Show All Suggestions</template>
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      v-if='potentialAvailable'
+                      color="teal darken-6"
+                      style="color: white"
+                      v-on="on"
+                      @click="showAllPotential = !showAllPotential"
+                    >
+                      <template v-if="showAllPotential">Show Scored Suggestions</template>
+                      <template v-else>
+                        <v-icon left>mdi-eye</v-icon>
+                        Show All Suggestions
+                      </template>
+                    </v-btn>
+                  </template>
                   <span v-if="showAllPotential">Limit to only scored suggestions</span>
                   <span v-else>See all possible choices ignoring the score</span>
                 </v-tooltip>
@@ -305,17 +319,19 @@
                 text-sm-right
               >
                 <v-tooltip top>
-                  <v-btn
-                    color="orange darken-2"
-                    @click.native="back"
-                    style="color: white"
-                    slot="activator"
-                  >
-                    <v-icon
-                      dark
-                      left
-                    >arrow_back</v-icon>Back
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      color="orange darken-2"
+                      @click.native="back"
+                      style="color: white"
+                      v-on="on"
+                    >
+                      <v-icon
+                        dark
+                        left
+                      >mdi-arrow-left</v-icon>Back
+                    </v-btn>
+                  </template>
                   <span>Return without saving</span>
                 </v-tooltip>
               </v-flex>
@@ -353,16 +369,18 @@
           </v-select>
         </v-flex>
         <v-flex xs2>
-          <v-btn
-            v-if='!$store.state.scoreSavingProgressData.savingMatches'
-            slot="activator"
-            color="primary"
-            dark
-            @click="getScores(false)"
-            round
-          >
-            <v-icon>repeat_one</v-icon> Recalculate Scores
-          </v-btn>
+          <template v-if='!$store.state.scoreSavingProgressData.savingMatches'>
+            <template>
+              <v-btn
+                color="primary"
+                dark
+                @click="getScores(false)"
+                rounded
+              >
+                <v-icon>mdi-repeat-once</v-icon> Recalculate Scores
+              </v-btn>
+            </template>
+          </template>
           <template v-else>
             Saving matches for {{translateDataHeader('source1', $store.state.recoLevel - 1)}}
             <v-progress-linear
@@ -388,15 +406,19 @@
           text-xs-right
         >
           <v-tooltip top>
-            <v-btn
-              flat
-              icon
-              color="primary"
-              @click="helpDialog = true"
-              slot="activator"
-            >
-              <v-icon>help</v-icon>
-            </v-btn>
+            <template v-slot:activator="{ on }">
+              <v-btn
+                class="mx-1"
+                fab
+                dark
+                x-small
+                color="primary"
+                @click="helpDialog = true"
+                v-on="on"
+              >
+                <v-icon>mdi-help</v-icon>
+              </v-btn>
+            </template>
             <span>Help</span>
           </v-tooltip>
         </v-flex>
@@ -415,7 +437,7 @@
             dark
           >
             <v-toolbar-title>
-              <v-icon>info</v-icon> About this page
+              <v-icon>mdi-information</v-icon> About this page
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -423,7 +445,7 @@
               dark
               @click.native="helpDialog = false"
             >
-              <v-icon>close</v-icon>
+              <v-icon>mdi-close</v-icon>
             </v-btn>
           </v-toolbar>
           <v-card-text>
@@ -596,7 +618,7 @@
               <v-spacer></v-spacer>
               <v-text-field
                 v-model="searchUnmatchedSource1"
-                append-icon="search"
+                append-icon="mdi-magnify"
                 label="Search"
                 single-line
                 hide-details
@@ -616,26 +638,28 @@
                 class="elevation-1"
               >
                 <template
-                  slot="items"
-                  slot-scope="props"
+                  v-slot:item="{ item }"
                 >
-                  <td
-                    v-if="$store.state.recoStatus === 'Done'"
-                    :key='props.item.id'
-                  >{{props.item.name}}</td>
-                  <td
-                    v-else
-                    @click="getPotentialMatch(props.item.id)"
-                    style="cursor: pointer"
-                    :key='props.item.id'
-                  >{{props.item.name}}</td>
-                  <td
-                    v-for="(parent,index) in props.item.parents"
-                    v-if='index !=props.item.parents.length-1'
-                    :key='props.item.id+index'
-                  >
-                    {{parent}}
-                  </td>
+                  <tr>
+                    <td
+                      v-if="$store.state.recoStatus === 'Done'"
+                      :key='item.id'
+                    >{{item.name}}</td>
+                    <td
+                      v-else
+                      @click="getPotentialMatch(item.id)"
+                      style="cursor: pointer"
+                      :key='item.id'
+                    >{{item.name}}</td>
+                    <td
+                      v-for="(parent,index) in item.parents"
+                      :key='item.id+index'
+                    >
+                      <template v-if='index != item.parents.length-1'>
+                        {{parent}}
+                      </template>
+                    </td>
+                  </tr>
                 </template>
               </v-data-table>
             </template>
@@ -658,7 +682,7 @@
               <v-spacer></v-spacer>
               <v-text-field
                 v-model="searchUnmatchedSource2"
-                append-icon="search"
+                append-icon="mdi-magnify"
                 label="Search"
                 single-line
                 hide-details
@@ -673,10 +697,11 @@
                 class="elevation-1"
               >
                 <template
-                  slot="items"
-                  slot-scope="props"
+                  v-slot:item="{ item }"
                 >
-                  <td>{{props.item.name}} <br>&ensp;&ensp;{{props.item.parents | joinParentsAndReverse}}</td>
+                  <tr>
+                    <td>{{item.name}} <br>&ensp;&ensp;{{item.parents | joinParentsAndReverse}}</td>
+                  </tr>
                 </template>
               </v-data-table>
             </template>
@@ -838,7 +863,7 @@
           centered
           grow
           dark
-          color="cyan"
+          background-color="cyan"
         >
           <v-tabs-slider color="red"></v-tabs-slider>
           <v-tab key="match">
@@ -846,34 +871,34 @@
             <v-icon
               color="white"
               right
-            >thumb_up</v-icon>
+            >mdi-thumb-up</v-icon>
           </v-tab>
           <v-tab key="nomatch">
             NO MATCH ({{source1TotalNoMatch}})
             <v-icon
               color="white"
               right
-            >thumb_down</v-icon>
+            >mdi-thumb-down</v-icon>
           </v-tab>
           <v-tab key="ignore">
             IGNORED ({{source1TotalIgnore}})
             <v-icon
               color="white"
               right
-            >thumb_down</v-icon>
+            >mdi-thumb-down</v-icon>
           </v-tab>
           <v-tab key="flagged">
             FLAGGED ({{totalFlagged}})
             <v-icon
               color="white"
               right
-            >notification_important</v-icon>
+            >mdi-bell</v-icon>
           </v-tab>
           <v-tab-item key="match">
             <template v-if='$store.state.matchedContent != null'>
               <v-text-field
                 v-model="searchMatched"
-                append-icon="search"
+                append-icon="mdi-magnify"
                 label="Search"
                 single-line
                 hide-details
@@ -885,38 +910,39 @@
                 class="elevation-1"
               >
                 <template
-                  slot="items"
-                  slot-scope="props"
+                  v-slot:item="{ item }"
                 >
-                  <td>{{props.item.source1Name}}</td>
-                  <td>{{props.item.source1Id}}</td>
-                  <td>{{props.item.source2Name}}</td>
-                  <td>
-                    <v-treeview :items="props.item.source2IdHierarchy" />
-                  </td>
-                  <td v-if='props.item.matchComments'>{{props.item.matchComments.join(', ')}}</td>
-                  <td v-else></td>
-                  <td>
-                    <v-btn
-                      v-if="$store.state.recoStatus == 'Done'"
-                      disabled
-                      color="error"
-                      style='text-transform: none'
-                      small
-                      @click='breakMatch(props.item.source1Id)'
-                    >
-                      <v-icon>undo</v-icon>Break Match
-                    </v-btn>
-                    <v-btn
-                      v-else
-                      color="error"
-                      style='text-transform: none'
-                      small
-                      @click='breakMatch(props.item.source1Id)'
-                    >
-                      <v-icon>undo</v-icon>Break Match
-                    </v-btn>
-                  </td>
+                  <tr>
+                    <td>{{item.source1Name}}</td>
+                    <td>{{item.source1Id}}</td>
+                    <td>{{item.source2Name}}</td>
+                    <td>
+                      <v-treeview :items="item.source2IdHierarchy" />
+                    </td>
+                    <td v-if='item.matchComments'>{{item.matchComments.join(', ')}}</td>
+                    <td v-else></td>
+                    <td>
+                      <v-btn
+                        v-if="$store.state.recoStatus == 'Done'"
+                        disabled
+                        color="error"
+                        style='text-transform: none'
+                        small
+                        @click='breakMatch(item.source1Id)'
+                      >
+                        <v-icon>mdi-undo</v-icon>Break Match
+                      </v-btn>
+                      <v-btn
+                        v-else
+                        color="error"
+                        style='text-transform: none'
+                        small
+                        @click='breakMatch(item.source1Id)'
+                      >
+                        <v-icon>mdi-undo</v-icon>Break Match
+                      </v-btn>
+                    </td>
+                  </tr>
                 </template>
               </v-data-table>
             </template>
@@ -932,7 +958,7 @@
             <template v-if='$store.state.noMatchContent != null'>
               <v-text-field
                 v-model="searchNotMatched"
-                append-icon="search"
+                append-icon="mdi-magnify"
                 label="Search"
                 single-line
                 hide-details
@@ -944,33 +970,34 @@
                 class="elevation-1"
               >
                 <template
-                  slot="items"
-                  slot-scope="props"
+                  v-slot:item="{ item }"
                 >
-                  <td>{{props.item.source1Name}}</td>
-                  <td>{{props.item.source1Id}}</td>
-                  <td>{{props.item.parents.join('->')}}</td>
-                  <td>
-                    <v-btn
-                      v-if="$store.state.recoStatus == 'Done'"
-                      disabled
-                      color="error"
-                      style='text-transform: none'
-                      small
-                      @click='breakNoMatch(props.item.source1Id, "nomatch")'
-                    >
-                      <v-icon>cached</v-icon>Break No Match
-                    </v-btn>
-                    <v-btn
-                      v-else
-                      color="error"
-                      style='text-transform: none'
-                      small
-                      @click='breakNoMatch(props.item.source1Id, "nomatch")'
-                    >
-                      <v-icon>cached</v-icon>Break No Match
-                    </v-btn>
-                  </td>
+                  <tr>
+                    <td>{{item.source1Name}}</td>
+                    <td>{{item.source1Id}}</td>
+                    <td>{{item.parents.join('->')}}</td>
+                    <td>
+                      <v-btn
+                        v-if="$store.state.recoStatus == 'Done'"
+                        disabled
+                        color="error"
+                        style='text-transform: none'
+                        small
+                        @click='breakNoMatch(item.source1Id, "nomatch")'
+                      >
+                        <v-icon>mdi-cached</v-icon>Break No Match
+                      </v-btn>
+                      <v-btn
+                        v-else
+                        color="error"
+                        style='text-transform: none'
+                        small
+                        @click='breakNoMatch(item.source1Id, "nomatch")'
+                      >
+                        <v-icon>mdi-cached</v-icon>Break No Match
+                      </v-btn>
+                    </td>
+                  </tr>
                 </template>
               </v-data-table>
             </template>
@@ -986,7 +1013,7 @@
             <template v-if='$store.state.ignoreContent != null'>
               <v-text-field
                 v-model="searchIgnore"
-                append-icon="search"
+                append-icon="mdi-magnify"
                 label="Search"
                 single-line
                 hide-details
@@ -998,12 +1025,11 @@
                 class="elevation-1"
               >
                 <template
-                  slot="items"
-                  slot-scope="props"
+                  v-slot:item="{ item }"
                 >
-                  <td>{{props.item.source1Name}}</td>
-                  <td>{{props.item.source1Id}}</td>
-                  <td>{{props.item.parents.join('->')}}</td>
+                  <td>{{item.source1Name}}</td>
+                  <td>{{item.source1Id}}</td>
+                  <td>{{item.parents.join('->')}}</td>
                   <td>
                     <v-btn
                       v-if="$store.state.recoStatus == 'Done'"
@@ -1011,18 +1037,18 @@
                       color="error"
                       style='text-transform: none'
                       small
-                      @click='breakNoMatch(props.item.source1Id, "ignore")'
+                      @click='breakNoMatch(item.source1Id, "ignore")'
                     >
-                      <v-icon>cached</v-icon>Break Ignore
+                      <v-icon>mdi-cached</v-icon>Break Ignore
                     </v-btn>
                     <v-btn
                       v-else
                       color="error"
                       style='text-transform: none'
                       small
-                      @click='breakNoMatch(props.item.source1Id, "ignore")'
+                      @click='breakNoMatch(item.source1Id, "ignore")'
                     >
-                      <v-icon>cached</v-icon>Break Ignore
+                      <v-icon>mdi-cached</v-icon>Break Ignore
                     </v-btn>
                   </td>
                 </template>
@@ -1040,7 +1066,7 @@
             <template v-if='$store.state.flagged != null'>
               <v-text-field
                 v-model="searchFlagged"
-                append-icon="search"
+                append-icon="mdi-magnify"
                 label="Search"
                 single-line
                 hide-details
@@ -1052,56 +1078,57 @@
                 class="elevation-1"
               >
                 <template
-                  slot="items"
-                  slot-scope="props"
+                  v-slot:item="{ item }"
                 >
-                  <td>{{props.item.source1Name}}</td>
-                  <td>{{props.item.source1Id}}</td>
-                  <td>{{props.item.source2Name}}</td>
-                  <td>
-                    <v-treeview :items="props.item.source2IdHierarchy" />
-                  </td>
-                  <td>{{props.item.flagComment}}</td>
-                  <td>
-                    <v-btn
-                      v-if="$store.state.recoStatus == 'Done'"
-                      disabled
-                      color="primary"
-                      style='text-transform: none'
-                      small
-                      @click='acceptFlag(props.item.source1Id)'
-                    >
-                      <v-icon>thumb_up</v-icon>Confirm Match
-                    </v-btn>
-                    <v-btn
-                      v-else
-                      color="primary"
-                      style='text-transform: none'
-                      small
-                      @click='acceptFlag(props.item.source1Id)'
-                    >
-                      <v-icon>thumb_up</v-icon>Confirm Match
-                    </v-btn>
-                    <v-btn
-                      v-if="$store.state.recoStatus == 'Done'"
-                      disabled
-                      color="error"
-                      style='text-transform: none'
-                      small
-                      @click='unFlag(props.item.source1Id)'
-                    >
-                      <v-icon>cached</v-icon>Release
-                    </v-btn>
-                    <v-btn
-                      v-else
-                      color="error"
-                      style='text-transform: none'
-                      small
-                      @click='unFlag(props.item.source1Id)'
-                    >
-                      <v-icon>cached</v-icon>Release
-                    </v-btn>
-                  </td>
+                  <tr>
+                    <td>{{item.source1Name}}</td>
+                    <td>{{item.source1Id}}</td>
+                    <td>{{item.source2Name}}</td>
+                    <td>
+                      <v-treeview :items="item.source2IdHierarchy" />
+                    </td>
+                    <td>{{item.flagComment}}</td>
+                    <td>
+                      <v-btn
+                        v-if="$store.state.recoStatus == 'Done'"
+                        disabled
+                        color="primary"
+                        style='text-transform: none'
+                        small
+                        @click='acceptFlag(item.source1Id)'
+                      >
+                        <v-icon>mdi-thumb-up</v-icon>Confirm Match
+                      </v-btn>
+                      <v-btn
+                        v-else
+                        color="primary"
+                        style='text-transform: none'
+                        small
+                        @click='acceptFlag(item.source1Id)'
+                      >
+                        <v-icon>mdi-thumb-up</v-icon>Confirm Match
+                      </v-btn>
+                      <v-btn
+                        v-if="$store.state.recoStatus == 'Done'"
+                        disabled
+                        color="error"
+                        style='text-transform: none'
+                        small
+                        @click='unFlag(item.source1Id)'
+                      >
+                        <v-icon>mdi-cached</v-icon>Release
+                      </v-btn>
+                      <v-btn
+                        v-else
+                        color="error"
+                        style='text-transform: none'
+                        small
+                        @click='unFlag(item.source1Id)'
+                      >
+                        <v-icon>mdi-cached</v-icon>Release
+                      </v-btn>
+                    </td>
+                  </tr>
                 </template>
               </v-data-table>
             </template>
@@ -1124,10 +1151,10 @@
         >
           <v-btn
             color="primary"
-            round
+            rounded
             @click='levelChanged($store.state.recoLevel+1)'
           >
-            <v-icon>forward</v-icon>Proceed to {{nextLevelText}}
+            <v-icon>mdi-forward</v-icon>Proceed to {{nextLevelText}}
           </v-btn>
         </v-flex>
         <v-flex
@@ -1138,10 +1165,10 @@
         >
           <v-btn
             color="primary"
-            round
+            rounded
             @click='$router.push({name:"FacilityRecoStatus"})'
           >
-            <v-icon>dashboard</v-icon>Reconciliation Status
+            <v-icon>mdi-view-dashboard</v-icon>Reconciliation Status
           </v-btn>
         </v-flex>
       </v-layout>
@@ -1155,8 +1182,6 @@ import { scoresMixin } from '../mixins/scoresMixin'
 import { generalMixin } from '../mixins/generalMixin'
 import { eventBus } from '../main'
 import ReconciliationExport from './ReconciliationExport'
-
-const backendServer = process.env.BACKEND_SERVER
 
 export default {
   mixins: [scoresMixin, generalMixin],
@@ -1233,9 +1258,9 @@ export default {
         this.pagination.descending = false
       }
       if (this.pagination.descending) {
-        this.sort_arrow = 'down'
+        this.sort_arrow = 'mdi-down'
       } else {
-        this.sort_arrow = 'up'
+        this.sort_arrow = 'mdi-up'
       }
     },
     addListener () {
@@ -1311,7 +1336,7 @@ export default {
       this.$store.state.dynamicProgress = true
       this.$store.state.progressTitle = 'Getting potential matches from server'
       axios
-        .get(backendServer + '/reconcile/?' + path)
+        .get('/reconcile/?' + path)
         .then(response => {
           this.$store.state.dynamicProgress = false
           if (response.data) {
@@ -1502,7 +1527,7 @@ export default {
       formData.append('totalLevels', this.$store.state.totalSource1Levels)
       formData.append('userID', this.$store.state.activePair.userID._id)
       axios
-        .post(backendServer + '/match/' + this.matchType, formData, {
+        .post('/match/' + this.matchType, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -1574,7 +1599,7 @@ export default {
       formData.append('source1Id', source1Id)
       let userID = this.$store.state.activePair.userID._id
       axios
-        .post(backendServer + '/acceptFlag/' + this.getSource1() + '/' + this.getSource2() + '/' + userID, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        .post('/acceptFlag/' + this.getSource1() + '/' + this.getSource2() + '/' + userID, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
         .then(() => {
           this.$store.state.dynamicProgress = false
           // Add from a list of Source 1 Matched and remove from list of Flagged
@@ -1615,13 +1640,13 @@ export default {
       let sourcesOwner = this.getDatasourceOwner()
       formData.append('source1Id', source1Id)
       axios
-        .post(backendServer + '/breakMatch/' + this.getSource1() + '/' + this.getSource2() + '/' + sourcesOwner.source1Owner + '/' + sourcesOwner.source2Owner + '/' + userID, formData, {
+        .post('/breakMatch/' + this.getSource1() + '/' + this.getSource2() + '/' + sourcesOwner.source1Owner + '/' + sourcesOwner.source2Owner + '/' + userID, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         }
         )
-        .then(data => {
+        .then(() => {
           this.$store.state.dynamicProgress = false
           for (let k in this.$store.state.matchedContent) {
             if (this.$store.state.matchedContent[k].source1Id === source1Id) {
@@ -1661,12 +1686,12 @@ export default {
       let sourcesOwner = this.getDatasourceOwner()
       formData.append('source1Id', source1Id)
       axios
-        .post(backendServer + '/breakMatch/' + this.getSource1() + '/' + this.getSource2() + '/' + sourcesOwner.source1Owner + '/' + sourcesOwner.source2Owner + '/' + userID, formData, {
+        .post('/breakMatch/' + this.getSource1() + '/' + this.getSource2() + '/' + sourcesOwner.source1Owner + '/' + sourcesOwner.source2Owner + '/' + userID, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         }
-        ).then(data => {
+        ).then(() => {
           this.$store.state.dynamicProgress = false
           for (let k in this.$store.state.flagged) {
             if (this.$store.state.flagged[k].source1Id === source1Id) {
@@ -1707,13 +1732,13 @@ export default {
       formData.append('totalLevels', this.$store.state.totalSource1Levels)
       let userID = this.$store.state.activePair.userID._id
       axios
-        .post(backendServer + '/breakNoMatch/' + type + '/' + this.getSource1() + '/' + this.getSource2() + '/' + userID, formData, {
+        .post('/breakNoMatch/' + type + '/' + this.getSource1() + '/' + this.getSource2() + '/' + userID, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         }
         )
-        .then(data => {
+        .then(() => {
           this.$store.state.dynamicProgress = false
           if (type === 'nomatch') {
             for (let k in this.$store.state.noMatchContent) {
@@ -1765,7 +1790,7 @@ export default {
       formData.append('totalLevels', this.$store.state.totalSource1Levels)
 
       axios
-        .post(backendServer + `/noMatch/${type}/${this.getSource1()}/${this.getSource2()}/${source1Owner}/${source2Owner}/${userID}`, formData, {
+        .post(`/noMatch/${type}/${this.getSource1()}/${this.getSource2()}/${source1Owner}/${source2Owner}/${userID}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -1827,7 +1852,7 @@ export default {
       get: function () {
         return this.translateDataHeader('source1', this.$store.state.recoLevel)
       },
-      set: function (newVal) { }
+      set: function () { }
     },
     currentLevelText: {
       get: function () {
@@ -1836,7 +1861,7 @@ export default {
           this.$store.state.recoLevel - 1
         )
       },
-      set: function (newVal) { }
+      set: function () { }
     },
     matchedHeaders () {
       let header = [
@@ -1878,7 +1903,7 @@ export default {
         })
       }
       results.push({ text: 'Score', value: 'score' })
-      results.push({ text: 'Comment', value: 'comment' })
+      results.push({ text: 'Comment', value: 'comment', sortable: false,})
       return results
     },
     potentialAvailable () {
@@ -1901,9 +1926,9 @@ export default {
           })
           if (!matched) {
             addIt.score = 'N/A'
-            if (!addIt.source2IdHierarchy && addIt.source2IdHierarchy) {
-              addIt.source2IdHierarchy = addIt.source2IdHierarchy
-            }
+            // if (!addIt.source2IdHierarchy && addIt.source2IdHierarchy) {
+            //   addIt.source2IdHierarchy = addIt.source2IdHierarchy
+            // }
             results.push(addIt)
           }
         }
@@ -1933,8 +1958,6 @@ export default {
         return results
       }
       createTree(this.$store.state.source1Parents, results)
-      // This is needed because the tree doesn't show up on the initial page load without it
-      this.source1TreeUpdate++
       return results
     },
     source1Grid () {
@@ -2175,8 +2198,10 @@ export default {
     if (this.$store.state.recoLevel === this.$store.state.totalSource1Levels) {
       this.dialogWidth = 'auto'
     } else {
-      this.dialogWidth = '1190px'
+      this.dialogWidth = '1500px'
     }
+    // This is needed because the tree doesn't show up on the initial page load without it
+    this.source1TreeUpdate++
   },
   components: {
     'liquor-tree': LiquorTree,

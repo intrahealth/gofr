@@ -1,6 +1,4 @@
 /* eslint-disable func-names */
-require('./init');
-const winston = require('winston');
 const request = require('request');
 const async = require('async');
 const URI = require('urijs');
@@ -11,6 +9,7 @@ const isJSON = require('is-json');
 const redis = require('redis');
 const mixin = require('./mixin')();
 const config = require('./config');
+const logger = require('./winston');
 
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST || '127.0.0.1',
@@ -38,7 +37,7 @@ module.exports = function () {
       credentials.topOrgName = topOrgName;
 
       if (reset) {
-        winston.info(`Attempting to reset time on ${host}\n`);
+        logger.info(`Attempting to reset time on ${host}\n`);
 
         const req = (dhis2URL.protocol == 'https:' ? https : http).request({
           hostname: dhis2URL.hostname,
@@ -49,7 +48,7 @@ module.exports = function () {
           },
           method: 'DELETE',
         }, (res) => {
-          winston.info(`Reset request returned with code ${res.statusCode}`);
+          logger.info(`Reset request returned with code ${res.statusCode}`);
           res.on('end', () => {});
           res.on('error', (e) => {
             console.log(`ERROR: ${e.message}`);
@@ -60,9 +59,9 @@ module.exports = function () {
       }
     },
     getLastUpdate(name, dhis2URL, auth, callback) {
-      winston.info('getting lastupdated time');
+      logger.info('getting lastupdated time');
       if (dhis2URL.port < 0 || dhis2URL.port >= 65536) {
-        winston.error('port number is out of range');
+        logger.error('port number is out of range');
         return callback(false);
       }
       const req = (dhis2URL.protocol == 'https:' ? https : http).request({
@@ -75,7 +74,7 @@ module.exports = function () {
         method: 'GET',
       });
       req.on('response', (res) => {
-        winston.info(`Request to get lastupdated time has responded with code ${res.statusCode}`);
+        logger.info(`Request to get lastupdated time has responded with code ${res.statusCode}`);
         let body = '';
         res.on('data', (chunk) => {
           body += chunk;
@@ -93,12 +92,12 @@ module.exports = function () {
           return callback(dataStore.value);
         });
         res.on('error', (e) => {
-          winston.error(`ERROR: ${e.message}`);
+          logger.error(`ERROR: ${e.message}`);
           return callback(false);
         });
       });
       req.on('error', (err) => {
-        winston.error(err);
+        logger.error(err);
         return callback(false);
       });
       req.end();
@@ -168,7 +167,7 @@ module.exports = function () {
         const {
           auth,
         } = credentials;
-        winston.info(`GETTING ${dhis2URL.protocol}//${dhis2URL.hostname}:${dhis2URL.port}${dhis2URL.path}api/metadata.json?${metadataOpts.join('&')}`);
+        logger.info(`GETTING ${dhis2URL.protocol}//${dhis2URL.hostname}:${dhis2URL.port}${dhis2URL.path}api/metadata.json?${metadataOpts.join('&')}`);
         const req = (dhis2URL.protocol == 'https:' ? https : http).request({
           hostname: dhis2URL.hostname,
           port: dhis2URL.port,
@@ -179,15 +178,15 @@ module.exports = function () {
           timeout: 300000,
           method: 'GET',
         }, (res) => {
-          winston.info(`Request to get Metadata responded with code ${res.statusCode}`);
+          logger.info(`Request to get Metadata responded with code ${res.statusCode}`);
           let body = '';
           res.on('data', (chunk) => {
             body += chunk;
           });
           res.on('end', () => {
             if (!isJSON(body)) {
-              winston.error(body);
-              winston.error('Non JSON response received while getting DHIS2 data');
+              logger.error(body);
+              logger.error('Non JSON response received while getting DHIS2 data');
               dhisSyncRequestId = `dhisSyncRequest${clientId}`;
               dhisSyncRequest = JSON.stringify({
                 status: '1/2 - Getting DHIS2 Data',
@@ -200,13 +199,13 @@ module.exports = function () {
               try {
                 metadata = JSON.parse(body);
               } catch (error) {
-                winston.error(error);
-                winston.error(body);
-                winston.error('An error occured while parsing response from DHIS2 server');
+                logger.error(error);
+                logger.error(body);
+                logger.error('An error occured while parsing response from DHIS2 server');
               }
 
               if (!metadata.hasOwnProperty('organisationUnits')) {
-                winston.info('No organization unit found in metadata');
+                logger.info('No organization unit found in metadata');
                 dhisSyncRequestId = `dhisSyncRequest${clientId}`;
                 dhisSyncRequest = JSON.stringify({
                   status: 'Done',
@@ -222,7 +221,7 @@ module.exports = function () {
             }
           });
           res.on('error', (e) => {
-            winston.error(`ERROR: ${e.message}`);
+            logger.error(`ERROR: ${e.message}`);
           });
         }).end();
       });
@@ -231,7 +230,7 @@ module.exports = function () {
 };
 
 function processOrgUnit(metadata, hasKey) {
-  winston.info('Now writting org units into the database');
+  logger.info('Now writting org units into the database');
   const {
     name,
     clientId,
@@ -273,13 +272,13 @@ function processOrgUnit(metadata, hasKey) {
   };
   request.put(options, (err, res, body) => {
     if (err) {
-      winston.error('An error occured while saving the top org of hierarchy, this will cause issues with reconciliation');
+      logger.error('An error occured while saving the top org of hierarchy, this will cause issues with reconciliation');
     }
   });
 
   let i = 0;
   async.eachSeries(metadata.organisationUnits, (org, nxtOrg) => {
-    winston.info(`Processing (${++i}/${max}) ${org.id}`);
+    logger.info(`Processing (${++i}/${max}) ${org.id}`);
     const fhir = {
       resourceType: 'Location',
       id: org.id,
@@ -340,7 +339,7 @@ function processOrgUnit(metadata, hasKey) {
           latitude: coords[1],
         };
       } catch (e) {
-        winston.error(`Failed to load coordinates. ${e.message}`);
+        logger.error(`Failed to load coordinates. ${e.message}`);
       }
     }
     if (org.hasOwnProperty('parent') && org.parent.id) {
@@ -397,9 +396,9 @@ function processOrgUnit(metadata, hasKey) {
       });
       redisClient.set(dhisSyncRequestId, dhisSyncRequest);
       if (err) {
-        winston.error(err);
+        logger.error(err);
       } else {
-        winston.info(body);
+        logger.info(body);
       }
       return nxtOrg();
     });
@@ -413,7 +412,7 @@ function checkLoaderDataStore() {
   const name = credentials.name;
   const dhis2URL = credentials.dhis2URL;
   const auth = credentials.auth;
-  winston.info('Checking loader datastore');
+  logger.info('Checking loader datastore');
   return new Promise((resolve, reject) => {
     const req = (dhis2URL.protocol == 'https:' ? https : http).request({
       hostname: dhis2URL.hostname,
@@ -425,7 +424,7 @@ function checkLoaderDataStore() {
       method: 'GET',
     });
     req.on('response', (res) => {
-      winston.info(`Loader datastore responded with code ${res.statusCode}`);
+      logger.info(`Loader datastore responded with code ${res.statusCode}`);
       if (res.statusCode == 200 || res.statusCode == 201) {
         resolve(true);
       } else {
@@ -447,7 +446,7 @@ function setLastUpdate(hasKey, lastUpdate) {
   } = credentials;
   const userID = credentials.sourceOwner;
   const database = mixin.toTitleCase(name + userID);
-  winston.info('setting lastupdated time');
+  logger.info('setting lastupdated time');
   const req = (dhis2URL.protocol == 'https:' ? https : http).request({
     hostname: dhis2URL.hostname,
     port: dhis2URL.port,
@@ -458,11 +457,11 @@ function setLastUpdate(hasKey, lastUpdate) {
     },
     method: (hasKey ? 'PUT' : 'POST'),
   }, (res) => {
-    winston.info(`request to set lastupdated time has responded with code ${res.statusCode}`);
+    logger.info(`request to set lastupdated time has responded with code ${res.statusCode}`);
     if (res.statusCode == 200 || res.statusCode == 201) {
-      winston.info('Last update dataStore set.');
+      logger.info('Last update dataStore set.');
     } else {
-      winston.error('Last update dataStore FAILED.');
+      logger.error('Last update dataStore FAILED.');
     }
     let body = '';
     res.on('data', (chunk) => {
@@ -470,10 +469,10 @@ function setLastUpdate(hasKey, lastUpdate) {
     });
     res.on('end', () => {
       const dataStore = JSON.parse(body);
-      winston.info(dataStore);
+      logger.info(dataStore);
     });
     res.on('error', (e) => {
-      winston.error(`ERROR: ${e.message}`);
+      logger.error(`ERROR: ${e.message}`);
     });
   });
   const payload = {

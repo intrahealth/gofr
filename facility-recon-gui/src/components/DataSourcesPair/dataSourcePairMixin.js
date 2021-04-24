@@ -2,7 +2,6 @@ import {
   eventBus
 } from '@/main'
 import axios from 'axios'
-const backendServer = process.env.BACKEND_SERVER
 export const dataSourcePairMixin = {
   methods: {
     createDatasourcePair (source1, source2) {
@@ -42,7 +41,7 @@ export const dataSourcePairMixin = {
       formData.append('orgId', this.$store.state.dhis.user.orgId)
       formData.append('singlePair', singlePair)
       formData.append('activePairID', activePairID)
-      axios.post(backendServer + '/addDataSourcePair', formData, {
+      axios.post('/addDataSourcePair', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -73,11 +72,11 @@ export const dataSourcePairMixin = {
       let formData = new FormData()
       formData.append('pairID', pairID)
       formData.append('userID', this.$store.state.auth.userID)
-      axios.post(backendServer + '/activateSharedPair', formData, {
+      axios.post('/activateSharedPair', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
-      }).then((response) => {
+      }).then(() => {
         eventBus.$emit('getDataSourcePair')
         // this.alertSuccess = true
         // this.alertMsg = 'Data Source Pair Activated Successfully'

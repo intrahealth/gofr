@@ -1,9 +1,9 @@
 const express = require('express');
 
 const router = express.Router();
-const nconf = require('../config');
+const config = require('../config');
 
-const fhirAxios = nconf.fhirAxios;
+const fhirAxios = require('../modules/fhirAxios')
 const fhirQuestionnaire = require('../modules/fhirQuestionnaire');
 const fhirModules = require('../modules/fhirModules');
 const outcomes = require('../../config/operationOutcomes');
@@ -26,7 +26,7 @@ router.post('/QuestionnaireResponse', (req, res, next) => {
   };
 
 
-  const workflowQuestionnaires = nconf.get('workflow:questionnaire');
+  const workflowQuestionnaires = config.get('workflow:questionnaire');
   const workflow = Object.keys(workflowQuestionnaires).find(wf => workflowQuestionnaires[wf].url === req.body.questionnaire);
   if (workflow) {
     let processor = workflow;
@@ -34,7 +34,7 @@ router.post('/QuestionnaireResponse', (req, res, next) => {
       processor = workflowQuestionnaires[workflow].processor;
     }
 
-    const details = nconf.get(`workflow:processor:${processor}`);
+    const details = config.get(`workflow:processor:${processor}`);
 
     if (!details || (!details.file && !details.library)) {
       const outcome = { ...outcomes.ERROR };

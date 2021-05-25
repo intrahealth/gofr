@@ -39,6 +39,7 @@ const config = require('./config');
 const FRRouter = require('./routes/facilityRegistry');
 const FRConfig = require('./routes/config');
 const questionnaireRouter = require('./routes/questionnaire');
+const facilitiesRequests = require('./routes/facilitiesRequests');
 const fhirRouter = require('./routes/fhir');
 const mcsd = require('./mcsd')();
 const dhis = require('./dhis')();
@@ -129,6 +130,7 @@ app.use('/FR/', FRRouter);
 app.use('/config/', FRConfig);
 app.use('/fhir', questionnaireRouter);
 app.use('/fhir', fhirRouter);
+app.use('/facilitiesRequests', facilitiesRequests)
 // socket config - large documents can cause machine to max files open
 
 https.globalAgent.maxSockets = 32;

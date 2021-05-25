@@ -7,23 +7,23 @@
 <script>
 // @ is an alias to /src
 
-var pageId
-var page
 import Vue from 'vue'
 import axios from 'axios'
-
+let pageId
 export default {
   name: "fhir-page-view",
+  props: ['page', 'pageId'],
   data: function() {
     return {
     }
   },
   created: function() {
     this.getTemplate()
+    pageId = this.pageId
   },
   methods: {
     getTemplate: function() {
-      axios.get( "/config/page/"+page ).then(response => {
+      axios.get( "/config/page/"+this.page ).then(response => {
         let data = response.data
         if ( data.resourceType === "OperationOutcome" ) {
           Vue.component( 'ihris-template', {
@@ -102,8 +102,6 @@ export default {
   components: {
   },
   beforeCreate: function() {
-    pageId = this.$route.params.id
-    page = this.$route.params.page
     Vue.component('ihris-template', { template: '<div>Loading...</div>' } )
   }
 }

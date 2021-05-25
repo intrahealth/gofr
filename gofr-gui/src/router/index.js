@@ -113,9 +113,13 @@ let router = new Router({
       })
     }
   }, {
-    path: "/resource/view/:page/:id",
+    path: "/Resource/View/:page/:id",
     name: "ResourceView",
     component: ResourceView,
+    props: (route) => ({
+      page: route.params.page,
+      pageId: route.params.id
+    }),
     beforeEnter: (to, from, next) => {
       let hasTask = tasksVerification.canAdd(to.name)
       if (hasTask) {
@@ -130,9 +134,20 @@ let router = new Router({
       })
     }
   }, {
-    path: "/resource/add/:page",
+    path: "/Resource/Add/:page",
     name: "ResourceAdd",
-    component: () => import("../components/FacilityRegistry/fhir-page-add.vue")
+    component: () => import("../components/FacilityRegistry/fhir-page-add.vue"),
+    props: (route) => ({
+      page: route.params.page
+    })
+  }, {
+    path: "/Resource/Search/:page/:requestType?",
+    name: "ResourceSearch",
+    component: () => import("../components/FacilityRegistry/fhir-page-search.vue"),
+    props: (route) => ({
+      page: route.params.page,
+      requestType: route.params.requestType
+    })
   }, {
     path: '/RequestBuildingAddition',
     name: 'RequestBuildingAddition',

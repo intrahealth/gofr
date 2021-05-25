@@ -16,6 +16,7 @@ Description:    "iHRIS Page Display details."
 * ^context.expression = "IhrisPage"
 * extension contains
       resource 1..1 MS and
+      requestUpdatingResource 0..1 MS and
       search 1..* MS and
       filter 0..* MS and
       add 0..1 MS and
@@ -26,6 +27,11 @@ Description:    "iHRIS Page Display details."
 * extension[resource].valueReference only Reference(StructureDefinition or CodeSystem)
 * extension[resource].valueReference 1..1 MS
 * extension[resource].valueReference ^label = "Primary Resource"
+
+* extension[requestUpdatingResource].value[x] only Reference
+* extension[requestUpdatingResource].valueReference only Reference(StructureDefinition or CodeSystem)
+* extension[requestUpdatingResource].valueReference 1..1 MS
+* extension[requestUpdatingResource].valueReference ^label = "Resource that is to be updated by a request"
 
 * extension[search].value[x] only string
 * extension[search].valueString 1..1 MS
@@ -160,52 +166,3 @@ Description:    "iHRIS Page Section information."
 * extension[resource].extension[action].extension[class].value[x] only string
 * extension[resource].extension[action].extension[class].valueString MS
 * extension[resource].extension[action].extension[class].valueString ^label = "Element Class for the Action"
-
-
-Instance:       gofr-page-facility
-InstanceOf:     IhrisPage
-Title:          "iHRIS Facility Page"
-Usage:          #example
-* code = IhrisResourceCodeSystem#page
-* extension[display].extension[resource].valueReference = Reference(StructureDefinition/gofr-facility)
-* extension[display].extension[search][0].valueString = "Name|name"
-* extension[display].extension[search][1].valueString = "Parent|partOf"
-* extension[display].extension[search][2].valueString = "Type|type"
-* extension[display].extension[filter][0].valueString = "Name|name:contains"
-* extension[display].extension[filter][1].valueString = "Type|type"
-* extension[display].extension[add].extension[url].valueUrl = "/questionnaire/ihris-practitioner/practitioner"
-* extension[display].extension[add].extension[icon].valueString = "mdi-account-plus"
-* extension[display].extension[add].extension[class].valueString = "accent"
-* extension[section][0].extension[title].valueString = "Basic Details"
-* extension[section][0].extension[description].valueString = "uncategorized details"
-* extension[section][0].extension[name].valueString = "basic"
-* extension[section][0].extension[field][0].valueString = "Location.name"
-* extension[section][0].extension[field][1].valueString = "Location.alias"
-* extension[section][0].extension[field][2].valueString = "Location.description"
-* extension[section][0].extension[field][3].valueString = "Location.status"
-* extension[section][0].extension[field][4].valueString = "Location.type"
-* extension[section][0].extension[field][5].valueString = "Location.partOf"
-* extension[section][1].extension[title].valueString = "Identifiers"
-* extension[section][1].extension[description].valueString = "Identifiers for this facility"
-* extension[section][1].extension[name].valueString = "identifiers"
-* extension[section][1].extension[field][0].valueString = "Location.identifier"
-* extension[section][1].extension[field][1].valueString = "Location.identifier.use"
-* extension[section][1].extension[field][2].valueString = "Location.identifier.type"
-* extension[section][1].extension[field][3].valueString = "Location.identifier.value"
-* extension[section][1].extension[field][4].valueString = "Location.identifier.system"
-* extension[section][2].extension[title].valueString = "Geo-Coordinates"
-* extension[section][2].extension[description].valueString = "Geo-coordinates for the facility"
-* extension[section][2].extension[name].valueString = "position"
-* extension[section][2].extension[field][0].valueString = "Location.position"
-* extension[section][3].extension[title].valueString = "Contact Details"
-* extension[section][3].extension[description].valueString = "Address, email, phone numbers"
-* extension[section][3].extension[name].valueString = "contact"
-* extension[section][3].extension[field][0].valueString = "Location.telecom"
-* extension[section][4].extension[title].valueString = "Address"
-* extension[section][4].extension[description].valueString = "Address"
-* extension[section][4].extension[name].valueString = "address"
-* extension[section][4].extension[field][0].valueString = "Location.address"
-* extension[section][5].extension[title].valueString = "Hours of operation"
-* extension[section][5].extension[description].valueString = "Business hours"
-* extension[section][5].extension[name].valueString = "hoursOfOperation"
-* extension[section][5].extension[field][0].valueString = "Location.hoursOfOperation"

@@ -1,13 +1,13 @@
 <template>
   <ihris-element :edit="edit" :loading="loading">
     <template #form>
-      <v-select 
-        :loading="loading" 
-        :label="display" 
-        v-model="valueCode" 
-        :items="items" 
-        outlined 
-        hide-details="auto" 
+      <v-select
+        :loading="loading"
+        :label="display"
+        v-model="valueCode"
+        :items="items"
+        outlined
+        hide-details="auto"
         :error-messages="errors"
         item-text="display"
         item-value="code"
@@ -87,7 +87,7 @@ export default {
   methods: {
     setupData: function() {
       if ( this.slotProps && this.slotProps.source ) {
-        this.source = { path: this.slotProps.source.path+"."+this.field, data: {}, 
+        this.source = { path: this.slotProps.source.path+"."+this.field, data: {},
           binding: this.binding || this.slotProps.source.binding }
         if ( this.slotProps.source.fromArray ) {
           this.source.data = this.slotProps.source.data
@@ -113,7 +113,7 @@ export default {
       }
       let binding = this.binding || this.slotProps.source.binding
       this.$fhirutils.expand( binding ).then( items => {
-        this.items = items 
+        this.items = items
         this.loading = false
       } ).catch( err => {
         console.log(err)
@@ -121,86 +121,6 @@ export default {
         this.errors = err.message
         this.loading = false
       } )
-      //console.log("CODING",binding)
-      /*
-      let lastSlash = binding.lastIndexOf('/')
-      let lastPipe = binding.lastIndexOf('|')
-      let valueSetId = binding.slice(lastSlash+1, (lastPipe !== -1 ? lastPipe : binding.length ))
-      //console.log("CODING",lastSlash,lastPipe,valueSetId)
-      fetch("/fhir/ValueSet/"+valueSetId+"/$expand").then(response=> {
-        if( response.ok ) {
-          response.json().then(data=>{
-            try {
-              if ( data.expansion.contains && data.expansion.contains.length > 0 ) {
-                if ( data.expansion.contains[0].hasOwnProperty("display") ) {
-                  this.items = data.expansion.contains
-                } else if ( data.compose && data.compose.include ) {
-                  this.items = data.expansion.contains.map( code => {
-                    let include = data.compose.include.find( inc => inc.system === code.system )
-                    if ( include && include.concept ) {
-                      let display = include.concept.find( concept => concept.code === code.code )
-                      if ( display ) {
-                        code.display = display.display
-                      }
-                    }
-                    return code
-                  } )
-                }
-              }
-              this.items.sort( itemSort )
-            } catch(err) {
-              this.error = true
-              this.errors = "Invalid response from server."
-            }
-            this.loading = false
-          }).catch(err=>{
-            this.errors = err.message
-            this.error = true
-            this.loading = false
-          })
-        } else {
-          // Try loading valueset without expansion if expand failed.
-          console.log("Failed to get ValueSet Expansion for "+valueSetId)
-          fetch("/fhir/ValueSet/"+valueSetId).then(response=> {
-            if ( response.ok ) {
-              response.json().then(data=> {
-                this.items = []
-                if ( data.compose && data.compose.include ) {
-                  for( let include of data.compose.include ) {
-                    if ( include.concept ) {
-                      for ( let concept of include.concept ) {
-                        concept.system = include.system
-                        this.items.push( concept )
-                        //this.items.push( { system: include.system, ...concept } )
-                      }
-                    }
-                  }
-                }
-                this.items.sort( itemSort )
-                this.loading = false
-              }).catch(err=>{
-                this.errors = err.message
-                this.error = true
-                this.loading = false
-              })
-            } else {
-              this.error = true
-              this.errors = "Invalid response from server."
-              this.loading = false
-            }
-          }).catch(err=>{
-            this.errors = err.message
-            this.error = true
-            this.loading = false
-          })
-
-        }
-      }).catch(err=>{
-        this.errors = err.message
-        this.error = true
-        this.loading = false
-      })
-      */
     }
   },
   computed: {
@@ -222,16 +142,6 @@ export default {
         return []
       }
     }
-    /*
-    displayValue: function() {
-      let found = this.items.find( item => item.code === this.valueCode )
-      if ( found ) {
-        return found.display
-      } else {
-        return ""
-      }
-    }
-    */
   }
 }
 </script>

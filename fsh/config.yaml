@@ -5,20 +5,20 @@
 # │  configuration from now on. You may delete your package.json as it is no longer needed.        │
 # ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
 
-# ╭─────────────────────────────────ImplementationGuide-ihris.json─────────────────────────────────╮
+# ╭─────────────────────────────────ImplementationGuide-gofr.json─────────────────────────────────╮
 # │  The properties below are used to create the ImplementationGuide resource. For a list of       │
 # │  supported properties, see: https://fshschool.org/sushi/configuration/                         │
 # ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
-id: ihris
-canonical: http://ihris.org/fhir
+id: gofr
+canonical: http://gofr.org/fhir
 version: 0.1.0
-name: iHRISImplementationGuide
-title: iHRIS Implementation Guide
+name: GOFRImplementationGuide
+title: GOFR Implementation Guide
 status: active
 publisher:
-  name: Luke Duncan
-  email: lduncan@intrahealth.org
-description: Conformance resources that define the base installation of iHRIS 5
+  name: Ally Shaban
+  email: ashaban@intrahealth.org
+description: Conformance resources that define the base installation of GOFR
 license: CC0-1.0
 fhirVersion: 4.0.1
 parameters:
@@ -45,7 +45,7 @@ menu:
 # │  To use a provided ig-data/input/[pagecontent | pages]/index.[md | xml], delete the            │
 # │  "indexPageContent" property below.                                                            │
 # ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
-indexPageContent: Conformance resources that define the base installation of iHRIS 5
+indexPageContent: Conformance resources that define the base installation of GOFR
 
 # ╭───────────────────────────────────────package-list.json────────────────────────────────────────╮
 # │  To use a provided ig-data/package-list.json file, delete the "history" property below.        │

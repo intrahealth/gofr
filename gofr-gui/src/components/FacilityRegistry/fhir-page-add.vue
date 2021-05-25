@@ -7,12 +7,12 @@
 <script>
 // @ is an alias to /src
 
-var page
 import Vue from 'vue'
 import axios from 'axios'
 
 export default {
   name: "fhir-page-add",
+  props: ['page'],
   data: function() {
     return {
     }
@@ -22,7 +22,7 @@ export default {
   },
   methods: {
     getTemplate: function() {
-      axios.get( "/config/page/"+page ).then(response => {
+      axios.get( "/config/page/"+this.page ).then(response => {
         let data = response.data
         if ( data.resourceType === "OperationOutcome" ) {
           Vue.component( 'ihris-template', {
@@ -96,7 +96,6 @@ export default {
   components: {
   },
   beforeCreate: function() {
-    page = this.$route.params.page
     Vue.component('ihris-template', { template: '<div>Loading...</div>' } )
   }
 }

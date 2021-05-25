@@ -102,6 +102,7 @@ const fhirAxios = {
     });
   }),
   create: (resource, database) => new Promise((resolve, reject) => {
+    console.error(resource);
     if (resource === undefined) {
       err = new InvalidRequestError('resource must be defined');
       err.response = { status: 404 };
@@ -131,6 +132,7 @@ const fhirAxios = {
     }
 
     const auth = fhirAxios.__getAuth();
+    console.log(url.href);
     axios.post(url.href, resource, { auth }).then((response) => {
       resolve(response.data);
     }).catch((err) => {

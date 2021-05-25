@@ -24,23 +24,72 @@
         >
         <v-list class="white--text">
           <v-list-item>
-            <v-btn v-if="!edit" dark class="secondary" @click="$emit('set-edit', !edit)">
-              <v-icon light>mdi-pencil</v-icon>
-              <span>Edit</span>
-            </v-btn>
-            <v-btn v-else dark class="secondary" @click="$router.go(0)">
+            <template v-if="!edit">
+              <v-row>
+                <v-col md="12">
+                  <v-btn small dark class="secondary" @click="$emit('set-edit', !edit)">
+                    <v-icon left light>mdi-pencil</v-icon>
+                    <span>Edit</span>
+                  </v-btn>
+                </v-col>
+                <v-col>
+                  <v-btn
+                    small
+                    @click="processRequest('approved')"
+                    color="success"
+                    v-if="$store.state.requestResourceUpdateData.requestUpdatingResource"
+                    :disabled="currentRequestStatus === 'approved' || currentRequestStatus === ''"
+                  >
+                    <v-icon left>mdi-check-circle</v-icon> Approve
+                  </v-btn>
+                </v-col>
+                <v-col>
+                  <v-btn
+                    small
+                    @click="processRequest('rejected')"
+                    color="error"
+                    v-if="$store.state.requestResourceUpdateData.requestUpdatingResource"
+                    :disabled="currentRequestStatus !== 'pending'"
+                  >
+                    <v-icon left>mdi-cancel</v-icon> Reject
+                  </v-btn>
+                </v-col>
+              </v-row>
+              <v-layout row wrap>
+                <v-flex xs12>
+
+                </v-flex>
+                <v-flex xs5>
+
+                </v-flex>
+                <v-spacer></v-spacer>
+                <v-flex xs5>
+
+                </v-flex>
+              </v-layout>
+            </template>
+            <v-btn small v-else dark class="secondary" @click="$router.go(0)">
               <v-icon light>mdi-pencil-off</v-icon>
               <span>Cancel</span>
             </v-btn>
             <v-spacer></v-spacer>
-            <template v-if="edit">
-              <v-btn v-if="valid" dark class="success darken-1" @click="processFHIR()" :disabled="!valid">
+            <template v-if="edit && $store.state.searchAction !== 'send-update-request'">
+              <v-btn small v-if="valid" dark class="success darken-1" @click="processFHIR()" :disabled="!valid">
                 <v-icon light>mdi-content-save</v-icon>
                 <span>Save</span>
               </v-btn>
-              <v-btn v-else dark class="warning" @click="$refs.form.validate()">
+              <v-btn small v-else dark class="warning" @click="$refs.form.validate()">
                 <v-icon light>mdi-content-save</v-icon>
                 <span>Save</span>
+              </v-btn>
+            </template>
+            <template v-else-if="edit && $store.state.searchAction === 'send-update-request'">
+              <v-btn
+                small
+                @click="createUpdateRequest"
+                color="success"
+              >
+                <v-icon left>mdi-check-circle</v-icon> Send Update Request
               </v-btn>
             </template>
           </v-list-item>
@@ -72,7 +121,7 @@
 import axios from 'axios'
 export default {
   name: "ihris-resource",
-  props: ["title","field","fhir-id","page","profile","section-menu","edit","links","constraints" ],
+  props: ["title","field","fhirId","page","profile","section-menu","edit","links","constraints" ],
   data: function() {
     return {
       fhir: {},
@@ -83,20 +132,26 @@ export default {
       overlay: false,
       isEdit: false,
       linktext: [ ],
-      advancedValid: true
+      advancedValid: true,
+      currentRequestStatus: ''
     }
   },
   created: function() {
     if ( this.fhirId ) {
       this.loading = true
-      //console.log("getting",this.field,this.fhirId)
       axios.get( "/fhir/"+this.field+"/"+this.fhirId ).then(response => {
         let data = response.data
-        //this.$store.commit('setCurrentResource', data)
         this.orig = data
         this.source = { data: data, path: this.field }
         this.setLinkText()
         this.loading = false
+        if(data.extension) {
+          for(let ext of data.extension) {
+            if(ext.url === "http://gofr.org/fhir/StructureDefinition/request-status") {
+              this.currentRequestStatus = ext.valueCoding.code
+            }
+          }
+        }
       }).catch(err=> {
         console.log(this.field,this.fhirId,err)
       })
@@ -178,13 +233,105 @@ export default {
         return true
       }
     }
-    /*
-    source: function() {
-      return this.$store.state.fhir
-    }
-    */
   },
   methods: {
+    async createUpdateRequest() {
+      this.$refs.form.validate()
+      if ( !this.valid ) return
+      this.fhir = {
+        resourceType: this.field,
+        meta: {
+          profile: [ "http://gofr.org/fhir/StructureDefinition/gofr-facility-update-request" ]
+        }
+      }
+      try {
+        await this.processChildren( this.field, this.fhir, this.$children )
+      } catch( err ) {
+        this.advancedValid = false
+        console.log(err)
+      }
+      if ( !this.advancedValid ) {
+        this.overlay = false
+        this.loading = false
+        this.$store.commit('setMessage', { type: 'error', text: 'There were errors on the form.' })
+        return
+      }
+      if(!this.fhir.extension) {
+        this.fhir.extension = []
+      }
+      this.fhir.extension.push({
+        url: "http://gofr.org/fhir/StructureDefinition/request-status",
+        valueCoding: {
+          system: "http://gofr.org/fhir/StructureDefinition/request-status-codesystem",
+          code: "pending",
+          display: "Pending"
+        }
+      }, {
+        "url": "http://gofr.org/fhir/StructureDefinition/request-affected-resource",
+        "valueReference": {
+          "reference": "Location/" + this.fhirId
+        }
+      })
+      let url = "/fhir/"+this.field
+      let opts = {
+        method: "POST",
+        url,
+        headers: {
+          "Content-Type": "application/json"
+        },
+        data: this.fhir
+      }
+      axios( opts ).then(() => {
+        this.overlay = false
+        this.loading = false
+        this.$store.state.searchAction = ""
+        // this.$router.go(0)
+      } ).catch((err) => {
+        this.overlay = false
+        this.loading = false
+        this.$store.state.errorTitle = 'Error'
+        this.$store.state.errorDescription = 'This request was not successfully processed'
+        this.$store.state.dialogError = true
+        console.error(err);
+      })
+    },
+    processRequest(newStatus) {
+      let url
+      if(this.$store.state.requestResourceUpdateData.requestType === 'add-request') {
+        url = "/facilitiesRequests/add"
+      } else if(this.$store.state.requestResourceUpdateData.requestType === 'update-request') {
+        url = "/facilitiesRequests/update"
+      }
+      let opts = {
+        method: "POST",
+        url,
+        headers: {
+          "Content-Type": "application/json"
+        },
+        data: {
+          resource: this.source.data,
+          requestStatus: newStatus,
+          requestUpdatingResource: this.$store.state.requestResourceUpdateData.requestUpdatingResource,
+          profile: this.profile
+        }
+      }
+      axios( opts ).then(() => {
+        this.overlay = false
+        this.loading = false
+        this.$store.state.requestResourceUpdateData = {
+          requestType: '',
+          requestUpdatingResource: ''
+        }
+        this.$router.go(0)
+      } ).catch((err) => {
+        this.overlay = false
+        this.loading = false
+        this.$store.state.errorTitle = 'Error'
+        this.$store.state.errorDescription = 'This request was not successfully processed'
+        this.$store.state.dialogError = true
+        console.error(err);
+      })
+    },
     getLinkField: function(field) {
       let content = this.$fhirpath.evaluate( this.source.data, field )
       if ( content ) {
@@ -223,6 +370,78 @@ export default {
         }
       }
     },
+    processChildren: async function( parent, obj, children ) {
+      for( let child of children ) {
+        let fullField = parent
+
+        let next = obj
+
+        if ( child.field && !child.fieldType /* ignore arrays */ ) {
+          let field
+          if ( child.sliceName ) {
+            if ( child.field.startsWith("value[x]") ) {
+              field = child.field.substring(9)
+              fullField += "." + field
+            } else {
+              field = child.field.replace(":"+child.sliceName, "")
+              fullField += "." + field
+            }
+          } else {
+            field = child.field
+            fullField += "."+field
+          }
+          if ( child.max !== "1" || child.baseMax !== "1" ) {
+            if ( !obj.hasOwnProperty(field) ) {
+              next[field] = []
+            }
+          } else {
+            next[field] = {}
+          }
+          if ( child.hasOwnProperty("value") ) {
+            if ( Array.isArray( next[field] ) ) {
+              next[field].push( child.value )
+            } else {
+              next[field] = child.value
+            }
+            next = next[field]
+          } else {
+            if ( Array.isArray( next[field] ) ) {
+              let sub = {}
+              if ( child.profile ) {
+                sub.url = child.profile
+              } else if ( field === "extension" && child.sliceName ) {
+                sub.url = child.sliceName
+              }
+              next[field].push( sub )
+              next = sub
+            } else {
+              next = next[field]
+            }
+          }
+        }
+        if ( child.$children ) {
+          try {
+            await this.processChildren( fullField, next, child.$children )
+          } catch( err ) {
+            this.advancedValid = false
+            console.log(err)
+          }
+        }
+        if ( child.constraints ) {
+          child.errors = []
+          try {
+            this.advancedValid = this.advancedValid && await this.$fhirutils.checkConstraints( child.constraints,
+              this.constraints, next, child.errors, this.fhirId )
+          } catch( err ) {
+            this.advancedValid = false
+            child.errors.push("An unknown error occurred.")
+            console.log(err)
+          }
+        }
+
+      }
+
+    },
     processFHIR: async function() {
       this.$refs.form.validate()
       if ( !this.valid ) return
@@ -230,99 +449,14 @@ export default {
       this.overlay = true
       this.loading = true
 
-      //const processChildren = function( parent, obj, children ) {
-      const processChildren = async ( parent, obj, children ) => {
-        //console.log("called on "+parent)
-
-        for( let child of children ) {
-
-          let fullField = parent
-
-          let next = obj
-
-          if ( child.field && !child.fieldType /* ignore arrays */ ) {
-            //console.log("working on "+parent+" . "+child.field)
-            let field
-            if ( child.sliceName ) {
-              if ( child.field.startsWith("value[x]") ) {
-                field = child.field.substring(9)
-                fullField += "." + field
-              } else {
-                field = child.field.replace(":"+child.sliceName, "")
-                fullField += "." + field
-              }
-            } else {
-              field = child.field
-              fullField += "."+field
-            }
-            if ( child.max !== "1" || child.baseMax !== "1" ) {
-              if ( !obj.hasOwnProperty(field) ) {
-                next[field] = []
-              }
-            } else {
-              next[field] = {}
-            }
-            //console.log(fullField)
-            //console.log(child.max, child.baseMax)
-            //console.log(child)
-            if ( child.hasOwnProperty("value") ) {
-              //console.log( fullField +"="+ child.value )
-              if ( Array.isArray( next[field] ) ) {
-                next[field].push( child.value )
-              } else {
-                next[field] = child.value
-              }
-              next = next[field]
-            } else {
-              if ( Array.isArray( next[field] ) ) {
-                let sub = {}
-                if ( child.profile ) {
-                  sub.url = child.profile
-                } else if ( field === "extension" && child.sliceName ) {
-                  sub.url = child.sliceName
-                }
-                next[field].push( sub )
-                next = sub
-              } else {
-                next = next[field]
-              }
-            }
-          }
-
-          if ( child.$children ) {
-            try {
-              await processChildren( fullField, next, child.$children )
-            } catch( err ) {
-              this.advancedValid = false
-              console.log(err)
-            }
-          }
-          if ( child.constraints ) {
-            child.errors = []
-            try {
-              this.advancedValid = this.advancedValid && await this.$fhirutils.checkConstraints( child.constraints,
-                this.constraints, next, child.errors, this.fhirId )
-            } catch( err ) {
-              this.advancedValid = false
-              child.errors.push("An unknown error occurred.")
-              console.log(err)
-            }
-          }
-
-        }
-
-      }
-
-      //console.log(this.field)
       this.fhir = {
         resourceType: this.field,
         meta: {
           profile: [ this.profile ]
         }
       }
-      //console.log(this)
       try {
-        await processChildren( this.field, this.fhir, this.$children )
+        await this.processChildren( this.field, this.fhir, this.$children )
       } catch( err ) {
         this.advancedValid = false
         console.log(err)
@@ -333,7 +467,6 @@ export default {
         this.$store.commit('setMessage', { type: 'error', text: 'There were errors on the form.' })
         return
       }
-      console.log("FINISHED PROCESS AND CHECK.")
       let url = "/fhir/"+this.field
       let opts = {
         method: "POST",
@@ -349,10 +482,7 @@ export default {
         opts.url = url
       }
       opts.data = this.fhir
-      console.log("SAVE",url,this.fhir)
       axios( opts ).then(response => {
-        //console.log(response)
-        //console.log(response.headers)
         let data = response.data
         this.overlay = false
         this.loading = false
@@ -362,12 +492,13 @@ export default {
           this.$router.push({ name:"ResourceView", params: {page: this.page, id: data.id } })
         }
       } )
-      //console.log(this.fhir)
-
-      /*
-      console.log(this.$scopedSlots.default())
-      processSlots( this.field, this.$scopedSlots.default() )
-      */
+    }
+  },
+  beforeDestroy() {
+    this.$store.state.searchAction = ""
+    this.$store.state.requestResourceUpdateData = {
+      requestType: '',
+      requestUpdatingResource: ''
     }
   }
 }

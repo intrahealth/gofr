@@ -873,8 +873,9 @@
           <v-spacer></v-spacer>
           <v-flex>
             <v-text-field
+              dark
               v-model="searchServices"
-              append-icon="search"
+              append-icon="mdi-magnify"
               label="Search Service"
               single-line
               hide-details

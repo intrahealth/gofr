@@ -2,9 +2,9 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const requireFromString = require('require-from-string');
-const nconf = require('../config');
+const config = require('../config');
 
-const fhirAxios = nconf.fhirAxios;
+const fhirAxios = require('./fhirAxios')
 const logger = require('../winston');
 
 const _workflowModules = {};
@@ -18,7 +18,7 @@ const fhirModules = {
 
 
       let moduleAccepted = false;
-      const skipSecurity = nconf.getBool('security:disabled');
+      const skipSecurity = config.getBool('security:disabled');
 
       if (skipSecurity) {
         logger.warn('SKIPPING SECURITY CHECK ON REMOTE MODULE:', mod, '. This should only be done in development.');
@@ -27,7 +27,7 @@ const fhirModules = {
         const verifier = crypto.createVerify('sha256');
         verifier.update(module);
 
-        const publicKeys = Object.values(nconf.get('keys'));
+        const publicKeys = Object.values(config.get('keys'));
         for (const key of publicKeys) {
           if (verifier.verify(key, sign, 'base64')) {
             moduleAccepted = true;

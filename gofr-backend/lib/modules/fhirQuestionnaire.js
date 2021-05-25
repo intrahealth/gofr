@@ -1,7 +1,7 @@
 const uuidv5 = require('uuid/v5');
-const nconf = require('../config');
+const config = require('../config');
 
-const fhirAxios = nconf.fhirAxios;
+const fhirAxios = require('./fhirAxios');
 const structureDef = require('./fhirDefinition');
 const logger = require('../winston');
 
@@ -84,7 +84,7 @@ const fhirQuestionnaire = {
     processChildren(response.item);
   },
   _createBundle: (fields, questionnaireRef) => {
-    const FHIR_UUID_NAMESPACE = nconf.get('fhir:uuid:namespace') || 'e91c9519-eccb-48a8-a506-6659b8c22518';
+    const FHIR_UUID_NAMESPACE = config.get('fhir:uuid:namespace') || 'e91c9519-eccb-48a8-a506-6659b8c22518';
     const entries = {};
     let idCount = 1;
     logger.silly('FIELDS', JSON.stringify(fields, null, 2));
@@ -260,7 +260,6 @@ const fhirQuestionnaire = {
               item.linkId = linkDetails[0];
             }
             const question = questionnaireRef[item.linkId];
-
             const simple = ['date', 'string', 'dateTime', 'text', 'attachment'];
             const data = { linkId: item.linkId, definition: item.definition, q: question.type };
 

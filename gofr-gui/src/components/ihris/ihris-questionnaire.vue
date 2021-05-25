@@ -72,9 +72,6 @@ export default {
       advancedValid: true
     }
   },
-  created: function() {
-    //console.log("QUERY",this.$route.query)
-  },
   methods: {
     processFHIR: async function() {
       this.$refs.form.validate()
@@ -178,13 +175,14 @@ export default {
         url: "/fhir/QuestionnaireResponse?"+querystring.stringify(this.$route.query),
         method: "POST",
         data: this.fhir
-      } ).then(() => {
+      } ).then((response) => {
         this.overlay = false
         this.loading = false
         this.$store.state.alert.show = true
         this.$store.state.alert.width = '600px'
         this.$store.state.alert.msg = 'Saved successfully!'
         this.$store.state.alert.type = 'success'
+        this.$router.push({ name:"ResourceView", params: {page: this.viewPage, id: response.data.subject.reference.split('/')[1] } })
       } ).catch(err => {
         this.overlay = false
         this.loading = false

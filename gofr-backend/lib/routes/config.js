@@ -63,7 +63,6 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
     }" description="${resource.description}" purpose="${resource.purpose
     }"__SECTIONMENU__>` + '\n';
 
-
     const sectionMenu = [];
     const templateData = { sectionMenu: {}, hidden: {}, constraints: {} };
 
@@ -203,7 +202,7 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
             for (const attr of field_attrs) {
               if (config.get(`defaults:fields:${field.id}:${attr}`)) {
                 vueOutput += ` ${attr}="${config.get(`defaults:fields:${field.id}:${attr}`)}"`;
-              } else if(attr === 'initialValue' && displayType === 'tree') {
+              } else if (attr === 'initialValue' && displayType === 'tree') {
                 const topOrgId = mixin.getTopOrgId(config.get('mCSD:registryDB'));
                 vueOutput += ` initialValue="${topOrgId}"`;
               }
@@ -322,9 +321,13 @@ router.get('/page/:page/:type?', (req, res) => {
   // Limited access to these don't make sense so not allowing it for now
 
   fhirAxios.read('Basic', page).then(async (resource) => {
-    const pageDisplay = resource.extension.find(ext => ext.url === 'http://ihris.org/fhir/StructureDefinition/ihris-page-display');
+    const pageDisplay = resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/ihris-page-display');
 
     const pageResource = pageDisplay.extension.find(ext => ext.url === 'resource').valueReference.reference;
+    let pageUpdatingResource = pageDisplay.extension.find(ext => ext.url === 'requestUpdatingResource');
+    if (pageUpdatingResource) {
+      pageUpdatingResource = pageUpdatingResource.valueReference.reference;
+    }
     const pageFields = {};
     try {
       pageDisplay.extension.filter(ext => ext.url === 'field').map((ext) => {
@@ -341,7 +344,7 @@ router.get('/page/:page/:type?', (req, res) => {
       });
     } catch (err) {}
 
-    const pageSections = resource.extension.filter(ext => ext.url === 'http://ihris.org/fhir/StructureDefinition/ihris-page-section');
+    const pageSections = resource.extension.filter(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/ihris-page-section');
 
     const createTemplate = async (resource, structure) => {
       logger.silly(JSON.stringify(structure, null, 2));
@@ -534,7 +537,7 @@ router.get('/page/:page/:type?', (req, res) => {
           resourceElement = 'ihris-codesystem';
         }
 
-        vueOutput = `<${resourceElement} :fhir-id="fhirId" :edit="isEdit" v-on:set-edit="setEdit($event)" profile="${resource.url}" :key="$route.params.page+($route.params.id || '')" page="${req.params.page}" field="${fhir}" title="${sections[fhir].title}" :constraints="constraints"`;
+        vueOutput = `<${resourceElement} :fhirId="fhirId" :edit="isEdit" v-on:set-edit="setEdit($event)" profile="${resource.url}" :key="$route.params.page+($route.params.id || '')" page="${req.params.page}" field="${fhir}" title="${sections[fhir].title}" :constraints="constraints"`;
         if (sectionKeys.length > 1) {
           sectionMenu = sectionKeys.map(name => ({
             name, title: sections[name].title, desc: sections[name].description, secondary: !!sections[name].resource,
@@ -670,7 +673,7 @@ router.get('/page/:page/:type?', (req, res) => {
               } else if (config.get(`defaults:components:${eleName}:${attr}`)) {
                 output += ` ${attr}="${
                   config.get(`defaults:components:${eleName}:${attr}`)}"`;
-              }  else if(attr === 'initialValue' && displayType === 'tree') {
+              } else if (attr === 'initialValue' && displayType === 'tree') {
                 const topOrgId = mixin.getTopOrgId(config.get('mCSD:registryDB'));
                 output += ` initialValue="${topOrgId}"`;
               }
@@ -767,7 +770,6 @@ router.get('/page/:page/:type?', (req, res) => {
 
     const createSearchTemplate = async (resource, structure) => {
       logger.silly(JSON.stringify(structure, null, 2));
-
       let search = ['id'];
       try {
         search = pageDisplay.extension.filter(ext => ext.url === 'search').map(ext => ext.valueString.match(/^([^|]*)\|?([^|]*)?\|?(.*)?$/).slice(1, 4));
@@ -799,7 +801,11 @@ router.get('/page/:page/:type?', (req, res) => {
         searchElement += '-code';
       }
 
-      let searchTemplate = `<${searchElement} :key="$route.params.page" page="${req.params.page}" label="${resource.title || resource.name}" :fields="fields" :terms="terms" resource="${resource.resourceType === 'StructureDefinition' ? resource.type : resource.resourceType}" profile="${resource.url}"`;
+      let searchTemplate = `<${searchElement} :key="$route.params.page" page="${req.params.page}" label="${resource.title || resource.name}" :fields="fields" :terms="terms" resource="${resource.resourceType === 'StructureDefinition' ? resource.type : resource.resourceType}" profile="${resource.url}" :searchAction="searchAction"`;
+      if (pageUpdatingResource) {
+        pageUpdatingResource = resource.url.replace(pageResource, '') + pageUpdatingResource;
+        searchTemplate += `request-updating-resource=${pageUpdatingResource} :request-type='requestType'`;
+      }
       if (addLink) {
         searchTemplate += " :add-link='addLink'";
       }

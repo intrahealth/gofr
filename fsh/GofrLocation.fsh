@@ -26,6 +26,11 @@ Title:          "GOFR Facility"
 Description:    "GOFR Profile of Locations to manage facilities."
 * name 1..1 MS
 * name ^label = "Name"
+* physicalType 0..1 MS
+* physicalType ^label = "Physical Type"
+* physicalType.coding 1..1 MS
+* physicalType.coding ^label = "Physical Type"
+* physicalType.coding from 	http://hl7.org/fhir/ValueSet/location-physical-type
 * description 0..1 MS
 * description ^label = "Description"
 * alias 0..* MS
@@ -49,11 +54,9 @@ Description:    "GOFR Profile of Locations to manage facilities."
 * identifier.value MS
 * identifier.value ^label = "Value"
 * type 1..* MS
-* type ^label = "Facilty Service Type"
+* type ^label = "Type"
 * type.coding 1..1 MS
-* type.coding ^label = "Facilty Service Type"
-* physicalType 1..1 MS
-* physicalType ^label = "Facilty Physical Type"
+* type.coding ^label = "Type"
 * position 0..1 MS
 * position ^label = "Co-ordinates"
 * position.latitude MS
@@ -96,9 +99,77 @@ Description:    "GOFR Profile of Locations to manage facilities."
 * hoursOfOperation.openingTime ^label = "Time that the facility is open"
 * hoursOfOperation.closingTime MS
 * hoursOfOperation.closingTime ^label = "Time that the facility closes"
-* partOf 1..1 MS
+* partOf 0..1 MS
 * partOf only Reference(GofrJurisdiction)
 * partOf ^label = "Parent"
+
+Extension:      RequestAffectedResource
+Id:             request-affected-resource
+Title:          "Resource changed/added following this request"
+Description:    "Resource changed/added following this request"
+* ^context.type = #element
+* ^context.expression = "GofrFacilityAddRequest"
+* value[x] only Reference
+* valueReference 1..1 MS
+* valueReference ^label = "Affected Resource"
+* valueReference only Reference(GofrFacility)
+* valueReference.reference 1..1 MS
+* valueReference.reference ^label = "Affected Resource"
+
+Extension:      RequestStatus
+Id:             request-status
+Title:          "Status of a request to add/update facility"
+Description:    "Status of a request to add/update facility"
+* ^context.type = #element
+* ^context.expression = "GofrFacilityAddRequest"
+* value[x] only Coding
+* valueCoding 1..1 MS
+* valueCoding ^label = "Request Status"
+* valueCoding from RequestStatusValueSet (required)
+
+CodeSystem:      RequestStatusCodeSystem
+Id:              request-status-codesystem
+Title:           "Request Status"
+* ^date = "2021-05-24T11:16:04.362Z"
+* ^version = "0.1.0"
+* #approved "Approved"
+* #rejected "Rejected"
+* #pending "Pending"
+
+ValueSet:         RequestStatusValueSet
+Id:               request-status-valueset
+Title:            "Request Status ValueSet"
+* ^date = "2021-05-24T11:16:04.362Z"
+* ^version = "0.1.0"
+* codes from system RequestStatusCodeSystem
+
+Profile:        GofrFacilityAddRequest
+Parent:         GofrFacility
+Id:             gofr-facility-add-request
+Title:          "GOFR Facility Add Request"
+Description:    "GOFR Profile of Locations to manage requests to add new facilities."
+* extension contains
+  RequestStatus named requestStatus 1..1 MS and
+  RequestAffectedResource named requestAffectedResource 0..1 MS
+* extension[requestStatus].valueCoding MS
+* extension[requestStatus] ^label = "Affected Resource"
+* extension[requestAffectedResource].valueReference MS
+* extension[requestAffectedResource] ^label = "Affected Resource"
+
+Profile:        GofrFacilityUpdateRequest
+Parent:         GofrFacility
+Id:             gofr-facility-update-request
+Title:          "GOFR Facility Update Request"
+Description:    "GOFR Profile of Locations to manage requests to update facilities."
+* extension contains
+  RequestStatus named requestStatus 1..1 MS and
+  RequestAffectedResource named requestAffectedResource 0..1 MS
+* extension[requestStatus].valueCoding MS
+* extension[requestStatus] ^label = "Affected Resource"
+* extension[requestAffectedResource].valueReference MS
+* extension[requestAffectedResource] ^label = "Affected Resource"
+
+
 
 Profile:        GofrFacilityService
 Parent:         HealthcareService
@@ -199,6 +270,9 @@ Description:    "GOFR Profile of facilities service."
 * appointmentRequired ^label = "Appointment Required"
 * active 0..1 MS
 * active ^label = "Active"
+* location 1..* MS
+* location only Reference(GofrFacility)
+* location ^label = "Facility Service Is Provided"
 
 ValueSet:         GofrJurisdictionType
 Id:               gofr-jurisdiction-type
@@ -222,7 +296,7 @@ InstanceOf:     IhrisPage
 Title:          "GOFR Facility Page"
 Usage:          #example
 * code = IhrisResourceCodeSystem#page
-* extension[display].extension[resource].valueReference = Reference(StructureDefinition/Practitioner)
+* extension[display].extension[resource].valueReference = Reference(StructureDefinition/gofr-facility)
 * extension[display].extension[search][0].valueString = "Facility Name|name"
 * extension[display].extension[search][1].valueString = "Facility Type|type[1].text"
 * extension[display].extension[search][2].valueString = "Facility Physical Type|physicalType.text"
@@ -235,10 +309,152 @@ Usage:          #example
 * extension[display].extension[filter][2].valueString = "Physical Type|physicalType|http://hl7.org/fhir/ValueSet/location-physical-type"
 * extension[display].extension[field][0].extension[path].valueString = "position.longitude"
 * extension[display].extension[field][1].extension[path].valueString = "position.latitude"
-* extension[section][0].extension[title].valueString = "Facility"
-* extension[section][0].extension[description].valueString = "Facility details"
-* extension[section][0].extension[name].valueString = "Facility"
+* extension[display].extension[field][2].extension[readOnlyIfSet].valueBoolean = true
+* extension[display].extension[field][2].extension[path].valueString = "Location.physicalType.coding"
+* extension[section][0].extension[title].valueString = "Basic Details"
+* extension[section][0].extension[description].valueString = "Basic Details"
+* extension[section][0].extension[name].valueString = "Basic Details"
 * extension[section][0].extension[field][0].valueString = "Location.name"
+* extension[section][0].extension[field][1].valueString = "Location.alias"
+* extension[section][0].extension[field][2].valueString = "Location.descriptions"
+* extension[section][0].extension[field][3].valueString = "Location.status"
+* extension[section][0].extension[field][4].valueString = "Location.type"
+* extension[section][0].extension[field][5].valueString = "Location.partOf"
+* extension[section][0].extension[field][6].valueString = "Location.description"
+* extension[section][0].extension[field][7].valueString = "Location.physicalType"
+* extension[section][1].extension[title].valueString = "Geo-Coordinates"
+* extension[section][1].extension[description].valueString = "Facility Geo-Coordinates"
+* extension[section][1].extension[name].valueString = "Geo-Coordinates"
+* extension[section][1].extension[field][0].valueString = "Location.position"
+* extension[section][2].extension[title].valueString = "Identifiers"
+* extension[section][2].extension[description].valueString = "Facility Identifiers"
+* extension[section][2].extension[name].valueString = "Identifiers"
+* extension[section][2].extension[field][0].valueString = "Location.identifier"
+* extension[section][3].extension[title].valueString = "Contact Details"
+* extension[section][3].extension[description].valueString = "Address, email, phone numbers"
+* extension[section][3].extension[name].valueString = "contact"
+* extension[section][3].extension[field][0].valueString = "Location.telecom"
+* extension[section][4].extension[title].valueString = "Address"
+* extension[section][4].extension[description].valueString = "Facility Address"
+* extension[section][4].extension[name].valueString = "Address"
+* extension[section][4].extension[field][0].valueString = "Location.address"
+* extension[section][5].extension[title].valueString = "Hours of operation"
+* extension[section][5].extension[description].valueString = "Business hours"
+* extension[section][5].extension[name].valueString = "hoursOfOperation"
+* extension[section][5].extension[field][0].valueString = "Location.hoursOfOperation"
+
+Instance:       gofr-page-facility-add-request
+InstanceOf:     IhrisPage
+Title:          "GOFR Request Add Facility Page"
+Usage:          #example
+* code = IhrisResourceCodeSystem#page
+* extension[display].extension[resource].valueReference = Reference(StructureDefinition/gofr-facility-add-request)
+* extension[display].extension[requestUpdatingResource].valueReference = Reference(StructureDefinition/gofr-facility)
+* extension[display].extension[search][0].valueString = "Facility Name|name"
+* extension[display].extension[search][1].valueString = "Facility Type|type[1].text"
+* extension[display].extension[search][2].valueString = "Facility Physical Type|physicalType.text"
+* extension[display].extension[search][3].valueString = "Parent|partOf.reference"
+* extension[display].extension[search][4].valueString = "Status|status"
+* extension[display].extension[search][5].valueString = "Longitute|position.longitude"
+* extension[display].extension[search][6].valueString = "Latitude|position.latitude"
+* extension[display].extension[search][7].valueString = "Request Status|extension.where(url='http://gofr.org/fhir/StructureDefinition/request-status').valueCoding.display"
+* extension[display].extension[filter][0].valueString = "Name|name:contains"
+* extension[display].extension[filter][1].valueString = "Type|type|http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+* extension[display].extension[filter][2].valueString = "Physical Type|physicalType|http://hl7.org/fhir/ValueSet/location-physical-type"
+* extension[display].extension[filter][3].valueString = "Request Status|requeststatus|request-status-valueset"
+* extension[display].extension[field][0].extension[path].valueString = "position.longitude"
+* extension[display].extension[field][1].extension[path].valueString = "position.latitude"
+* extension[display].extension[field][2].extension[readOnlyIfSet].valueBoolean = true
+* extension[display].extension[field][2].extension[path].valueString = "Location.physicalType.coding"
+* extension[display].extension[field][3].extension[readOnlyIfSet].valueBoolean = true
+* extension[display].extension[field][3].extension[path].valueString = "Location.extension:requestStatus"
+* extension[section][0].extension[title].valueString = "Basic Details"
+* extension[section][0].extension[description].valueString = "Basic Details"
+* extension[section][0].extension[name].valueString = "Basic Details"
+* extension[section][0].extension[field][0].valueString = "Location.name"
+* extension[section][0].extension[field][1].valueString = "Location.alias"
+* extension[section][0].extension[field][2].valueString = "Location.descriptions"
+* extension[section][0].extension[field][3].valueString = "Location.status"
+* extension[section][0].extension[field][4].valueString = "Location.type"
+* extension[section][0].extension[field][5].valueString = "Location.partOf"
+* extension[section][0].extension[field][6].valueString = "Location.description"
+* extension[section][0].extension[field][7].valueString = "Location.physicalType"
+* extension[section][1].extension[title].valueString = "Geo-Coordinates"
+* extension[section][1].extension[description].valueString = "Facility Geo-Coordinates"
+* extension[section][1].extension[name].valueString = "Geo-Coordinates"
+* extension[section][1].extension[field][0].valueString = "Location.position"
+* extension[section][2].extension[title].valueString = "Identifiers"
+* extension[section][2].extension[description].valueString = "Facility Identifiers"
+* extension[section][2].extension[name].valueString = "Identifiers"
+* extension[section][2].extension[field][0].valueString = "Location.identifier"
+* extension[section][3].extension[title].valueString = "Address"
+* extension[section][3].extension[description].valueString = "Facility Address"
+* extension[section][3].extension[name].valueString = "Address"
+* extension[section][3].extension[field][0].valueString = "Location.address"
+
+Instance:       gofr-page-facility-update-request
+InstanceOf:     IhrisPage
+Title:          "GOFR Request Update Facility Page"
+Usage:          #example
+* code = IhrisResourceCodeSystem#page
+* extension[display].extension[resource].valueReference = Reference(StructureDefinition/gofr-facility-update-request)
+* extension[display].extension[requestUpdatingResource].valueReference = Reference(StructureDefinition/gofr-facility)
+* extension[display].extension[search][0].valueString = "Facility Name|name"
+* extension[display].extension[search][1].valueString = "Facility Type|type[1].text"
+* extension[display].extension[search][2].valueString = "Facility Physical Type|physicalType.text"
+* extension[display].extension[search][3].valueString = "Parent|partOf.reference"
+* extension[display].extension[search][4].valueString = "Status|status"
+* extension[display].extension[search][5].valueString = "Longitute|position.longitude"
+* extension[display].extension[search][6].valueString = "Latitude|position.latitude"
+* extension[display].extension[search][7].valueString = "Request Status|extension.where(url='http://gofr.org/fhir/StructureDefinition/request-status').valueCoding.display"
+* extension[display].extension[filter][0].valueString = "Name|name:contains"
+* extension[display].extension[filter][1].valueString = "Type|type|http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+* extension[display].extension[filter][2].valueString = "Physical Type|physicalType|http://hl7.org/fhir/ValueSet/location-physical-type"
+* extension[display].extension[filter][3].valueString = "Request Status|requeststatus|request-status-valueset"
+* extension[display].extension[field][0].extension[path].valueString = "position.longitude"
+* extension[display].extension[field][1].extension[path].valueString = "position.latitude"
+* extension[display].extension[field][2].extension[readOnlyIfSet].valueBoolean = true
+* extension[display].extension[field][2].extension[path].valueString = "Location.physicalType.coding"
+* extension[display].extension[field][3].extension[readOnlyIfSet].valueBoolean = true
+* extension[display].extension[field][3].extension[path].valueString = "Location.extension:requestStatus"
+* extension[section][0].extension[title].valueString = "Basic Details"
+* extension[section][0].extension[description].valueString = "Basic Details"
+* extension[section][0].extension[name].valueString = "Basic Details"
+* extension[section][0].extension[field][0].valueString = "Location.name"
+* extension[section][0].extension[field][1].valueString = "Location.alias"
+* extension[section][0].extension[field][2].valueString = "Location.descriptions"
+* extension[section][0].extension[field][3].valueString = "Location.status"
+* extension[section][0].extension[field][4].valueString = "Location.type"
+* extension[section][0].extension[field][5].valueString = "Location.partOf"
+* extension[section][0].extension[field][6].valueString = "Location.description"
+* extension[section][0].extension[field][7].valueString = "Location.physicalType"
+* extension[section][1].extension[title].valueString = "Geo-Coordinates"
+* extension[section][1].extension[description].valueString = "Facility Geo-Coordinates"
+* extension[section][1].extension[name].valueString = "Geo-Coordinates"
+* extension[section][1].extension[field][0].valueString = "Location.position"
+* extension[section][2].extension[title].valueString = "Identifiers"
+* extension[section][2].extension[description].valueString = "Facility Identifiers"
+* extension[section][2].extension[name].valueString = "Identifiers"
+* extension[section][2].extension[field][0].valueString = "Location.identifier"
+* extension[section][3].extension[title].valueString = "Address"
+* extension[section][3].extension[description].valueString = "Facility Address"
+* extension[section][3].extension[name].valueString = "Address"
+* extension[section][3].extension[field][0].valueString = "Location.address"
+
+Instance:       gofr-request-status
+InstanceOf:     SearchParameter
+Title:          "Search for the request status of a request to add/update facilities"
+Usage:          #definition
+* url = "http://gofr.org/fhir/StructureDefinition/search-parameter-request-status"
+* name = "Search for the request status of a request to add/update facilities"
+* description = "Search for the request status of a request to add/update facilities"
+* status = #active
+* experimental = false
+* code = #requeststatus
+* base[0] = #Location
+* type = #token
+* expression = "Location.extension('http://gofr.org/fhir/StructureDefinition/request-status').valueCoding"
+* target[0] = #Location
 
 Instance:       gofr-page-jurisdiction
 InstanceOf:     IhrisPage
@@ -251,7 +467,7 @@ Usage:          #example
 * extension[display].extension[search][2].valueString = "Physical Type|physicalType.text"
 * extension[display].extension[search][3].valueString = "Jurisdiction|partOf.reference"
 * extension[display].extension[filter][0].valueString = "Name|name:contains"
-* extension[display].extension[filter][1].valueString = "Type|type|http://ihris.org/fhir/ValueSet/gofr-jurisdiction-type"
+* extension[display].extension[filter][1].valueString = "Type|type|http://gofr.org/fhir/ValueSet/gofr-jurisdiction-type"
 * extension[display].extension[filter][2].valueString = "Jurisdiction|partOf"
 * extension[section][0].extension[title].valueString = "Details"
 * extension[section][0].extension[description].valueString = "Jurisdiction details"
@@ -269,7 +485,9 @@ Usage:          #example
 * code = IhrisResourceCodeSystem#page
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/gofr-facility-service)
 * extension[display].extension[search][0].valueString = "Name|name"
+* extension[display].extension[search][1].valueString = "Active|active"
 * extension[display].extension[filter][0].valueString = "Name|name:contains"
+* extension[display].extension[filter][1].valueString = "Active|active"
 * extension[section][0].extension[title].valueString = "Details"
 * extension[section][0].extension[description].valueString = "Healthcare service details"
 * extension[section][0].extension[name].valueString = "Healthcare service"
@@ -278,3 +496,18 @@ Usage:          #example
 * extension[section][0].extension[field][2].valueString = "HealthcareService.identifier"
 * extension[section][0].extension[field][3].valueString = "HealthcareService.telecom"
 * extension[section][0].extension[field][4].valueString = "HealthcareService.type"
+* extension[section][0].extension[field][5].valueString = "HealthcareService.category"
+* extension[section][0].extension[field][6].valueString = "HealthcareService.specialty"
+* extension[section][0].extension[field][7].valueString = "HealthcareService.referralMethod"
+* extension[section][0].extension[field][8].valueString = "HealthcareService.communication"
+* extension[section][0].extension[field][9].valueString = "HealthcareService.program"
+* extension[section][0].extension[field][10].valueString = "HealthcareService.eligibility"
+* extension[section][0].extension[field][11].valueString = "HealthcareService.serviceProvisionCode"
+* extension[section][0].extension[field][12].valueString = "HealthcareService.availableTime"
+* extension[section][0].extension[field][13].valueString = "HealthcareService.notAvailable"
+* extension[section][0].extension[field][14].valueString = "HealthcareService.appointmentRequired"
+* extension[section][0].extension[field][15].valueString = "HealthcareService.active"
+* extension[section][1].extension[title].valueString = "Facilities Service Is Offered"
+* extension[section][1].extension[description].valueString = "Facilities Service Is Offered"
+* extension[section][1].extension[name].valueString = "Facilities Service Is Offered"
+* extension[section][1].extension[field][0].valueString = "HealthcareService.location"

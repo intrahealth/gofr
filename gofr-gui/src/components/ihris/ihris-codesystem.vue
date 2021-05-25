@@ -177,7 +177,7 @@ export default {
         if ( this.fhirId ) {
           this.$router.go(0)
         } else {
-          this.$router.push({ name:"resource_view", params: {page: this.page, id: this.fhir.code } })
+          this.$router.push({ name:"ResourceView", params: {page: this.page, id: this.fhir.code } })
         }
       } ).catch(err => {
         console.log("FAILED TO SAVE",url,err)

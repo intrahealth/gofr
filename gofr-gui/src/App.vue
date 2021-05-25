@@ -140,7 +140,7 @@
 
         </v-flex>
       </v-layout>
-      <router-view :key='"baseRouterViewKey" + $store.state.baseRouterViewKey'></router-view>
+      <router-view :key='$route.path'></router-view>
     </v-main>
     <v-footer
       dark

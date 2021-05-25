@@ -144,7 +144,33 @@ export const store = new Vuex.Store({
     loadingServers: false,
     dynamicProgress: false,
     initializingApp: false,
-    cols: { header: 4, content: 8 }
+    cols: { header: 4, content: 8 },
+    searchAction: "",
+    requestResourceUpdateData: {
+      requestType: '',
+      requestUpdatingResource: ''
+    },
+    message: {
+      type: "info",
+      text: null,
+      timeout: 5000,
+      active: false
+    }
+  },
+  mutations: {
+    setMessage( state, data ) {
+      if ( typeof data === "string" ) {
+        state.message.type = "info"
+        state.message.timeout = 5000
+        state.message.text = data
+        state.message.active = true
+      } else {
+        state.message.type = data.type || "info"
+        state.message.timeout = data.timeout || 5000
+        state.message.text = data.text
+        state.message.active = true
+      }
+    }
   }
 })
 

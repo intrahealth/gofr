@@ -21,52 +21,35 @@
         clipped
         class="primary darken-1 white--text"
         style="z-index: 3;"
+        width="350"
         >
         <v-list class="white--text">
           <v-list-item>
             <template v-if="!edit">
-              <v-row>
-                <v-col md="12">
-                  <v-btn small dark class="secondary" @click="$emit('set-edit', !edit)">
-                    <v-icon left light>mdi-pencil</v-icon>
-                    <span>Edit</span>
-                  </v-btn>
-                </v-col>
-                <v-col>
-                  <v-btn
-                    small
-                    @click="processRequest('approved')"
-                    color="success"
-                    v-if="$store.state.requestResourceUpdateData.requestUpdatingResource"
-                    :disabled="currentRequestStatus === 'approved' || currentRequestStatus === ''"
-                  >
-                    <v-icon left>mdi-check-circle</v-icon> Approve
-                  </v-btn>
-                </v-col>
-                <v-col>
-                  <v-btn
-                    small
-                    @click="processRequest('rejected')"
-                    color="error"
-                    v-if="$store.state.requestResourceUpdateData.requestUpdatingResource"
-                    :disabled="currentRequestStatus !== 'pending'"
-                  >
-                    <v-icon left>mdi-cancel</v-icon> Reject
-                  </v-btn>
-                </v-col>
-              </v-row>
-              <v-layout row wrap>
-                <v-flex xs12>
-
-                </v-flex>
-                <v-flex xs5>
-
-                </v-flex>
-                <v-spacer></v-spacer>
-                <v-flex xs5>
-
-                </v-flex>
-              </v-layout>
+              <v-btn small dark class="secondary" @click="$emit('set-edit', !edit)">
+                <v-icon left light>mdi-pencil</v-icon>
+                <span>Edit</span>
+              </v-btn>
+              <v-spacer></v-spacer>
+              <v-btn
+                small
+                @click="processRequest('approved')"
+                color="success"
+                v-if="$store.state.requestResourceUpdateData.requestAction"
+                :disabled="currentRequestStatus === 'approved' || currentRequestStatus === ''"
+              >
+                <v-icon left>mdi-check-circle</v-icon> Approve
+              </v-btn>
+              <v-spacer></v-spacer>
+              <v-btn
+                small
+                @click="processRequest('rejected')"
+                color="error"
+                v-if="$store.state.requestResourceUpdateData.requestAction"
+                :disabled="currentRequestStatus !== 'pending'"
+              >
+                <v-icon left>mdi-cancel</v-icon> Reject
+              </v-btn>
             </template>
             <v-btn small v-else dark class="secondary" @click="$router.go(0)">
               <v-icon light>mdi-pencil-off</v-icon>
@@ -281,25 +264,26 @@ export default {
         },
         data: this.fhir
       }
+      this.overlay = true
+      this.loading = true
       axios( opts ).then(() => {
         this.overlay = false
         this.loading = false
         this.$store.state.searchAction = ""
-        // this.$router.go(0)
+        this.$store.commit('setMessage', { type: 'info', text: 'Request submitted successfully.' })
+        this.$router.go(-1)
       } ).catch((err) => {
         this.overlay = false
         this.loading = false
-        this.$store.state.errorTitle = 'Error'
-        this.$store.state.errorDescription = 'This request was not successfully processed'
-        this.$store.state.dialogError = true
+        this.$store.commit('setMessage', { type: 'error', text: 'Request submition failed.' })
         console.error(err);
       })
     },
     processRequest(newStatus) {
       let url
-      if(this.$store.state.requestResourceUpdateData.requestType === 'add-request') {
+      if(this.$store.state.requestResourceUpdateData.requestAction === 'process-add-request') {
         url = "/facilitiesRequests/add"
-      } else if(this.$store.state.requestResourceUpdateData.requestType === 'update-request') {
+      } else if(this.$store.state.requestResourceUpdateData.requestAction === 'process-update-request') {
         url = "/facilitiesRequests/update"
       }
       let opts = {
@@ -310,25 +294,24 @@ export default {
         },
         data: {
           resource: this.source.data,
-          requestStatus: newStatus,
-          requestUpdatingResource: this.$store.state.requestResourceUpdateData.requestUpdatingResource,
-          profile: this.profile
+          requestStatus: newStatus
         }
       }
+      this.overlay = true
+      this.loading = true
       axios( opts ).then(() => {
         this.overlay = false
         this.loading = false
         this.$store.state.requestResourceUpdateData = {
-          requestType: '',
+          requestAction: '',
           requestUpdatingResource: ''
         }
-        this.$router.go(0)
+        this.$store.commit('setMessage', { type: 'info', text: 'Request ' + newStatus + ' successfully.' })
+        this.$router.go(-1)
       } ).catch((err) => {
         this.overlay = false
         this.loading = false
-        this.$store.state.errorTitle = 'Error'
-        this.$store.state.errorDescription = 'This request was not successfully processed'
-        this.$store.state.dialogError = true
+        this.$store.commit('setMessage', { type: 'error', text: 'Failed to ' + newStatus + ' request.' })
         console.error(err);
       })
     },
@@ -497,7 +480,7 @@ export default {
   beforeDestroy() {
     this.$store.state.searchAction = ""
     this.$store.state.requestResourceUpdateData = {
-      requestType: '',
+      requestAction: '',
       requestUpdatingResource: ''
     }
   }

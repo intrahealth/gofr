@@ -26,16 +26,16 @@
         >
         <v-list class="white--text">
           <v-list-item>
-            <v-btn dark class="secondary" @click="$router.go(-1)">
+            <v-btn small dark class="secondary" @click="$router.go(-1)">
               <v-icon light>mdi-pencil-off</v-icon>
               <span>Cancel</span>
             </v-btn>
             <v-spacer></v-spacer>
-            <v-btn v-if="valid" dark class="success darken-1" @click="processFHIR()" :disabled="!valid">
+            <v-btn small v-if="valid" dark class="success darken-1" @click="processFHIR()" :disabled="!valid">
               <v-icon light>mdi-content-save</v-icon>
               <span>Save</span>
             </v-btn>
-            <v-btn v-else dark class="warning" @click="$refs.form.validate()">
+            <v-btn v-else dark small class="warning" @click="$refs.form.validate()">
               <v-icon light>mdi-content-save</v-icon>
               <span>Save</span>
             </v-btn>

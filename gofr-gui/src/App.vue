@@ -96,6 +96,20 @@
           </v-card-text>
         </v-card>
       </v-dialog>
+      <v-snackbar
+        app
+        class="mt-12"
+        v-model="$store.state.message.active"
+        :color="$store.state.message.type"
+        :timeout="$store.state.message.timeout"
+        top
+        multi-line
+        >
+        {{ $store.state.message.text }}
+          <v-btn icon dark @click="$store.commit('closeMessage')">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+      </v-snackbar>
       <v-row>
         <v-col>
           <template v-if="Object.keys($store.state.activePair.source1).length > 0 && !$store.state.denyAccess">

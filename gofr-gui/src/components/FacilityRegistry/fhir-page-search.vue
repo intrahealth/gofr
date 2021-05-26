@@ -7,18 +7,18 @@
 <script>
 import Vue from 'vue'
 import axios from 'axios'
-let requestType
+let requestAction
 let searchAction
 
 export default {
   name: "fhir-page-search",
-  props: ['page', 'requestType'],
+  props: ['page', 'requestAction'],
   data: function() {
     return {
     }
   },
   created: function() {
-    requestType = this.requestType
+    requestAction = this.requestAction
     if(this.$route.query.searchAction) {
       searchAction = this.$route.query.searchAction
     }
@@ -49,7 +49,7 @@ export default {
                 fields: data.data.fields,
                 addLink: data.data.addLink,
                 terms: {},
-                requestType: requestType,
+                requestAction: requestAction,
                 searchAction: searchAction
               }
             },
@@ -76,7 +76,7 @@ export default {
   },
   beforeDestroy() {
     searchAction = ""
-    requestType = ""
+    requestAction = ""
   },
   beforeCreate: function() {
     Vue.component('ihris-template', { template: '<div>Loading...</div>' } )

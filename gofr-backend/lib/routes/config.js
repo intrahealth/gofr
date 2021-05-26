@@ -801,10 +801,10 @@ router.get('/page/:page/:type?', (req, res) => {
         searchElement += '-code';
       }
 
-      let searchTemplate = `<${searchElement} :key="$route.params.page" page="${req.params.page}" label="${resource.title || resource.name}" :fields="fields" :terms="terms" resource="${resource.resourceType === 'StructureDefinition' ? resource.type : resource.resourceType}" profile="${resource.url}" :searchAction="searchAction"`;
+      let searchTemplate = `<${searchElement} :key="$route.params.page" page="${req.params.page}" label="${resource.title || resource.name}" :fields="fields" :terms="terms" resource="${resource.resourceType === 'StructureDefinition' ? resource.type : resource.resourceType}" profile="${resource.url}" :search-action="searchAction" :request-action='requestAction'`;
       if (pageUpdatingResource) {
         pageUpdatingResource = resource.url.replace(pageResource, '') + pageUpdatingResource;
-        searchTemplate += `request-updating-resource=${pageUpdatingResource} :request-type='requestType'`;
+        searchTemplate += `request-updating-resource=${pageUpdatingResource}`;
       }
       if (addLink) {
         searchTemplate += " :add-link='addLink'";

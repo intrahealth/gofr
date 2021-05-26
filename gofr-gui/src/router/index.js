@@ -141,12 +141,12 @@ let router = new Router({
       page: route.params.page
     })
   }, {
-    path: "/Resource/Search/:page/:requestType?",
+    path: "/Resource/Search/:page/:requestAction?",
     name: "ResourceSearch",
     component: () => import("../components/FacilityRegistry/fhir-page-search.vue"),
     props: (route) => ({
       page: route.params.page,
-      requestType: route.params.requestType
+      requestAction: route.params.requestAction
     })
   }, {
     path: '/RequestBuildingAddition',

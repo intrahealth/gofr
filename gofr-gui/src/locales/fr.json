@@ -24,6 +24,22 @@
         "msg": "registre des installations",
         "tooltip": "registre des installations"
       },
+      "search": {
+        "msg": "Search",
+        "tooltip": "Search"
+      },
+      "searchFacility": {
+        "msg": "Search Facility",
+        "tooltip": "Search Facility"
+      },
+      "searchFacilityAddRequest": {
+        "msg": "Search Facility Add Request",
+        "tooltip": "Search Facility Add Request"
+      },
+      "searchFacilityUpdateRequest": {
+        "msg": "Search Facility Update Request",
+        "tooltip": "Search Facility Update Request"
+      },
       "createOrgHier": {
         "msg": "Créer une hiérarchie",
         "tooltip": "Ajouter une installation et une édition"
@@ -39,10 +55,6 @@
       "facilityRegReports": {
         "msg": "Rapports",
         "tooltip": "Voir les rapports"
-      },
-      "historyReport": {
-        "msg": "Histoire",
-        "tooltip": "Suivre l'historique des installations et des services"
       },
       "addJurisdiction": {
         "msg": "Ajouter une juridiction",

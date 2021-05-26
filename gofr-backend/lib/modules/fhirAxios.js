@@ -76,11 +76,14 @@ const fhirAxios = {
       reject(err);
     });
   }),
-  search: (resource, params) => new Promise((resolve, reject) => {
+  search: (resource, params, database) => new Promise((resolve, reject) => {
     if (resource === undefined) {
       reject(new InvalidRequestError('resource must be defined'));
     }
     const url = new URL(fhirAxios.baseUrl.href);
+    if (database) {
+      url.href.replace(config.get('mCSD:registryDB'), database);
+    }
     url.pathname += resource;
     const auth = fhirAxios.__getAuth();
 
@@ -102,7 +105,6 @@ const fhirAxios = {
     });
   }),
   create: (resource, database) => new Promise((resolve, reject) => {
-    console.error(resource);
     if (resource === undefined) {
       err = new InvalidRequestError('resource must be defined');
       err.response = { status: 404 };

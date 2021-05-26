@@ -4,11 +4,11 @@
       <v-card-title>
         Search {{ label }}
         <v-spacer></v-spacer>
-        <v-btn :class="addLink ? addLink.class || 'primary' : 'primary'" :to="addLink ? addLink.url : '/resource/add/'+page">
+        <!-- <v-btn :class="addLink ? addLink.class || 'primary' : 'primary'" :to="addLink ? addLink.url : '/resource/add/'+page">
           <v-icon v-if="addLink && addLink.icon">{{ addLink.icon }}</v-icon>
           <v-icon v-else>mdi-database-plus</v-icon>
           Add {{label}}
-        </v-btn>
+        </v-btn> -->
       </v-card-title>
       <v-card-title>
         <slot></slot>
@@ -42,7 +42,7 @@
 import axios from 'axios';
 export default {
   name: "ihris-search",
-  props: ["profile", "request-updating-resource", "request-type", "searchAction", "fields", "label", "terms", "page", "resource", "add-link"],
+  props: ["profile", "request-updating-resource", "request-action", "search-action", "fields", "label", "terms", "page", "resource", "add-link"],
   data: function() {
     return {
       debug: "",
@@ -82,7 +82,7 @@ export default {
   methods: {
     clickIt: function(record) {
       this.$store.state.searchAction = this.searchAction
-      this.$store.state.requestResourceUpdateData.requestType = this.requestType
+      this.$store.state.requestResourceUpdateData.requestAction = this.requestAction
       this.$store.state.requestResourceUpdateData.requestUpdatingResource = this.requestUpdatingResource
       this.$router.push({
         path: `/Resource/View/${this.page}/${record.id}`
@@ -95,7 +95,6 @@ export default {
       }
     },
     getData(restart) {
-      //console.log("getting data",restart)
       if ( this.loading ) {
         this.update_again.rerun = true
         this.update_again.restart = this.update_again.restart || restart

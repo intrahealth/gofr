@@ -40,9 +40,21 @@
         "msg": "Reports",
         "tooltip": "View Reports"
       },
-      "historyReport": {
-        "msg": "History",
-        "tooltip": "Track history of facilities and services"
+      "search": {
+        "msg": "Search",
+        "tooltip": "Search"
+      },
+      "searchFacility": {
+        "msg": "Search Facility",
+        "tooltip": "Search Facility"
+      },
+      "searchFacilityAddRequest": {
+        "msg": "Search Facility Add Request",
+        "tooltip": "Search Facility Add Request"
+      },
+      "searchFacilityUpdateRequest": {
+        "msg": "Search Facility Update Request",
+        "tooltip": "Search Facility Update Request"
       },
       "addJurisdiction": {
         "msg": "Add Jurisdiction",

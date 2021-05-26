@@ -163,7 +163,7 @@ Title:          "GOFR Facility Update Request"
 Description:    "GOFR Profile of Locations to manage requests to update facilities."
 * extension contains
   RequestStatus named requestStatus 1..1 MS and
-  RequestAffectedResource named requestAffectedResource 0..1 MS
+  RequestAffectedResource named requestAffectedResource 1..1 MS
 * extension[requestStatus].valueCoding MS
 * extension[requestStatus] ^label = "Affected Resource"
 * extension[requestAffectedResource].valueReference MS
@@ -379,6 +379,7 @@ Usage:          #example
 * extension[section][0].extension[field][5].valueString = "Location.partOf"
 * extension[section][0].extension[field][6].valueString = "Location.description"
 * extension[section][0].extension[field][7].valueString = "Location.physicalType"
+* extension[section][0].extension[field][8].valueString = "Location.extension:requestStatus"
 * extension[section][1].extension[title].valueString = "Geo-Coordinates"
 * extension[section][1].extension[description].valueString = "Facility Geo-Coordinates"
 * extension[section][1].extension[name].valueString = "Geo-Coordinates"
@@ -398,7 +399,6 @@ Title:          "GOFR Request Update Facility Page"
 Usage:          #example
 * code = IhrisResourceCodeSystem#page
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/gofr-facility-update-request)
-* extension[display].extension[requestUpdatingResource].valueReference = Reference(StructureDefinition/gofr-facility)
 * extension[display].extension[search][0].valueString = "Facility Name|name"
 * extension[display].extension[search][1].valueString = "Facility Type|type[1].text"
 * extension[display].extension[search][2].valueString = "Facility Physical Type|physicalType.text"
@@ -428,6 +428,7 @@ Usage:          #example
 * extension[section][0].extension[field][5].valueString = "Location.partOf"
 * extension[section][0].extension[field][6].valueString = "Location.description"
 * extension[section][0].extension[field][7].valueString = "Location.physicalType"
+* extension[section][0].extension[field][8].valueString = "Location.extension:requestStatus"
 * extension[section][1].extension[title].valueString = "Geo-Coordinates"
 * extension[section][1].extension[description].valueString = "Facility Geo-Coordinates"
 * extension[section][1].extension[name].valueString = "Geo-Coordinates"

@@ -170,6 +170,9 @@ export const store = new Vuex.Store({
         state.message.text = data.text
         state.message.active = true
       }
+    },
+    closeMessage( state ) {
+      state.message.active = false
     }
   }
 })

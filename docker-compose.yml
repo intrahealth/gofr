@@ -1,13 +1,6 @@
 version: "3.3"
 
 services:
-  mongo:
-    container_name: mongo-gofr
-    image: mongo:3.6
-    ports:
-      - "27017:27017"
-    restart: always
-
   redis:
     container_name: redis-gofr
     image: redis
@@ -15,23 +8,27 @@ services:
       - "6379:6379"
     restart: always
 
-  hearth:
-    container_name: hearth-gofr
-    image: intrahealth/hearth:latest
-    environment:
-      - mongodb__url=mongodb://mongo/hearth-dev
-      - logger__level=warning
-      - authentication__type=disabled
-      # - idGenerator=uuidv4 <- setting from jembi/health, is untested
+  mongo:
+    container_name: mongo-gofr
+    image: mongo:3.6
     ports:
-      - "3447:3447"
+      - "27017:27017"
     restart: always
 
-  facility-recon:
-    container_name: facility-recon
-    image: openhie/facility-recon:latest
+  fhir:
+    container_name: hapi-fhir
+    image: hapiproject/hapi:v5.3.0
+    ports:
+      - "8080:8080"
+    restart: always
+    depends_on:
+      - redis
+
+  gofr:
+    container_name: gofr
+    image: intrahealth/gofr:latest
     environment: 
-      - HEARTH_URL=http://hearth:3447 
+      - FHIR_BASE_URL=http://fhir:8080/fhir
       - REDIS_HOST=redis 
       - DB_HOST=mongo 
     ports:

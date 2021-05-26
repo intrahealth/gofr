@@ -1,0 +1,193 @@
+{
+  "App": {
+    "title": "Global Open Facility Registry",
+    "initApp": "Initializing App",
+    "source": "Source",
+    "menu": {
+      "facilityRecon": {
+        "msg": "Facility Reconciliation",
+        "tooltip": "Facility Reconciliation"
+      },
+      "createPair": {
+        "msg": "Create and Manage Data Source Pair",
+        "tooltip": "Select data sources to start mathing"
+      },
+      "reconcile": {
+        "msg": "Reconcile",
+        "tooltip": "Perform location matching of your selected data sources"
+      },
+      "recoStatus": {
+        "msg": "Reconciliation Status",
+        "tooltip": "Matching Status"
+      },
+      "facilityRegistry": {
+        "msg": "Facility Registry",
+        "tooltip": "Facility Registry"
+      },
+      "createOrgHier": {
+        "msg": "Create Hierarchy",
+        "tooltip": "Add Facility And Jurisdition"
+      },
+      "healthService": {
+        "msg": "Healthcare Services",
+        "tooltip": "Add services and define service terminologies"
+      },
+      "healthServiceTerminologies": {
+        "msg": "Add Terminologies",
+        "tooltip": "Add service based terminologies"
+      },
+      "facilityRegReports": {
+        "msg": "Reports",
+        "tooltip": "View Reports"
+      },
+      "search": {
+        "msg": "Search",
+        "tooltip": "Search"
+      },
+      "searchFacility": {
+        "msg": "Search Facility",
+        "tooltip": "Search Facility"
+      },
+      "searchFacilityAddRequest": {
+        "msg": "Search Facility Add Request",
+        "tooltip": "Search Facility Add Request"
+      },
+      "searchFacilityUpdateRequest": {
+        "msg": "Search Facility Update Request",
+        "tooltip": "Search Facility Update Request"
+      },
+      "addJurisdiction": {
+        "msg": "Add Jurisdiction",
+        "tooltip": "Add Counties/Districts"
+      },
+      "addFacility": {
+        "msg": "Add Facility",
+        "tooltip": "Add Facility"
+      },
+      "searchService": {
+        "msg": "Search Service",
+        "tooltip": "Search Service"
+      },
+      "facilitiesReport": {
+        "msg": "Facilities",
+        "tooltip": "Facilities"
+      },
+      "servicesReport": {
+        "msg": "Services",
+        "tooltip": "Services"
+      },
+      "newFacilitiesRequestsReport": {
+        "msg": "New Facilities Requests",
+        "tooltip": "Report on requests made to create new facilities"
+      },
+      "facilitiesUpdateRequestsReport": {
+        "msg": "Requested Facilities Updates",
+        "tooltip": "Report about requests to update details of facilities"
+      },
+      "facilityRequests": {
+        "msg": "Requests",
+        "tooltip": "Send requests about addition of new facilities or update of facility details"
+      },
+      "requestNewFacility": {
+        "msg": "Request Addition of New Facility",
+        "tooltip": "Request Addition of New Facility"
+      },
+      "requestUpdateFacility": {
+        "msg": "Request Update of Facility Details",
+        "tooltip": "Request Update of Facility Details"
+      },
+      "addServiceType": {
+        "msg": "Add Service Type",
+        "tooltip": "Add Service Type"
+      },
+      "addServiceCategory": {
+        "msg": "Add Service Category",
+        "tooltip": "Add Service Category"
+      },
+      "addServiceSpecialty": {
+        "msg": "Add Service Specialty",
+        "tooltip": "Add Service Specialty"
+      },
+      "addServiceEligibility": {
+        "msg": "Add Service Eligibility",
+        "tooltip": "Add Service Eligibility"
+      },
+      "addLanguage": {
+        "msg": "Add Language",
+        "tooltip": "Add Language"
+      },
+      "addReferralMethod": {
+        "msg": "Add Referral Methods",
+        "tooltip": "Add Referral Methods"
+      },
+      "addProgram": {
+        "msg": "Add Programs",
+        "tooltip": "Add Programs"
+      },
+      "addCharacteristic": {
+        "msg": "Add Characteristics",
+        "tooltip": "Add Characteristics"
+      },
+      "addServiceProvisionCondition": {
+        "msg": "Add Service Provision Condition",
+        "tooltip": "Add Service Provision Condition"
+      },
+      "addService": {
+        "msg": "Add Service",
+        "tooltip": "Add Service offered by health facilities"
+      },
+      "services": {
+        "msg": "Services",
+        "tooltip": "Services"
+      },
+      "archive": {
+        "msg": "Archived Uploads",
+        "tooltip": "Access to backup data"
+      },
+
+      "account": {
+        "msg": "Account"
+      },
+      "addUser": {
+        "msg": "Add User",
+        "tooltip": "Create new user account"
+      },
+      "usersList": {
+        "msg": "Users List",
+        "tooltip": "Manage user accounts"
+      },
+      "rolesManagement": {
+        "msg": "Roles Management",
+        "tooltip": "Add or remove specific tasks on roles"
+      },
+      "changePassword": {
+        "msg": "Change Password"
+      },
+      "logout": {
+        "msg": "Logout"
+      },
+      "configure": {
+        "msg": "configure System"
+      },
+      "dataSourcesParent": {
+        "msg": "Data Sources",
+        "tooltip": "Upload CSV data and add remote DHIS2 or FHIR servers"
+      },
+      "viewDataSources": {
+        "msg": "View Data Sources",
+        "tooltip": "View datasets that can be used for reconciliation"
+      },
+      "addDataSources": {
+        "msg": "Add Data Sources",
+        "tooltip": "Add a new dataset that you want to reconcile"
+      },
+      "view": {
+        "msg": "View",
+        "tooltip": "Explore data sources contents"
+      },
+      "recoParent": {
+        "msg": "Reconcile"
+      }
+    }
+  }
+}

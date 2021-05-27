@@ -2,9 +2,9 @@
   "name": "gofr",
   "version": "1.0.0",
   "description": "GOFR",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node --max-old-space-size=8192 lib/index.js"
+    "start": "node --max-old-space-size=8192 lib/app.js"
   },
   "repository": {
     "type": "git",

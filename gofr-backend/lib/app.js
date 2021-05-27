@@ -73,10 +73,10 @@ const jwtValidator = function (req, res, next) {
     || req.path == '/addUser/'
     || req.path.startsWith('/progress')
     || req.path == '/'
-    || req.path.startsWith('/static/js')
-    || req.path.startsWith('/static/config.json')
-    || req.path.startsWith('/static/css')
-    || req.path.startsWith('/static/img')
+    || req.path.startsWith('/js')
+    || req.path.startsWith('/config.json')
+    || req.path.startsWith('/css')
+    || req.path.startsWith('/img')
     || req.path.startsWith('/favicon.ico')
   ) {
     return next();

@@ -1,0 +1,148 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-page-service",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/ihris-page"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "page",
+        "system": "http://gofr.org/fhir/CodeSystem/ihris-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-display",
+      "extension": [
+        {
+          "url": "resource",
+          "valueReference": {
+            "reference": "StructureDefinition/gofr-facility-service"
+          }
+        },
+        {
+          "url": "search",
+          "valueString": "Name|name"
+        },
+        {
+          "url": "search",
+          "valueString": "Active|active"
+        },
+        {
+          "url": "filter",
+          "valueString": "Name|name:contains"
+        },
+        {
+          "url": "filter",
+          "valueString": "Active|active"
+        }
+      ]
+    },
+    {
+      "extension": [
+        {
+          "url": "title",
+          "valueString": "Details"
+        },
+        {
+          "url": "description",
+          "valueString": "Healthcare service details"
+        },
+        {
+          "url": "name",
+          "valueString": "Healthcare service"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.name"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.comment"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.identifier"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.telecom"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.type"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.category"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.specialty"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.referralMethod"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.communication"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.program"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.eligibility"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.serviceProvisionCode"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.availableTime"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.notAvailable"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.appointmentRequired"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.active"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+    },
+    {
+      "extension": [
+        {
+          "url": "title",
+          "valueString": "Facilities Service Is Offered"
+        },
+        {
+          "url": "description",
+          "valueString": "Facilities Service Is Offered"
+        },
+        {
+          "url": "name",
+          "valueString": "Facilities Service Is Offered"
+        },
+        {
+          "url": "field",
+          "valueString": "HealthcareService.location"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+    }
+  ]
+}

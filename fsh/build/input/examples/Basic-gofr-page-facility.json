@@ -1,0 +1,255 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-page-facility",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/ihris-page"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "page",
+        "system": "http://gofr.org/fhir/CodeSystem/ihris-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-display",
+      "extension": [
+        {
+          "url": "resource",
+          "valueReference": {
+            "reference": "StructureDefinition/gofr-facility"
+          }
+        },
+        {
+          "url": "search",
+          "valueString": "Facility Name|name"
+        },
+        {
+          "url": "search",
+          "valueString": "Facility Type|type[1].text"
+        },
+        {
+          "url": "search",
+          "valueString": "Facility Physical Type|physicalType.text"
+        },
+        {
+          "url": "search",
+          "valueString": "Parent|partOf.reference"
+        },
+        {
+          "url": "search",
+          "valueString": "Status|status"
+        },
+        {
+          "url": "search",
+          "valueString": "Longitute|position.longitude"
+        },
+        {
+          "url": "search",
+          "valueString": "Latitude|position.latitude"
+        },
+        {
+          "url": "filter",
+          "valueString": "Name|name:contains"
+        },
+        {
+          "url": "filter",
+          "valueString": "Type|type|http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+        },
+        {
+          "url": "filter",
+          "valueString": "Physical Type|physicalType|http://hl7.org/fhir/ValueSet/location-physical-type"
+        },
+        {
+          "extension": [
+            {
+              "url": "path",
+              "valueString": "position.longitude"
+            }
+          ],
+          "url": "field"
+        },
+        {
+          "extension": [
+            {
+              "url": "path",
+              "valueString": "position.latitude"
+            }
+          ],
+          "url": "field"
+        },
+        {
+          "extension": [
+            {
+              "url": "readOnlyIfSet",
+              "valueBoolean": true
+            },
+            {
+              "url": "path",
+              "valueString": "Location.physicalType.coding"
+            }
+          ],
+          "url": "field"
+        }
+      ]
+    },
+    {
+      "extension": [
+        {
+          "url": "title",
+          "valueString": "Basic Details"
+        },
+        {
+          "url": "description",
+          "valueString": "Basic Details"
+        },
+        {
+          "url": "name",
+          "valueString": "Basic Details"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.name"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.alias"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.descriptions"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.status"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.type"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.partOf"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.description"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.physicalType"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+    },
+    {
+      "extension": [
+        {
+          "url": "title",
+          "valueString": "Geo-Coordinates"
+        },
+        {
+          "url": "description",
+          "valueString": "Facility Geo-Coordinates"
+        },
+        {
+          "url": "name",
+          "valueString": "Geo-Coordinates"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.position"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+    },
+    {
+      "extension": [
+        {
+          "url": "title",
+          "valueString": "Identifiers"
+        },
+        {
+          "url": "description",
+          "valueString": "Facility Identifiers"
+        },
+        {
+          "url": "name",
+          "valueString": "Identifiers"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.identifier"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+    },
+    {
+      "extension": [
+        {
+          "url": "title",
+          "valueString": "Contact Details"
+        },
+        {
+          "url": "description",
+          "valueString": "Address, email, phone numbers"
+        },
+        {
+          "url": "name",
+          "valueString": "contact"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.telecom"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+    },
+    {
+      "extension": [
+        {
+          "url": "title",
+          "valueString": "Address"
+        },
+        {
+          "url": "description",
+          "valueString": "Facility Address"
+        },
+        {
+          "url": "name",
+          "valueString": "Address"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.address"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+    },
+    {
+      "extension": [
+        {
+          "url": "title",
+          "valueString": "Hours of operation"
+        },
+        {
+          "url": "description",
+          "valueString": "Business hours"
+        },
+        {
+          "url": "name",
+          "valueString": "hoursOfOperation"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.hoursOfOperation"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+    }
+  ]
+}

@@ -2,11 +2,27 @@ version: "3.3"
 
 services:
   redis:
-    container_name: redis
+    container_name: redis-gofr
     image: redis
     ports:
       - "6379:6379"
     restart: always
+
+  mongo:
+    container_name: mongo-gofr
+    image: mongo:3.6
+    ports:
+      - "27017:27017"
+    restart: always
+
+  # fhir:
+  #   container_name: hapi-fhir
+  #   image: hapiproject/hapi:v5.3.0
+  #   ports:
+  #     - "8080:8080"
+  #   restart: always
+  #   depends_on:
+  #     - redis
 
   gofr:
     container_name: gofr
@@ -14,12 +30,12 @@ services:
     environment: 
       - FHIR_BASE_URL=http://fhir:8080/fhir
       - REDIS_HOST=redis 
-      - DB_HOST=mongo-1 
+      - DB_HOST=mongo-gofr
     ports:
       - "3000:3000"
     restart: always
 
-# join core network or gofr won't see hapi
+# join core network
 networks:
   default:
     external: true

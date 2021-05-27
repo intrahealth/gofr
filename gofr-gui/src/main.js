@@ -38,7 +38,7 @@ function getDHIS2StoreConfig (callback) {
       callback(response.data)
       // if BACKEND_URL is missing then set it
       if (!response.data.BACKEND_SERVER) {
-        let url = process.env.BACKEND_SERVER || guiConfig.BACKEND_SERVER
+        let url = process.env.VUE_APP_BACKEND_SERVER || guiConfig.BACKEND_SERVER
         let config = {
           BACKEND_SERVER: url
         }
@@ -47,7 +47,7 @@ function getDHIS2StoreConfig (callback) {
     }).catch((err) => {
       console.log(JSON.stringify(err))
       let resp = false
-      let url = process.env.BACKEND_SERVER || guiConfig.BACKEND_SERVER
+      let url = process.env.VUE_APP_BACKEND_SERVER || guiConfig.BACKEND_SERVER
       let config = {
         BACKEND_SERVER: url
       }
@@ -66,13 +66,15 @@ function addDHIS2StoreConfig (config) {
 }
 /* eslint-disable no-new */
 getDHIS2StoreConfig((storeConfig) => {
+  console.log(process.env.VUE_APP_BACKEND_SERVER);
   if (storeConfig && storeConfig.BACKEND_SERVER) {
-    axios.defaults.baseURL = process.env.BACKEND_SERVER || storeConfig.BACKEND_SERVER
-  } else if (process.env.BACKEND_SERVER) {
-    axios.defaults.baseURL = process.env.BACKEND_SERVER
+    axios.defaults.baseURL = process.env.VUE_APP_BACKEND_SERVER || storeConfig.BACKEND_SERVER
+  } else if (process.env.VUE_APP_BACKEND_SERVER) {
+    axios.defaults.baseURL = process.env.VUE_APP_BACKEND_SERVER
   } else {
     axios.defaults.baseURL = guiConfig.BACKEND_SERVER
   }
+  console.log(axios.defaults.baseURL);
   // get general config of App and pass it to the App component as props
   let defaultGenerConfig = JSON.stringify(store.state.config.generalConfig)
   axios.get('/getGeneralConfig?defaultGenerConfig=' + defaultGenerConfig).then(genConfig => {

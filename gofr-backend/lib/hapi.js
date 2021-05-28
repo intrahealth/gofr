@@ -406,7 +406,7 @@ module.exports = {
 
 // deleteTenancy({id:102})
 // addTenancy({
-//   name: 'dfsddfd',
+//   name: 'Mlw8607d293f5f8ce74ef85ec40f',
 //   description: 'Requests Database',
 // }).catch(() => {
 //   logger.error();

@@ -216,37 +216,42 @@
               >
                 <tr>
                   <td>
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <v-btn
-                          color="error"
-                          small
-                          @click.native="match('flag', item.id, item.name, item.source2IdHierarchy, item.mappedParentName)"
-                          v-on="on"
-                        >
-                          <v-icon
-                            dark
-                            left
-                          >mdi-bell</v-icon>Flag
-                        </v-btn>
-                      </template>
-                      <span>Mark the selected item as a match to be reviewed</span>
-                    </v-tooltip>
-                    |
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <v-btn
-                          color="primary"
-                          small
-                          dark
-                          @click.native="match('match', item.id, item.name, item.source2IdHierarchy)"
-                          v-on="on"
-                        >
-                          <v-icon left>mdi-thumb-up</v-icon>Save Match
-                        </v-btn>
-                      </template>
-                      <span>Save the selected item as a match</span>
-                    </v-tooltip>
+                    <v-row>
+                      <v-col md="4">
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on }">
+                            <v-btn
+                              color="error"
+                              small
+                              @click.native="match('flag', item.id, item.name, item.source2IdHierarchy, item.mappedParentName)"
+                              v-on="on"
+                            >
+                              <v-icon
+                                dark
+                                left
+                              >mdi-bell</v-icon>Flag
+                            </v-btn>
+                          </template>
+                          <span>Mark the selected item as a match to be reviewed</span>
+                        </v-tooltip>
+                      </v-col>
+                      <v-col md="4">
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on }">
+                            <v-btn
+                              color="primary"
+                              small
+                              dark
+                              @click.native="match('match', item.id, item.name, item.source2IdHierarchy)"
+                              v-on="on"
+                            >
+                              <v-icon left>mdi-thumb-up</v-icon>Save Match
+                            </v-btn>
+                          </template>
+                          <span>Save the selected item as a match</span>
+                        </v-tooltip>
+                      </v-col>
+                    </v-row>
                   </td>
                   <td>{{item.name}}</td>
                   <td>{{item.id}}</td>
@@ -259,11 +264,8 @@
             </v-data-table>
           </v-card-text>
           <v-card-actions style='float: center'>
-            <v-layout
-              row
-              wrap
-            >
-              <v-flex xs2>
+            <v-row>
+              <v-col justify="1">
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
@@ -277,8 +279,8 @@
                   </template>
                   <span>Save this Source 1 location as having no match</span>
                 </v-tooltip>
-              </v-flex>
-              <v-flex xs2>
+              </v-col>
+              <v-col justify="1">
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
@@ -292,8 +294,8 @@
                   </template>
                   <span>Mark this source 1 location as being ignored</span>
                 </v-tooltip>
-              </v-flex>
-              <v-flex xs2>
+              </v-col>
+              <v-col justify="5">
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
@@ -313,11 +315,8 @@
                   <span v-if="showAllPotential">Limit to only scored suggestions</span>
                   <span v-else>See all possible choices ignoring the score</span>
                 </v-tooltip>
-              </v-flex>
-              <v-flex
-                xs6
-                text-sm-right
-              >
+              </v-col>
+              <v-col justify="7">
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
@@ -334,8 +333,8 @@
                   </template>
                   <span>Return without saving</span>
                 </v-tooltip>
-              </v-flex>
-            </v-layout>
+              </v-col>
+            </v-row>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -1292,7 +1291,7 @@ export default {
       if (
         this.$store.state.recoLevel === this.$store.state.totalSource1Levels
       ) {
-        this.dialogWidth = '1440px'
+        this.dialogWidth = '1460px'
       } else {
         this.dialogWidth = '1190px'
       }

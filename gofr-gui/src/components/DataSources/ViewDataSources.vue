@@ -18,7 +18,7 @@
             dark
             @click.native="deleteConfirm = false"
           >
-            <v-icon>close</v-icon>
+            <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card-text>

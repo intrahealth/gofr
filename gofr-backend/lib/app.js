@@ -130,7 +130,7 @@ app.use('/FR/', FRRouter);
 app.use('/config/', FRConfig);
 app.use('/fhir', questionnaireRouter);
 app.use('/fhir', fhirRouter);
-app.use('/facilitiesRequests', facilitiesRequests)
+app.use('/facilitiesRequests', facilitiesRequests);
 // socket config - large documents can cause machine to max files open
 
 https.globalAgent.maxSockets = 32;

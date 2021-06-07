@@ -72,12 +72,6 @@ const jwtValidator = function (req, res, next) {
     || req.path == '/getGeneralConfig'
     || req.path == '/addUser/'
     || req.path.startsWith('/progress')
-    || req.path == '/'
-    || req.path.startsWith('/js')
-    || req.path.startsWith('/config.json')
-    || req.path.startsWith('/css')
-    || req.path.startsWith('/img')
-    || req.path.startsWith('/favicon.ico')
   ) {
     return next();
   }
@@ -115,8 +109,8 @@ const jwtValidator = function (req, res, next) {
 };
 
 app.use(cleanReqPath);
-app.use(jwtValidator);
 app.use(express.static(`${__dirname}/../gui`));
+app.use(jwtValidator);
 app.use(cors({
   origin: true,
   credentials: true,
@@ -192,7 +186,6 @@ if (cluster.isMaster) {
 
     // check if FR DB Exists
     const defaultDB = config.get('mCSD:registryDB');
-    const requestsDB = config.get('mCSD:requestsDB');
     let url = URI(config.get('mCSD:url')).segment(defaultDB).segment('Location').toString();
     const options = {
       url,
@@ -204,42 +197,23 @@ if (cluster.isMaster) {
         process.exit();
       }
       if (res.statusCode === 404) {
-        async.series([
-          (callback) => {
-            hapi.addTenancy({
-              id: 100,
-              name: defaultDB,
-              description: 'Core Database',
-            }).then(() => callback(null)).catch(error => callback(error));
-          },
-          (callback) => {
-            hapi.addTenancy({
-              id: 101,
-              name: requestsDB,
-              description: 'Requests Database',
-            }).then(() => callback(null)).catch(error => callback(error));
-          },
-        ], (error) => {
-          if (error) {
-            logger.error(error);
-            Promise.exit();
-          }
+        hapi.addTenancy({
+          id: 100,
+          name: defaultDB,
+          description: 'Core Database',
+        }).then(() => {
           // check if FR has fake org id
-          Promise.all([
-            mcsd.createFakeOrgID(requestsDB),
-            mcsd.createFakeOrgID(defaultDB),
-          ]).then(() => {
+          mcsd.createFakeOrgID(defaultDB).then(() => {
             defaultSetups.initialize();
           }).catch((error) => {
             logger.error(error);
           });
+        }).catch((error) => {
+          logger.error(error);
         });
       } else {
         // check if FR has fake org id
-        Promise.all([
-          mcsd.createFakeOrgID(requestsDB),
-          mcsd.createFakeOrgID(defaultDB),
-        ]).catch((error) => {
+        mcsd.createFakeOrgID(defaultDB).catch((error) => {
           logger.error(error);
         });
       }

@@ -1,7 +1,12 @@
 /* eslint-disable no-restricted-syntax */
+const fs = require('fs');
+const axios = require('axios');
+const URI = require('urijs');
 require('./connection');
+const config = require('./config');
 const logger = require('./winston');
 const models = require('./models');
+const mixin = require('./mixin')();
 
 function initializeTasks() {
   const tasks = [{
@@ -100,8 +105,72 @@ function initializeTasks() {
   }
 }
 
+const loadFSHFiles = async () => {
+  // const installed = config.get('app:installed');
+  // if (installed) {
+  //   return;
+  // }
+  const fshDir = config.get('builtFSHFIles');
+  const dirs = await fs.readdirSync(`${__dirname}/${fshDir}`);
+  const dirPromises = [];
+  const filesPromises = [];
+  for (const dir of dirs) {
+    dirPromises.push(new Promise(async (resolve, reject) => {
+      const files = await fs.readdirSync(`${__dirname}/${fshDir}/${dir}`);
+      for (const file of files) {
+        filesPromises.push(new Promise((resolve, reject) => {
+          fs.readFile(`${__dirname}/${fshDir}/${dir}/${file}`, { encoding: 'utf8', flag: 'r' }, (err, data) => {
+            if (err) throw err;
+            const fhir = JSON.parse(data);
+            if (fhir.resourceType === 'Bundle'
+              && (fhir.type === 'transaction' || fhir.type === 'batch')) {
+              logger.info(`Saving ${fhir.type}`);
+              const url = URI(config.get('mCSD:url')).segment(config.get('mCSD:registryDB')).toString();
+              axios.post(url, fhir).then((res) => {
+                logger.info(`${url}: ${res.status}`);
+                logger.info(JSON.stringify(res.data, null, 2));
+                resolve();
+              }).catch((err) => {
+                logger.error(err);
+                reject();
+              });
+            } else {
+              logger.info(`Saving ${fhir.resourceType} - ${fhir.id}`);
+              const url = URI(config.get('mCSD:url')).segment(config.get('mCSD:registryDB')).segment(fhir.resourceType).segment(fhir.id)
+                .toString();
+              axios.put(url, fhir).then((res) => {
+                logger.info(`${url}: ${res.status}`);
+                logger.info(res.headers['content-location']);
+                resolve();
+              }).catch((err) => {
+                logger.error(err);
+                logger.error(JSON.stringify(err.response.data, null, 2));
+                reject();
+              });
+            }
+          });
+        }));
+      }
+      Promise.all(filesPromises).then(() => {
+        resolve();
+      }).catch(() => {
+        reject();
+      });
+    }));
+  }
+  Promise.all(dirPromises).then(() => {
+    logger.info('Done loading FSH files');
+    // mixin.updateConfigFile(['app', 'installed'], true, () => {
+    //   logger.info('Done loading FSH files');
+    // });
+  }).catch(() => {
+    logger.error('Done loading FSH files with errors');
+  });
+};
+
 module.exports = {
   initialize: () => {
     initializeTasks();
+    loadFSHFiles();
   },
 };

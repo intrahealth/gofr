@@ -4,6 +4,7 @@ const uuid5 = require('uuid/v5');
 const csv = require('fast-csv');
 const async = require('async');
 const moment = require('moment');
+const fs = require('fs');
 const config = require('./config');
 const logger = require('./winston');
 
@@ -227,6 +228,28 @@ module.exports = function () {
           reason,
         });
       }
+    },
+    setNestedKey(obj, path, value) {
+      if (path.length === 1) {
+        obj[path] = value;
+        return;
+      }
+      this.setNestedKey(obj[path[0]], path.slice(1), value);
+    },
+    updateConfigFile(path, newValue, callback) {
+      const pathString = path.join(':');
+      config.set(pathString, newValue);
+      logger.info('Updating config file');
+      const configFile = `${__dirname}/../config/default.json`;
+      const configData = require(configFile);
+      this.setNestedKey(configData, path, newValue);
+      fs.writeFile(configFile, JSON.stringify(configData, 0, 2), (err) => {
+        if (err) {
+          throw err;
+        }
+        logger.info('Done updating config file');
+        return callback();
+      });
     },
   };
 };

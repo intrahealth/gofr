@@ -15,14 +15,14 @@ services:
       - "27017:27017"
     restart: always
 
-  # fhir:
-  #   container_name: hapi-fhir
-  #   image: hapiproject/hapi:v5.3.0
-  #   ports:
-  #     - "8080:8080"
-  #   restart: always
-  #   depends_on:
-  #     - redis
+  fhir:
+    container_name: hapi-fhir
+    image: hapiproject/hapi:v5.3.0
+    ports:
+      - "8080:8080"
+    restart: always
+    depends_on:
+      - redis
 
   gofr:
     container_name: gofr
@@ -30,6 +30,8 @@ services:
     environment: 
       - FHIR_BASE_URL=http://fhir:8080/fhir
       - REDIS_HOST=redis 
+      # use instant core mongo
+      # - DB_HOST=mongo-1
       - DB_HOST=mongo-gofr
     ports:
       - "3000:3000"

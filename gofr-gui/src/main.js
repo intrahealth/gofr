@@ -66,7 +66,6 @@ function addDHIS2StoreConfig (config) {
 }
 /* eslint-disable no-new */
 getDHIS2StoreConfig((storeConfig) => {
-  console.log(process.env.VUE_APP_BACKEND_SERVER);
   if (storeConfig && storeConfig.BACKEND_SERVER) {
     axios.defaults.baseURL = process.env.VUE_APP_BACKEND_SERVER || storeConfig.BACKEND_SERVER
   } else if (process.env.VUE_APP_BACKEND_SERVER) {
@@ -74,7 +73,6 @@ getDHIS2StoreConfig((storeConfig) => {
   } else {
     axios.defaults.baseURL = guiConfig.BACKEND_SERVER
   }
-  console.log(axios.defaults.baseURL);
   // get general config of App and pass it to the App component as props
   let defaultGenerConfig = JSON.stringify(store.state.config.generalConfig)
   axios.get('/getGeneralConfig?defaultGenerConfig=' + defaultGenerConfig).then(genConfig => {

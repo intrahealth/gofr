@@ -1,5 +1,3 @@
-
-
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-loop-func */
@@ -88,6 +86,7 @@ module.exports = function () {
             logger.error(err);
           }
         }
+        useCachedParents = false;
         if (!useCachedParents) {
           logger.info('Populating parents');
           for (const entry of mcsdSource2.entry) {
@@ -103,7 +102,7 @@ module.exports = function () {
                     .segment(source2DB)
                     .segment('Location')
                     .segment(parent.id)
-                    .toString();
+                    .toString()
                   this.matchStatus(mcsdMapped, parentIdentifier, (mapped) => {
                     if (mapped) {
                       source2MappedParentIds[entry.resource.id].push(mapped.resource.id);
@@ -1107,7 +1106,7 @@ module.exports = function () {
       }
       const status = mcsdMapped.entry.find(
         entry => entry.resource.id === id
-        || (entry.resource.hasOwnProperty('identifier') && entry.resource.identifier.find(identifier => identifier.value.split('/Location/')[1] === id)),
+        || (entry.resource.identifier && entry.resource.identifier.find(identifier => identifier.value === id)),
       );
       return callback(status);
     },

@@ -1,0 +1,95 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-page-jurisdiction",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/ihris-page"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "page",
+        "system": "http://gofr.org/fhir/CodeSystem/ihris-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-display",
+      "extension": [
+        {
+          "url": "resource",
+          "valueReference": {
+            "reference": "StructureDefinition/gofr-jurisdiction"
+          }
+        },
+        {
+          "url": "search",
+          "valueString": "Name|name"
+        },
+        {
+          "url": "search",
+          "valueString": "Type|type.coding.code"
+        },
+        {
+          "url": "search",
+          "valueString": "Physical Type|physicalType.text"
+        },
+        {
+          "url": "search",
+          "valueString": "Jurisdiction|partOf.reference"
+        },
+        {
+          "url": "filter",
+          "valueString": "Name|name:contains"
+        },
+        {
+          "url": "filter",
+          "valueString": "Type|type|http://gofr.org/fhir/ValueSet/gofr-jurisdiction-type"
+        },
+        {
+          "url": "filter",
+          "valueString": "Jurisdiction|partOf"
+        }
+      ]
+    },
+    {
+      "extension": [
+        {
+          "url": "title",
+          "valueString": "Details"
+        },
+        {
+          "url": "description",
+          "valueString": "Jurisdiction details"
+        },
+        {
+          "url": "name",
+          "valueString": "Geographical Location"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.name"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.alias"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.type"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.partOf"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.status"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+    }
+  ]
+}

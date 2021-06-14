@@ -19,7 +19,7 @@ terraform.tfstate.backup
 .vscode
 
 # readthedocs
-build
+./build
 _static
 _templates
 *.mo

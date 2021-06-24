@@ -6,6 +6,7 @@ import i18n from './i18n'
 import vuetify from './plugins/vuetify';
 import vuelidate from 'vuelidate'
 import axios from 'axios'
+import VueAxios from 'vue-axios'
 import 'whatwg-fetch'
 import fhirpath from "fhirpath"
 import fhirutils from "./plugins/fhirutils"
@@ -19,6 +20,7 @@ Object.defineProperty(Vue.prototype, '$fhirutils', {
 })
 
 Vue.use(vuelidate)
+Vue.use(VueAxios, axios)
 
 Vue.config.productionTip = false
 

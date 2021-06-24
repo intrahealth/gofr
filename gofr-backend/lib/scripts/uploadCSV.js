@@ -74,6 +74,7 @@ function buildJurisdiction(jurisdictions, bundle) {
     resource.meta = {};
     resource.meta.profile = [];
     resource.meta.profile.push('http://ihe.net/fhir/StructureDefinition/IHE_mCSD_Location');
+    resource.meta.profile.push('http://gofr.org/fhir/StructureDefinition/gofr-jurisdiction');
     resource.name = jurisdiction.name;
     resource.status = 'active';
     resource.mode = 'instance';
@@ -114,6 +115,7 @@ function buildBuilding(building, bundle) {
   resource.meta.profile = [];
   resource.meta.profile.push('http://ihe.net/fhir/StructureDefinition/IHE_mCSD_Location');
   resource.meta.profile.push('http://ihe.net/fhir/StructureDefinition/IHE_mCSD_FacilityLocation');
+  resource.meta.profile.push('http://gofr.org/fhir/StructureDefinition/gofr-facility');
   resource.name = building.name;
   if (building.alt_name) {
     resource.alias = [];

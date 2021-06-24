@@ -113,6 +113,10 @@ let router = new Router({
       })
     }
   }, {
+    path: "/ViewMap",
+    name: "ViewMap",
+    component: () => import("../components/ViewMap.vue")
+  }, {
     path: "/Resource/View/:page/:id",
     name: "ResourceView",
     component: ResourceView,

@@ -17,15 +17,15 @@ services:
 
   fhir:
     container_name: hapi-fhir
-    image: intrahealth/hapi-fhir-jpaserver-starter-partitions:v5.4.1
+    image: hapiproject/hapi:v5.4.1
     ports:
       - "8080:8080"
     restart: always
     depends_on:
       - redis
-    # environment:
+    environment:
       # file:// can only deal with absolute paths, have to use classpath
-    #   SPRING_CONFIG_LOCATION: 'classpath:./application.yaml'
+      SPRING_CONFIG_LOCATION: 'classpath:./application.yaml'
 
 
   gofr:

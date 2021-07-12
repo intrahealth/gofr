@@ -222,6 +222,27 @@
             <span>{{ $t('App.menu.addService.tooltip')}}</span>
           </v-tooltip>
         </v-list>
+        <v-list
+          class="lastMenu"
+          v-if="tasksVerification.canAdd('AddService')"
+        >
+          <v-tooltip right>
+            <template v-slot:activator="{ on }">
+              <v-list-item
+                to="/ViewMap"
+                v-on="on"
+              >
+                <v-list-item-title class="menuText">
+                  <v-icon
+                    left
+                    color="black"
+                  >mdi-google-maps</v-icon>{{ $t('App.menu.viewMap.msg')}}
+                </v-list-item-title>
+              </v-list-item>
+            </template>
+            <span>{{ $t('App.menu.viewMap.tooltip')}}</span>
+          </v-tooltip>
+        </v-list>
         <li class="parent">
           <a href="#">
             <v-icon

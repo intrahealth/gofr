@@ -184,40 +184,47 @@ if (cluster.isMaster) {
       }
     });
 
-    // check if FR DB Exists
     const defaultDB = config.get('mCSD:registryDB');
-    let url = URI(config.get('mCSD:url')).segment(defaultDB).segment('Location').toString();
-    const options = {
-      url,
-    };
-    url = false;
-    request.get(options, (err, res, body) => {
-      if (!res) {
-        logger.error('It appears that FHIR server is not running, quiting GOFR now ...');
-        process.exit();
-      }
-      if (res.statusCode === 404) {
-        hapi.addTenancy({
-          id: 100,
-          name: defaultDB,
-          description: 'Core Database',
-        }).then(() => {
-          // check if FR has fake org id
-          mcsd.createFakeOrgID(defaultDB).then(() => {
-            defaultSetups.initialize();
-          }).catch((error) => {
-            logger.error(error);
-          });
-        }).catch((error) => {
-          logger.error(error);
-        });
-      } else {
-        // check if FR has fake org id
-        mcsd.createFakeOrgID(defaultDB).catch((error) => {
-          logger.error(error);
-        });
-      }
+    mcsd.createFakeOrgID(defaultDB).then(() => {
+      defaultSetups.initialize();
+    }).catch((error) => {
+      logger.error(error);
     });
+
+    // check if FR DB Exists
+    // const defaultDB = config.get('mCSD:registryDB');
+    // let url = URI(config.get('mCSD:url')).segment(defaultDB).segment('Location').toString();
+    // const options = {
+    //   url,
+    // };
+    // url = false;
+    // request.get(options, (err, res, body) => {
+    //   if (!res) {
+    //     logger.error('It appears that FHIR server is not running, quiting GOFR now ...');
+    //     process.exit();
+    //   }
+    //   if (res.statusCode === 404) {
+    //     hapi.addTenancy({
+    //       id: 100,
+    //       name: defaultDB,
+    //       description: 'Core Database',
+    //     }).then(() => {
+    //       // check if FR has fake org id
+    //       mcsd.createFakeOrgID(defaultDB).then(() => {
+    //         defaultSetups.initialize();
+    //       }).catch((error) => {
+    //         logger.error(error);
+    //       });
+    //     }).catch((error) => {
+    //       logger.error(error);
+    //     });
+    //   } else {
+    //     // check if FR has fake org id
+    //     mcsd.createFakeOrgID(defaultDB).catch((error) => {
+    //       logger.error(error);
+    //     });
+    //   }
+    // });
   });
 
   const numWorkers = require('os').cpus().length;

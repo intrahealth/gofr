@@ -1,6 +1,6 @@
 {
   "app": {
-    "installed": true
+    "installed": false
   },
   "server": {
     "hostname": "0.0.0.0",
@@ -33,13 +33,13 @@
   },
   "baseProfile": "http://gofr.org/fhir/StructureDefinition",
   "mCSD": {
-    "url": "http://localhost:8081/hapi5/fhir",
+    "url": "http://localhost:8081/hapi54/fhir",
     "username": "",
     "password": "",
     "fakeOrgId": "eac583d2-d1ba-11e8-a8d5-f2801f1b9fd1",
     "fakeOrgName": "Taifafeki",
     "cacheTime": 1200,
-    "registryDB": "facilityregistry"
+    "registryDB": "DEFAULT"
   },
   "dbArchives": {
     "maxArchives": 2

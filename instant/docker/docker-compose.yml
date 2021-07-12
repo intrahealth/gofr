@@ -1,0 +1,48 @@
+version: '3.7'
+
+services:
+  redis:
+    container_name: redis-gofr
+    image: redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+  mongo:
+    container_name: mongo-gofr
+    image: mongo:3.6
+    ports:
+      - "27017:27017"
+    restart: always
+
+  fhir:
+    container_name: hapi-fhir
+    image: intrahealth/hapi-fhir-jpaserver-starter-partitions:v5.4.1
+    ports:
+      - "8080:8080"
+    restart: always
+    depends_on:
+      - redis
+    # environment:
+      # file:// can only deal with absolute paths, have to use classpath
+    #   SPRING_CONFIG_LOCATION: 'classpath:./application.yaml'
+
+
+  gofr:
+    container_name: gofr
+    image: intrahealth/gofr:latest
+    environment: 
+      - FHIR_BASE_URL=http://fhir:8080/fhir
+      - REDIS_HOST=redis 
+      # use instant core mongo
+      # - DB_HOST=mongo-1
+      - DB_HOST=mongo-gofr
+    ports:
+      - "4000:4000"
+    restart: always
+
+# join core network
+# networks:
+#   default:
+#     external: true
+#     name: instant_default

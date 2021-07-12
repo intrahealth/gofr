@@ -21,6 +21,7 @@ const mixin = require('./mixin')();
 const config = require('./config');
 const logger = require('./winston');
 const codesystem = require('../terminologies/gofr-codesystem.json');
+const { createLogger } = require('winston');
 
 const topOrgName = config.get('mCSD:fakeOrgName');
 

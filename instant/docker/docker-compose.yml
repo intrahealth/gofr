@@ -17,13 +17,16 @@ services:
 
   fhir:
     container_name: hapi-fhir
-    image: intrahealth/hapi-fhir-jpaserver-starter-partitions:v5.4.1
+    image: hapiproject/hapi:latest
     ports:
       - "8080:8080"
     restart: always
     depends_on:
       - redis
-    # environment:
+    environment:
+      - hapi.fhir.partitioning.enabled=true
+      - hapi.fhir.partitioning.allow_references_across_partitions=false
+      - hapi.fhir.partitioning.partitioning_include_in_search_hashes=false
       # file:// can only deal with absolute paths, have to use classpath
     #   SPRING_CONFIG_LOCATION: 'classpath:./application.yaml'
 
@@ -31,9 +34,9 @@ services:
   gofr:
     container_name: gofr
     image: intrahealth/gofr:latest
-    environment: 
+    environment:
       - FHIR_BASE_URL=http://fhir:8080/fhir
-      - REDIS_HOST=redis 
+      - REDIS_HOST=redis
       # use instant core mongo
       # - DB_HOST=mongo-1
       - DB_HOST=mongo-gofr

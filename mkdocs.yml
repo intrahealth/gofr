@@ -42,7 +42,7 @@ markdown_extensions:
   - codehilite:
       guess_lang: false
   - toc:
-      toc_depth : "3"
+      toc_depth : "2"
   - footnotes
   
 # https://github.com/zhaoterryy/mkdocs-pdf-export-plugin not working

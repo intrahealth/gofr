@@ -31,8 +31,6 @@ nav:
     - 'index.md'
   - Getting started:
     - 'getting_started/getting_started.md'
-    - 'getting_started/demo_site.md'
-    - 'getting_started/using_docker.md'
   - Working with FHIR:
     - 'working_with_fhir/working_with_fhir.md'
     - 'working_with_fhir/mcsd.md'

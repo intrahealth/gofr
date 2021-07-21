@@ -1,16 +1,20 @@
 # Basics of mCSD
 
+A guiding tenant of the evolving FHIR standard is that 80% of interoperability use cases should be satisfied out-of-the-box by any combination of the more than 130 base resources. Profiles may be created from the base resources to address diverse use cases, such as domain-specific ones like oncology, specific deployments like a patient identity registry, and local requirements such as incorporating legal definitions of marital status and race into data dictionaries. A simple use case, like a case report, up to a large use case like adapting FHIR to an entire country healthcare system, may be profiled from the base FHIR resources. Aspects of consent, security, and privacy are also embodied in profiles. 
+
+[Integrating the Healthcare Enterprise (IHE)](http://www.ihe.net) supports the open, consensus-driven development of profiles for FHIR resources and other healthcare specifications. The profiling of base resources for use cases are increasingly specified in machine-computable FHIR Implementation Guides (IGs). The terms 'profile' and 'implementation guide' may be used interchangeably, though profiles for FHIR are increasingly being specified in Implmentation Guides.
+
 The [mCSD](https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_mCSD.pdf) profile describes four entities and how they exchange information and work together. Here are the key takeaways about them.
 
-## FHIR Location and Organization
+## mCSD Facility (Location and Organization)
 
-!!! tip "FHIR Resource types are often capitalized to help identify them, e.g. Location, Organization, Practitioner, Healthcare Service"
+![Alt text](../img/mcsd1.png "FHIR resources")
 
 First, it is important to say that we often think of health facilities as a single concept, such as physical sites such as hospitals, clinics, health outposts, physician offices, etc. In this way of thinking, a facility has a unique identifier, geographic attributes (address, geocode), contact attributes, attributes regarding its hours of operation, etc. 
 
 But, in FHIR there is no single facility resource, rather **each Facility is defined by a pairing of FHIR Location and FHIR Organization**. All of the attributes required can be included, but there is no 'Facility' FHIR resource.
 
-!!! tip "A facility is defined as a FHIR Location + FHIR Organization pair"
+!!! tip "A mCSD facility is defined as a FHIR Location + FHIR Organization pair"
     The key takeaway is that when thinking of a health facility, there no single FHIR resource, instead it is represented in FHIR as a Location and Organization resource pair. 
 
 * **FHIR Locations** are physical places where care can be delivered such as facilities, buildings, wards, rooms, or vehicles. Locations also include political administrative units such as a village districts or regions. A Location has a unique identifier and may have geographic attributes (address, geocode), attributes etc. Each Location may be related to one Organization. A location may have a hierarchical relationship with other locations.
@@ -22,6 +26,8 @@ But, in FHIR there is no single facility resource, rather **each Facility is def
 
 !!! tip "Organizations can have more than hierarchy, but not Locations"
     Organizations are powerful representaions, they can have more than one hierarchy in mCSD. (This requires a mCSD extension to the core FHIR spec.)
+
+* ***mCSD Jurisdictions** are also the pairing of a Location and Organization. However, they do not directly provide care, rather than are authoritative entities.
 
 ## FHIR Healthcare Services and Practitioners
 

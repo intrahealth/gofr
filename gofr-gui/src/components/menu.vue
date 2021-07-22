@@ -203,6 +203,27 @@
         </v-list>
         <v-list
           class="lastMenu"
+          v-if="tasksVerification.canAdd('AddJurisdiction')"
+        >
+          <v-tooltip right>
+            <template v-slot:activator="{ on }">
+              <v-list-item
+                to="/questionnaire/gofr-organization-questionnaire/mcsd-organization"
+                v-on="on"
+              >
+                <v-list-item-title class="menuText">
+                  <v-icon
+                    left
+                    color="black"
+                  >mdi-home-city</v-icon>{{ $t('App.menu.addOrganization.msg')}}
+                </v-list-item-title>
+              </v-list-item>
+            </template>
+            <span>{{ $t('App.menu.addOrganization.tooltip')}}</span>
+          </v-tooltip>
+        </v-list>
+        <v-list
+          class="lastMenu"
           v-if="tasksVerification.canAdd('AddService')"
         >
           <v-tooltip right>
@@ -330,6 +351,27 @@
                   </v-list-item>
                 </template>
                 <span>{{ $t('App.menu.searchFacility.tooltip')}}</span>
+              </v-tooltip>
+            </v-list>
+            <v-list
+              class="lastMenu"
+              v-if="tasksVerification.canAdd('AddFacility')"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/Resource/Search/organization"
+                    v-on="on"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-magnify</v-icon>{{ $t('App.menu.searchOrganization.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
+                <span>{{ $t('App.menu.searchOrganization.tooltip')}}</span>
               </v-tooltip>
             </v-list>
             <v-list

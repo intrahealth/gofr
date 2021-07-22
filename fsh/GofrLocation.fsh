@@ -19,14 +19,49 @@ Description:    "GOFR Profile of Locations to manage jurisdictions."
 * partOf ^label = "Parent"
 * extension contains http://hl7.org/fhir/StructureDefinition/location-boundary-geojson named geojson 0..*
 
+Profile:        GofrMcsdFacilityOrganization
+Parent:         MCSDFacilityOrganization
+Id:             GOFR.IHE.mCSD.FacilityOrganization
+Title:          "GOFR Facility Organization"
+Description:    "GOFR Profile of Locations to manage facilities organization."
+* name 1..1 MS
+* name ^label = "Name"
+* type 2..* MS
+* type ^label = "Type"
+* type.coding 1..1 MS
+* type.coding ^label = "Type"
+* contact 0..* MS
+* contact.purpose MS
+* contact.purpose ^label = "Purpose"
+* contact.purpose.coding 1..1 MS
+* contact.purpose.coding ^label = "Purpose"
+* contact.name 1..1 MS
+* contact.name ^label = "Contact Person"
+* contact.name.use 0..1 MS
+* contact.name.use ^label = "Usage"
+* contact.name.family 1..1 MS
+* contact.name.family ^label = "Family"
+* contact.name.given 1..1 MS
+* contact.name.given ^label = "Given"
+* extension contains GOFRMCSDOrganizationHierarchy named gofr-facility-hierarchy 0..* MS
+* extension[gofr-facility-hierarchy] MS
+* extension[gofr-facility-hierarchy] ^label = "Attach To Hierarchy"
+* extension[gofr-facility-hierarchy].extension[hierarchy-type].valueCodeableConcept MS
+* extension[gofr-facility-hierarchy].extension[hierarchy-type].valueCodeableConcept.coding 1..1 MS
+* extension[gofr-facility-hierarchy].extension[hierarchy-type].valueCodeableConcept ^label = "Parent Type"
+* extension[gofr-facility-hierarchy].extension[hierarchy-type].valueCodeableConcept.coding from OrganizationHierarchyTypeValueSet (required)
+* extension[gofr-facility-hierarchy].extension[hierarchy-type].valueCodeableConcept.coding ^label = "Parent Type"
+* extension[gofr-facility-hierarchy].extension[part-of].valueReference.reference MS
+* extension[gofr-facility-hierarchy].extension[part-of].valueReference ^label = "Parent"
+
 Profile:        GofrFacility
-Parent:         Location
+Parent:         MCSDFacilityLocation
 Id:             gofr-facility
 Title:          "GOFR Facility"
 Description:    "GOFR Profile of Locations to manage facilities."
 * name 1..1 MS
 * name ^label = "Name"
-* physicalType 0..1 MS
+* physicalType 1..1 MS
 * physicalType ^label = "Physical Type"
 * physicalType.coding 1..1 MS
 * physicalType.coding ^label = "Physical Type"
@@ -53,7 +88,7 @@ Description:    "GOFR Profile of Locations to manage facilities."
 * identifier.system ^label = "System"
 * identifier.value MS
 * identifier.value ^label = "Value"
-* type 1..* MS
+* type 2..* MS
 * type ^label = "Type"
 * type.coding 1..1 MS
 * type.coding ^label = "Type"
@@ -63,6 +98,8 @@ Description:    "GOFR Profile of Locations to manage facilities."
 * position.latitude ^label = "Latitude"
 * position.longitude MS
 * position.longitude ^label = "Longitude"
+* managingOrganization 1..1 MS
+* managingOrganization only Reference(MCSDFacilityOrganization)
 * telecom 0..* MS
 * telecom ^label = "Telecom"
 * telecom.system MS
@@ -127,6 +164,14 @@ Description:    "Status of a request to add/update facility"
 * valueCoding ^label = "Request Status"
 * valueCoding from RequestStatusValueSet (required)
 
+CodeSystem:      OrganizationHierarchyTypeCodeSystem
+Id:              gofr-organization-hiearchy-type-codesystem
+Title:           "Organization Hierarchy Type"
+* ^date = "2021-07-17T08:32:04.362Z"
+* ^version = "0.1.0"
+* #funder "Funder"
+* #operational "Operational"
+
 CodeSystem:      RequestStatusCodeSystem
 Id:              request-status-codesystem
 Title:           "Request Status"
@@ -135,6 +180,13 @@ Title:           "Request Status"
 * #approved "Approved"
 * #rejected "Rejected"
 * #pending "Pending"
+
+ValueSet:         OrganizationHierarchyTypeValueSet
+Id:               gofr-organization-hiearchy-type-valueset
+Title:            "Organization Hierarchy Type ValueSet"
+* ^date = "2021-07-17T08:32:04.362Z"
+* ^version = "0.1.0"
+* codes from system OrganizationHierarchyTypeCodeSystem
 
 ValueSet:         RequestStatusValueSet
 Id:               request-status-valueset
@@ -169,111 +221,6 @@ Description:    "GOFR Profile of Locations to manage requests to update faciliti
 * extension[requestAffectedResource].valueReference MS
 * extension[requestAffectedResource] ^label = "Affected Resource"
 
-
-
-Profile:        GofrFacilityService
-Parent:         HealthcareService
-Id:             gofr-facility-service
-Title:          "GOFR Facility Service"
-Description:    "GOFR Profile of facilities service."
-* name 1..1 MS
-* name ^label = "Name"
-* comment 0..1 MS
-* comment ^label = "Comment about this service"
-* identifier 0..* MS
-* identifier ^label = "Identifier"
-* identifier ^constraint[0].key = "ihris-search-identifier"
-* identifier ^constraint[0].severity = #error
-* identifier ^constraint[0].expression = "'Location' | 'identifier' | iif(system.exists(), system & '|' & value, value)"
-* identifier ^constraint[0].human = "The identifier must be unique and another record has this identifier"
-* identifier.use MS
-* identifier.use ^label = "Use"
-* identifier.type MS
-* identifier.type ^label = "Type"
-* identifier.type.coding 1..1 MS
-* identifier.type.coding ^label = "Type"
-* identifier.system MS
-* identifier.system ^label = "System"
-* identifier.value MS
-* identifier.value ^label = "Value"
-* telecom 0..* MS
-* telecom ^label = "Telecom"
-* telecom.system MS
-* telecom.system ^label = "Contact Type"
-* telecom.use MS
-* telecom.use ^label = "Use"
-* telecom.value MS
-* telecom.value ^label = "Value"
-* type 0..* MS
-* type ^label = "Type of Service"
-* type.coding 1..1 MS
-* type.coding ^label = "Type of Service"
-* type.coding from ServiceType (required)
-* category 0..* MS
-* category ^label = "Broad Category of Service"
-* category.coding 1..1 MS
-* category.coding ^label = "Broad Category of Service"
-* category.coding from ServiceCategory (required)
-* referralMethod 0..* MS
-* referralMethod ^label = "Referral Methods"
-* referralMethod.coding 1..1 MS
-* referralMethod.coding ^label = "Referral Methods"
-* referralMethod.coding from ReferralMethod (required)
-* specialty 0..* MS
-* specialty ^label = "Specialty"
-* specialty.coding 1..1 MS
-* specialty.coding ^label = "Specialty"
-* specialty.coding from PracticeSettingCodeValueSet (required)
-* eligibility 0..* MS
-* eligibility ^label = "Eligibility"
-* eligibility.code 1..1 MS
-* eligibility.code ^label = "Eligibility"
-* eligibility.code.coding 1..1 MS
-* eligibility.code.coding ^label = "Eligibility"
-* eligibility.code.coding from SNOMEDCTClinicalFindings (required)
-* communication 0..* MS
-* communication ^label = "Communication Language"
-* communication.coding 1..1 MS
-* communication.coding ^label = "Communication Language"
-* communication.coding from CommonLanguages (required)
-* program 0..* MS
-* program ^label = "Programs"
-* program.coding 1..1 MS
-* program.coding ^label = "Programs"
-* program.coding from Program (required)
-* serviceProvisionCode 0..* MS
-* serviceProvisionCode ^label = "Service Provision Condition"
-* serviceProvisionCode.coding 1..1 MS
-* serviceProvisionCode.coding ^label = "Service Provision Condition"
-* serviceProvisionCode.coding from ServiceProvisionConditions (required)
-* availableTime 0..* MS
-* availableTime ^label = "Service Time Availability"
-* availableTime.daysOfWeek MS
-* availableTime.daysOfWeek ^label = "Days of week"
-* availableTime.allDay MS
-* availableTime.allDay ^label = "Available all day"
-* availableTime.availableStartTime MS
-* availableTime.availableStartTime ^label = "Opening Time"
-* availableTime.availableEndTime MS
-* availableTime.availableEndTime ^label = "Closing Time"
-* notAvailable 0..* MS
-* notAvailable ^label = "Service Unavailability"
-* notAvailable.description 1..1 MS
-* notAvailable.description ^label = "Description"
-* notAvailable.during 1..1 MS
-* notAvailable.during ^label = "Dates Unavailable"
-* notAvailable.during.start 1..1 MS
-* notAvailable.during.start ^label = "Start Date"
-* notAvailable.during.end 1..1 MS
-* notAvailable.during.end ^label = "End Date"
-* appointmentRequired 0..1 MS
-* appointmentRequired ^label = "Appointment Required"
-* active 0..1 MS
-* active ^label = "Active"
-* location 1..* MS
-* location only Reference(GofrFacility)
-* location ^label = "Facility Service Is Provided"
-
 ValueSet:         GofrJurisdictionType
 Id:               gofr-jurisdiction-type
 Title:            "GOFR Jurisdiction Type ValueSet"
@@ -290,6 +237,47 @@ Title:           "Jurisdiction Type(Country/Region/District/County)"
 * #region "Region" "Region"
 * #district "District" "District"
 * #county "County" "County"
+
+Instance:       gofr-page-facility-new
+InstanceOf:     IhrisPage
+Title:          "GOFR Facility Page"
+Usage:          #example
+* code = IhrisResourceCodeSystem#page
+* extension[display].extension[resource].valueReference = Reference(StructureDefinition/IHE.mCSD.FacilityOrganization)
+* extension[display].extension[search][0].valueString = "Facility Name|name"
+* extension[display].extension[filter][0].valueString = "Name|name:contains"
+* extension[section][0].extension[title].valueString = "Basic Details"
+* extension[section][0].extension[description].valueString = "Basic Details"
+* extension[section][0].extension[name].valueString = "Basic Details"
+* extension[section][0].extension[field][0].valueString = "Organization.name"
+
+* extension[section][1].extension[title].valueString = "Status"
+* extension[section][1].extension[description].valueString = "Status"
+* extension[section][1].extension[name].valueString = "status"
+* extension[section][1].extension[resource].extension[resource].valueReference = Reference(StructureDefinition/gofr-facility)
+* extension[section][1].extension[resource].extension[searchfield].valueString = "organization"
+* extension[section][1].extension[resource].extension[linkfield].valueString = "Location.id"
+* extension[section][1].extension[resource].extension[column][0].extension[header].valueString = "status"
+* extension[section][1].extension[resource].extension[column][0].extension[field].valueString = "Location.status"
+* extension[section][1].extension[resource].extension[column][1].extension[header].valueString = "Parent"
+* extension[section][1].extension[resource].extension[column][1].extension[field].valueString = "Location.partOf"
+
+Instance:       gofr-page-facilityorganization
+InstanceOf:     IhrisPage
+Title:          "GOFR Organization Page"
+Usage:          #example
+* code = IhrisResourceCodeSystem#page
+* extension[display].extension[resource].valueReference = Reference(StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization)
+* extension[display].extension[search][0].valueString = "Name|name"
+* extension[display].extension[filter][0].valueString = "Name|name:contains"
+* extension[display].extension[field][0].extension[readOnlyIfSet].valueBoolean = true
+* extension[display].extension[field][0].extension[path].valueString = "Organization.name"
+* extension[section][0].extension[title].valueString = "Basic Details"
+* extension[section][0].extension[description].valueString = "Basic Details"
+* extension[section][0].extension[name].valueString = "Basic Details"
+* extension[section][0].extension[field][0].valueString = "Organization.name"
+* extension[section][0].extension[field][1].valueString = "Organization.type"
+* extension[section][0].extension[field][2].valueString = "Organization.extension:gofr-facility-hierarchy"
 
 Instance:       gofr-page-facility
 InstanceOf:     IhrisPage
@@ -342,6 +330,24 @@ Usage:          #example
 * extension[section][5].extension[description].valueString = "Business hours"
 * extension[section][5].extension[name].valueString = "hoursOfOperation"
 * extension[section][5].extension[field][0].valueString = "Location.hoursOfOperation"
+
+* extension[section][6].extension[title].valueString = "Managing Organization"
+* extension[section][6].extension[description].valueString = "Organizations Managing This Facility"
+* extension[section][6].extension[name].valueString = "Managing Organization"
+* extension[section][6].extension[resource].extension[resource].valueReference = Reference(StructureDefinition/gofr-mcsd-organization)
+* extension[section][6].extension[resource].extension[searchfield].valueString = "Location:organization"
+* extension[section][6].extension[resource].extension[linkfield].valueString = "Organization.id"
+* extension[section][6].extension[resource].extension[column][0].extension[header].valueString = "Organization"
+* extension[section][6].extension[resource].extension[column][0].extension[field].valueString = "extension.where(url='http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.OrganizationHierarchy').extension.where(url='part-of').valueReference"
+* extension[section][6].extension[resource].extension[column][1].extension[header].valueString = "Organization Type"
+* extension[section][6].extension[resource].extension[column][1].extension[field].valueString = "extension.where(url='http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.OrganizationHierarchy').extension.where(url='hierarchy-type').valueCodeableConcept.coding"
+* extension[section][6].extension[resource].extension[column][2].extension[header].valueString = "Actions"
+* extension[section][6].extension[resource].extension[column][2].extension[field].valueString = "_action"
+* extension[section][6].extension[resource].extension[action][0].extension[link].valueString = "/resource/view/facilityorganization/ITEMID"
+* extension[section][6].extension[resource].extension[action][0].extension[text].valueString = "Edit"
+* extension[section][6].extension[resource].extension[action][0].extension[row].valueBoolean = true
+* extension[section][6].extension[resource].extension[action][0].extension[emptyDisplay].valueBoolean = false
+* extension[section][6].extension[resource].extension[action][0].extension[class].valueString = "secondary"
 
 Instance:       gofr-page-facility-add-request
 InstanceOf:     IhrisPage

@@ -33,7 +33,7 @@ module.exports = function () {
       credentials.auth = auth;
       credentials.name = name;
       credentials.sourceOwner = sourceOwner;
-      credentials.topOrgId = mixin.getTopOrgId(name + sourceOwner);
+      credentials.topOrgId = mixin.getTopOrgId(name + sourceOwner, 'Location');
       credentials.topOrgName = topOrgName;
 
       if (reset) {

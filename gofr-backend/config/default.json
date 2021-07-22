@@ -23,6 +23,9 @@
       },
       "HealthcareService.location": {
         "type": "tree"
+      },
+      "Organization.extension:hierarchy.extension:part-of.value[x]:valueReference": {
+        "type": "tree"
       }
     }
   },

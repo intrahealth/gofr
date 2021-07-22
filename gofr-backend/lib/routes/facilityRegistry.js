@@ -11,7 +11,7 @@ const config = require('../config');
 const mixin = require('../mixin')();
 const logger = require('../winston');
 
-const topOrgId = mixin.getTopOrgId(config.get('mCSD:registryDB'));
+const topOrgId = mixin.getTopOrgId(config.get('mCSD:registryDB'), 'Location');
 
 router.post('/addService', (req, res) => {
   logger.info('Received a request to add a new service');

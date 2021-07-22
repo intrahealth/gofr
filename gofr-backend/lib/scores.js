@@ -43,7 +43,7 @@ module.exports = function () {
       const scoreResults = [];
       const matchBrokenCode = config.get('mapping:matchBrokenCode');
       const maxSuggestions = config.get('matchResults:maxSuggestions');
-      const topOrgId1 = mixin.getTopOrgId(source1DB);
+      const topOrgId1 = mixin.getTopOrgId(source1DB, 'Location');
 
       if (mcsdSource2.total == 0) {
         logger.error('No Source2 data found for this orgunit');
@@ -519,7 +519,7 @@ module.exports = function () {
       const scoreResults = [];
       const matchBrokenCode = config.get('mapping:matchBrokenCode');
       const maxSuggestions = config.get('matchResults:maxSuggestions');
-      const topOrgId1 = mixin.getTopOrgId(source1DB);
+      const topOrgId1 = mixin.getTopOrgId(source1DB, 'Location');
 
       if (mcsdSource2.total == 0) {
         logger.error('No Source2 data found for this orgunit');

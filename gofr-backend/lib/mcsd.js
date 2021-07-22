@@ -21,7 +21,6 @@ const mixin = require('./mixin')();
 const config = require('./config');
 const logger = require('./winston');
 const codesystem = require('../terminologies/gofr-codesystem.json');
-const { createLogger } = require('winston');
 
 const topOrgName = config.get('mCSD:fakeOrgName');
 
@@ -1949,47 +1948,91 @@ module.exports = () => ({
 
   createFakeOrgID(database) {
     return new Promise((resolve, reject) => {
-      const topOrgId = mixin.getTopOrgId(database);
-      this.getLocationByID(database, topOrgId, false, (results) => {
-        if (results.entry.length > 0) {
-          return resolve();
+      const locTopOrgId = mixin.getTopOrgId(database, 'Location');
+      const orgTopOrgId = mixin.getTopOrgId(database, 'Organization');
+      let createLoc = false;
+      let createOrg = false;
+      const fhirDoc = {};
+      fhirDoc.entry = [];
+      fhirDoc.type = 'batch';
+      fhirDoc.resourceType = 'Bundle';
+      async.parallel({
+        loc: (callback) => {
+          this.getLocationByID(database, locTopOrgId, false, (results) => {
+            if (results.entry.length === 0) {
+              createLoc = true;
+            }
+            return callback(null);
+          });
+        },
+        org: (callback) => {
+          this.getOrganizationByID({
+            id: orgTopOrgId,
+            database,
+          }, (orgDt) => {
+            if (orgDt.entry.length === 0) {
+              createOrg = true;
+            }
+            return callback(null);
+          });
+        },
+      }, () => {
+        if (createLoc) {
+          const resource = {};
+          resource.resourceType = 'Location';
+          resource.name = topOrgName;
+          resource.id = locTopOrgId;
+          resource.identifier = [{
+            system: 'https://digitalhealth.intrahealth.org/id',
+            value: locTopOrgId,
+          }];
+          resource.physicalType = {
+            coding: [{
+              system: 'http://hl7.org/fhir/location-physical-type',
+              code: 'jdn',
+              display: 'Jurisdiction',
+            }],
+            text: 'Jurisdiction',
+          };
+          fhirDoc.entry.push({
+            resource,
+            request: {
+              method: 'PUT',
+              url: `Location/${locTopOrgId}`,
+            },
+          });
         }
-        logger.info('Fake Org ID does not exist into the FR Database, Creating now');
-        const resource = {};
-        resource.resourceType = 'Location';
-        resource.name = topOrgName;
-        resource.id = topOrgId;
-        resource.identifier = [{
-          system: 'https://digitalhealth.intrahealth.org/id',
-          value: topOrgId,
-        }];
-        resource.physicalType = {
-          coding: [{
-            system: 'http://hl7.org/fhir/location-physical-type',
-            code: 'jdn',
-            display: 'Jurisdiction',
-          }],
-          text: 'Jurisdiction',
-        };
-        const fhirDoc = {};
-        fhirDoc.entry = [];
-        fhirDoc.type = 'batch';
-        fhirDoc.resourceType = 'Bundle';
-        fhirDoc.entry.push({
-          resource,
-          request: {
-            method: 'PUT',
-            url: `Location/${topOrgId}`,
-          },
-        });
-        this.saveLocations(fhirDoc, database, (err) => {
-          if (err) {
-            reject(err);
-          } else {
-            logger.info('Fake Org Id Created Successfully');
-            resolve();
-          }
-        });
+
+        if (createOrg) {
+          const resource = {};
+          resource.resourceType = 'Organization';
+          resource.name = topOrgName;
+          resource.id = orgTopOrgId;
+          resource.identifier = [{
+            system: 'https://digitalhealth.intrahealth.org/id',
+            value: orgTopOrgId,
+          }];
+          fhirDoc.entry.push({
+            resource,
+            request: {
+              method: 'PUT',
+              url: `Organization/${orgTopOrgId}`,
+            },
+          });
+        }
+
+        if (fhirDoc.entry.length > 0) {
+          this.saveLocations(fhirDoc, database, (err) => {
+            if (err) {
+              reject(err);
+            } else {
+              logger.info('Fake Org Id Created Successfully');
+              resolve();
+            }
+          });
+        } else {
+          return resolve()
+        }
       });
     });
   },
@@ -2046,9 +2089,9 @@ module.exports = () => ({
     const manualllyMatchedCode = config.get('mapping:manualllyMatchedCode');
     const matchCommentsCode = config.get('mapping:matchCommentsCode');
     const flagCommentCode = config.get('mapping:flagCommentCode');
-    const src1FakeOrgId = mixin.getTopOrgId(source1DB);
-    const src2FakeOrgId = mixin.getTopOrgId(source2DB);
-    const mappingFakeOrgId = mixin.getTopOrgId(mappingDB);
+    const src1FakeOrgId = mixin.getTopOrgId(source1DB, 'Location');
+    const src2FakeOrgId = mixin.getTopOrgId(source2DB, 'Location');
+    const mappingFakeOrgId = mixin.getTopOrgId(mappingDB, 'Location');
     const source1System = 'https://digitalhealth.intrahealth.org/source1';
     const source2System = 'https://digitalhealth.intrahealth.org/source2';
     // check if its already mapped and ignore
@@ -2345,8 +2388,8 @@ module.exports = () => ({
     const source1System = 'https://digitalhealth.intrahealth.org/source1';
     const noMatchCode = config.get('mapping:noMatchCode');
     const ignoreCode = config.get('mapping:ignoreCode');
-    const src1FakeOrgId = mixin.getTopOrgId(source1DB);
-    const mappingFakeOrgId = mixin.getTopOrgId(mappingDB);
+    const src1FakeOrgId = mixin.getTopOrgId(source1DB, 'Location');
+    const mappingFakeOrgId = mixin.getTopOrgId(mappingDB, 'Location');
     const mappingId = mixin.getMappingId(source1Id);
     const me = this;
     async.parallel({
@@ -2544,7 +2587,7 @@ module.exports = () => ({
     const namespace = config.get('UUID:namespace');
     const levels = config.get('levels');
     levels.sort((a, b) => parseInt(a.replace('level', '')) - parseInt(b.replace('level', '')));
-    const topOrgId = mixin.getTopOrgId(database);
+    const topOrgId = mixin.getTopOrgId(database, 'Location');
     const orgname = config.get('mCSD:fakeOrgName');
     const countryUUID = topOrgId;
 

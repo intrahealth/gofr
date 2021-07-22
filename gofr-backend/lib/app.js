@@ -183,7 +183,6 @@ if (cluster.isMaster) {
         });
       }
     });
-
     const defaultDB = config.get('mCSD:registryDB');
     mcsd.createFakeOrgID(defaultDB).then(() => {
       defaultSetups.initialize();
@@ -1141,10 +1140,10 @@ if (cluster.isMaster) {
     const source2 = mixin.toTitleCase(req.params.source2 + source2Owner);
 
     if (!source1LimitOrgId) {
-      source1LimitOrgId = mixin.getTopOrgId(source1);
+      source1LimitOrgId = mixin.getTopOrgId(source1, 'Location');
     }
     if (!source2LimitOrgId) {
-      source2LimitOrgId = mixin.getTopOrgId(source2);
+      source2LimitOrgId = mixin.getTopOrgId(source2, 'Location');
     }
     async.parallel({
       Source1Levels(callback) {
@@ -1239,7 +1238,7 @@ if (cluster.isMaster) {
     const db = mixin.toTitleCase(req.params.source + sourceOwner);
     const level = req.params.level;
     const levelData = [];
-    const topOrgId = mixin.getTopOrgId(db);
+    const topOrgId = mixin.getTopOrgId(db, 'Location');
     mcsd.getLocations(db, (mcsdData) => {
       mcsd.filterLocations(mcsdData, topOrgId, level, (mcsdLevelData) => {
         async.each(mcsdLevelData.entry, (data, nxtData) => {
@@ -1462,7 +1461,7 @@ if (cluster.isMaster) {
       id,
     } = req.query;
     if (!sourceLimitOrgId) {
-      sourceLimitOrgId = mixin.getTopOrgId(mixin.toTitleCase(source + sourceOwner));
+      sourceLimitOrgId = mixin.getTopOrgId(mixin.toTitleCase(source + sourceOwner), 'Location');
     }
     if (!id) {
       id = sourceLimitOrgId;
@@ -1517,7 +1516,7 @@ if (cluster.isMaster) {
     } = req.params;
     const db = mixin.toTitleCase(source + sourceOwner);
     if (!parentID) {
-      parentID = mixin.getTopOrgId(db);
+      parentID = mixin.getTopOrgId(db, 'Location');
     }
     logger.info(`Received a request to get immediate children of ${parentID}`);
     const children = [];
@@ -1560,7 +1559,7 @@ if (cluster.isMaster) {
         sourceLimitOrgId,
       } = req.params;
       const db = mixin.toTitleCase(source + sourceOwner);
-      const topOrgId = mixin.getTopOrgId(db);
+      const topOrgId = mixin.getTopOrgId(db, 'Location');
       if (!sourceLimitOrgId) {
         sourceLimitOrgId = topOrgId;
       }
@@ -1615,10 +1614,10 @@ if (cluster.isMaster) {
     const source1DB = mixin.toTitleCase(req.params.source1 + source1Owner);
     const source2DB = mixin.toTitleCase(req.params.source2 + source2Owner);
     if (!source1LimitOrgId) {
-      source1LimitOrgId = mixin.getTopOrgId(source1DB);
+      source1LimitOrgId = mixin.getTopOrgId(source1DB, 'Location');
     }
     if (!source2LimitOrgId) {
-      source2LimitOrgId = mixin.getTopOrgId(source2DB);
+      source2LimitOrgId = mixin.getTopOrgId(source2DB, 'Location');
     }
     const recoLevel = req.params.level;
     const statusRequestId = `mappingStatus${clientId}`;
@@ -1696,10 +1695,10 @@ if (cluster.isMaster) {
       getPotential,
     } = req.query;
     if (!source1LimitOrgId) {
-      source1LimitOrgId = mixin.getTopOrgId(mixin.toTitleCase(source1 + source1Owner));
+      source1LimitOrgId = mixin.getTopOrgId(mixin.toTitleCase(source1 + source1Owner), 'Location');
     }
     if (!source2LimitOrgId) {
-      source2LimitOrgId = mixin.getTopOrgId(mixin.toTitleCase(source2 + source2Owner));
+      source2LimitOrgId = mixin.getTopOrgId(mixin.toTitleCase(source2 + source2Owner), 'Location');
     }
     let {
       parentConstraint,
@@ -1901,8 +1900,8 @@ if (cluster.isMaster) {
     const source1DB = mixin.toTitleCase(req.query.source1 + source1Owner);
     const source2DB = mixin.toTitleCase(req.query.source2 + source2Owner);
     const mappingDB = mixin.toTitleCase(req.query.source1 + userID + req.query.source2);
-    const topOrgId1 = mixin.getTopOrgId(source1DB);
-    const topOrgId2 = mixin.getTopOrgId(source2DB);
+    const topOrgId1 = mixin.getTopOrgId(source1DB, 'Location');
+    const topOrgId2 = mixin.getTopOrgId(source2DB, 'Location');
     if (!source1LimitOrgId) {
       source1LimitOrgId = topOrgId1;
     }
@@ -2177,8 +2176,8 @@ if (cluster.isMaster) {
     const source2DB = mixin.toTitleCase(req.query.source2 + source2Owner);
     const levelMapping1 = JSON.parse(req.query.levelMapping1);
     const levelMapping2 = JSON.parse(req.query.levelMapping2);
-    const topOrgId1 = mixin.getTopOrgId(source1DB);
-    const topOrgId2 = mixin.getTopOrgId(source2DB);
+    const topOrgId1 = mixin.getTopOrgId(source1DB, 'Location');
+    const topOrgId2 = mixin.getTopOrgId(source2DB, 'Location');
     if (!source1LimitOrgId) {
       source1LimitOrgId = topOrgId1;
     }

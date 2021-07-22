@@ -44,7 +44,7 @@ Usage:          #definition
 * item[0].item[3].repeats = false
 * item[0].item[3].required = true
 
-* item[0].item[4].linkId = "Location.type"
+* item[0].item[4].linkId = "Location.type[0]"
 * item[0].item[4].definition = "http://gofr.org/fhir/StructureDefinition/gofr-facility#Location.type"
 * item[0].item[4].text = "Facility Types"
 * item[0].item[4].type = #choice
@@ -52,22 +52,42 @@ Usage:          #definition
 * item[0].item[4].repeats = true
 * item[0].item[4].required = true
 
-* item[0].item[5].linkId = "Location.physicalType"
-* item[0].item[5].definition = "http://gofr.org/fhir/StructureDefinition/gofr-facility#Location.physicalType"
-* item[0].item[5].text = "Physical Type"
+* item[0].item[5].linkId = "Location.type[1]"
+* item[0].item[5].definition = "http://gofr.org/fhir/StructureDefinition/gofr-facility#Location.type"
+* item[0].item[5].text = "Facility Types"
 * item[0].item[5].type = #choice
-* item[0].item[5].required = true
 * item[0].item[5].repeats = false
 * item[0].item[5].readOnly = true
-* item[0].item[5].answerOption.valueCoding = http://hl7.org/fhir/ValueSet/location-physical-type#bu
+* item[0].item[5].required = true
+* item[0].item[5].answerOption.valueCoding = urn:ietf:rfc:3986#urn:ihe:iti:mcsd:2019:facility
 * item[0].item[5].answerOption.initialSelected = true
 
-* item[0].item[6].linkId = "Location.partOf#tree"
-* item[0].item[6].definition = "http://gofr.org/fhir/StructureDefinition/gofr-facility#Location.partOf"
-* item[0].item[6].text = "Parent"
-* item[0].item[6].type = #reference
+* item[0].item[6].linkId = "Location.physicalType"
+* item[0].item[6].definition = "http://gofr.org/fhir/StructureDefinition/gofr-facility#Location.physicalType"
+* item[0].item[6].text = "Physical Type"
+* item[0].item[6].type = #choice
+* item[0].item[6].required = true
 * item[0].item[6].repeats = false
-* item[0].item[6].required = false
+* item[0].item[6].readOnly = true
+* item[0].item[6].answerOption.valueCoding = http://hl7.org/fhir/ValueSet/location-physical-type#bu
+* item[0].item[6].answerOption.initialSelected = true
+
+* item[0].item[7].linkId = "Location.partOf#tree"
+* item[0].item[7].definition = "http://gofr.org/fhir/StructureDefinition/gofr-facility#Location.partOf"
+* item[0].item[7].text = "Parent"
+* item[0].item[7].type = #reference
+* item[0].item[7].repeats = false
+* item[0].item[7].required = false
+
+* item[0].item[8].linkId = "Location.managingOrganization"
+* item[0].item[8].definition = "http://gofr.org/fhir/StructureDefinition/gofr-facility#Location.managingOrganization"
+* item[0].item[8].text = "Managing Organization"
+* item[0].item[8].type = #string
+* item[0].item[8].required = true
+* item[0].item[8].repeats = false
+* item[0].item[8].readOnly = true
+* item[0].item[8].answerOption.valueString = "__REPLACE__Organization.id"
+* item[0].item[8].answerOption.initialSelected = true
 
 * item[1].linkId = "Location.identifier"
 * item[1].definition = "http://gofr.org/fhir/StructureDefinition/gofr-facility#Location.identifier"
@@ -136,7 +156,7 @@ Usage:          #definition
 
 * item[3].item[0].linkId = "Location.telecom[0]"
 * item[3].item[0].definition = "http://gofr.org/fhir/StructureDefinition/gofr-facility#Location.telecom"
-* item[3].item[0].text = "Contacts"
+* item[3].item[0].text = "Office Contacts"
 * item[3].item[0].type = #group
 * item[3].item[0].repeats = true
 * item[3].item[0].required = false
@@ -178,9 +198,8 @@ Usage:          #definition
 * item[4].item[0].type = #choice
 * item[4].item[0].required = false
 * item[4].item[0].repeats = false
-* item[4].item[0].readOnly = true
-* item[4].item[0].answerOption.valueCoding = http://hl7.org/fhir/address-use#work
-* item[4].item[0].answerOption.initialSelected = true
+* item[4].item[0].readOnly = false
+* item[4].item[0].answerValueSet = "http://hl7.org/fhir/address-use"
 
 * item[4].item[1].linkId = "Location.address.type"
 * item[4].item[1].definition = "http://gofr.org/fhir/StructureDefinition/gofr-facility#Location.address.type"
@@ -273,7 +292,134 @@ Usage:          #definition
 * item[5].item[0].item[3].required = false
 * item[5].item[0].item[3].repeats = false
 
+* item[6].linkId = "Organization"
+* item[6].definition = "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization"
+* item[6].text = "Organization"
+* item[6].type = #group
 
+* item[6].item[0].linkId = "Organization.name"
+* item[6].item[0].definition = "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.name"
+* item[6].item[0].text = "Oranization Names"
+* item[6].item[0].type = #string
+* item[6].item[0].repeats = false
+* item[6].item[0].required = true
+* item[6].item[0].readOnly = true
+* item[6].item[0].answerOption.valueString = "__REPLACE__Location.name"
+* item[6].item[0].answerOption.initialSelected = true
+
+* item[6].item[1].linkId = "Organization.type"
+* item[6].item[1].definition = "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.type"
+* item[6].item[1].text = "Oranization Type"
+* item[6].item[1].type = #string
+* item[6].item[1].repeats = false
+* item[6].item[1].required = true
+* item[6].item[1].readOnly = true
+* item[6].item[1].answerOption.valueString = "__REPLACE__Location.type"
+* item[6].item[1].answerOption.initialSelected = true
+
+* item[6].item[2].linkId = "Organization.extension[0]"
+* item[6].item[2].definition = "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.extension:gofr-facility-hierarchy"
+* item[6].item[2].text = "Managing Organization"
+* item[6].item[2].type = #group
+* item[6].item[2].repeats = true
+
+* item[6].item[2].item[0].linkId = "Organization.extension[0].extension[0]#tree"
+* item[6].item[2].item[0].definition = "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.extension:gofr-facility-hierarchy.extension:part-of.value[x]:valueReference"
+* item[6].item[2].item[0].text = "Organization"
+* item[6].item[2].item[0].type = #reference
+* item[6].item[2].item[0].repeats = false
+* item[6].item[2].item[0].required = true
+
+* item[6].item[2].item[1].linkId = "Organization.extension[0].extension[1]"
+* item[6].item[2].item[1].definition = "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.extension:gofr-facility-hierarchy.extension:hierarchy-type.value[x]:valueCodeableConcept"
+* item[6].item[2].item[1].text = "Type"
+* item[6].item[2].item[1].type = #choice
+* item[6].item[2].item[1].answerValueSet = "http://gofr.org/fhir/ValueSet/gofr-organization-hiearchy-type-valueset"
+* item[6].item[2].item[1].repeats = false
+* item[6].item[2].item[1].required = false
+
+* item[3].item[1].linkId = "Organization.contact[0]"
+* item[3].item[1].definition = "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact"
+* item[3].item[1].text = "Contact Person"
+* item[3].item[1].type = #group
+* item[3].item[1].repeats = true
+* item[3].item[1].required = false
+
+* item[3].item[1].item[0].linkId = "Organization.contact[0].purpose"
+* item[3].item[1].item[0].definition = "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.purpose"
+* item[3].item[1].item[0].text = "Purpose"
+* item[3].item[1].item[0].type = #choice
+* item[3].item[1].item[0].answerValueSet = "http://terminology.hl7.org/CodeSystem/contactentity-type"
+* item[3].item[1].item[0].required = false
+* item[3].item[1].item[0].repeats = false
+
+* item[3].item[1].item[1].linkId = "Organization.contact[0].name.given[0]"
+* item[3].item[1].item[1].definition = "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.name.given"
+* item[3].item[1].item[1].text = "Given Name"
+* item[3].item[1].item[1].type = #string
+* item[3].item[1].item[1].required = true
+* item[3].item[1].item[1].repeats = false
+
+* item[3].item[1].item[2].linkId = "Organization.contact[0].name.family"
+* item[3].item[1].item[2].definition = "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.name.family"
+* item[3].item[1].item[2].text = "Family Name"
+* item[3].item[1].item[2].type = #string
+* item[3].item[1].item[2].required = true
+* item[3].item[1].item[2].repeats = false
+
+* item[3].item[1].item[3].linkId = "Organization.contact[0].telecom[0].use"
+* item[3].item[1].item[3].definition = "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.telecom.use"
+* item[3].item[1].item[3].text = "Telecom Use"
+* item[3].item[1].item[3].type = #choice
+* item[3].item[1].item[3].required = true
+* item[3].item[1].item[3].repeats = false
+* item[3].item[1].item[3].readOnly = true
+* item[3].item[1].item[3].answerOption.valueCoding = http://hl7.org/fhir/contact-point-use#mobile
+* item[3].item[1].item[3].answerOption.initialSelected = true
+
+* item[3].item[1].item[4].linkId = "Organization.contact[0].telecom[0].system"
+* item[3].item[1].item[4].definition = "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.telecom.system"
+* item[3].item[1].item[4].text = "Telecom System"
+* item[3].item[1].item[4].type = #choice
+* item[3].item[1].item[4].required = true
+* item[3].item[1].item[4].repeats = false
+* item[3].item[1].item[4].readOnly = true
+* item[3].item[1].item[4].answerOption.valueCoding = http://hl7.org/fhir/contact-point-system#phone
+* item[3].item[1].item[4].answerOption.initialSelected = true
+
+* item[3].item[1].item[5].linkId = "Organization.contact[0].telecom[0].value"
+* item[3].item[1].item[5].definition = "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.telecom.value"
+* item[3].item[1].item[5].text = "Mobile Phone"
+* item[3].item[1].item[5].type = #string
+* item[3].item[1].item[5].required = true
+* item[3].item[1].item[5].repeats = false
+
+* item[3].item[1].item[6].linkId = "Organization.contact[0].telecom[1].use"
+* item[3].item[1].item[6].definition = "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.telecom.use"
+* item[3].item[1].item[6].text = "Telecom Use"
+* item[3].item[1].item[6].type = #choice
+* item[3].item[1].item[6].required = true
+* item[3].item[1].item[6].repeats = false
+* item[3].item[1].item[6].readOnly = true
+* item[3].item[1].item[6].answerOption.valueCoding = http://hl7.org/fhir/contact-point-use#work
+* item[3].item[1].item[6].answerOption.initialSelected = true
+
+* item[3].item[1].item[7].linkId = "Organization.contact[0].telecom[1].system"
+* item[3].item[1].item[7].definition = "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.telecom.system"
+* item[3].item[1].item[7].text = "Telecom System"
+* item[3].item[1].item[7].type = #choice
+* item[3].item[1].item[7].required = true
+* item[3].item[1].item[7].repeats = false
+* item[3].item[1].item[7].readOnly = true
+* item[3].item[1].item[7].answerOption.valueCoding = http://hl7.org/fhir/contact-point-system#email
+* item[3].item[1].item[7].answerOption.initialSelected = true
+
+* item[3].item[1].item[8].linkId = "Organization.contact[0].telecom[1].value"
+* item[3].item[1].item[8].definition = "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.telecom.value"
+* item[3].item[1].item[8].text = "Work Email"
+* item[3].item[1].item[8].type = #string
+* item[3].item[1].item[8].required = false
+* item[3].item[1].item[8].repeats = false
 
 Instance:       GofrFacilityAddRequestQuestionnaire
 InstanceOf:     IhrisQuestionnaire

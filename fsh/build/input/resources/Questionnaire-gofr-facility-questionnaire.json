@@ -54,13 +54,31 @@
           "required": true
         },
         {
-          "linkId": "Location.type",
+          "linkId": "Location.type[0]",
           "definition": "http://gofr.org/fhir/StructureDefinition/gofr-facility#Location.type",
           "text": "Facility Types",
           "type": "choice",
           "answerValueSet": "http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType",
           "repeats": true,
           "required": true
+        },
+        {
+          "linkId": "Location.type[1]",
+          "definition": "http://gofr.org/fhir/StructureDefinition/gofr-facility#Location.type",
+          "text": "Facility Types",
+          "type": "choice",
+          "repeats": false,
+          "readOnly": true,
+          "required": true,
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "urn:ihe:iti:mcsd:2019:facility",
+                "system": "urn:ietf:rfc:3986"
+              },
+              "initialSelected": true
+            }
+          ]
         },
         {
           "linkId": "Location.physicalType",
@@ -87,6 +105,21 @@
           "type": "reference",
           "repeats": false,
           "required": false
+        },
+        {
+          "linkId": "Location.managingOrganization",
+          "definition": "http://gofr.org/fhir/StructureDefinition/gofr-facility#Location.managingOrganization",
+          "text": "Managing Organization",
+          "type": "string",
+          "required": true,
+          "repeats": false,
+          "readOnly": true,
+          "answerOption": [
+            {
+              "valueString": "__REPLACE__Organization.id",
+              "initialSelected": true
+            }
+          ]
         }
       ]
     },
@@ -174,7 +207,7 @@
         {
           "linkId": "Location.telecom[0]",
           "definition": "http://gofr.org/fhir/StructureDefinition/gofr-facility#Location.telecom",
-          "text": "Contacts",
+          "text": "Office Contacts",
           "type": "group",
           "repeats": true,
           "required": false,
@@ -215,6 +248,129 @@
               ]
             }
           ]
+        },
+        {
+          "linkId": "Organization.contact[0]",
+          "definition": "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact",
+          "text": "Contact Person",
+          "type": "group",
+          "repeats": true,
+          "required": false,
+          "item": [
+            {
+              "linkId": "Organization.contact[0].purpose",
+              "definition": "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.purpose",
+              "text": "Purpose",
+              "type": "choice",
+              "answerValueSet": "http://terminology.hl7.org/CodeSystem/contactentity-type",
+              "required": false,
+              "repeats": false
+            },
+            {
+              "linkId": "Organization.contact[0].name.given[0]",
+              "definition": "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.name.given",
+              "text": "Given Name",
+              "type": "string",
+              "required": true,
+              "repeats": false
+            },
+            {
+              "linkId": "Organization.contact[0].name.family",
+              "definition": "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.name.family",
+              "text": "Family Name",
+              "type": "string",
+              "required": true,
+              "repeats": false
+            },
+            {
+              "linkId": "Organization.contact[0].telecom[0].use",
+              "definition": "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.telecom.use",
+              "text": "Telecom Use",
+              "type": "choice",
+              "required": true,
+              "repeats": false,
+              "readOnly": true,
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "code": "mobile",
+                    "system": "http://hl7.org/fhir/contact-point-use"
+                  },
+                  "initialSelected": true
+                }
+              ]
+            },
+            {
+              "linkId": "Organization.contact[0].telecom[0].system",
+              "definition": "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.telecom.system",
+              "text": "Telecom System",
+              "type": "choice",
+              "required": true,
+              "repeats": false,
+              "readOnly": true,
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "code": "phone",
+                    "system": "http://hl7.org/fhir/contact-point-system"
+                  },
+                  "initialSelected": true
+                }
+              ]
+            },
+            {
+              "linkId": "Organization.contact[0].telecom[0].value",
+              "definition": "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.telecom.value",
+              "text": "Mobile Phone",
+              "type": "string",
+              "required": true,
+              "repeats": false
+            },
+            {
+              "linkId": "Organization.contact[0].telecom[1].use",
+              "definition": "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.telecom.use",
+              "text": "Telecom Use",
+              "type": "choice",
+              "required": true,
+              "repeats": false,
+              "readOnly": true,
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "code": "work",
+                    "system": "http://hl7.org/fhir/contact-point-use"
+                  },
+                  "initialSelected": true
+                }
+              ]
+            },
+            {
+              "linkId": "Organization.contact[0].telecom[1].system",
+              "definition": "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.telecom.system",
+              "text": "Telecom System",
+              "type": "choice",
+              "required": true,
+              "repeats": false,
+              "readOnly": true,
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "code": "email",
+                    "system": "http://hl7.org/fhir/contact-point-system"
+                  },
+                  "initialSelected": true
+                }
+              ]
+            },
+            {
+              "linkId": "Organization.contact[0].telecom[1].value",
+              "definition": "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.contact.telecom.value",
+              "text": "Work Email",
+              "type": "string",
+              "required": false,
+              "repeats": false
+            }
+          ]
         }
       ]
     },
@@ -232,16 +388,8 @@
           "type": "choice",
           "required": false,
           "repeats": false,
-          "readOnly": true,
-          "answerOption": [
-            {
-              "valueCoding": {
-                "code": "work",
-                "system": "http://hl7.org/fhir/address-use"
-              },
-              "initialSelected": true
-            }
-          ]
+          "readOnly": false,
+          "answerValueSet": "http://hl7.org/fhir/address-use"
         },
         {
           "linkId": "Location.address.type",
@@ -348,6 +496,70 @@
               "type": "time",
               "required": false,
               "repeats": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "Organization",
+      "definition": "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization",
+      "text": "Organization",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "Organization.name",
+          "definition": "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.name",
+          "text": "Oranization Names",
+          "type": "string",
+          "repeats": false,
+          "required": true,
+          "readOnly": true,
+          "answerOption": [
+            {
+              "valueString": "__REPLACE__Location.name",
+              "initialSelected": true
+            }
+          ]
+        },
+        {
+          "linkId": "Organization.type",
+          "definition": "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.type",
+          "text": "Oranization Type",
+          "type": "string",
+          "repeats": false,
+          "required": true,
+          "readOnly": true,
+          "answerOption": [
+            {
+              "valueString": "__REPLACE__Location.type",
+              "initialSelected": true
+            }
+          ]
+        },
+        {
+          "linkId": "Organization.extension[0]",
+          "definition": "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.extension:gofr-facility-hierarchy",
+          "text": "Managing Organization",
+          "type": "group",
+          "repeats": true,
+          "item": [
+            {
+              "linkId": "Organization.extension[0].extension[0]#tree",
+              "definition": "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.extension:gofr-facility-hierarchy.extension:part-of.value[x]:valueReference",
+              "text": "Organization",
+              "type": "reference",
+              "repeats": false,
+              "required": true
+            },
+            {
+              "linkId": "Organization.extension[0].extension[1]",
+              "definition": "http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.FacilityOrganization#Organization.extension:gofr-facility-hierarchy.extension:hierarchy-type.value[x]:valueCodeableConcept",
+              "text": "Type",
+              "type": "choice",
+              "answerValueSet": "http://gofr.org/fhir/ValueSet/gofr-organization-hiearchy-type-valueset",
+              "repeats": false,
+              "required": false
             }
           ]
         }

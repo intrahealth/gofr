@@ -18,8 +18,8 @@ module.exports = function () {
       val = Number(val);
       return val === +val && isFinite(val) && !(val % 1);
     },
-    getTopOrgId(dbname) {
-      return uuid5(dbname, '16b229bc-eba5-4e99-abec-aaa0d1462583');
+    getTopOrgId(dbname, resourceType) {
+      return uuid5(dbname+resourceType, '16b229bc-eba5-4e99-abec-aaa0d1462583');
     },
     getMappingId(id) {
       return uuid5(id.toString(), '16b229bc-eba5-4e99-abec-aaa0d1462583');

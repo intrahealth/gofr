@@ -111,30 +111,39 @@ const fhirAxios = {
       reject(err);
     }
     const url = new URL(fhirAxios.baseUrl.href);
-    let topOrgId;
+    let db = database;
     if (!database) {
-      topOrgId = mixin.getTopOrgId(config.get('mCSD:registryDB'));
+      db = config.get('mCSD:registryDB');
     } else {
       url.href.replace(config.get('mCSD:registryDB'), database);
-      topOrgId = mixin.getTopOrgId(database);
     }
     if (resource.resourceType !== 'Bundle') {
       url.pathname += resource.resourceType;
-      if (resource.resourceType === 'Location') {
+      if (['Location', 'Organization'].includes(resource.resourceType)) {
         if (!resource.partOf || (resource.partOf && !resource.partOf.reference)) {
           resource.partOf = {
-            reference: `Location/${topOrgId}`,
+            reference: `${resource.resourceType}/${mixin.getTopOrgId(db, resource.resourceType)}`,
           };
         }
+      }
+    } else if (resource.resourceType === 'Bundle') {
+      for (const index in resource.entry) {
+        const resType = resource.entry[index].resource.resourceType;
+        console.log(resType);
+        if (!resource.entry[index].resource.partOf && ['Location', 'Organization'].includes(resType)) {
+          console.log(resType);
+          resource.entry[index].resource.partOf = {
+            reference: `${resType}/${mixin.getTopOrgId(db, resType)}`,
+          };
+        }
+        console.error(JSON.stringify(resource, 0, 2));
       }
     } else if (!(resource.type === 'transaction' || resource.type === 'batch')) {
       err = new InvalidRequestError("Bundles must of type 'transaction' or 'batch'");
       err.response = { status: 404 };
       reject(err);
     }
-
     const auth = fhirAxios.__getAuth();
-    console.log(url.href);
     axios.post(url.href, resource, { auth }).then((response) => {
       resolve(response.data);
     }).catch((err) => {

@@ -32,7 +32,6 @@ const fhirDefinition = {
   getFieldDefinition: expression => new Promise((resolve, reject) => {
     const exp = expression.split('#');
     const defId = exp[0].substring(exp[0].lastIndexOf('/') + 1);
-
     if (!cache.hasOwnProperty(exp[0])) {
       fhirWrapper.getResource({
         resource: 'StructureDefinition',

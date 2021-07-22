@@ -48,6 +48,10 @@
         "msg": "Search Facility",
         "tooltip": "Search Facility"
       },
+      "searchOrganization": {
+        "msg": "Search Organization",
+        "tooltip": "Search Organization"
+      },
       "searchFacilityAddRequest": {
         "msg": "Search Facility Add Request",
         "tooltip": "Search Facility Add Request"
@@ -59,6 +63,10 @@
       "addJurisdiction": {
         "msg": "Add Jurisdiction",
         "tooltip": "Add Counties/Districts"
+      },
+      "addOrganization": {
+        "msg": "Add Organization",
+        "tooltip": "Add Organization"
       },
       "addFacility": {
         "msg": "Add Facility",

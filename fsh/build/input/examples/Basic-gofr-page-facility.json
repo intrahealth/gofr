@@ -250,6 +250,106 @@
         }
       ],
       "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+    },
+    {
+      "extension": [
+        {
+          "url": "title",
+          "valueString": "Managing Organization"
+        },
+        {
+          "url": "description",
+          "valueString": "Organizations Managing This Facility"
+        },
+        {
+          "url": "name",
+          "valueString": "Managing Organization"
+        },
+        {
+          "extension": [
+            {
+              "url": "resource",
+              "valueReference": {
+                "reference": "StructureDefinition/gofr-mcsd-organization"
+              }
+            },
+            {
+              "url": "linkfield",
+              "valueString": "Organization.id"
+            },
+            {
+              "url": "column",
+              "extension": [
+                {
+                  "url": "header",
+                  "valueString": "Organization"
+                },
+                {
+                  "url": "field",
+                  "valueString": "extension.where(url='http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.OrganizationHierarchy').extension.where(url='part-of').valueReference"
+                }
+              ]
+            },
+            {
+              "url": "searchfield",
+              "valueString": "Location:organization"
+            },
+            {
+              "extension": [
+                {
+                  "url": "header",
+                  "valueString": "Organization Type"
+                },
+                {
+                  "url": "field",
+                  "valueString": "extension.where(url='http://gofr.org/fhir/StructureDefinition/GOFR.IHE.mCSD.OrganizationHierarchy').extension.where(url='hierarchy-type').valueCodeableConcept.coding"
+                }
+              ],
+              "url": "column"
+            },
+            {
+              "extension": [
+                {
+                  "url": "header",
+                  "valueString": "Actions"
+                },
+                {
+                  "url": "field",
+                  "valueString": "_action"
+                }
+              ],
+              "url": "column"
+            },
+            {
+              "extension": [
+                {
+                  "url": "link",
+                  "valueString": "/resource/view/facilityorganization/ITEMID"
+                },
+                {
+                  "url": "text",
+                  "valueString": "Edit"
+                },
+                {
+                  "url": "row",
+                  "valueBoolean": true
+                },
+                {
+                  "url": "emptyDisplay",
+                  "valueBoolean": false
+                },
+                {
+                  "url": "class",
+                  "valueString": "secondary"
+                }
+              ],
+              "url": "action"
+            }
+          ],
+          "url": "resource"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
     }
   ]
 }

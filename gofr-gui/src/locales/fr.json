@@ -29,8 +29,12 @@
         "tooltip": "Search"
       },
       "searchFacility": {
-        "msg": "Search Facility",
-        "tooltip": "Search Facility"
+        "msg": "Facilité de recherche",
+        "tooltip": "Facilité de recherche"
+      },
+      "searchOrganization": {
+        "msg": "Rechercher une organisation",
+        "tooltip": "Rechercher une organisation"
       },
       "searchFacilityAddRequest": {
         "msg": "Search Facility Add Request",
@@ -59,6 +63,10 @@
       "addJurisdiction": {
         "msg": "Ajouter une juridiction",
         "tooltip": "Ajouter des comtés / districts"
+      },
+      "addOrganization": {
+        "msg": "Ajouter une organisation",
+        "tooltip": "Ajouter une organisation"
       },
       "addFacility": {
         "msg": "Add Facility",

@@ -43,6 +43,7 @@ router.post('/QuestionnaireResponse', (req, res, next) => {
     }
     fhirModules.requireWorkflow(workflow, details.library, details.file).then((module) => {
       module.process(req).then((bundle) => {
+        return res.status(500).send()
         fhirAxios.create(bundle).then((results) => {
           if (module.postProcess) {
             module.postProcess(req, results).then(() => {

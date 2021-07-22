@@ -203,7 +203,11 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
               if (config.get(`defaults:fields:${field.id}:${attr}`)) {
                 vueOutput += ` ${attr}="${config.get(`defaults:fields:${field.id}:${attr}`)}"`;
               } else if (attr === 'initialValue' && displayType === 'tree') {
-                const topOrgId = mixin.getTopOrgId(config.get('mCSD:registryDB'));
+                let resType = field.id.split('.')[0]
+                let topOrgId = ''
+                if(['Location', 'Organization'].includes(resType)) {
+                  topOrgId = mixin.getTopOrgId(config.get('mCSD:registryDB'), resType);
+                }
                 vueOutput += ` initialValue="${topOrgId}"`;
               }
             }
@@ -674,7 +678,7 @@ router.get('/page/:page/:type?', (req, res) => {
                 output += ` ${attr}="${
                   config.get(`defaults:components:${eleName}:${attr}`)}"`;
               } else if (attr === 'initialValue' && displayType === 'tree') {
-                const topOrgId = mixin.getTopOrgId(config.get('mCSD:registryDB'));
+                const topOrgId = mixin.getTopOrgId(config.get('mCSD:registryDB'), resource.type);
                 output += ` initialValue="${topOrgId}"`;
               }
             }

@@ -77,28 +77,24 @@ export default {
   },
   methods: {
     setupData: function() {
-      /*
-      if ( this.slotProps && this.slotProps.source ) {
-        this.source = { path: this.field, data: {} }
-        if ( this.slotProps.source.fromArray ) {
-          this.source.data = this.slotProps.source.data
-        } else {
-          this.source.data = this.$fhirpath.evaluate( this.slotProps.source.data, this.field )
-        }
-        //console.log(this.source)
-      }
-      */
-      let url = "/fhir/" + this.field
-      let queryStr = []
-      if ( this.profile ) {
-        queryStr.push( "_profile="+this.profile )
-      }
-      if ( this.searchField ) {
-        queryStr.push( this.searchField+"="+this.linkId )
+      let url
+      //for searchfield in the form Location:organization with Location being the primary resource, then use _include to retrieve secondary resources
+      if(this.searchField.split(':').length === 2) {
+        let resource = this.searchField.split(':')[0]
+        url = "fhir/" + resource + "?_id=" + this.linkId + "&_include=" + this.searchField
       } else {
-        queryStr.push( this.linkField.substring( this.linkField.indexOf('.') +1 ) +"="+this.linkId )
+        url = "/fhir/" + this.field
+        let queryStr = []
+        if ( this.profile ) {
+          queryStr.push( "_profile="+this.profile )
+        }
+        if ( this.searchField ) {
+          queryStr.push( this.searchField+"="+this.linkId )
+        } else {
+          queryStr.push( this.linkField.substring( this.linkField.indexOf('.') +1 ) +"="+this.linkId )
+        }
+        url += "?" + queryStr.join("&")
       }
-      url += "?" + queryStr.join("&")
       this.items = []
       this.loading = true
       this.addItems( url )
@@ -108,6 +104,9 @@ export default {
         let data = response.data
         if ( data.entry && data.entry.length > 0 ) {
           for( let entry of data.entry ) {
+            if(this.searchField.split(':').length === 2 && entry.resource.resourceType === this.searchField.split(':')[0]) {
+              continue
+            }
             let row = { id: entry.resource.id }
             for( let header of this.columns ) {
               if ( header.value === "_action" ) continue

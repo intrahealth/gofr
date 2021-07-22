@@ -1,4 +1,6 @@
 const uuidv5 = require('uuid/v5');
+const uuidv4 = require('uuid/v4');
+const async = require('async');
 const config = require('../config');
 
 const fhirAxios = require('./fhirAxios');
@@ -161,7 +163,6 @@ const fhirQuestionnaire = {
             current[lastElement] = {};
           }
         }
-
         if (arrayIdx !== false) {
           if (!current[lastElement][arrayIdx]) {
             current[lastElement][arrayIdx] = {};
@@ -169,11 +170,6 @@ const fhirQuestionnaire = {
           current[lastElement][arrayIdx].url = field.url;
         } else {
           current[lastElement].url = field.url;
-        }
-      } else if (typeof field.answer === 'string' && field.answer.startsWith('__REPLACE__')) {
-        const reference = field.answer.substring(11);
-        if (entries.hasOwnProperty(reference)) {
-          current[lastElement] = { reference: entries[reference].fullUrl };
         }
       } else if (!current.hasOwnProperty(lastElement)) {
         if (arrayIdx !== false) {
@@ -200,6 +196,36 @@ const fhirQuestionnaire = {
         current[lastElement] = field.answer || '';
       }
     }
+
+    for (const field of fields) {
+      const fieldPath = field.definition.split('.');
+      const fieldResource = fieldPath.shift();
+      if (typeof field.answer === 'string' && field.answer.startsWith('__REPLACE__')) {
+        const replaceResource = field.answer.substring(11).split('.')[0];
+        const replacePaths = field.answer.substring(11).split('.');
+        if ((replacePaths.length === 1 || (replacePaths.length === 2 && replacePaths[1] === 'id')) && entries.hasOwnProperty(replaceResource)) {
+          setNestedKey(entries[fieldResource].resource, fieldPath, { reference: entries[replaceResource].fullUrl });
+        } else {
+          let replaceValue;
+          for (const path of replacePaths) {
+            if (!replaceValue) {
+              replaceValue = entries[path].resource;
+            } else {
+              replaceValue = replaceValue[path];
+            }
+          }
+          setNestedKey(entries[fieldResource].resource, fieldPath, replaceValue);
+        }
+      }
+    }
+
+    function setNestedKey(obj, path, value) {
+      if (path.length === 1) {
+        obj[path] = value;
+      } else {
+        setNestedKey(obj[path[0]], path.slice(1), value);
+      }
+    }
     const bundleEntries = [];
     const isObject = obj => (!!obj) && (obj.constructor === Object);
     const recursiveFilter = (filterObj) => {
@@ -223,6 +249,40 @@ const fhirQuestionnaire = {
       entry: bundleEntries,
     };
   },
+
+  hasParentProfile: (profile, parentProfile) => new Promise((resolve, reject) => {
+    let nextProfile = false;
+    async.doWhilst(
+      (callback) => {
+        if (nextProfile) {
+          profile = nextProfile;
+        }
+        let has = false;
+        fhirAxios.search('StructureDefinition', { _id: profile, _elements: 'baseDefinition,name' }).then((structDef) => {
+          if (structDef.entry[0].resource.name !== parentProfile && structDef.entry[0].resource.baseDefinition.split('/').pop() !== 'DomainResource') {
+            nextProfile = structDef.entry[0].resource.baseDefinition.split('/').pop();
+          } else {
+            nextProfile = false;
+            if (structDef.entry[0].resource.name === parentProfile) {
+              has = true;
+            }
+          }
+          return callback(null, has);
+        }).catch((err) => {
+          nextProfile = false;
+          return callback(err);
+        });
+      },
+      () => nextProfile !== false,
+      (error, has) => {
+        if (error) {
+          return reject(error);
+        }
+        resolve(has);
+      },
+    );
+  }),
+
   processQuestionnaire: response => new Promise((resolve, reject) => {
     fhirQuestionnaire.setQuestionnairePaths(response);
 
@@ -262,7 +322,6 @@ const fhirQuestionnaire = {
             const question = questionnaireRef[item.linkId];
             const simple = ['date', 'string', 'dateTime', 'text', 'attachment'];
             const data = { linkId: item.linkId, definition: item.definition, q: question.type };
-
             if (item.definition.includes('extension')) {
               logger.silly('EXT', question, item);
               // Check for multiple extensions so the URL can be set up.
@@ -281,9 +340,9 @@ const fhirQuestionnaire = {
               let def = defs.pop();
               while (path && dataDef && def) {
                 if (path.includes('extension')) {
-                  const parentPath = `${paths.join('.') }.${path}`;
-                  const parentDef = `${defs.join('.') }.${def}`;
-                  const parentDataDef = `${dataDefs.join('.') }.${dataDef}`;
+                  const parentPath = `${paths.join('.')}.${path}`;
+                  const parentDef = `${defs.join('.')}.${def}`;
+                  const parentDataDef = `${dataDefs.join('.')}.${dataDef}`;
                   if (!fields.find(field => field.linkId === parentPath)) {
                     logger.silly('WOULD CHECK AND ADD', defs, def);
                     const parentExt = await structureDef.getFieldDefinition(parentDef);
@@ -364,9 +423,9 @@ const fhirQuestionnaire = {
               }
             } else if (simple.includes(question.type)) {
               if (question.repeats) {
-                data.answer = item.answer.map(answer => answer[`value${  capitalize(question.type)}`]);
+                data.answer = item.answer.map(answer => answer[`value${capitalize(question.type)}`]);
               } else {
-                data.answer = item.answer[0][`value${  capitalize(question.type)}`];
+                data.answer = item.answer[0][`value${capitalize(question.type)}`];
               }
               fields.push(data);
             } else if (question.type === 'choice') {
@@ -424,7 +483,7 @@ const fhirQuestionnaire = {
       logger.silly('FINISHED', JSON.stringify(fields, null, 2));
       logger.silly(fields);
       const bundle = fhirQuestionnaire._createBundle(fields, questionnaireRef);
-      resolve(bundle);
+      return resolve(bundle);
     }).catch((err) => {
       reject(err);
     });

@@ -1,0 +1,75 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-page-organization",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/ihris-page"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "page",
+        "system": "http://gofr.org/fhir/CodeSystem/ihris-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-display",
+      "extension": [
+        {
+          "url": "resource",
+          "valueReference": {
+            "reference": "StructureDefinition/gofr-mcsd-organization"
+          }
+        },
+        {
+          "url": "search",
+          "valueString": "Name|name"
+        },
+        {
+          "url": "search",
+          "valueString": "Type|type[0].text"
+        },
+        {
+          "url": "search",
+          "valueString": "Parent|partOf.reference"
+        },
+        {
+          "url": "filter",
+          "valueString": "Name|name:contains"
+        }
+      ]
+    },
+    {
+      "extension": [
+        {
+          "url": "title",
+          "valueString": "Basic Details"
+        },
+        {
+          "url": "description",
+          "valueString": "Basic Details"
+        },
+        {
+          "url": "name",
+          "valueString": "Basic Details"
+        },
+        {
+          "url": "field",
+          "valueString": "Organization.name"
+        },
+        {
+          "url": "field",
+          "valueString": "Organization.type"
+        },
+        {
+          "url": "field",
+          "valueString": "Organization.extension:gofr-hierarchy"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+    }
+  ]
+}

@@ -159,6 +159,148 @@
         <v-icon>mdi-map-marker</v-icon>{{ $t('App.menu.facilityRegistry.msg')}}
       </a>
       <ul class="child">
+        <li class="parent">
+          <a href="#">
+            <v-icon
+              left
+              color="black"
+            >mdi-magnify</v-icon>
+            {{ $t('App.menu.search.msg')}}
+            <v-icon
+              color="black"
+              small
+              class="menuArrow"
+            >mdi-play</v-icon>
+          </a>
+          <ul class="child">
+            <v-list
+              class="lastMenu"
+              v-if="tasksVerification.canAdd('AddFacility')"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/Resource/Search/facility"
+                    v-on="on"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-magnify</v-icon>{{ $t('App.menu.searchFacility.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
+                <span>{{ $t('App.menu.searchFacility.tooltip')}}</span>
+              </v-tooltip>
+            </v-list>
+            <v-list
+              class="lastMenu"
+              v-if="tasksVerification.canAdd('AddFacility')"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/Resource/Search/jurisdiction"
+                    v-on="on"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-magnify</v-icon>{{ $t('App.menu.searchJurisdiction.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
+                <span>{{ $t('App.menu.searchJurisdiction.tooltip')}}</span>
+              </v-tooltip>
+            </v-list>
+            <v-list
+              class="lastMenu"
+              v-if="tasksVerification.canAdd('AddFacility')"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/Resource/Search/organization"
+                    v-on="on"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-magnify</v-icon>{{ $t('App.menu.searchOrganization.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
+                <span>{{ $t('App.menu.searchOrganization.tooltip')}}</span>
+              </v-tooltip>
+            </v-list>
+            <v-list
+              class="lastMenu"
+              v-if="tasksVerification.canAdd('AddService')"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/Resource/Search/service"
+                    v-on="on"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-magnify</v-icon>{{ $t('App.menu.searchService.msg') }}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
+                <span>{{ $t('App.menu.searchService.tooltip')}}</span>
+              </v-tooltip>
+            </v-list>
+            <v-list
+              class="lastMenu"
+              v-if="tasksVerification.canAdd('AddService')"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/Resource/Search/facility-add-request/process-add-request"
+                    v-on="on"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-magnify</v-icon>{{ $t('App.menu.searchFacilityAddRequest.msg') }}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
+                <span>{{ $t('App.menu.searchFacilityAddRequest.tooltip')}}</span>
+              </v-tooltip>
+            </v-list>
+            <v-list
+              class="lastMenu"
+              v-if="tasksVerification.canAdd('AddService')"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/Resource/Search/facility-update-request/process-update-request"
+                    v-on="on"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-magnify</v-icon>{{ $t('App.menu.searchFacilityUpdateRequest.msg') }}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
+                <span>{{ $t('App.menu.searchFacilityUpdateRequest.tooltip')}}</span>
+              </v-tooltip>
+            </v-list>
+          </ul>
+        </li>
         <v-list
           class="lastMenu"
           v-if="tasksVerification.canAdd('AddJurisdiction')"
@@ -318,128 +460,6 @@
             </v-list>
           </ul>
         </li>
-        <li class="parent">
-          <a href="#">
-            <v-icon
-              left
-              color="black"
-            >mdi-magnify</v-icon>
-            {{ $t('App.menu.search.msg')}}
-            <v-icon
-              color="black"
-              small
-              class="menuArrow"
-            >mdi-play</v-icon>
-          </a>
-          <ul class="child">
-            <v-list
-              class="lastMenu"
-              v-if="tasksVerification.canAdd('AddFacility')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/Resource/Search/facility"
-                    v-on="on"
-                  >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-magnify</v-icon>{{ $t('App.menu.searchFacility.msg')}}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.searchFacility.tooltip')}}</span>
-              </v-tooltip>
-            </v-list>
-            <v-list
-              class="lastMenu"
-              v-if="tasksVerification.canAdd('AddFacility')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/Resource/Search/organization"
-                    v-on="on"
-                  >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-magnify</v-icon>{{ $t('App.menu.searchOrganization.msg')}}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.searchOrganization.tooltip')}}</span>
-              </v-tooltip>
-            </v-list>
-            <v-list
-              class="lastMenu"
-              v-if="tasksVerification.canAdd('AddService')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/Resource/Search/service"
-                    v-on="on"
-                  >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-magnify</v-icon>{{ $t('App.menu.searchService.msg') }}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.searchService.tooltip')}}</span>
-              </v-tooltip>
-            </v-list>
-            <v-list
-              class="lastMenu"
-              v-if="tasksVerification.canAdd('AddService')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/Resource/Search/facility-add-request/process-add-request"
-                    v-on="on"
-                  >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-magnify</v-icon>{{ $t('App.menu.searchFacilityAddRequest.msg') }}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.searchFacilityAddRequest.tooltip')}}</span>
-              </v-tooltip>
-            </v-list>
-            <v-list
-              class="lastMenu"
-              v-if="tasksVerification.canAdd('AddService')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/Resource/Search/facility-update-request/process-update-request"
-                    v-on="on"
-                  >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-magnify</v-icon>{{ $t('App.menu.searchFacilityUpdateRequest.msg') }}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.searchFacilityUpdateRequest.tooltip')}}</span>
-              </v-tooltip>
-            </v-list>
-          </ul>
-        </li>
-
         <li class="parent">
           <a href="#">
             <v-icon

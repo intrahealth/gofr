@@ -48,6 +48,10 @@
         "msg": "Search Facility",
         "tooltip": "Search Facility"
       },
+      "searchJurisdiction": {
+        "msg": "Search Jurisdiction",
+        "tooltip": "Search Jurisdiction"
+      },
       "searchOrganization": {
         "msg": "Search Organization",
         "tooltip": "Search Organization"

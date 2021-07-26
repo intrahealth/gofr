@@ -15,12 +15,12 @@ const logger = require('../winston');
 const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window);
 
-router.get('/:resource/:id?', (req, res, next) => {
+router.get('/:partition/:resource/:id?', (req, res, next) => {
   if (req.params.resource.startsWith('$') || (req.params.id && req.params.id.startsWith('$'))) {
     return next();
   }
   if (req.params.id) {
-    fhirAxios.read(req.params.resource, req.params.id).then(resource => res.status(200).json(resource)).catch((err) => {
+    fhirAxios.read(req.params.resource, req.params.id, '', req.params.partition).then(resource => res.status(200).json(resource)).catch((err) => {
       /* return response from FHIR server */
       // return res.status( err.response.status ).json( err.response.data )
       /* for custom responses */
@@ -30,7 +30,7 @@ router.get('/:resource/:id?', (req, res, next) => {
       return res.status(500).json(outcome);
     });
   } else {
-    fhirAxios.search(req.params.resource, req.query).then(resource => res.status(200).json(resource)).catch((err) => {
+    fhirAxios.search(req.params.resource, req.query, req.params.partition).then(resource => res.status(200).json(resource)).catch((err) => {
       logger.error(err.message);
       const outcome = { ...outcomes.ERROR };
       outcome.issue[0].diagnostics = err.message;
@@ -39,9 +39,9 @@ router.get('/:resource/:id?', (req, res, next) => {
   }
 });
 
-router.post('/:resource', (req, res) => {
+router.post('/:partition/:resource', (req, res) => {
   const resource = req.body;
-  fhirAxios.create(resource).then((output) => {
+  fhirAxios.create(resource, req.params.partition).then((output) => {
     fhirAudit.create(req.user, req.ip, `${output.resourceType}/${output.id
     }${output.meta.versionId ? `/_history/${output.meta.versionId}` : ''}`, true);
     return res.status(201).json(output);
@@ -56,7 +56,7 @@ router.post('/:resource', (req, res) => {
   });
 });
 
-router.patch('/CodeSystem/:id/:code', (req, res) => {
+router.patch('/:partition/CodeSystem/:id/:code', (req, res) => {
   const incrementValueSetVersion = (codeSystem) => {
     const increment = (version) => {
       if (!version) return '0.0.1';
@@ -76,12 +76,12 @@ router.patch('/CodeSystem/:id/:code', (req, res) => {
         return `${version}.1`;
       }
     };
-    fhirAxios.search('ValueSet', { reference: codeSystem, _count: '200' }).then((bundle) => {
+    fhirAxios.search('ValueSet', { reference: codeSystem, _count: '200' }, req.params.partition).then((bundle) => {
       if (bundle.entry) {
         for (const entry of bundle.entry) {
           if (!entry.resource) continue;
           entry.resource.version = increment(entry.resource.version);
-          fhirAxios.update(entry.resource).catch((err) => {
+          fhirAxios.update(entry.resource, req.params.partition).catch((err) => {
             logger.error(`Failed to update valueset to increment version: ${entry.resource.id}`);
           });
         }
@@ -92,7 +92,7 @@ router.patch('/CodeSystem/:id/:code', (req, res) => {
   };
 
   const update = req.body;
-  fhirAxios.read('CodeSystem', req.params.id).then((resource) => {
+  fhirAxios.read('CodeSystem', req.params.id, '', req.params.partition).then((resource) => {
     if (resource.concept) {
       const codeIdx = resource.concept.findIndex(concept => concept.code === update.code);
       if (codeIdx === -1) {
@@ -104,7 +104,7 @@ router.patch('/CodeSystem/:id/:code', (req, res) => {
       resource.concept = [update];
     }
     resource.date = new Date().toISOString();
-    fhirAxios.update(resource).then((response) => {
+    fhirAxios.update(resource, req.params.partition).then((response) => {
       fhirAudit.patch(req.user, req.ip, `CodeSystem/${resource.id
       }${response.meta.versionId ? `/_history/${response.meta.versionId}` : ''}`, true, { code: req.params.code });
       incrementValueSetVersion(resource.url);
@@ -131,10 +131,10 @@ router.patch('/CodeSystem/:id/:code', (req, res) => {
   });
 });
 
-router.put('/:resource/:id', (req, res) => {
+router.put('/:partition/:resource/:id', (req, res) => {
   const update = req.body;
   logger.error(JSON.stringify(update, 0, 2));
-  fhirAxios.update(update).then((resource) => {
+  fhirAxios.update(update, req.params.partition).then((resource) => {
     fhirAudit.update(req.user, req.ip, `${resource.resourceType}/${resource.id
     }${resource.meta.versionId ? `/_history/${resource.meta.versionId}` : ''}`, true);
     res.status(200).json(resource);
@@ -149,8 +149,8 @@ router.put('/:resource/:id', (req, res) => {
   });
 });
 
-router.get('/ValueSet/:id/\\$expand', (req, res) => {
-  fhirAxios.expand(req.params.id, req.query).then(resource => res.status(200).json(resource)).catch((err) => {
+router.get('/:partition/ValueSet/:id/\\$expand', (req, res) => {
+  fhirAxios.expand(req.params.id, req.query, '', '', req.params.partition).then(resource => res.status(200).json(resource)).catch((err) => {
     /* return response from FHIR server */
     // return res.status( err.response.status ).json( err.response.data )
     /* for custom responses */
@@ -160,8 +160,8 @@ router.get('/ValueSet/:id/\\$expand', (req, res) => {
   });
 });
 
-router.get('/CodeSystem/\\$lookup', (req, res) => {
-  fhirAxios.lookup(req.query).then(resource => res.status(200).json(resource)).catch((err) => {
+router.get('/:partition/CodeSystem/\\$lookup', (req, res) => {
+  fhirAxios.lookup(req.query, req.params.partition).then(resource => res.status(200).json(resource)).catch((err) => {
     /* return response from FHIR server */
     // return res.status( err.response.status ).json( err.response.data )
     /* for custom responses */
@@ -171,8 +171,8 @@ router.get('/CodeSystem/\\$lookup', (req, res) => {
   });
 });
 
-router.get('/DocumentReference/:id/\\$html', (req, res) => {
-  fhirAxios.read('DocumentReference', req.params.id).then((resource) => {
+router.get('/:partition/DocumentReference/:id/\\$html', (req, res) => {
+  fhirAxios.read('DocumentReference', req.params.id, '', req.params.partition).then((resource) => {
     const docToHTML = (resource) => {
       try {
         let html = '';
@@ -204,11 +204,11 @@ router.get('/DocumentReference/:id/\\$html', (req, res) => {
   });
 });
 
-router.get('/\\$short-name', (req, res) => {
+router.get('/:partition/\\$short-name', (req, res) => {
   if (req.query.reference) {
-    fhirShortName.lookup(req.query).then(display => res.status(200).json({ display }));
+    fhirShortName.lookup(req.query, req.params.partition).then(display => res.status(200).json({ display }));
   } else {
-    fhirShortName.lookup(req.query).then(display => res.status(200).json({ display }));
+    fhirShortName.lookup(req.query, req.params.partition).then(display => res.status(200).json({ display }));
   }
 });
 

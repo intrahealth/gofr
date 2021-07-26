@@ -25,7 +25,7 @@ const fhirShortName = {
       delete _cache_loading[lookup];
     }
   },
-  lookup: parameters => new Promise((resolve) => {
+  lookup: (parameters, partition) => new Promise((resolve) => {
     let isCode = false;
     let lookup;
     if (parameters.reference) {
@@ -37,13 +37,13 @@ const fhirShortName = {
     }
     if (_cache_loading[lookup]) {
       setTimeout(() => {
-        resolve(fhirShortName.lookup(parameters));
+        resolve(fhirShortName.lookup(parameters, partition));
       }, INPROGRESS_DELAY);
     } else if (!_cache[lookup]) {
       if (isCode) {
-        resolve(fhirShortName._codeLookup(parameters.system, parameters.code, parameters.valueset));
+        resolve(fhirShortName._codeLookup(parameters.system, parameters.code, parameters.valueset, partition));
       } else {
-        resolve(fhirShortName._resourceLookup(parameters.reference));
+        resolve(fhirShortName._resourceLookup(parameters.reference, partition));
       }
     } else {
       resolve(_cache[lookup]);
@@ -52,12 +52,12 @@ const fhirShortName = {
   /**
    * reference is a relative FHIR Resource: Resource/ID (e.g. Practitioner/1234)
    */
-  _resourceLookup: reference => new Promise((resolve) => {
+  _resourceLookup: (reference, partition) => new Promise((resolve) => {
     const refData = reference.split('/');
     if (refData.length !== 2) {
       resolve(fhirShortName._setCache(reference, 'Invalid Reference'));
     } else {
-      fhirAxios.read(refData[0], refData[1]).then((resource) => {
+      fhirAxios.read(refData[0], refData[1], '', partition).then((resource) => {
         let details = nconf.get(`shortname:${refData[0]}`);
         if (!details) {
           details = DEFAULT_DETAILS;
@@ -82,11 +82,11 @@ const fhirShortName = {
   /**
    * Lookup a code from a codesystem with valueset fallback.
    */
-  _codeLookup: (system, code, valueset) => new Promise((resolve) => {
+  _codeLookup: (system, code, valueset, partition) => new Promise((resolve) => {
     const lookup = `${system}#${code}`;
     _cache_loading[lookup] = true;
     const params = { system, code };
-    fhirAxios.lookup(params).then((resource) => {
+    fhirAxios.lookup(params, partition).then((resource) => {
       if (resource.parameter) {
         const display = resource.parameter.find(param => param.name === 'display');
         if (display) {
@@ -97,22 +97,22 @@ const fhirShortName = {
         winston.warn('No display data from codesystem found ', lookup);
       }
       if (valueset) {
-        resolve(fhirShortName._vsCodeLookup(valueset, system, code));
+        resolve(fhirShortName._vsCodeLookup(valueset, system, code, partition));
       } else {
         resolve(fhirShortName._setCache(lookup, code));
       }
     }).catch((err) => {
       winston.warn('Failed to retrive codesystem ', lookup, err);
       if (valueset) {
-        resolve(fhirShortName._vsCodeLookup(valueset, system, code));
+        resolve(fhirShortName._vsCodeLookup(valueset, system, code, partition));
       } else {
         resolve(fhirShortName._setCache(lookup, code));
       }
     });
   }),
-  _vsCodeLookup: (valueset, system, code) => new Promise((resolve) => {
+  _vsCodeLookup: (valueset, system, code, partition) => new Promise((resolve) => {
     const lookup = `${system}#${code}`;
-    fhirAxios.read('ValueSet', valueset.substring(valueset.lastIndexOf('/'))).then((resource) => {
+    fhirAxios.read('ValueSet', valueset.substring(valueset.lastIndexOf('/')), '', partition).then((resource) => {
       if (resource.compose && resource.compose.include) {
         const included = resource.compose.include.find(include => include.system === system);
         if (included && included.concept) {

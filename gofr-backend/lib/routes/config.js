@@ -320,11 +320,11 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
   });
 });
 
-router.get('/page/:page/:type?', (req, res) => {
+router.get('/page/:page/:type/:partition?', (req, res) => {
   const page = `gofr-page-${req.params.page}`;
   // Limited access to these don't make sense so not allowing it for now
 
-  fhirAxios.read('Basic', page).then(async (resource) => {
+  fhirAxios.read('Basic', page, partition).then(async (resource) => {
     const pageDisplay = resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/ihris-page-display');
 
     const pageResource = pageDisplay.extension.find(ext => ext.url === 'resource').valueReference.reference;

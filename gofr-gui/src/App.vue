@@ -212,48 +212,51 @@ export default {
       this.$store.state.dialogError = false
     },
     renderInitialPage () {
-      let source1 = this.$store.state.activePair.source1.name
-      let source2 = this.$store.state.activePair.source2.name
-      if (
-        (!source1 || !source2) &&
-        (this.$store.state.dataSources.length > 1 ||
-          this.$store.state.dataSourcePairs.length > 0)
-      ) {
-        this.$router.push({ name: 'DataSourcesPair' })
-        return
-      }
-      if (!source1 || !source2) {
-        this.$router.push({ name: 'AddDataSources' })
-        return
-      }
-      source1 = this.toTitleCase(source1)
-      source2 = this.toTitleCase(source2)
+      this.$store.state.initializingApp = false
+      this.$router.push({ name: 'ViewMap' })
+      return
+      // let source1 = this.$store.state.activePair.source1.name
+      // let source2 = this.$store.state.activePair.source2.name
+      // if (
+      //   (!source1 || !source2) &&
+      //   (this.$store.state.dataSources.length > 1 ||
+      //     this.$store.state.dataSourcePairs.length > 0)
+      // ) {
+      //   this.$router.push({ name: 'DataSourcesPair' })
+      //   return
+      // }
+      // if (!source1 || !source2) {
+      //   this.$router.push({ name: 'AddDataSources' })
+      //   return
+      // }
+      // source1 = this.toTitleCase(source1)
+      // source2 = this.toTitleCase(source2)
 
-      let sourcesOwner = this.getDatasourceOwner()
-      axios
-        .get(
-          '/uploadAvailable/' +
-          source1 +
-          '/' +
-          source2 +
-          '/' +
-          sourcesOwner.source1Owner +
-          '/' +
-          sourcesOwner.source2Owner
-        )
-        .then(results => {
-          this.$store.state.initializingApp = false
-          if (results.data.dataUploaded) {
-            this.$store.state.recalculateScores = true
-            this.$router.push({ name: 'FacilityReconScores' })
-          } else {
-            this.$router.push({ name: 'AddDataSources' })
-          }
-        })
-        .catch(err => {
-          console.log(err)
-          this.$router.push({ name: 'AddDataSources' })
-        })
+      // let sourcesOwner = this.getDatasourceOwner()
+      // axios
+      //   .get(
+      //     '/uploadAvailable/' +
+      //     source1 +
+      //     '/' +
+      //     source2 +
+      //     '/' +
+      //     sourcesOwner.source1Owner +
+      //     '/' +
+      //     sourcesOwner.source2Owner
+      //   )
+      //   .then(results => {
+      //     this.$store.state.initializingApp = false
+      //     if (results.data.dataUploaded) {
+      //       this.$store.state.recalculateScores = true
+      //       this.$router.push({ name: 'FacilityReconScores' })
+      //     } else {
+      //       this.$router.push({ name: 'AddDataSources' })
+      //     }
+      //   })
+      //   .catch(err => {
+      //     console.log(err)
+      //     this.$router.push({ name: 'AddDataSources' })
+      //   })
     },
     getTotalLevels () {
       let source1 = this.$store.state.activePair.source1.name
@@ -521,6 +524,14 @@ export default {
     eventBus.$on('getDataSourcePair', () => {
       this.getDataSourcePair()
     })
+  },
+  mounted: function() {
+    let elHtml = document.getElementsByTagName('html')[0]
+    elHtml.style.overflowY = 'auto'
+  },
+  destroyed: function() {
+    let elHtml = document.getElementsByTagName('html')[0]
+    elHtml.style.overflowY = null
   },
   name: 'App'
 }

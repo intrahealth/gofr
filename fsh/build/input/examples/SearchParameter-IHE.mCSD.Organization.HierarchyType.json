@@ -1,0 +1,14 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "IHE.mCSD.Organization.HierarchyType",
+  "url": "http://profiles.ihe.net/ITI/mCSD/SearchParameter/IHE.mCSD.Organization.HierarchyType",
+  "description": "This Search Parameter enables finding Organizations by the hierarchy type.",
+  "name": "ihe-mcsd-hierarchy-type",
+  "status": "active",
+  "code": "ihe-mcsd-hierarchy-type",
+  "base": [
+    "Organization"
+  ],
+  "type": "token",
+  "expression": "extension('http://profiles.ihe.net/ITI/mCSD/StructureDefinition/IHE.mCSD.OrganizationHierarchy').extension('hierarchy-type').value as CodeableConcept"
+}

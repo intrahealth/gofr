@@ -1,0 +1,69 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "gofr-organization-questionnaire",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/ihris-questionnaire"
+    ]
+  },
+  "title": "GOFR Organization Questionnaire",
+  "description": "iHRIS Organization initial data entry questionnaire.",
+  "url": "http://gofr.org/fhir/Questionnaire/gofr-organization-questionnaire",
+  "name": "gofr-organization-questionnaire",
+  "status": "active",
+  "date": "2021-07-19",
+  "purpose": "Data entry page for organizations.",
+  "item": [
+    {
+      "linkId": "Organization",
+      "definition": "http://gofr.org/fhir/StructureDefinition/gofr-mcsd-organization",
+      "text": "Basic Details | Basic Details",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "Organization.name",
+          "definition": "http://gofr.org/fhir/StructureDefinition/gofr-mcsd-organization#Organization.name",
+          "text": "Name",
+          "type": "string",
+          "required": true,
+          "repeats": false
+        },
+        {
+          "linkId": "Organization.type",
+          "definition": "http://gofr.org/fhir/StructureDefinition/gofr-mcsd-organization#Organization.type",
+          "text": "Type",
+          "type": "choice",
+          "answerValueSet": "http://terminology.hl7.org/CodeSystem/organization-type",
+          "required": true,
+          "repeats": false
+        },
+        {
+          "linkId": "Organization.extension[0]",
+          "definition": "http://gofr.org/fhir/StructureDefinition/gofr-mcsd-organization#Organization.extension:gofr-hierarchy",
+          "text": "Attach To Hierarchy",
+          "type": "group",
+          "repeats": true,
+          "item": [
+            {
+              "linkId": "Organization.extension[0].extension[0]#tree",
+              "definition": "http://gofr.org/fhir/StructureDefinition/gofr-mcsd-organization#Organization.extension:gofr-hierarchy.extension:part-of.value[x]:valueReference",
+              "text": "Parent",
+              "type": "reference",
+              "repeats": false,
+              "required": true
+            },
+            {
+              "linkId": "Organization.extension[0].extension[1]",
+              "definition": "http://gofr.org/fhir/StructureDefinition/gofr-mcsd-organization#Organization.extension:gofr-hierarchy.extension:hierarchy-type.value[x]:valueCodeableConcept",
+              "text": "Parent Type",
+              "type": "choice",
+              "answerValueSet": "http://gofr.org/fhir/ValueSet/gofr-organization-hiearchy-type-valueset",
+              "repeats": false,
+              "required": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -82,7 +82,6 @@ router.post('/QuestionnaireResponse', (req, res, next) => {
         next();
       }).catch((err) => {
         logger.error(err.message);
-        // return res.status( err.response.status ).json( err.response.data )
         return res.status(500).json({ err: err.message });
       });
     }).catch((err) => {

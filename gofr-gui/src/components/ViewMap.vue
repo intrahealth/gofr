@@ -1,11 +1,11 @@
 <template>
-  <v-app>
-    <FhirMap
+<v-container grid-list-xs>
+  <FhirMap
       :accessToken="accessToken"
       :fhirServerUrl="fhirServerUrl"
       :options="options"
     />
-  </v-app>
+</v-container>
 </template>
 
 <script>
@@ -22,8 +22,9 @@ export default {
         -11.84389
       ],
       "zoom": 3,
+      "isFacility" : true,
       "root": "cf12e355-a553-5875-b271-2dfb97b22355",
-      "includeRoot": true,
+      "includeRoot": false,
       "contextServices": [],
       "searchParameters": [
         {
@@ -34,7 +35,39 @@ export default {
           "options": []
         }
       ],
-      "filters": []
+      "filters": [],
+      "attributes": [
+        {
+          "name": "identifier",
+          "label": "Identifiers",
+          "expression": "Location.identifier.value"
+        },
+        {
+          "name": "description",
+          "label": "Description",
+          "expression": "Location.description.single()"
+        },
+        {
+          "name": "status",
+          "label": "Status",
+          "expression": "Location.status.single()"
+        }
+      ],
+      "locationStyles": {
+        "fill": {
+          "fill-color": "#B22222",
+          "fill-opacity": 0.8,
+          "fill-outline-color": "black"
+        }
+      },
+      "selectedStyles": {
+        "circle": {
+          "circle-radius": 10,
+          "circle-color": "#d3d3d3",
+          "circle-stroke-width": 2,
+          "circle-stroke-color": "#FFFFFF"
+        },
+      }
     }
   }),
 

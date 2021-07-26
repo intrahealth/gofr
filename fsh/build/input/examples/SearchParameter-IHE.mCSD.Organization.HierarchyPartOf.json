@@ -1,0 +1,14 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "IHE.mCSD.Organization.HierarchyPartOf",
+  "url": "http://profiles.ihe.net/ITI/mCSD/SearchParameter/IHE.mCSD.Organization.HierarchyPartOf",
+  "description": "This Search Parameter enables finding Organizations by the hierarchy part of.",
+  "name": "ihe-mcsd-hierarchy-partof",
+  "status": "active",
+  "code": "ihe-mcsd-hierarchy-partof",
+  "base": [
+    "Organization"
+  ],
+  "type": "reference",
+  "expression": "extension('http://profiles.ihe.net/ITI/mCSD/StructureDefinition/IHE.mCSD.OrganizationHierarchy').extension('part-of').value as Reference"
+}

@@ -238,30 +238,6 @@ Title:           "Jurisdiction Type(Country/Region/District/County)"
 * #district "District" "District"
 * #county "County" "County"
 
-Instance:       gofr-page-facility-new
-InstanceOf:     IhrisPage
-Title:          "GOFR Facility Page"
-Usage:          #example
-* code = IhrisResourceCodeSystem#page
-* extension[display].extension[resource].valueReference = Reference(StructureDefinition/IHE.mCSD.FacilityOrganization)
-* extension[display].extension[search][0].valueString = "Facility Name|name"
-* extension[display].extension[filter][0].valueString = "Name|name:contains"
-* extension[section][0].extension[title].valueString = "Basic Details"
-* extension[section][0].extension[description].valueString = "Basic Details"
-* extension[section][0].extension[name].valueString = "Basic Details"
-* extension[section][0].extension[field][0].valueString = "Organization.name"
-
-* extension[section][1].extension[title].valueString = "Status"
-* extension[section][1].extension[description].valueString = "Status"
-* extension[section][1].extension[name].valueString = "status"
-* extension[section][1].extension[resource].extension[resource].valueReference = Reference(StructureDefinition/gofr-facility)
-* extension[section][1].extension[resource].extension[searchfield].valueString = "organization"
-* extension[section][1].extension[resource].extension[linkfield].valueString = "Location.id"
-* extension[section][1].extension[resource].extension[column][0].extension[header].valueString = "status"
-* extension[section][1].extension[resource].extension[column][0].extension[field].valueString = "Location.status"
-* extension[section][1].extension[resource].extension[column][1].extension[header].valueString = "Parent"
-* extension[section][1].extension[resource].extension[column][1].extension[field].valueString = "Location.partOf"
-
 Instance:       gofr-page-facilityorganization
 InstanceOf:     IhrisPage
 Title:          "GOFR Organization Page"

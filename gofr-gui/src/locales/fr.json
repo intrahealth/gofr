@@ -32,6 +32,10 @@
         "msg": "Facilité de recherche",
         "tooltip": "Facilité de recherche"
       },
+      "searchJurisdiction": {
+        "msg": "juridiction de recherche",
+        "tooltip": "juridiction de recherche"
+      },
       "searchOrganization": {
         "msg": "Rechercher une organisation",
         "tooltip": "Rechercher une organisation"

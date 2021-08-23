@@ -65,16 +65,14 @@ const cleanReqPath = function (req, res, next) {
 };
 
 const jwtValidator = function (req, res, next) {
-  logger.error(req.path);
   if (req.method == 'OPTIONS'
     || (req.query.hasOwnProperty('authDisabled') && req.query.authDisabled)
-    || req.path == '/auth/login/'
+    || req.path.startsWith('/auth/login')
     || req.path == '/getSignupConf'
     || req.path == '/config/getGeneralConfig'
     || req.path == '/addUser/'
     || req.path.startsWith('/progress')
   ) {
-    logger.error('here');
     return next();
   }
   if (!req.headers.authorization || req.headers.authorization.split(' ').length !== 2) {

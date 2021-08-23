@@ -119,15 +119,8 @@ export default {
   },
   methods: {
     authenticate () {
-      let formData = new FormData()
-      formData.append('username', this.username)
-      formData.append('password', this.password)
       axios
-        .post('/authenticate/', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        })
+        .post('/auth/login/', {username: this.username, password: this.password})
         .then(authResp => {
           this.$store.state.auth.token = authResp.data.token
           this.$store.state.auth.username = this.username

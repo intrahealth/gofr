@@ -258,7 +258,7 @@ const fhirQuestionnaire = {
           profile = nextProfile;
         }
         let has = false;
-        fhirAxios.search('StructureDefinition', { _id: profile, _elements: 'baseDefinition,name' }).then((structDef) => {
+        fhirAxios.search('StructureDefinition', { _id: profile, _elements: 'baseDefinition,name' }, 'DEFAULT').then((structDef) => {
           if (structDef.entry[0].resource.name !== parentProfile && structDef.entry[0].resource.baseDefinition.split('/').pop() !== 'DomainResource') {
             nextProfile = structDef.entry[0].resource.baseDefinition.split('/').pop();
           } else {
@@ -287,7 +287,7 @@ const fhirQuestionnaire = {
     fhirQuestionnaire.setQuestionnairePaths(response);
 
     const qId = response.questionnaire.substring(response.questionnaire.lastIndexOf('/') + 1);
-    fhirAxios.read('Questionnaire', qId).then(async (questionnaire) => {
+    fhirAxios.read('Questionnaire', qId, '', 'DEFAULT').then(async (questionnaire) => {
       const questionnaireRef = {};
       const flattenItems = (items, questionnaireRef) => {
         for (const item of items) {

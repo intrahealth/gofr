@@ -1,0 +1,39 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-role-admin",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/gofr-role"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "role",
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "name",
+      "valueString": "Admin"
+    },
+    {
+      "url": "primary",
+      "valueBoolean": true
+    },
+    {
+      "url": "tasks",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://gofr.org/fhir/CodeSystem/gofr-task-permission-codesystem",
+            "code": "*",
+            "display": "All"
+          }
+        ]
+      }
+    }
+  ]
+}

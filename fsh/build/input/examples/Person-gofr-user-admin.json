@@ -1,0 +1,43 @@
+{
+  "resourceType": "Person",
+  "id": "gofr-user-admin",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/gofr-person-user"
+    ]
+  },
+  "extension": [
+    {
+      "url": "organization",
+      "valueReference": {
+        "reference": "Organization/54cdcbe3-87e0-421f-b657-8313fce5f418"
+      }
+    },
+    {
+      "url": "role",
+      "valueReference": {
+        "reference": "Basic/gofr-role-admin"
+      }
+    },
+    {
+      "url": "password",
+      "valueString": "$2b$08$GUhIcB0sC3CBhFi7TmZ41.B53gbrl2/.kRzlYydo8ZiZtUFSR7mjW"
+    }
+  ],
+  "name": [
+    {
+      "text": "GOFR Admin"
+    }
+  ],
+  "telecom": [
+    {
+      "system": "email",
+      "value": "root@gofr.org"
+    },
+    {
+      "system": "phone",
+      "value": ""
+    }
+  ],
+  "active": true
+}

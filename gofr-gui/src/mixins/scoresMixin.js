@@ -260,7 +260,7 @@ export const scoresMixin = {
           value: k + 1
         })
       }
-      let userID = this.$store.state.activePair.userID._id
+      let userID = this.$store.state.activePair.userID
       let source1Owner = sourcesOwner.source1Owner
       let source2Owner = sourcesOwner.source2Owner
       let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
@@ -274,24 +274,24 @@ export const scoresMixin = {
       // this.$store.state.scoresProgressData.scoreProgressTimer = setInterval(this.checkScoreProgress, 2000)
     },
     getSource1 () {
-      let source = this.$store.state.activePair.source1.name
+      let source = this.$store.state.activePair.source1.display
       if (source) {
         source = this.toTitleCase(source)
       }
       return source
     },
     getSource2 () {
-      let source = this.$store.state.activePair.source2.name
+      let source = this.$store.state.activePair.source2.display
       if (source) {
         source = this.toTitleCase(source)
       }
       return source
     },
     getSource1Name () {
-      return this.$store.state.activePair.source1.name
+      return this.$store.state.activePair.source1.display
     },
     getSource2Name () {
-      return this.$store.state.activePair.source2.name
+      return this.$store.state.activePair.source2.display
     }
   },
   created () {

@@ -21,7 +21,6 @@ Object.defineProperty(Vue.prototype, '$fhirutils', {
 
 Vue.use(vuelidate)
 Vue.use(VueAxios, axios)
-
 Vue.config.productionTip = false
 
 export const eventBus = new Vue()
@@ -77,7 +76,7 @@ getDHIS2StoreConfig((storeConfig) => {
   }
   // get general config of App and pass it to the App component as props
   let defaultGenerConfig = JSON.stringify(store.state.config.generalConfig)
-  axios.get('/getGeneralConfig?defaultGenerConfig=' + defaultGenerConfig).then(genConfig => {
+  axios.get('/config/getGeneralConfig?defaultGenerConfig=' + defaultGenerConfig).then(genConfig => {
     if (!genConfig) {
       genConfig.data = {}
     }

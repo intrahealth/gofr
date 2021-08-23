@@ -237,7 +237,7 @@ export default {
       let formData = new FormData()
       formData.append('role', this.role)
       formData.append('status', status)
-      formData.append('id', this.user._id)
+      formData.append('id', this.user.id)
       axios.post('/processUserAccoutRequest/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -262,7 +262,7 @@ export default {
       formData.append('password', this.password)
       this.users = []
       this.loadingUsers = true
-      axios.get('/getUsers/').then((users) => {
+      axios.get('/auth/getUsers/').then((users) => {
         this.loadingUsers = false
         this.users = users.data
       }).catch((err) => {
@@ -273,7 +273,7 @@ export default {
       })
     },
     accountAction (action, user) {
-      let id = user._id
+      let id = user.id
       let formData = new FormData()
       formData.append('id', id)
       if (action === 'Active' || action === 'Inactive') {

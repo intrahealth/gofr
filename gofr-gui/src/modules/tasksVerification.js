@@ -101,7 +101,7 @@ export const tasksVerification = {
     let hasTask = false
     for (let allowedTask of allowedTasks) {
       for (let roleTask of roleTasks) {
-        if (roleTask.name === allowedTask) {
+        if (roleTask.code === allowedTask) {
           hasTask = true
           break
         }
@@ -127,7 +127,7 @@ export const tasksVerification = {
     let hasTask = false
     for (let allowedTask of allowedTasks) {
       for (let roleTask of roleTasks) {
-        if (roleTask.name === allowedTask) {
+        if (roleTask.code === allowedTask) {
           hasTask = true
           break
         }
@@ -153,7 +153,7 @@ export const tasksVerification = {
     let hasTask = false
     for (let allowedTask of allowedTasks) {
       for (let roleTask of roleTasks) {
-        if (roleTask.name === allowedTask) {
+        if (roleTask.code === allowedTask) {
           hasTask = true
           break
         }
@@ -179,7 +179,7 @@ export const tasksVerification = {
     let hasTask = false
     for (let allowedTask of allowedTasks) {
       for (let roleTask of roleTasks) {
-        if (roleTask.name === allowedTask) {
+        if (roleTask.code === allowedTask) {
           hasTask = true
           break
         }
@@ -205,7 +205,7 @@ export const tasksVerification = {
     let hasTask = false
     for (let allowedTask of allowedTasks) {
       for (let roleTask of roleTasks) {
-        if (roleTask.name === allowedTask) {
+        if (roleTask.code === allowedTask) {
           hasTask = true
           break
         }
@@ -231,7 +231,7 @@ export const tasksVerification = {
     let hasTask = false
     for (let allowedTask of allowedTasks) {
       for (let roleTask of roleTasks) {
-        if (roleTask.name === allowedTask) {
+        if (roleTask.code === allowedTask) {
           hasTask = true
           break
         }

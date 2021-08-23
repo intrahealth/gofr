@@ -1,6 +1,6 @@
 {
   "resourceType": "Basic",
-  "id": "gofr-page-organization",
+  "id": "gofr-page-instance-organization",
   "meta": {
     "profile": [
       "http://gofr.org/fhir/StructureDefinition/ihris-page"
@@ -29,14 +29,6 @@
           "valueString": "Name|name"
         },
         {
-          "url": "search",
-          "valueString": "Type|type[0].text"
-        },
-        {
-          "url": "search",
-          "valueString": "Parent|partOf.reference"
-        },
-        {
           "url": "filter",
           "valueString": "Name|name:contains"
         }
@@ -59,14 +51,6 @@
         {
           "url": "field",
           "valueString": "Organization.name"
-        },
-        {
-          "url": "field",
-          "valueString": "Organization.type"
-        },
-        {
-          "url": "field",
-          "valueString": "Organization.extension:gofr-hierarchy"
         }
       ],
       "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"

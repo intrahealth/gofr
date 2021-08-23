@@ -187,14 +187,14 @@ export default {
         params = { "partof:missing": true }
       }
       params._count = 500
-      let url = "/fhir/"+this.resource+"?"+querystring.stringify( params )
+      let url = "/fhir/"+this.$store.state.config.userConfig.FRDatasource+"/"+this.resource+"?"+querystring.stringify( params )
       this.items = []
       this.addItems( url, this.items )
 
     },
     checkChildren: function(item) {
       let params = { "partof": item.id, "_summary": "count" }
-      let url = "/fhir/"+this.resource+"?"+querystring.stringify( params )
+      let url = "/fhir/"+this.$store.state.config.userConfig.FRDatasource+"/"+this.resource+"?"+querystring.stringify( params )
       return new Promise( resolve => {
         axios.get( url ).then( response => {
           let data = response.data
@@ -242,7 +242,7 @@ export default {
     fetchChildren: function(item) {
       let params = {}
       params = { "partof": item.id, _count: 500 }
-      let url = "/fhir/"+this.resource+"?"+querystring.stringify( params )
+      let url = "/fhir/"+this.$store.state.config.userConfig.FRDatasource+"/"+this.resource+"?"+querystring.stringify( params )
       this.loading = true
       this.addItems( url, item.children )
       return new Promise( resolve => {
@@ -263,7 +263,7 @@ export default {
       if ( !this.targetProfile.endsWith( this.resource ) ) {
         params._profile = this.targetProfile
       }
-      let url = "/fhir/"+this.resource+"?"+querystring.stringify( params )
+      let url = "/fhir/"+this.$store.state.config.userConfig.FRDatasource+"/"+this.resource+"?"+querystring.stringify( params )
       axios.get( url ).then( async(response) => {
         let data = response.data
         this.items = []

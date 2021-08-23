@@ -99,7 +99,7 @@
                   <v-list-item
                     to="/dataSourcesPair"
                     v-on="on"
-                    :disabled="$store.state.dataSources.length <= 1 || $store.state.dataSourcePairs.length <= 0"
+                    :disabled="$store.state.dataSources.length <= 1 && $store.state.dataSourcePairs.length === 0"
                   >
                     <v-list-item-title class="menuText">
                       <v-icon
@@ -222,7 +222,7 @@
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
                   <v-list-item
-                    to="/Resource/Search/organization"
+                    to="/Resource/Search/mcsd-organization"
                     v-on="on"
                   >
                     <v-list-item-title class="menuText">

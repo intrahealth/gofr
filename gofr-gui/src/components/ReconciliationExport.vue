@@ -113,7 +113,7 @@ export default {
       this.unmatchedSource2DownloadData = ''
     },
     matchedLocations (type) {
-      let userID = this.$store.state.activePair.userID._id
+      let userID = this.$store.state.activePair.userID
       let source1 = this.getSource1()
       let source2 = this.getSource2()
       let sourcesOwner = this.getDatasourceOwner()
@@ -138,7 +138,7 @@ export default {
       return axios.get('/matchedLocations', { params })
     },
     unMatchedLocations (type) {
-      let userID = this.$store.state.activePair.userID._id
+      let userID = this.$store.state.activePair.userID
       let sourcesOwner = this.getDatasourceOwner()
       let source1Owner = sourcesOwner.source1Owner
       let source2Owner = sourcesOwner.source2Owner

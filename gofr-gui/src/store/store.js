@@ -31,7 +31,8 @@ export const store = new Vuex.Store({
       userConfig: {
         reconciliation: {
           useCSVHeader: true
-        }
+        },
+        FRDatasource: 'DEFAULT'
       },
       generalConfig: {
         reconciliation: {

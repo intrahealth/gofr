@@ -36,6 +36,7 @@
   },
   "baseProfile": "http://gofr.org/fhir/StructureDefinition",
   "mCSD": {
+    "url": "http://localhost:8081/hapi54/fhir",
     "protocal": "http",
     "host": "localhost",
     "port": "8081",

@@ -68,7 +68,7 @@ export default {
       this.loading = true
       //console.log("getting",this.field,this.fhirId)
       let codeSystemId = this.profile.substring( this.profile.lastIndexOf("/")+1 )
-      axios.get( "/fhir/"+this.field+"/"+codeSystemId ).then(response => {
+      axios.get( "/fhir/DEFAULT/"+this.field+"/"+codeSystemId ).then(response => {
         let data = response.data
         let types = {}
         if ( data.property ) {
@@ -152,7 +152,7 @@ export default {
       //console.log(this)
       processChildren( this.field, this.fhir, this.$children )
       let codeSystemId = this.profile.substring( this.profile.lastIndexOf("/")+1 )
-      let url = "/fhir/"+this.field+"/"+codeSystemId
+      let url = "/fhir/DEFAULT/"+this.field+"/"+codeSystemId
       let opts = {
         method: "PATCH",
         headers: {

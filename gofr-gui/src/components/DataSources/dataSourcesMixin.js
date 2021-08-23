@@ -22,7 +22,7 @@ export const dataSourcesMixin = {
         this.shareToSameOrgid = false
       }
     },
-    addDataSource (source) {
+    addDataSource (source, partitionID, levelData) {
       let formData = new FormData()
       const clientId = this.$store.state.clientId
       formData.append('host', this.host)
@@ -36,12 +36,14 @@ export const dataSourcesMixin = {
       formData.append('password', this.password)
       formData.append('name', this.name)
       formData.append('clientId', clientId)
+      formData.append('partitionID', partitionID)
+      formData.append('levelData', levelData)
       formData.append('userID', this.$store.state.auth.userID)
 
       var serverExists = this.$store.state.dataSources.find((dataSource) => {
         return dataSource.host === this.host
       })
-      axios.post('/addDataSource', formData, {
+      axios.post('/datasource/addSource', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

@@ -1,0 +1,10 @@
+{
+  "resourceType": "Organization",
+  "id": "54cdcbe3-87e0-421f-b657-8313fce5f418",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/gofr-instance-organization"
+    ]
+  },
+  "name": "Default"
+}

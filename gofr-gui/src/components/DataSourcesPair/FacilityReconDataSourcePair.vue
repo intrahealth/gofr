@@ -209,7 +209,7 @@
             dark
           >
             <v-toolbar-title>
-              Sharing <template v-if="sharePair.hasOwnProperty('source1')">{{sharePair.source1.name}} - {{sharePair.source2.name}}</template>
+              Sharing <template v-if="sharePair.hasOwnProperty('source1')">{{sharePair.source1.display}} - {{sharePair.source2.display}}</template>
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -241,11 +241,10 @@
                   <td>
                     <v-checkbox
                       v-model="sharedUsers"
-                      :value="item._id"
+                      :value="item.id"
                     ></v-checkbox>
                   <td>{{item.userName}}</td>
-                  <td>{{item.firstName}}</td>
-                  <td>{{item.surname}}</td>
+                  <td>{{item.fullName}}</td>
                 </tr>
               </template>
             </v-data-table>
@@ -309,7 +308,7 @@
                 color="white lighten-2"
                 style="font-weight: bold; font-size: 18px;"
               >
-                Choose Data Source Pair
+                Create Data Source Pair
               </v-toolbar>
             </v-card-title>
             <v-card-text style="float: center">
@@ -341,7 +340,7 @@
                             ></v-radio>
                           </td>
                         </v-radio-group>
-                        <td>{{item.name}}</td>
+                        <td>{{item.display}}</td>
                       </tr>
                     </template>
                   </v-data-table>
@@ -373,7 +372,7 @@
                             ></v-radio>
                           </td>
                         </v-radio-group>
-                        <td>{{item.name}}</td>
+                        <td>{{item.display}}</td>
                       </tr>
                     </template>
                   </v-data-table>
@@ -382,6 +381,7 @@
             </v-card-text>
             <v-card-actions>
               <v-btn
+                :disabled="!pairSelected"
                 color="error"
                 rounded
                 @click="reset"
@@ -390,7 +390,7 @@
               </v-btn>
               <v-spacer></v-spacer>
               <v-btn
-                :disabled='!canCreatePair'
+                :disabled='!canCreatePair || !pairSelected'
                 color="primary"
                 rounded
                 @click="checkLevels"
@@ -437,8 +437,8 @@
                   v-slot:item="{ item }"
                 >
                   <tr>
-                    <td>{{item.source1.name}} - {{item.source2.name}}</td>
-                    <td>{{item.userID.userName}}</td>
+                    <td>{{item.source1.display}} - {{item.source2.display}}</td>
+                    <td>{{item.user.name}}</td>
                     <v-radio-group
                       v-model='activeDataSourcePair'
                       style="height: 5px"
@@ -451,9 +451,9 @@
                       </td>
                     </v-radio-group>
                     <td>
-                      {{item.shared.users | mergeUsers}}
+                      {{item.sharedUsers | mergeUsers}}
                     </td>
-                    <td v-if='item.userID._id === $store.state.auth.userID'>
+                    <td v-if='item.user.id === $store.state.auth.userID'>
                       <v-btn
                         text
                         color="primary"
@@ -477,6 +477,7 @@
               </v-btn>
               <v-spacer></v-spacer>
               <v-btn
+                :disabled="!canActivatePair"
                 color="primary"
                 rounded
                 @click="activatePair"
@@ -536,9 +537,9 @@ export default {
         { text: 'Shared To', value: 'shareStatus' }
       ],
       usersHeader: [
+        {},
         { text: 'Username', value: 'username', sortable: true },
-        { text: 'Firstname', value: 'fname', sortable: true },
-        { text: 'Surname', value: 'sname', sortable: true }
+        { text: 'Full Name', value: 'fname', sortable: true },
       ],
       source1Levels: [],
       source2Levels: []
@@ -550,11 +551,17 @@ export default {
         return ''
       }
       let userNames = ''
+      let counter = 0
       for (let user of users) {
+        counter++
+        if(counter > 5) {
+          userNames += '...'
+          break
+        }
         if (!userNames) {
-          userNames = user.userName
+          userNames = user.name
         } else {
-          userNames = ',' + user.userName
+          userNames += ',' + user.name
         }
       }
       return userNames
@@ -566,8 +573,8 @@ export default {
     },
     deletePair () {
       this.confirmPairDeleteDialog = false
-      let query = `pairId=${this.activeDataSourcePair._id}&userID=${this.activeDataSourcePair.owner.id}&source1Name=${this.activeDataSourcePair.source1.name}&source2Name=${this.activeDataSourcePair.source2.name}`
-      axios.delete('/deleteSourcePair?' + query).then(() => {
+      let query = `pairId=${this.activeDataSourcePair.id}&userID=${this.$store.state.auth.userID}&pairOwner=${this.activeDataSourcePair.user.id}&source1Name=${this.activeDataSourcePair.source1.name}&source2Name=${this.activeDataSourcePair.source2.name}`
+      axios.delete('/datasource/deleteSourcePair?' + query).then(() => {
         this.$store.state.errorTitle = 'Pair Deletion'
         this.$store.state.errorDescription = 'Pair deleted successfully'
         this.$store.state.dialogError = true
@@ -589,7 +596,7 @@ export default {
       this.$store.state.dynamicProgress = true
       this.$store.state.progressTitle = 'Reseting Data Source Pairs'
       let userID = this.$store.state.auth.userID
-      axios.get('/resetDataSourcePair/' + userID).then(() => {
+      axios.get('/datasource/resetDataSourcePair/' + userID).then(() => {
         eventBus.$emit('getDataSourcePair')
         this.$store.state.dynamicProgress = false
         this.alertSuccess = true
@@ -602,20 +609,12 @@ export default {
     },
     checkLevels () {
       this.pairLevelsMapping = {}
-      let source1 = this.source1.name
-      let source2 = this.source2.name
-      source1 = this.toTitleCase(source1)
-      source2 = this.toTitleCase(source2)
       let sourcesLimitOrgId = JSON.stringify({
         source1LimitOrgId: this.getLimitOrgIdOnDataSource(this.source1),
         source2LimitOrgId: this.getLimitOrgIdOnDataSource(this.source2)
       })
-      let sourcesOwner = JSON.stringify({
-        source1Owner: this.source1.userID._id,
-        source2Owner: this.source2.userID._id
-      })
       axios
-        .get('/countLevels/' + source1 + '/' + source2 + '/' + sourcesOwner + '/' + sourcesLimitOrgId)
+        .get(`/datasource/countLevels?source1Id=${this.source1.id}&source1DB=${this.source1.name}&source2Id=${this.source2.id}&source2DB=${this.source2.name}&sourcesLimitOrgId=${sourcesLimitOrgId}`)
         .then(levels => {
           if (levels.data.totalSource1Levels === 1) {
             this.$store.state.errorTitle = 'No data for you'
@@ -671,9 +670,9 @@ export default {
       if (action === 'showDialog') {
         this.sharedUsers = []
         this.sharePair = pair
-        if (pair.hasOwnProperty('shared') && pair.shared.users.length > 0) {
-          pair.shared.users.forEach((sharedUsers) => {
-            this.sharedUsers.push(sharedUsers._id)
+        if (pair.hasOwnProperty('sharedUsers') && pair.sharedUsers.length > 0) {
+          pair.sharedUsers.forEach((sharedUsers) => {
+            this.sharedUsers.push(sharedUsers.id)
           })
         }
         this.shareDialog = true
@@ -685,13 +684,13 @@ export default {
           return
         }
         let formData = new FormData()
-        formData.append('sharePair', this.sharePair._id)
+        formData.append('sharePair', this.sharePair.id)
         formData.append('users', JSON.stringify(this.sharedUsers))
         formData.append('userID', this.$store.state.auth.userID)
         formData.append('orgId', this.$store.state.dhis.user.orgId)
         this.$store.state.loadingServers = true
         this.shareDialog = false
-        axios.post('/shareSourcePair', formData, {
+        axios.post('/datasource/shareSourcePair', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -705,7 +704,7 @@ export default {
       }
     },
     getUsers () {
-      axios.get('/getUsers').then((response) => {
+      axios.get('/auth/getUsers').then((response) => {
         this.users = response.data
       })
     }
@@ -718,7 +717,7 @@ export default {
         let dtSrc = ''
         for (let source of this.$store.state.dataSources) {
           if (
-            source._id ===
+            source.id ===
             this.$store.state.config.generalConfig.reconciliation.fixSource2To
           ) {
             dtSrc = source
@@ -738,15 +737,27 @@ export default {
         return true
       }
     },
+    pairSelected() {
+      if(this.source1.id && this.source2.id) {
+        return true
+      }
+      return false
+    },
     canDeletePair () {
-      if (JSON.stringify(this.activeDataSourcePair) === '{}') {
+      if (!this.activeDataSourcePair.id) {
         return false
       }
-      if (this.activeDataSourcePair.owner.id === this.$store.state.auth.userID) {
+      if (this.activeDataSourcePair.user.id === this.$store.state.auth.userID) {
         return true
       } else {
         return false
       }
+    },
+    canActivatePair() {
+      if(this.$store.state.dataSourcePairs.length === 0 || !this.activeDataSourcePair.id) {
+        return false
+      }
+      return true
     }
   },
   created () {
@@ -755,10 +766,10 @@ export default {
     }
     this.getUsers()
     this.source1 = this.$store.state.dataSources.find((dataSource) => {
-      return dataSource._id === this.$store.state.activePair.source1.id
+      return dataSource.id === this.$store.state.activePair.source1.id
     })
     this.source2 = this.$store.state.dataSources.find((dataSource) => {
-      return dataSource._id === this.$store.state.activePair.source2.id
+      return dataSource.id === this.$store.state.activePair.source2.id
     })
     this.activeDataSourcePair = this.getActiveDataSourcePair()
     if (!this.source1) {

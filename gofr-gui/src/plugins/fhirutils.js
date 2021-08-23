@@ -1,5 +1,6 @@
 const fhirpath = require('fhirpath')
 const axios = require('axios')
+import {store} from '../store/store.js'
 
 const fhirutils = {
   _code_cache: {},
@@ -23,7 +24,7 @@ const fhirutils = {
               query.push( results.shift() + "=" + encodeURI( results.shift() ) )
             }
             promises.push( new Promise( (resolve, reject) => {
-              axios.get( "/fhir/"+resource+"?"+query.join("&") ).then( response => {
+              axios.get( "/fhir/" + store.state.config.userConfig.FRDatasource + "/" + resource+"?"+query.join("&") ).then( response => {
                 let bundle = response.data
                 if ( bundle.total === 0 ) {
                   resolve( true )
@@ -88,7 +89,7 @@ const fhirutils = {
         }, 200 )
       } else if ( !fhirutils._code_cache[lookup] ) {
         fhirutils._code_loading[lookup] = true
-        axios.get( "/fhir/$short-name?reference="+reference ).then( response => {
+        axios.get( "/fhir/" + store.state.config.userConfig.FRDatasource + "/$short-name?reference="+reference ).then( response => {
           let data = response.data
           if ( data.display ) {
             resolve( fhirutils._setCache( lookup, data.display ) )
@@ -114,7 +115,7 @@ const fhirutils = {
         }, 200 )
       } else if ( !fhirutils._code_cache[lookup] ) {
         fhirutils._code_loading[lookup] = true
-        axios.get( "/fhir/$short-name?system="+system+"&code="+code+"&valuset="+binding ).then( response => {
+        axios.get( "/fhir/DEFAULT/$short-name?system="+system+"&code="+code+"&valuset="+binding ).then( response => {
           let data = response.data
           if ( data.display ) {
             resolve( fhirutils._setCache( lookup, data.display ) )
@@ -161,7 +162,7 @@ const fhirutils = {
       let valueSetId = valueset.slice(lastSlash+1, (lastPipe !== -1 ? lastPipe : valueset.length ))
       let items = []
 
-      axios.get("/fhir/ValueSet/"+valueSetId+"/$expand").then(response=> {
+      axios.get("/fhir/DEFAULT/ValueSet/"+valueSetId+"/$expand").then(response=> {
         let data = response.data
         try {
           if ( ( !data.expansion || data.expansion.total === 0 ) && data.compose.include ) {
@@ -176,7 +177,7 @@ const fhirutils = {
           reject( new Error( "Invalid response from server." ) )
         }
       }).catch(() => {
-        axios.get("/fhir/ValueSet/"+valueSetId).then(response=> {
+        axios.get("/fhir/DEFAULT/ValueSet/"+valueSetId).then(response=> {
           let data = response.data
           populateItemsFromCompose( data, items )
           items.sort( itemSort )

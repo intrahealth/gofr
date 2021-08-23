@@ -13,7 +13,7 @@ const logger = require('../winston');
  * This route will process a QuestionnaireReponse and parse
  * it into the underlying resources and save them.
  */
-router.post('/QuestionnaireResponse', (req, res, next) => {
+router.post('/:partition/QuestionnaireResponse', (req, res, next) => {
   const checkBundleForError = (bundle) => {
     if (bundle.entry) {
       for (const entry of bundle.entry) {
@@ -25,7 +25,7 @@ router.post('/QuestionnaireResponse', (req, res, next) => {
     return false;
   };
 
-
+logger.error('here');
   const workflowQuestionnaires = config.get('workflow:questionnaire');
   const workflow = Object.keys(workflowQuestionnaires).find(wf => workflowQuestionnaires[wf].url === req.body.questionnaire);
   if (workflow) {
@@ -43,8 +43,7 @@ router.post('/QuestionnaireResponse', (req, res, next) => {
     }
     fhirModules.requireWorkflow(workflow, details.library, details.file).then((module) => {
       module.process(req).then((bundle) => {
-        return res.status(500).send()
-        fhirAxios.create(bundle).then((results) => {
+        fhirAxios.create(bundle, req.params.partition).then((results) => {
           if (module.postProcess) {
             module.postProcess(req, results).then(() => {
               next();
@@ -74,8 +73,9 @@ router.post('/QuestionnaireResponse', (req, res, next) => {
       return res.status(500).json(outcome);
     });
   } else {
-    fhirQuestionnaire.processQuestionnaire(req.body).then((bundle) => {
-      fhirAxios.create(bundle).then((results) => {
+    fhirQuestionnaire.processQuestionnaire(req.body, req.params.partition).then((bundle) => {
+      logger.error('hello');
+      fhirAxios.create(bundle, req.params.partition).then((results) => {
         if (results.entry && results.entry.length > 0 && results.entry[0].response.location) {
           req.body.subject = { reference: results.entry[0].response.location };
         }

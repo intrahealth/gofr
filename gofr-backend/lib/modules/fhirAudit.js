@@ -31,7 +31,8 @@ const AUDIT_TEMPLATE = {
 const fhirAudit = {
 
   save: (audit) => {
-    fhirAxios.create(audit).then((response) => {
+    fhirAxios.create(audit, 'DEFAULT').then((response) => {
+      logger.error(JSON.stringify(response,0,2));
     }).catch((err) => {
       logger.error(`Failed to create audit trail: ${err.message}`);
       logger.error(JSON.stringify(audit, null, 2));

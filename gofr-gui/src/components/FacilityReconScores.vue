@@ -1316,13 +1316,11 @@ export default {
       }
 
       let sourcesOwner = this.getDatasourceOwner()
-      let userID = this.$store.state.activePair.userID._id
+      let userID = this.$store.state.activePair.userID
       let source1Owner = sourcesOwner.source1Owner
       let source2Owner = sourcesOwner.source2Owner
-      let source1LimitOrgId = this.getLimitOrgIdOnActivePair()
-        .source1LimitOrgId
-      let source2LimitOrgId = this.getLimitOrgIdOnActivePair()
-        .source2LimitOrgId
+      let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
+      let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
       let parentConstraint = JSON.stringify(
         this.$store.state.config.generalConfig.reconciliation.parentConstraint
       )
@@ -1524,7 +1522,7 @@ export default {
       formData.append('source2DB', this.getSource2())
       formData.append('recoLevel', this.$store.state.recoLevel)
       formData.append('totalLevels', this.$store.state.totalSource1Levels)
-      formData.append('userID', this.$store.state.activePair.userID._id)
+      formData.append('userID', this.$store.state.activePair.userID)
       axios
         .post('/match/' + this.matchType, formData, {
           headers: {
@@ -1596,7 +1594,7 @@ export default {
       this.$store.state.dynamicProgress = true
       let formData = new FormData()
       formData.append('source1Id', source1Id)
-      let userID = this.$store.state.activePair.userID._id
+      let userID = this.$store.state.activePair.userID
       axios
         .post('/acceptFlag/' + this.getSource1() + '/' + this.getSource2() + '/' + userID, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
         .then(() => {
@@ -1635,7 +1633,7 @@ export default {
       this.$store.state.progressTitle = 'Breaking match'
       this.$store.state.dynamicProgress = true
       let formData = new FormData()
-      let userID = this.$store.state.activePair.userID._id
+      let userID = this.$store.state.activePair.userID
       let sourcesOwner = this.getDatasourceOwner()
       formData.append('source1Id', source1Id)
       axios
@@ -1681,7 +1679,7 @@ export default {
       this.$store.state.progressTitle = 'Unflagging match'
       this.$store.state.dynamicProgress = true
       let formData = new FormData()
-      let userID = this.$store.state.activePair.userID._id
+      let userID = this.$store.state.activePair.userID
       let sourcesOwner = this.getDatasourceOwner()
       formData.append('source1Id', source1Id)
       axios
@@ -1729,7 +1727,7 @@ export default {
       formData.append('source1Id', source1Id)
       formData.append('recoLevel', this.$store.state.recoLevel)
       formData.append('totalLevels', this.$store.state.totalSource1Levels)
-      let userID = this.$store.state.activePair.userID._id
+      let userID = this.$store.state.activePair.userID
       axios
         .post('/breakNoMatch/' + type + '/' + this.getSource1() + '/' + this.getSource2() + '/' + userID, formData, {
           headers: {
@@ -1779,7 +1777,7 @@ export default {
     noMatch (type) {
       this.$store.state.progressTitle = 'Saving as no match'
       this.$store.state.dynamicProgress = true
-      let userID = this.$store.state.activePair.userID._id
+      let userID = this.$store.state.activePair.userID
       let sourcesOwner = this.getDatasourceOwner()
       let source1Owner = sourcesOwner.source1Owner
       let source2Owner = sourcesOwner.source2Owner

@@ -159,7 +159,7 @@ export default {
         this.datasetLimitWarn = false
         this.$store.state.dynamicProgress = false
         if (this.canAddDataset) {
-          this.addDataSource('syncServer')
+          this.addDataSource('syncServer', '')
         } else {
           this.datasetLimitWarn = true
         }
@@ -179,7 +179,7 @@ export default {
         }
       }
       for (let dtSrc of this.$store.state.dataSources) {
-        if (dtSrc.name === this.name) {
+        if (dtSrc.display === this.name) {
           this.nameErrors.push('This Name Exists')
           return false
         }

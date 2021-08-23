@@ -23,7 +23,7 @@
             <tr>
               <td>
                 <v-checkbox
-                  :value="item._id"
+                  :value="item.id"
                   v-model="role.tasks"
                 >
                 </v-checkbox>

@@ -524,6 +524,8 @@ export default {
   mixins: [dataSourcesMixin, generalMixin],
   data () {
     return {
+      partitionID: '',
+      levelData: '',
       datasetLimitWarn: false,
       errorDialog: false,
       errorTitle: '',
@@ -615,7 +617,7 @@ export default {
         }
       }
       for (let dtSrc of this.$store.state.dataSources) {
-        if (dtSrc.name.toLowerCase() === this.uploadName.toLowerCase()) {
+        if (dtSrc.display.toLowerCase() === this.uploadName.toLowerCase()) {
           this.uploadNameErrors.push('This Name Exists')
           return false
         }
@@ -656,7 +658,7 @@ export default {
         }
         if (uploadProgress.data.status === 'Done' || uploadProgress.data.status >= 100) {
           this.clearProgress('uploadProgress')
-          this.addDataSource('upload')
+          this.addDataSource('upload', this.partitionID, this.levelData)
           clearInterval(this.UploadProgressTimer)
           // resetting reco level
           this.$store.state.recoLevel = 2
@@ -728,8 +730,12 @@ export default {
             }
           }.bind(this)
         }
-      ).then(() => {
+      ).then((response) => {
+        let partitionID = response.data.partitionID
+        let levelData = response.data.levelData
         // this.UploadProgressTimer = setInterval(this.checkUploadProgress, 1000)
+        this.partitionID = partitionID
+        this.levelData = levelData
         this.checkUploadProgress()
       }).catch((err) => {
         if (Array.isArray(err.response.data.error)) {

@@ -113,7 +113,7 @@
       <v-row>
         <v-col>
           <template v-if="Object.keys($store.state.activePair.source1).length > 0 && !$store.state.denyAccess">
-            {{ $t('App.source') }} 1: <b>{{$store.state.activePair.source1.name}}</b>, &nbsp; &nbsp; {{ $t('App.source') }} 2: <b>{{$store.state.activePair.source2.name}}</b>,
+            {{ $t('App.source') }} 1: <b>{{$store.state.activePair.source1.display}}</b>, &nbsp; &nbsp; {{ $t('App.source') }} 2: <b>{{$store.state.activePair.source2.display}}</b>,
             &nbsp; &nbsp; Recon Status: <v-icon
               small
               v-if="$store.state.recoStatus === 'in-progress'"
@@ -212,56 +212,43 @@ export default {
       this.$store.state.dialogError = false
     },
     renderInitialPage () {
-      this.$store.state.initializingApp = false
-      this.$router.push({ name: 'ViewMap' })
-      return
-      // let source1 = this.$store.state.activePair.source1.name
-      // let source2 = this.$store.state.activePair.source2.name
-      // if (
-      //   (!source1 || !source2) &&
-      //   (this.$store.state.dataSources.length > 1 ||
-      //     this.$store.state.dataSourcePairs.length > 0)
-      // ) {
-      //   this.$router.push({ name: 'DataSourcesPair' })
-      //   return
-      // }
-      // if (!source1 || !source2) {
-      //   this.$router.push({ name: 'AddDataSources' })
-      //   return
-      // }
-      // source1 = this.toTitleCase(source1)
-      // source2 = this.toTitleCase(source2)
-
-      // let sourcesOwner = this.getDatasourceOwner()
-      // axios
-      //   .get(
-      //     '/uploadAvailable/' +
-      //     source1 +
-      //     '/' +
-      //     source2 +
-      //     '/' +
-      //     sourcesOwner.source1Owner +
-      //     '/' +
-      //     sourcesOwner.source2Owner
-      //   )
-      //   .then(results => {
-      //     this.$store.state.initializingApp = false
-      //     if (results.data.dataUploaded) {
-      //       this.$store.state.recalculateScores = true
-      //       this.$router.push({ name: 'FacilityReconScores' })
-      //     } else {
-      //       this.$router.push({ name: 'AddDataSources' })
-      //     }
-      //   })
-      //   .catch(err => {
-      //     console.log(err)
-      //     this.$router.push({ name: 'AddDataSources' })
-      //   })
+      // this.$store.state.initializingApp = false
+      // this.$router.push({ name: 'ViewMap' })
+      // return
+      let source1DB = this.$store.state.activePair.source1.name
+      let source2DB = this.$store.state.activePair.source2.name
+      if (
+        (!source1DB || !source2DB) &&
+        (this.$store.state.dataSources.length > 1 ||
+          this.$store.state.dataSourcePairs.length > 0)
+      ) {
+        this.$router.push({ name: 'DataSourcesPair' })
+        return
+      }
+      if (!source1DB || !source2DB) {
+        this.$router.push({ name: 'AddDataSources' })
+        return
+      }
+      axios.get( '/uploadAvailable/' + source1DB + '/' + source2DB ).then(results => {
+        this.$store.state.initializingApp = false
+        if (results.data.dataUploaded) {
+          this.$store.state.recalculateScores = true
+          this.$router.push({ name: 'FacilityReconScores' })
+        } else {
+          this.$router.push({ name: 'AddDataSources' })
+        }
+      })
+      .catch(err => {
+        console.log(err)
+        this.$router.push({ name: 'AddDataSources' })
+      })
     },
     getTotalLevels () {
-      let source1 = this.$store.state.activePair.source1.name
-      let source2 = this.$store.state.activePair.source2.name
-      if (!source1 || !source2) {
+      let source1DB = this.$store.state.activePair.source1.name
+      let source2DB = this.$store.state.activePair.source2.name
+      let source1Id = this.$store.state.activePair.source1.id
+      let source2Id = this.$store.state.activePair.source2.id
+      if (!source1DB || !source2DB) {
         this.$store.state.totalSource1Levels = 5
         this.$store.state.totalSource2Levels = 5
         this.$store.state.initializingApp = false
@@ -270,12 +257,9 @@ export default {
         this.getRecoStatus()
         return
       }
-      source1 = this.toTitleCase(source1)
-      source2 = this.toTitleCase(source2)
-      let sourcesOwner = JSON.stringify(this.getDatasourceOwner())
       let sourcesLimitOrgId = JSON.stringify(this.getLimitOrgIdOnActivePair())
       axios
-        .get('/countLevels/' + source1 + '/' + source2 + '/' + sourcesOwner + '/' + sourcesLimitOrgId)
+        .get(`/datasource/countLevels?source1Id=${source1Id}&source1DB=${source1DB}&source2Id=${source2Id}&source2DB=${source2DB}&sourcesLimitOrgId=${sourcesLimitOrgId}`)
         .then(levels => {
           this.$store.state.levelMapping.source1 = levels.data.levelMapping.levelMapping1
           this.$store.state.levelMapping.source2 = levels.data.levelMapping.levelMapping2
@@ -300,7 +284,7 @@ export default {
       }
       let source1 = this.toTitleCase(this.$store.state.activePair.source1.name)
       let source2 = this.toTitleCase(this.$store.state.activePair.source2.name)
-      let userID = this.$store.state.activePair.userID._id
+      let userID = this.$store.state.activePair.userID
       axios
         .get(
           '/recoStatus/' +
@@ -344,10 +328,10 @@ export default {
       let role = this.$store.state.auth.role
       let orgId = this.$store.state.dhis.user.orgId
       axios
-        .get('/getDataSources/' + userID + '/' + role + '/' + orgId)
+        .get('/datasource/getSource/' + userID + '/' + role + '/' + orgId)
         .then(response => {
           this.$store.state.loadingServers = false
-          this.$store.state.dataSources = response.data.servers
+          this.$store.state.dataSources = response.data.sources
           this.getDataSourcePair()
         })
         .catch(err => {
@@ -358,7 +342,7 @@ export default {
     getUserConfig () {
       let userID = this.$store.state.auth.userID
       axios
-        .get('/getUserConfig/' + userID)
+        .get('/config/getUserConfig/' + userID)
         .then(config => {
           if (config.data) {
             this.$store.state.config.userConfig = { ...this.$store.state.config.userConfig, ...config.data }
@@ -381,20 +365,23 @@ export default {
         this.$store.state.initializingApp = true
       }
       axios
-        .get('/getDataSourcePair/' + userID + '/' + this.$store.state.dhis.user.orgId)
+        .get('/datasource/getSourcePair/' + userID + '/' + this.$store.state.dhis.user.orgId)
         .then(response => {
           this.$store.state.dataSourcePairs = response.data
           let activeSource = this.getActiveDataSourcePair()
           if (Object.keys(activeSource).length > 0) {
-            this.$store.state.activePair.source1.id = activeSource.source1._id
+            this.$store.state.activePair.source1.id = activeSource.source1.id
             this.$store.state.activePair.source1.name = activeSource.source1.name
-            this.$store.state.activePair.source1.userID = activeSource.source1.userID
-            this.$store.state.activePair.source2.id = activeSource.source2._id
+            this.$store.state.activePair.source1.display = activeSource.source1.display
+            this.$store.state.activePair.source1.userID = activeSource.source1.user.id
+            this.$store.state.activePair.source2.id = activeSource.source2.id
             this.$store.state.activePair.source2.name = activeSource.source2.name
-            this.$store.state.activePair.source2.userID = activeSource.source2.userID
-            this.$store.state.activePair._id = activeSource._id
-            this.$store.state.activePair.shared = activeSource.shared
-            this.$store.state.activePair.userID = activeSource.userID
+            this.$store.state.activePair.source2.display = activeSource.source2.display
+            this.$store.state.activePair.source2.userID = activeSource.source2.user.id
+            this.$store.state.activePair.id = activeSource.id
+            this.$store.state.activePair.shared = activeSource.sharedUsers
+            this.$store.state.activePair.activeUsers = activeSource.activeUsers
+            this.$store.state.activePair.userID = activeSource.user.id
           }
           this.autoActivateDatasourcePair((created) => {
             if (!created) {
@@ -424,7 +411,7 @@ export default {
         let datasources = []
         for (let source of this.$store.state.dataSources) {
           let sharedToMe = source.shared.users.find((user) => {
-            return user._id === userID
+            return user.id === userID
           })
           let itsMine = source.owner.id === userID
           let sharedToAll = source.shareToAll.activated === true
@@ -435,7 +422,7 @@ export default {
           if (!itsMine && !sharedToMe && !sharedToAll && !sameOrgId) {
             continue
           }
-          if (source._id === fixedSource2To) {
+          if (source.id === fixedSource2To) {
             source2 = source
           } else {
             source1 = source

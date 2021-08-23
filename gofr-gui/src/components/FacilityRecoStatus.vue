@@ -423,7 +423,7 @@
       </v-col>
       <v-spacer></v-spacer>
       <v-col cols="3">
-        <template v-if="$store.state.activePair.userID._id === $store.state.auth.userID || $store.state.auth.role == 'Admin'">
+        <template v-if="$store.state.activePair.userID === $store.state.auth.userID || $store.state.auth.role == 'Admin'">
           <v-btn
             color="success"
             rounded
@@ -702,7 +702,7 @@ export default {
       const clientId = this.$store.state.clientId
       let totalSource2Levels = this.$store.state.totalSource2Levels
       let totalSource1Levels = this.$store.state.totalSource1Levels
-      let userID = this.$store.state.activePair.userID._id
+      let userID = this.$store.state.activePair.userID
       let sourcesOwner = this.getDatasourceOwner()
       let source1Owner = sourcesOwner.source1Owner
       let source2Owner = sourcesOwner.source2Owner
@@ -723,7 +723,7 @@ export default {
     markRecoDone () {
       this.$store.state.progressTitle = 'Marking reconciliation as Done'
       this.$store.state.dynamicProgress = true
-      let userID = this.$store.state.activePair.userID._id
+      let userID = this.$store.state.activePair.userID
       axios.get('/markRecoDone/' + this.source1 + '/' + this.source2 + '/' + userID).then((status) => {
         this.$store.state.dynamicProgress = false
         if (status.data.status) {
@@ -739,7 +739,7 @@ export default {
       })
     },
     markRecoUnDone () {
-      let userID = this.$store.state.activePair.userID._id
+      let userID = this.$store.state.activePair.userID
       this.$store.state.progressTitle = 'Marking reconciliation as Un Done'
       this.$store.state.dynamicProgress = true
       axios.get('/markRecoUnDone/' + this.source1 + '/' + this.source2 + '/' + userID).then((status) => {

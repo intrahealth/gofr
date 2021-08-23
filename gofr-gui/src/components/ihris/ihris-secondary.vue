@@ -81,9 +81,9 @@ export default {
       //for searchfield in the form Location:organization with Location being the primary resource, then use _include to retrieve secondary resources
       if(this.searchField.split(':').length === 2) {
         let resource = this.searchField.split(':')[0]
-        url = "fhir/" + resource + "?_id=" + this.linkId + "&_include=" + this.searchField
+        url = "fhir/" + this.$store.state.config.userConfig.FRDatasource + "/" + resource + "?_id=" + this.linkId + "&_include=" + this.searchField
       } else {
-        url = "/fhir/" + this.field
+        url = "/fhir/" + this.$store.state.config.userConfig.FRDatasource + "/" + this.field
         let queryStr = []
         if ( this.profile ) {
           queryStr.push( "_profile="+this.profile )

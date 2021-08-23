@@ -1,3 +1,5 @@
+const deepmerge = require('deepmerge');
+const formidable = require('formidable');
 const crypto = require('crypto');
 const express = require('express');
 
@@ -55,10 +57,7 @@ const setupOrder = (fields, sectionOrder) => {
 };
 
 router.get('/questionnaire/:questionnaire', (req, res) => {
-  fhirWrapper.getResource({
-    resource: 'Questionnaire',
-    id: req.params.questionnaire,
-  }).then(async (resource) => {
+  fhirAxios.read('Questionnaire', req.params.questionnaire, '', 'DEFAULT').then(async (resource) => {
     let vueOutput = `<ihris-questionnaire :edit=\"isEdit\" :view-page="viewPage" :constraints="constraints" url="${resource.url}" id="${resource.id}" title="${resource.title
     }" description="${resource.description}" purpose="${resource.purpose
     }"__SECTIONMENU__>` + '\n';
@@ -203,9 +202,9 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
               if (config.get(`defaults:fields:${field.id}:${attr}`)) {
                 vueOutput += ` ${attr}="${config.get(`defaults:fields:${field.id}:${attr}`)}"`;
               } else if (attr === 'initialValue' && displayType === 'tree') {
-                let resType = field.id.split('.')[0]
-                let topOrgId = ''
-                if(['Location', 'Organization'].includes(resType)) {
+                const resType = field.id.split('.')[0];
+                let topOrgId = '';
+                if (['Location', 'Organization'].includes(resType)) {
                   topOrgId = mixin.getTopOrgId(config.get('mCSD:registryDB'), resType);
                 }
                 vueOutput += ` initialValue="${topOrgId}"`;
@@ -320,11 +319,10 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
   });
 });
 
-router.get('/page/:page/:type/:partition?', (req, res) => {
+router.get('/page/:page/:type?', (req, res) => {
   const page = `gofr-page-${req.params.page}`;
   // Limited access to these don't make sense so not allowing it for now
-
-  fhirAxios.read('Basic', page, partition).then(async (resource) => {
+  fhirAxios.read('Basic', page, '', 'DEFAULT').then(async (resource) => {
     const pageDisplay = resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/ihris-page-display');
 
     const pageResource = pageDisplay.extension.find(ext => ext.url === 'resource').valueReference.reference;
@@ -773,6 +771,7 @@ router.get('/page/:page/:type/:partition?', (req, res) => {
     };
 
     const createSearchTemplate = async (resource, structure) => {
+      logger.error('here');
       logger.silly(JSON.stringify(structure, null, 2));
       let search = ['id'];
       try {
@@ -828,11 +827,8 @@ router.get('/page/:page/:type/:partition?', (req, res) => {
       }
       searchTemplate += `</${searchElement}>\n`;
       logger.debug(searchTemplate);
-
-
       return res.status(200).json({ template: searchTemplate, data: { fields: search, addLink } });
     };
-
 
     if (pageResource.startsWith('CodeSystem')) {
       getProperties(pageResource).then((resource) => {
@@ -887,6 +883,112 @@ router.get('/page/:page/:type/:partition?', (req, res) => {
     logger.error(err.message);
     logger.error(err.stack);
     return res.status(err.response.status).json(err.response.data);
+  });
+});
+
+router.post('/updateUserConfig/:userID', (req, res) => {
+  logger.info('Received updated user configurations');
+  const form = new formidable.IncomingForm();
+  form.parse(req, (err, fields, files) => {
+    let appConfig;
+    try {
+      appConfig = JSON.parse(fields.config);
+    } catch (error) {
+      appConfig = fields.config;
+    }
+    const configRes = {
+      resourceType: 'Parameters',
+      id: `gofr-user-config-${req.params.userID}`,
+      parameter: [{
+        name: 'config',
+        valueString: '{}',
+      }],
+    };
+    const index = configRes.parameter.findIndex(param => param.name === 'config');
+    configRes.parameter[index].valueString = JSON.stringify(appConfig.userConfig);
+    fhirAxios.update(configRes, 'DEFAULT').then(() => {
+      logger.info('User Config Saved');
+      return res.status(200).json({
+        status: 'Done',
+      });
+    }).catch((err) => {
+      logger.error(err);
+      res.status(500).json({
+        error: 'Unexpected error occured,please retry',
+      });
+    });
+  });
+});
+
+router.post('/updateGeneralConfig', (req, res) => {
+  logger.info('Received updated general configurations');
+  const form = new formidable.IncomingForm();
+  form.parse(req, (err, fields, files) => {
+    let appConfig;
+    try {
+      appConfig = JSON.parse(fields.config);
+    } catch (error) {
+      appConfig = fields.config;
+    }
+    fhirAxios.read('Parameters', 'gofr-general-config', '', 'DEFAULT').then((configRes) => {
+      const index = configRes.parameter.findIndex(param => param.name === 'config');
+      const _config = JSON.parse(configRes.parameter[index].valueString);
+      if (!_config.externalAuth || appConfig.generalConfig.externalAuth.password != _config.externalAuth.password) {
+        if (appConfig.generalConfig.externalAuth.password) {
+          appConfig.generalConfig.externalAuth.password = mongo.encrypt(appConfig.generalConfig.externalAuth.password);
+        }
+      } else {
+        appConfig.generalConfig.externalAuth.password = _config.externalAuth.password;
+      }
+      configRes.parameter[index].valueString = JSON.stringify(appConfig.generalConfig);
+      fhirAxios.update(configRes, 'DEFAULT').then(() => {
+        logger.info('General Config Saved');
+        return res.status(200).json({
+          status: 'Done',
+        });
+      }).catch((err) => {
+        logger.error(err);
+        res.status(500).json({
+          error: 'Unexpected error occured,please retry',
+        });
+      });
+    });
+  });
+});
+
+router.get('/getUserConfig/:userID', (req, res) => {
+  fhirAxios.read('Parameters', `gofr-user-config-${req.params.userID}`, '', 'DEFAULT').then((response) => {
+    const usrConfig = response.parameter.find(param => param.name === 'config');
+    return res.status(200).json(JSON.parse(usrConfig.valueString));
+  }).catch((err) => {
+    logger.error(err);
+    res.status(500).json({
+      error: 'internal error occured while getting configurations',
+    });
+  });
+});
+
+router.get('/getGeneralConfig', (req, res) => {
+  const defaultGenerConfig = JSON.parse(req.query.defaultGenerConfig);
+  logger.info('Received a request to get general configuration');
+  fhirAxios.read('Parameters', 'gofr-general-config', '', 'DEFAULT').then((response) => {
+    const resData = response.parameter.find(param => param.name === 'config');
+    let merged = {};
+    if (resData.valueString) {
+      // overwrite array on the left with one on the right
+      const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
+      merged = deepmerge.all([defaultGenerConfig, JSON.parse(resData.valueString)], {
+        arrayMerge: overwriteMerge,
+      });
+    } else {
+      merged = defaultGenerConfig;
+    }
+    res.status(200).json(merged);
+  }).catch((err) => {
+    logger.error(err);
+    res.status(500).json({
+      error: 'internal error occured while getting configurations',
+    });
   });
 });
 

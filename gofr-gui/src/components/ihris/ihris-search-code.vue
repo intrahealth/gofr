@@ -71,7 +71,7 @@ export default {
       //console.log("getting data",restart)
       this.loading = true
       this.error_message = null
-      let url = "/fhir/CodeSystem"+this.profile.substring(this.profile.lastIndexOf("/"))
+      let url = "/fhir/DEFAULT/CodeSystem"+this.profile.substring(this.profile.lastIndexOf("/"))
 
       axios.get( url ).then(async (response) => {
         let data = response.data

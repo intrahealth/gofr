@@ -27,7 +27,7 @@
             <v-data-table
               :headers="pairsHeaders"
               :items="pairs"
-              hide-actions
+              hide-default-footer
               :loading="loadingPairs"
             >
               <template
@@ -77,7 +77,7 @@
             dark
             @click.native="editDialog = false"
           >
-            <v-icon>close</v-icon>
+            <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card-text>
@@ -150,7 +150,7 @@
           dark
         >
           <v-toolbar-title>
-            Sharing {{shareSource.name}}
+            Sharing {{shareSource.display}}
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn
@@ -158,7 +158,7 @@
             dark
             @click.native="shareDialog = false"
           >
-            <v-icon>close</v-icon>
+            <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card-text>
@@ -177,10 +177,10 @@
               </p>
             </v-card-text>
           </template>
-          <v-icon small>lock</v-icon> Limiting Sharing to: <b>{{limitLocationName}}</b>
+          <v-icon small>mdi-lock</v-icon> Limiting Sharing to: <b>{{limitLocationName}}</b>
           <v-text-field
             v-model="searchUsers"
-            append-icon="search"
+            append-icon="mdi-magnify"
             label="Search"
             single-line
             hide-details
@@ -190,20 +190,19 @@
             :items="users"
             :search="searchUsers"
             class="elevation-1"
-            item-key="firstName"
+            item-key="id"
           >
-            <template v-slot:items="props">
-              <tr v-if="props.item.userName !== $store.state.auth.username">
+            <template v-slot:item="{ item }">
+              <tr v-if="item.userName !== $store.state.auth.username">
                 <td>
                   <v-checkbox
-                    :value="props.item._id"
+                    :value="item.id"
                     v-model="sharedUsers"
                   >
                   </v-checkbox>
                 </td>
-                <td>{{props.item.userName}}</td>
-                <td>{{props.item.firstName}}</td>
-                <td>{{props.item.surname}}</td>
+                <td>{{item.userName}}</td>
+                <td>{{item.fullName}}</td>
               </tr>
             </template>
           </v-data-table>
@@ -218,7 +217,7 @@
             <v-icon
               dark
               left
-            >cancel</v-icon>Cancel
+            >mdi-cancel</v-icon>Cancel
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
@@ -226,7 +225,7 @@
             :disabled='loadingLocationTree'
             @click.native="share('', 'saveShare')"
           >
-            <v-icon left>share</v-icon>Share
+            <v-icon left>mdi-share</v-icon>Share
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -428,21 +427,21 @@
                       ></v-radio>
                     </td>
                   </v-radio-group>
-                  <td>{{item.name}}</td>
-                  <td>{{item.host}}</td>
-                  <td>{{item.sourceType}}</td>
-                  <td>{{item.username}}</td>
-                  <td v-if="item.username">*****</td>
+                  <td>{{item.resource.flatExtension.name}}</td>
+                  <td>{{item.resource.flatExtension.host}}</td>
+                  <td>{{item.resource.flatExtension.sourceType}}</td>
+                  <td>{{item.resource.flatExtension.username}}</td>
+                  <td v-if="item.resource.flatExtension.username">*****</td>
                   <td v-else></td>
                   <td>{{item.lastUpdate}}</td>
-                  <td>{{item.userID.userName}}</td>
+                  <td>{{item.resource.flatExtension.userID.reference}}</td>
                   <td>
-                    {{item.shared.users | mergeUsers}}
+                    {{item.resource.flatExtension.sharedUsers | mergeUsers}}
                   </td>
                   <td>
-                    {{item.createdTime}}
+                    {{item.resource.flatExtension.createdTime}}
                   </td>
-                  <td v-if='item.userID._id === $store.state.auth.userID'>
+                  <td v-if='item.resource.flatExtension.userID.reference === $store.state.auth.userID'>
                     <v-btn
                       color="success"
                       flat
@@ -535,15 +534,15 @@
                       ></v-radio>
                     </td>
                   </v-radio-group>
-                  <td>{{item.name}}</td>
-                  <td>{{item.userID.userName}}</td>
+                  <td>{{item.display}}</td>
+                  <td>{{item.owner}}</td>
                   <td>
-                    {{item.shared.users | mergeUsers}}
+                    {{item.sharedUsers | mergeUsers}}
                   </td>
                   <td>
                     {{item.createdTime}}
                   </td>
-                  <td v-if='item.userID._id === $store.state.auth.userID'>
+                  <td v-if='item.userID === $store.state.auth.userID'>
                     <v-btn
                       color="success"
                       text
@@ -565,7 +564,7 @@
       :syncType="syncType"
       :serverName="server.name"
       :userID="$store.state.auth.userID"
-      :sourceOwner="server.userID._id"
+      :sourceOwner="server.userID"
       :mode="mode"
     >
     </appRemoteSync>
@@ -636,8 +635,7 @@ export default {
       usersHeader: [
         { sortable: false },
         { text: 'Username', value: 'userName', sortable: true },
-        { text: 'Firstname', value: 'firstName', sortable: true },
-        { text: 'Surname', value: 'surname', sortable: true }
+        { text: 'Fullname', value: 'fullName', sortable: true }
       ],
       dataSource: '',
       addDataSource: true,
@@ -658,11 +656,17 @@ export default {
         return ''
       }
       let userNames = ''
+      let counter = 0
       for (let user of users) {
+        counter++
+        if(counter > 5) {
+          userNames += '...'
+          break
+        }
         if (!userNames) {
-          userNames = user.userName
+          userNames = user.name
         } else {
-          userNames += ', ' + user.userName
+          userNames += ',' + user.name
         }
       }
       return userNames
@@ -684,7 +688,7 @@ export default {
         this.$store.state.errorDescription = 'Please select data source'
         return
       }
-      if (this.server.userID._id !== this.$store.state.auth.userID) {
+      if (this.server.userID !== this.$store.state.auth.userID) {
         this.$store.state.dialogError = true
         this.$store.state.errorTitle = 'Info'
         this.$store.state.errorDescription = 'You are not the owner of this data source, ask the owner to edit any details'
@@ -703,12 +707,12 @@ export default {
       formData.append('source', this.server.source)
       formData.append('username', this.server.username)
       formData.append('password', this.server.password)
-      formData.append('userID', this.server.userID._id)
+      formData.append('userID', this.server.userID)
       formData.append('name', this.server.name)
-      formData.append('id', this.server._id)
+      formData.append('id', this.server.id)
       formData.append('clientId', clientId)
       this.editDialog = false
-      axios.post('/addDataSource', formData, {
+      axios.post('/datasource/editSource', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -723,7 +727,7 @@ export default {
         this.$store.state.errorDescription = 'Please select data source'
         return
       }
-      if (this.server.userID._id !== this.$store.state.auth.userID && this.$store.state.auth.role !== 'Admin') {
+      if (this.server.userID !== this.$store.state.auth.userID && this.$store.state.auth.role !== 'Admin') {
         this.$store.state.dialogError = true
         this.$store.state.errorTitle = 'Info'
         this.$store.state.errorDescription = 'You are not the owner of this data source, ask the owner to remove you from the share'
@@ -734,16 +738,14 @@ export default {
     },
     deleteDataSource () {
       this.deleteConfirm = false
-      let userID = this.$store.state.auth.userID
-      let sourceOwner = this.server.userID._id
-      axios.get(`/deleteDataSource/${this.server._id}/${this.server.name}/${sourceOwner}/${userID}`).then(() => {
+      axios.delete(`/datasource/deleteDataSource/${this.server.id}`).then(() => {
         this.server = {}
         eventBus.$emit('getDataSources')
       })
     },
     getPairsToDelete () {
       this.loadingPairs = true
-      axios.get('/getPairForDatasource/' + this.server._id).then((response) => {
+      axios.get('/datasource/getPairForSource/' + this.server.id).then((response) => {
         this.loadingPairs = false
         this.pairs = response.data
       }).catch((error) => {
@@ -768,7 +770,7 @@ export default {
         this.getLocationTree()
         if (source.hasOwnProperty('shared') && source.shared.users.length > 0) {
           source.shared.users.forEach((sharedUsers) => {
-            this.sharedUsers.push(sharedUsers._id)
+            this.sharedUsers.push(sharedUsers.id)
           })
         }
         this.shareDialog = true
@@ -780,7 +782,7 @@ export default {
           return
         }
         let formData = new FormData()
-        formData.append('shareSource', this.shareSource._id)
+        formData.append('shareSource', this.shareSource.id)
         formData.append('users', JSON.stringify(this.sharedUsers))
         formData.append('userID', this.$store.state.auth.userID)
         formData.append('role', this.$store.state.auth.role)
@@ -788,13 +790,13 @@ export default {
         formData.append('limitLocationId', this.limitLocationId)
         this.$store.state.loadingServers = true
         this.shareDialog = false
-        axios.post('/shareDataSource', formData, {
+        axios.post('/datasource/shareSource', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
-        }).then((response) => {
+        }).then(() => {
           this.$store.state.loadingServers = false
-          this.$store.state.dataSources = response.data
+          eventBus.$emit('getDataSources')
         }).catch((err) => {
           console.log(err)
           this.$store.state.loadingServers = false
@@ -811,7 +813,7 @@ export default {
       }
     },
     getLocationTree () {
-      let userID = this.shareSource.userID._id
+      let userID = this.shareSource.userID
       this.loadingLocationTree = true
       let source = this.toTitleCase(this.shareSource.name)
       axios.get('/getTree/' + source + '/' + userID).then((hierarchy) => {
@@ -826,7 +828,7 @@ export default {
       })
     },
     getUsers () {
-      axios.get('/getUsers').then((response) => {
+      axios.get('/auth/getUsers').then((response) => {
         this.users = response.data
       })
     },
@@ -837,7 +839,7 @@ export default {
         this.$store.state.errorDescription = 'Please select data source'
         return
       }
-      let sourceOwner = this.server.userID._id
+      let sourceOwner = this.server.userID
       axios.get('/getUploadedCSV/' + sourceOwner + '/' + this.server.name).then((resp) => {
         let blob = new Blob([resp.data])
         if (window.navigator.msSaveOrOpenBlob) {
@@ -863,7 +865,7 @@ export default {
         this.$store.state.errorDescription = 'Please select data source'
         return
       }
-      if (this.server.userID._id !== this.$store.state.auth.userID) {
+      if (this.server.userID !== this.$store.state.auth.userID) {
         this.$store.state.dialogError = true
         this.$store.state.errorTitle = 'Info'
         this.$store.state.errorDescription = 'Only data source owner can run the sync'
@@ -896,7 +898,7 @@ export default {
     uploadedSources () {
       let upload = []
       for (let sources of this.$store.state.dataSources) {
-        if (sources.source === 'upload') {
+        if (sources.source === 'upload' || sources.source === 'blank') {
           upload.push(sources)
         }
       }

@@ -92,6 +92,13 @@
                 label="Remote Source"
                 value="remote"
               ></v-radio>
+              <v-radio
+                v-if='canUseBlankWay'
+                :disabled="!canAddDataset"
+                color="primary"
+                label="Blank Source"
+                value="blank"
+              ></v-radio>
             </v-radio-group>
           </v-card-text>
         </v-card>
@@ -136,6 +143,7 @@
 <script>
 import FacilityReconUpload from './FacilityReconUpload'
 import FacilityReconRemoteSources from './FacilityReconRemoteSources'
+import AddBlankSource from './AddBlankSource'
 import Dialogs from './dialogs'
 import { generalMixin } from '../../mixins/generalMixin'
 import { eventBus } from '../../main'
@@ -154,7 +162,8 @@ export default {
       addDataSource: true,
       alertSuccess: false,
       alertError: false,
-      alertMsg: ''
+      alertMsg: '',
+      blankName: ''
     }
   },
   methods: {
@@ -167,6 +176,8 @@ export default {
         this.selectedComponent = 'FacilityReconUpload'
       } else if (selection === 'remote') {
         this.selectedComponent = 'FacilityReconRemoteSources'
+      } else if (selection === 'blank') {
+        this.selectedComponent = 'AddBlankSource'
       }
     }
   },
@@ -184,11 +195,19 @@ export default {
       } else {
         return true
       }
+    },
+    canUseBlankWay () {
+      if (this.$store.state.config.generalConfig.datasetsAdditionWays.indexOf('Blank Datasource') === -1) {
+        return false
+      } else {
+        return true
+      }
     }
   },
   components: {
     'FacilityReconUpload': FacilityReconUpload,
     'FacilityReconRemoteSources': FacilityReconRemoteSources,
+    'AddBlankSource': AddBlankSource,
     'appDialogs': Dialogs
   },
   created () {

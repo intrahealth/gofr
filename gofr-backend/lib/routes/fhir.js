@@ -133,7 +133,6 @@ router.patch('/:partition/CodeSystem/:id/:code', (req, res) => {
 
 router.put('/:partition/:resource/:id', (req, res) => {
   const update = req.body;
-  logger.error(JSON.stringify(update, 0, 2));
   fhirAxios.update(update, req.params.partition).then((resource) => {
     fhirAudit.update(req.user, req.ip, `${resource.resourceType}/${resource.id
     }${resource.meta.versionId ? `/_history/${resource.meta.versionId}` : ''}`, true);

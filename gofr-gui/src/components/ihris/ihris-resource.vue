@@ -122,7 +122,7 @@ export default {
   created: function() {
     if ( this.fhirId ) {
       this.loading = true
-      axios.get( "/fhir/"+this.field+"/"+this.fhirId ).then(response => {
+      axios.get( "/fhir/" + this.$store.state.config.userConfig.FRDatasource + "/" + this.field+"/"+this.fhirId ).then(response => {
         let data = response.data
         this.orig = data
         this.source = { data: data, path: this.field }
@@ -255,7 +255,7 @@ export default {
           "reference": "Location/" + this.fhirId
         }
       })
-      let url = "/fhir/"+this.field
+      let url = "/fhir/" + this.$store.state.config.userConfig.FRDatasource + "/" + this.field
       let opts = {
         method: "POST",
         url,
@@ -450,7 +450,7 @@ export default {
         this.$store.commit('setMessage', { type: 'error', text: 'There were errors on the form.' })
         return
       }
-      let url = "/fhir/"+this.field
+      let url = "/fhir/" + this.$store.state.config.userConfig.FRDatasource + "/" + this.field
       let opts = {
         method: "POST",
         url,

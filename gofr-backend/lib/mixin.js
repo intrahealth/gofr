@@ -4,6 +4,7 @@ const uuid5 = require('uuid/v5');
 const csv = require('fast-csv');
 const async = require('async');
 const moment = require('moment');
+const crypto = require('crypto');
 const fs = require('fs');
 const config = require('./config');
 const logger = require('./winston');
@@ -19,7 +20,7 @@ module.exports = function () {
       return val === +val && isFinite(val) && !(val % 1);
     },
     getTopOrgId(dbname, resourceType) {
-      return uuid5(dbname+resourceType, '16b229bc-eba5-4e99-abec-aaa0d1462583');
+      return uuid5(dbname + resourceType, '16b229bc-eba5-4e99-abec-aaa0d1462583');
     },
     getMappingId(id) {
       return uuid5(id.toString(), '16b229bc-eba5-4e99-abec-aaa0d1462583');
@@ -250,6 +251,57 @@ module.exports = function () {
         logger.info('Done updating config file');
         return callback();
       });
+    },
+    encrypt(text) {
+      const algorithm = config.get('encryption:algorithm');
+      const secret = config.get('encryption:secret');
+      const cipher = crypto.createCipher(algorithm, secret);
+      let crypted = cipher.update(text, 'utf8', 'hex');
+      crypted += cipher.final('hex');
+      return crypted;
+    },
+    decrypt(text) {
+      const algorithm = config.get('encryption:algorithm');
+      const secret = config.get('encryption:secret');
+      const decipher = crypto.createDecipher(algorithm, secret);
+      let dec = decipher.update(text, 'hex', 'utf8');
+      dec += decipher.final('utf8');
+      return dec;
+    },
+    flattenExtension(extension) {
+      const results = {};
+      for (const ext of extension) {
+        let value = '';
+        for (const key of Object.keys(ext)) {
+          if (key !== 'url') {
+            value = ext[key];
+          }
+        }
+        if (results[ext.url]) {
+          if (Array.isArray(results[ext.url])) {
+            results[ext.url].push(value);
+          } else {
+            results[ext.url] = [results[ext.url], value];
+          }
+        } else if (Array.isArray(value)) {
+          results[ext.url] = [value];
+        } else {
+          results[ext.url] = value;
+        }
+      }
+      return results;
+    },
+    createLevelMapping(levelData) {
+      const levels = Object.keys(levelData);
+      const levelMapping = {};
+      for (const level of levels) {
+        if (level.startsWith('level') && levelData[level]) {
+          levelMapping[level] = levelData[level];
+        }
+      }
+      levelMapping.code = levelData.code;
+      levelMapping.facility = levelData.facility;
+      return levelData;
     },
   };
 };

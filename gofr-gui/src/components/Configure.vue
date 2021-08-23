@@ -129,7 +129,7 @@
                 >
                   <td>
                     <v-radio
-                      :value="item._id"
+                      :value="item.id"
                       color="blue"
                     ></v-radio>
                   </td>
@@ -182,6 +182,16 @@
                   v-model="$store.state.config.userConfig.reconciliation.useCSVHeader"
                 >
                 </v-switch>
+              </v-flex>
+              <v-flex>
+                <v-autocomplete
+                  @change="saveConfiguration('userConfig', 'useCSVHeader')"
+                  :items="$store.state.dataSources"
+                  item-text="display"
+                  item-value="name"
+                  v-model="$store.state.config.userConfig.FRDatasource"
+                  label="Facility Registry Datasource"
+                ></v-autocomplete>
               </v-flex>
             </v-layout>
           </v-card-text>
@@ -238,6 +248,12 @@
                       v-model="$store.state.config.generalConfig.datasetsAdditionWays"
                       value="Remote Servers Sync"
                       @change="checkDatasetsAdditionWays('remote')"
+                    ></v-checkbox>
+                    <v-checkbox
+                      label="Blank Datasource"
+                      v-model="$store.state.config.generalConfig.datasetsAdditionWays"
+                      value="Blank Datasource"
+                      @change="checkDatasetsAdditionWays('blank')"
                     ></v-checkbox>
                   </v-card-text>
                 </v-card>
@@ -516,7 +532,7 @@
                             <v-switch
                               @change="controlDatasetsCronjobs(item)"
                               color="primary"
-                              v-model="datasetsAutosyncState[item._id]"
+                              v-model="datasetsAutosyncState[item.id]"
                             >
                             </v-switch>
                           </td>
@@ -613,21 +629,21 @@
                         <v-text-field
                           label="End point URL"
                           v-model="notification_endpoint"
-                          box
+                          filled
                         ></v-text-field>
                       </v-flex>
                       <v-flex>
                         <v-text-field
                           label="End point Username"
                           v-model="notification_username"
-                          box
+                          filled
                         ></v-text-field>
                       </v-flex>
                       <v-flex>
                         <v-text-field
                           label="End point Password"
                           v-model="notification_password"
-                          box
+                          filled
                         ></v-text-field>
                       </v-flex>
                       <v-flex>
@@ -730,8 +746,8 @@ export default {
   methods: {
     controlDatasetsCronjobs (dataset) {
       let formData = new FormData()
-      formData.append('id', dataset._id)
-      formData.append('enabled', this.datasetsAutosyncState[dataset._id])
+      formData.append('id', dataset.id)
+      formData.append('enabled', this.datasetsAutosyncState[dataset.id])
       axios.post('/updateDatasetAutosync', formData)
     },
     checkDatasetsAdditionWays (way) {
@@ -744,6 +760,8 @@ export default {
           additionWay = 'Remote Servers Sync'
         } else if (way === 'upload') {
           additionWay = 'CSV Upload'
+        } else if (way === 'blank') {
+          additionWay = 'Blank Datasource'
         }
         this.$store.state.config.generalConfig.datasetsAdditionWays.push(additionWay)
       } else {
@@ -1046,9 +1064,9 @@ export default {
     for (let sources of this.$store.state.dataSources) {
       if (sources.source === 'syncServer') {
         if (sources.enableAutosync) {
-          this.datasetsAutosyncState[sources._id] = true
+          this.datasetsAutosyncState[sources.id] = true
         } else {
-          this.datasetsAutosyncState[sources._id] = false
+          this.datasetsAutosyncState[sources.id] = false
         }
       }
     }
@@ -1058,7 +1076,7 @@ export default {
       let dtSrc = ''
       for (let source of this.$store.state.dataSources) {
         if (
-          source._id ===
+          source.id ===
           this.$store.state.config.generalConfig.reconciliation.fixSource2To
         ) {
           dtSrc = source
@@ -1069,7 +1087,7 @@ export default {
     sharedToAllDatasets () {
       let servers = []
       for (let sources of this.$store.state.dataSources) {
-        if (sources.shareToAll.activated) {
+        if (sources.shareToAll && sources.shareToAll.activated) {
           servers.push(sources)
         } else {
           servers.push(sources)

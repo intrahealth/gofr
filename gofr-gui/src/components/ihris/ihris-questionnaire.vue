@@ -171,8 +171,9 @@ export default {
         return
       }
       console.log("SAVE",this.fhir)
+      console.error(JSON.stringify(this.fhir,0,2));
       axios({
-        url: "/fhir/QuestionnaireResponse?"+querystring.stringify(this.$route.query),
+        url: "/fhir/" + this.$store.state.config.userConfig.FRDatasource + "/QuestionnaireResponse?"+querystring.stringify(this.$route.query),
         method: "POST",
         data: this.fhir
       } ).then((response) => {

@@ -1,0 +1,16 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "gofr-search-partition-share-same-orgid",
+  "url": "http://gofr.org/fhir/SearchParameter/gofr-search-partition-share-same-orgid",
+  "description": "Search parameter for data source shared to all users on the same orgid",
+  "name": "Search parameter for data source shared to all users on the same orgid",
+  "status": "active",
+  "experimental": false,
+  "code": "partitionsharesameorgid",
+  "base": [
+    "Basic"
+  ],
+  "type": "token",
+  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/shared').extension('shareToSameOrgid')",
+  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/shared']/f:extension[@url='shareToSameOrgid']"
+}

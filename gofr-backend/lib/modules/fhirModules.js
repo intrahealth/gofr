@@ -11,7 +11,7 @@ const _workflowModules = {};
 
 const fhirModules = {
   require: mod => new Promise((resolve, reject) => {
-    fhirAxios.read('Library', mod).then((library) => {
+    fhirAxios.read('Library', mod, '', 'DEFAULT').then((library) => {
       const sign = library.content[0].data;
       const module64 = Buffer.from(library.content[1].data, 'base64');
       const module = module64.toString('utf8');

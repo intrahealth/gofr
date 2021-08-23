@@ -3,11 +3,13 @@ const fs = require('fs');
 const axios = require('axios');
 const URI = require('urijs');
 const async = require('async');
+const moment = require('moment');
 require('./connection');
 const config = require('./config');
 const logger = require('./winston');
 const models = require('./models');
 const mixin = require('./mixin')();
+const fhirAxios = require('./modules/fhirAxios');
 
 function initializeTasks() {
   return new Promise((resolve, reject) => {
@@ -122,6 +124,117 @@ function initializeTasks() {
   });
 }
 
+const addDataPartition = () => new Promise((resolve, reject) => {
+  const installed = config.get('app:installed');
+  if (installed) {
+    return resolve();
+  }
+  const bundle = {
+    resourceType: 'Bundle',
+    entry: [{
+      resource: {
+        resourceType: 'Basic',
+        id: 'default-partition',
+        meta: {
+          profile: ['http://gofr.org/fhir/StructureDefinition/gofr-partition'],
+        },
+        extension: [{
+          url: 'http://gofr.org/fhir/StructureDefinition/partitionID',
+          valueInteger: 0,
+        }, {
+          url: 'http://gofr.org/fhir/StructureDefinition/name',
+          valueString: 'DEFAULT',
+        }, {
+          url: 'http://gofr.org/fhir/StructureDefinition/owner',
+          extension: [{
+            url: 'userID',
+            valueReference: {
+              reference: 'Person/gofr-user-admin',
+            },
+          }],
+        }, {
+          url: 'http://gofr.org/fhir/StructureDefinition/shared',
+          extension: [{
+            url: 'shareToSameOrgid',
+            valueBoolean: false,
+          }, {
+            url: 'http://gofr.org/fhir/StructureDefinition/shareToAll',
+            extension: [{
+              url: 'activated',
+              valueBoolean: false,
+            }, {
+              url: 'limitByUserLocation',
+              valueBoolean: false,
+            }],
+          }],
+        }, {
+          url: 'http://gofr.org/fhir/StructureDefinition/createdTime',
+          valueDateTime: moment().format(),
+        }],
+      },
+      request: {
+        method: 'PUT',
+        url: 'Basic/default-partition',
+      },
+    }, {
+      resource: {
+        resourceType: 'Basic',
+        id: 'default-datasource',
+        meta: {
+          profile: ['http://gofr.org/fhir/StructureDefinition/gofr-datasource'],
+        },
+        extension: [{
+          url: 'http://gofr.org/fhir/StructureDefinition/partition',
+          valueReference: {
+            reference: 'Basic/default-partition',
+          },
+        }, {
+          url: 'http://gofr.org/fhir/StructureDefinition/name',
+          valueString: 'DEFAULT',
+        }, {
+          url: 'http://gofr.org/fhir/StructureDefinition/sourceType',
+          valueString: 'upload',
+        }, {
+          url: 'http://gofr.org/fhir/StructureDefinition/source',
+          valueString: 'upload',
+        }],
+      },
+      request: {
+        method: 'PUT',
+        url: 'Basic/default-datasource',
+      },
+    }],
+  };
+  fhirAxios.create(bundle, 'DEFAULT').then((response) => {
+    resolve();
+  }).catch((err) => {
+    logger.error(err);
+    reject();
+  });
+});
+
+const loadDefaultConfig = () => new Promise((resolve, reject) => {
+  const installed = config.get('app:installed');
+  if (installed) {
+    return resolve();
+  }
+  const resource = {
+    resourceType: 'Parameters',
+    id: 'gofr-general-config',
+    parameter: [{
+      name: 'config',
+      valueString: '{}',
+    }],
+  };
+  fhirAxios.update(resource, 'DEFAULT').then(() => {
+    logger.info('General Config Saved');
+    return resolve();
+  }).catch((err) => {
+    logger.error(err);
+    reject();
+  });
+});
+
 const loadFSHFiles = () => new Promise(async (resolvePar, rejectPar) => {
   const installed = config.get('app:installed');
   if (installed) {
@@ -173,14 +286,26 @@ const loadFSHFiles = () => new Promise(async (resolvePar, rejectPar) => {
 
 module.exports = {
   initialize: () => new Promise((resolve, reject) => {
-    Promise.all([initializeTasks(), loadFSHFiles()]).then(() => {
-      mixin.updateConfigFile(['app', 'installed'], true, () => {
-        logger.info('Done loading FSH files');
-        resolve();
+    addDataPartition().then(() => {
+      Promise.all([loadDefaultConfig(), initializeTasks(), loadFSHFiles()]).then(() => {
+        mixin.updateConfigFile(['app', 'installed'], true, () => {
+          logger.info('Done loading FSH files');
+          resolve();
+        });
+      }).catch((err) => {
+        logger.error('Some errors occured');
+        reject(err);
       });
-    }).catch((err) => {
-      logger.error('Some errors occured');
-      reject(err);
+    }).catch(() => {
+      Promise.all([initializeTasks(), loadFSHFiles()]).then(() => {
+        mixin.updateConfigFile(['app', 'installed'], true, () => {
+          logger.info('Done loading FSH files');
+          resolve();
+        });
+      }).catch((err) => {
+        logger.error('Some errors occured');
+        reject(err);
+      });
     });
   }),
 };

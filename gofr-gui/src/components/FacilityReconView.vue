@@ -517,7 +517,7 @@ export default {
         this.confirmDelete = true
       } else {
         this.confirmDelete = false
-        let userID = this.$store.state.activePair.userID._id
+        let userID = this.$store.state.activePair.userID
         let query = `id=${this.deleteLocationData.id}&sourceId=${this.deleteSource.sourceId}&sourceName=${this.deleteSource.sourceName}&userID=${userID}&sourceOwner=${this.sourceOwner}`
         axios.delete(`/deleteLocation?${query}`).then(() => {
           if (this.deleteSource.name === 'source1') {
@@ -544,7 +544,7 @@ export default {
       this.loadingSource1Grid = true
       let source1Owner = this.getDatasourceOwner().source1Owner
       let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
-      let userID = this.$store.state.activePair.userID._id
+      let userID = this.$store.state.activePair.userID
       let path = `/hierarchy?source=${this.source1}&start=${this.source1Start}&count=${this.source1Count}&id=${id}&userID=${userID}&sourceOwner=${source1Owner}&sourceLimitOrgId=${source1LimitOrgId}`
       axios.get(path).then((hierarchy) => {
         this.loadingSource1Grid = false
@@ -598,7 +598,7 @@ export default {
       this.loadingSource2Grid = true
       let source2Owner = this.getDatasourceOwner().source2Owner
       let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
-      let userID = this.$store.state.activePair.userID._id
+      let userID = this.$store.state.activePair.userID
       let path = `/hierarchy?source=${this.source2}&start=${this.source2Start}&count=${this.source2Count}&id=${id}&userID=${userID}&sourceOwner=${source2Owner}&sourceLimitOrgId=${source2LimitOrgId}`
       axios.get(path).then((hierarchy) => {
         this.loadingSource2Grid = false

@@ -19,15 +19,13 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const redis = require('redis');
-const deepmerge = require('deepmerge');
+const morgan = require('morgan')
 
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST || '127.0.0.1',
 });
 const moment = require('moment');
 const json2csv = require('json2csv').parse;
-const URL = require('url');
-const URI = require('urijs');
 const async = require('async');
 const mongoose = require('mongoose');
 const models = require('./models');
@@ -36,6 +34,8 @@ const mail = require('./mail')();
 const mixin = require('./mixin')();
 const mongo = require('./mongo')();
 const config = require('./config');
+const AuthRouter = require('./routes/auth');
+const DataSourcesRouter = require('./routes/dataSources');
 const FRRouter = require('./routes/facilityRegistry');
 const FRConfig = require('./routes/config');
 const questionnaireRouter = require('./routes/questionnaire');
@@ -65,14 +65,16 @@ const cleanReqPath = function (req, res, next) {
 };
 
 const jwtValidator = function (req, res, next) {
+  logger.error(req.path);
   if (req.method == 'OPTIONS'
     || (req.query.hasOwnProperty('authDisabled') && req.query.authDisabled)
-    || req.path == '/authenticate/'
+    || req.path == '/auth/login/'
     || req.path == '/getSignupConf'
-    || req.path == '/getGeneralConfig'
+    || req.path == '/config/getGeneralConfig'
     || req.path == '/addUser/'
     || req.path.startsWith('/progress')
   ) {
+    logger.error('here');
     return next();
   }
   if (!req.headers.authorization || req.headers.authorization.split(' ').length !== 2) {
@@ -108,6 +110,7 @@ const jwtValidator = function (req, res, next) {
   }
 };
 
+app.use(morgan('dev'))
 app.use(cleanReqPath);
 app.use(express.static(`${__dirname}/../gui`));
 app.use(jwtValidator);
@@ -120,6 +123,8 @@ app.use(bodyParser.urlencoded({
   extended: true,
 }));
 app.use(bodyParser.json());
+app.use('/auth', AuthRouter);
+app.use('/datasource', DataSourcesRouter);
 app.use('/FR/', FRRouter);
 app.use('/config/', FRConfig);
 app.use('/fhir', questionnaireRouter);
@@ -139,57 +144,14 @@ if (cluster.isMaster) {
   const db = mongoose.connection;
   db.on('error', console.error.bind(console, 'connection error:'));
   db.once('open', () => {
-    models.UsersModel.find({
-      userName: 'root@gofr.org',
-    }).lean().exec((err, data) => {
-      if (data.length == 0) {
-        logger.info('Default user not found, adding now ...');
-        const roles = [{
-          name: 'Admin',
-          tasks: [],
-        },
-        {
-          name: 'Data Manager',
-          tasks: [],
-        },
-        {
-          name: 'Guest',
-          tasks: [],
-        },
-        ];
-        models.RolesModel.collection.insertMany(roles, (err, data) => {
-          models.RolesModel.find({
-            name: 'Admin',
-          }, (err, data) => {
-            const User = new models.UsersModel({
-              firstName: 'Root',
-              surname: 'Root',
-              userName: 'root@gofr.org',
-              status: 'Active',
-              role: data[0]._id,
-              email: 'root@gofr.org',
-              phone: '+255',
-              password: bcrypt.hashSync('gofr', 8),
-            });
-            User.save((err, data) => {
-              if (err) {
-                logger.error(err);
-                logger.error('Unexpected error occured,please retry');
-              } else {
-                logger.info('Admin User added successfully');
-              }
-            });
-          });
-        });
-      }
-    });
-    const defaultDB = config.get('mCSD:registryDB');
-    mcsd.createFakeOrgID(defaultDB).then(() => {
-      defaultSetups.initialize();
-    }).catch((error) => {
-      logger.error(error);
-    });
+    defaultSetups.initialize().then(() => {
+      const defaultDB = config.get('mCSD:registryDB');
+      mcsd.createFakeOrgID(defaultDB).then(() => {
 
+      }).catch((error) => {
+        logger.error(error);
+      });
+    });
     // check if FR DB Exists
     // const defaultDB = config.get('mCSD:registryDB');
     // let url = URI(config.get('mCSD:url')).segment(defaultDB).segment('Location').toString();
@@ -308,69 +270,6 @@ if (cluster.isMaster) {
       }, () => {
         logger.info(`Found ${dupplicated.length} Source1 Locations with Double Matching`);
         res.send(dupplicated);
-      });
-    });
-  });
-
-  app.post('/authenticate', (req, res) => {
-    const form = new formidable.IncomingForm();
-    form.parse(req, (err, fields, files) => {
-      logger.info(`Authenticating user ${fields.username}`);
-      models.UsersModel.find({
-        userName: fields.username,
-        $or: [{
-          status: 'Active',
-        }, {
-          status: '',
-        }, {
-          status: undefined,
-        }],
-      }).lean().exec((err, data) => {
-        if (data.length === 1) {
-          const userID = data[0]._id.toString();
-          const passwordMatch = bcrypt.compareSync(fields.password, data[0].password);
-          if (passwordMatch) {
-            const tokenDuration = config.get('auth:tokenDuration');
-            const secret = config.get('auth:secret');
-            const token = jwt.sign({
-              id: data[0]._id.toString(),
-            }, secret, {
-              expiresIn: tokenDuration,
-            });
-            // get role name
-            models.RolesModel.find({
-              _id: data[0].role,
-            }).populate('tasks').lean().exec((err, roles) => {
-              let role = null;
-              let tasks;
-              if (roles.length === 1) {
-                role = roles[0].name;
-                tasks = roles[0].tasks;
-              }
-              logger.info(`Successfully Authenticated user ${fields.username}`);
-              res.status(200).json({
-                token,
-                role,
-                tasks,
-                userID,
-              });
-            });
-          } else {
-            logger.info(`Failed Authenticating user ${fields.username}`);
-            res.status(200).json({
-              token: null,
-              role: null,
-              userID: null,
-            });
-          }
-        } else {
-          logger.info(`Failed Authenticating user ${fields.username}`);
-          res.status(200).json({
-            token: null,
-            role: null,
-            userID: null,
-          });
-        }
       });
     });
   });
@@ -629,14 +528,6 @@ if (cluster.isMaster) {
     });
   });
 
-  app.get('/getUsers', (req, res) => {
-    logger.info('received a request to get users lists');
-    models.UsersModel.find({}).populate('role').lean().exec((err, users) => {
-      logger.info(`sending back a list of ${users.length} users`);
-      res.status(200).json(users);
-    });
-  });
-
   app.post('/changeAccountStatus', (req, res) => {
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
@@ -679,422 +570,6 @@ if (cluster.isMaster) {
     });
   });
 
-  app.post('/shareSourcePair', (req, res) => {
-    logger.info('Received a request to share data source pair');
-    const form = new formidable.IncomingForm();
-    form.parse(req, (err, fields, files) => {
-      fields.users = JSON.parse(fields.users);
-      mongo.shareSourcePair(fields.sharePair, fields.users, (err, response) => {
-        if (err) {
-          logger.error(err);
-          logger.error('An error occured while sharing data source pair');
-          res.status(500).send('An error occured while sharing data source pair');
-        } else {
-          logger.info('Data source pair shared successfully');
-          mongo.getDataSourcePair(fields.userID, fields.orgId, (err, pairs) => {
-            if (err) {
-              logger.error(err);
-              logger.error('An error has occured while getting data source pairs');
-              res.status(500).send('An error has occured while getting data source pairs');
-              return;
-            }
-            res.status(200).json(pairs);
-          });
-        }
-      });
-    });
-  });
-
-  function getLastUpdateTime(sources, callback) {
-    // sources = JSON.parse(JSON.stringify(sources))
-    async.eachOfSeries(sources, (server, key, nxtServer) => {
-      server.createdTime = moment(server._id.getTimestamp()).format('Do MMM YYYY h:mm:ss a');
-      if (server.sourceType === 'FHIR') {
-        const database = mixin.toTitleCase(server.name) + server.userID._id;
-        fhir.getLastUpdate(database, (lastUpdate) => {
-          if (lastUpdate) {
-            sources[key].lastUpdate = lastUpdate;
-          }
-          return nxtServer();
-        });
-      } else if (server.sourceType === 'DHIS2') {
-        let password = '';
-        if (server.password) {
-          password = mongo.decrypt(server.password);
-        }
-        const auth = `Basic ${Buffer.from(`${server.username}:${password}`).toString('base64')}`;
-        const dhis2URL = URL.parse(server.host);
-        const database = server.name + server.userID._id;
-        dhis.getLastUpdate(database, dhis2URL, auth, (lastUpdate) => {
-          if (lastUpdate) {
-            lastUpdate = lastUpdate.split('.').shift();
-            sources[key].lastUpdate = lastUpdate;
-          }
-          return nxtServer();
-        });
-      } else {
-        return nxtServer();
-      }
-    }, () => callback(sources));
-  }
-
-  app.post('/shareDataSource', (req, res) => {
-    logger.info('Received a request to share data source');
-    const form = new formidable.IncomingForm();
-    form.parse(req, (err, fields, files) => {
-      fields.users = JSON.parse(fields.users);
-      const limitLocationId = fields.limitLocationId;
-      mongo.shareDataSource(fields.shareSource, fields.users, limitLocationId, (err, response) => {
-        if (err) {
-          logger.error(err);
-          logger.error('An error occured while sharing data source');
-          res.status(500).send('An error occured while sharing data source');
-        } else {
-          logger.info('Data source shared successfully');
-          mongo.getDataSources(fields.userID, fields.role, fields.orgId, (err, sources) => {
-            getLastUpdateTime(sources, (sources) => {
-              if (err) {
-                logger.error(err);
-                logger.error('An error has occured while getting data source');
-                res.status(500).send('An error has occured while getting data source');
-                return;
-              }
-              logger.info('returning list of data sources');
-              res.status(200).json(sources);
-            });
-          });
-        }
-      });
-    });
-  });
-
-  app.post('/updateUserConfig', (req, res) => {
-    logger.info('Received updated user configurations');
-    const form = new formidable.IncomingForm();
-    form.parse(req, (err, fields, files) => {
-      let appConfig;
-      try {
-        appConfig = JSON.parse(fields.config);
-      } catch (error) {
-        appConfig = fields.config;
-      }
-      appConfig.userConfig.userID = fields.userID;
-      models.MetaDataModel.findOne({
-        'config.userConfig.userID': fields.userID,
-      }, (err, data) => {
-        if (!data) {
-          models.MetaDataModel.findOne({}, {
-            _id: 1,
-          }, (err, data) => {
-            if (data) {
-              models.MetaDataModel.findByIdAndUpdate(data._id, {
-                $push: {
-                  'config.userConfig': appConfig.userConfig,
-                },
-              }, (err, data) => {
-                if (err) {
-                  logger.error(err);
-                  logger.error('Failed to save new config');
-                  res.status(500).json({
-                    error: 'Unexpected error occured,please retry',
-                  });
-                } else {
-                  logger.info('New config saved successfully');
-                  res.status(200).json({
-                    status: 'Done',
-                  });
-                }
-              });
-            } else {
-              const MetaData = new models.MetaDataModel({
-                'config.userConfig': appConfig.userConfig,
-              });
-              MetaData.save((err, data) => {
-                if (err) {
-                  logger.error(err);
-                  logger.error('Failed to save new config');
-                  res.status(500).json({
-                    error: 'Unexpected error occured,please retry',
-                  });
-                } else {
-                  logger.info('New config saved successfully');
-                  res.status(200).json({
-                    status: 'Done',
-                  });
-                }
-              });
-            }
-          });
-        } else {
-          models.MetaDataModel.findOneAndUpdate({
-            _id: data.id,
-            'config.userConfig._id': appConfig.userConfig._id,
-          }, {
-            $set: {
-              'config.userConfig': appConfig.userConfig,
-            },
-          }, (err, data) => {
-            if (err) {
-              logger.error(err);
-              logger.error('Failed to save new config');
-              res.status(500).json({
-                error: 'Unexpected error occured,please retry',
-              });
-            } else {
-              logger.info('New config saved successfully');
-              res.status(200).json({
-                status: 'Done',
-              });
-            }
-          });
-        }
-      });
-    });
-  });
-
-  app.post('/updateGeneralConfig', (req, res) => {
-    logger.info('Received updated general configurations');
-    const form = new formidable.IncomingForm();
-    form.parse(req, (err, fields, files) => {
-      let appConfig;
-      try {
-        appConfig = JSON.parse(fields.config);
-      } catch (error) {
-        appConfig = fields.config;
-      }
-      models.MetaDataModel.findOne({}, (err, data) => {
-        if (!data) {
-          if (appConfig.generalConfig.externalAuth.password) {
-            appConfig.generalConfig.externalAuth.password = mongo.encrypt(appConfig.generalConfig.externalAuth.password);
-          }
-          const MetaData = new models.MetaDataModel({
-            'config.generalConfig': appConfig.generalConfig,
-          });
-          MetaData.save((err, data) => {
-            if (err) {
-              logger.error(err);
-              logger.error('Failed to save new config');
-              res.status(500).json({
-                error: 'Unexpected error occured,please retry',
-              });
-            } else {
-              logger.info('New config saved successfully');
-              res.status(200).json({
-                status: 'Done',
-              });
-            }
-          });
-        } else {
-          if (appConfig.generalConfig.externalAuth.password != data.config.generalConfig.externalAuth.password) {
-            appConfig.generalConfig.externalAuth.password = mongo.encrypt(appConfig.generalConfig.externalAuth.password);
-          } else {
-            appConfig.generalConfig.externalAuth.password = data.config.generalConfig.externalAuth.password;
-          }
-          models.MetaDataModel.findByIdAndUpdate(data.id, {
-            'config.generalConfig': appConfig.generalConfig,
-          }, (err, data) => {
-            if (err) {
-              logger.error(err);
-              logger.error('Failed to save new general config');
-              res.status(500).json({
-                error: 'Unexpected error occured,please retry',
-              });
-            } else {
-              logger.info('New general config saved successfully');
-              res.status(200).json({
-                status: 'Done',
-              });
-            }
-          });
-        }
-      });
-    });
-  });
-
-  app.get('/getUserConfig/:userID', (req, res) => {
-    const userID = req.params.userID;
-    models.MetaDataModel.findOne({}, {
-      'config.userConfig': 1,
-    }, (err, data) => {
-      if (!data) {
-        return res.status(200).send();
-      }
-      const userConfig = data.config.userConfig.find((userConfigData) => {
-        let userConfig = {};
-        try {
-          userConfig = JSON.parse(JSON.stringify(userConfigData));
-        } catch (error) {
-          logger.error(error);
-        }
-        return userConfig.userID === userID;
-      });
-      if (err) {
-        logger.error(err);
-        res.status(500).json({
-          error: 'internal error occured while getting configurations',
-        });
-      } else {
-        if (data) {
-          delete data._id;
-          delete data.config.userConfig.userID;
-        }
-        res.status(200).json(userConfig);
-      }
-    });
-  });
-
-  app.get('/getGeneralConfig', (req, res) => {
-    const defaultGenerConfig = JSON.parse(req.query.defaultGenerConfig);
-    logger.info('Received a request to get general configuration');
-    mongo.getGeneralConfig((err, resData) => {
-      if (err) {
-        logger.error(err);
-        res.status(500).json({
-          error: 'internal error occured while getting configurations',
-        });
-      } else {
-        const data = JSON.parse(JSON.stringify(resData));
-        let merged = {};
-        if (data) {
-          // overwrite array on the left with one on the right
-          const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
-          merged = deepmerge.all([defaultGenerConfig, data.config.generalConfig], {
-            arrayMerge: overwriteMerge,
-          });
-        } else {
-          merged = defaultGenerConfig;
-        }
-        res.status(200).json(merged);
-      }
-    });
-  });
-
-  app.post('/addFormField', (req, res) => {
-    const form = new formidable.IncomingForm();
-
-    form.parse(req, (err, fields, files) => {
-      const {
-        fieldName,
-        fieldLabel,
-      } = fields;
-      let required;
-      try {
-        required = JSON.parse(fields.fieldRequired);
-      } catch (error) {
-        logger.error(error);
-        required = false;
-      }
-      const formName = fields.form;
-      models.MetaDataModel.findOne({
-        'forms.name': formName,
-      }, (err, form) => {
-        if (err) {
-          logger.error(err);
-          res.status(500).json({
-            error: 'internal error occured while getting form fields',
-          });
-        } else {
-          let customFields = {};
-          if (form) {
-            customFields = form.forms[0].fields;
-          }
-          customFields[fieldName] = {
-            type: 'String',
-            required,
-            display: fieldLabel,
-          };
-          const promises = [];
-
-          promises.push(new Promise((resolve, reject) => {
-            if (!form) {
-              models.MetaDataModel.find({}, {
-                _id: 1,
-              }).lean().exec((err, mtDt) => {
-                const form = {
-                  name: formName,
-                  fields: customFields,
-                };
-                if (err) {
-                  return resolve(err, null);
-                }
-                models.MetaDataModel.findByIdAndUpdate(mtDt[0]._id, {
-                  $push: {
-                    forms: form,
-                  },
-                }, (err, data) => {
-                  if (err) {
-                    return resolve(err, null);
-                  }
-                  return resolve(null, data);
-                });
-              });
-            } else {
-              models.MetaDataModel.update({
-                'forms.name': formName,
-              }, {
-                $set: {
-                  'forms.$.fields': customFields,
-                },
-              }, (err, data) => {
-                if (err) {
-                  return resolve(err, null);
-                }
-                return resolve(null, data);
-              });
-            }
-          }));
-
-          Promise.all(promises).then((results) => {
-            if (results[0]) {
-              logger.error(results[0]);
-              logger.error('Failed to save new field');
-              res.status(500).json({
-                error: 'Unexpected error occured,please retry',
-              });
-            } else {
-              delete mongoose.connection.models.Users;
-              let usersFields = Object.assign({}, customFields);
-              usersFields = Object.assign(usersFields, schemas.usersFields);
-              Users = new mongoose.Schema(usersFields);
-              models.UsersModel = mongoose.model('Users', Users);
-              logger.info('Field added successfully');
-              res.status(200).json({
-                status: 'Done',
-              });
-            }
-          }).catch((err) => {
-            logger.error(err);
-          });
-        }
-      });
-    });
-  });
-
-  app.get('/getSignupConf', (req, res) => {
-    models.MetaDataModel.findOne({
-      'forms.name': 'signup',
-    }, (err, form) => {
-      if (err) {
-        logger.error(err);
-        res.status(500).json({
-          error: 'internal error occured while getting configurations',
-        });
-      } else {
-        let customFields = {};
-        if (form) {
-          customFields = form.forms[0].fields;
-        }
-        let allFields = Object.assign({}, schemas.usersFields);
-        allFields = Object.assign(allFields, customFields);
-        res.status(200).json({
-          customSignupFields: customFields,
-          originalSignupFields: schemas.usersFields,
-          allSignupFields: allFields,
-        });
-      }
-    });
-  });
-
   app.get('/getRoles/:id?', (req, res) => {
     logger.info('Received a request to get roles');
     let idFilter;
@@ -1125,112 +600,6 @@ if (cluster.isMaster) {
       logger.info(`sending back a list of ${tasks.length} tasks`);
       res.status(200).json(tasks);
     });
-  });
-
-  app.get('/countLevels/:source1/:source2/:sourcesOwner/:sourcesLimitOrgId', (req, res) => {
-    logger.info('Received a request to get total levels');
-    const sourcesOwner = JSON.parse(req.params.sourcesOwner);
-    const source1Owner = sourcesOwner.source1Owner;
-    const source2Owner = sourcesOwner.source2Owner;
-    const sourcesLimitOrgId = JSON.parse(req.params.sourcesLimitOrgId);
-    let source1LimitOrgId = sourcesLimitOrgId.source1LimitOrgId;
-    let source2LimitOrgId = sourcesLimitOrgId.source2LimitOrgId;
-
-    const source1 = mixin.toTitleCase(req.params.source1 + source1Owner);
-    const source2 = mixin.toTitleCase(req.params.source2 + source2Owner);
-
-    if (!source1LimitOrgId) {
-      source1LimitOrgId = mixin.getTopOrgId(source1, 'Location');
-    }
-    if (!source2LimitOrgId) {
-      source2LimitOrgId = mixin.getTopOrgId(source2, 'Location');
-    }
-    async.parallel({
-      Source1Levels(callback) {
-        mcsd.countLevels(source1, source1LimitOrgId, (err, source1TotalLevels) => {
-          logger.info(`Received total source1 levels of ${source1TotalLevels}`);
-          return callback(err, source1TotalLevels);
-        });
-      },
-      Source2Levels(callback) {
-        mcsd.countLevels(source2, source2LimitOrgId, (err, source2TotalLevels) => {
-          logger.info(`Received total source2 levels of ${source2TotalLevels}`);
-          return callback(err, source2TotalLevels);
-        });
-      },
-      getLevelMapping(callback) {
-        async.series({
-          levelMapping1(callback) {
-            mongo.getLevelMapping(source1, (levelMappingData) => {
-              const levelMapping = {};
-              if (levelMappingData) {
-                for (const level in levelMappingData) {
-                  let levelData = levelMappingData[level];
-                  try {
-                    levelData = JSON.parse(levelData);
-                  } catch (error) {
-
-                  }
-                  if (levelData && levelData !== 'undefined' && level != '$init') {
-                    levelMapping[level] = levelMappingData[level];
-                  }
-                }
-              }
-              return callback(false, levelMapping);
-            });
-          },
-          levelMapping2(callback) {
-            mongo.getLevelMapping(source2, (levelMappingData) => {
-              const levelMapping = {};
-              if (levelMappingData) {
-                for (const level in levelMappingData) {
-                  let levelData = levelMappingData[level];
-                  try {
-                    levelData = JSON.parse(levelData);
-                  } catch (error) {
-
-                  }
-                  if (levelData && levelData !== 'undefined' && level != '$init') {
-                    levelMapping[level] = levelMappingData[level];
-                  }
-                }
-              }
-              return callback(false, levelMapping);
-            });
-          },
-        }, (err, mappings) => callback(false, mappings));
-      },
-    }, (err, results) => {
-      if (err) {
-        logger.error(err);
-        res.status(400).json({
-          error: err,
-        });
-      } else {
-        if (Object.keys(results.getLevelMapping.levelMapping1).length == 0) {
-          results.getLevelMapping.levelMapping1 = generateLevelMapping(results.Source1Levels);
-        }
-        if (Object.keys(results.getLevelMapping.levelMapping2).length == 0) {
-          results.getLevelMapping.levelMapping2 = generateLevelMapping(results.Source2Levels);
-        }
-        const recoLevel = 2;
-        res.status(200).json({
-          totalSource1Levels: results.Source1Levels,
-          totalSource2Levels: results.Source2Levels,
-          recoLevel,
-          levelMapping: results.getLevelMapping,
-        });
-      }
-    });
-
-    function generateLevelMapping(totalLevels) {
-      const levelMapping = {};
-      for (let k = 1; k < totalLevels; k++) {
-        levelMapping[`level${k}`] = `level${k}`;
-      }
-      levelMapping.facility = `level${totalLevels}`;
-      return levelMapping;
-    }
   });
 
   app.get('/getLevelData/:source/:sourceOwner/:level', (req, res) => {
@@ -1288,7 +657,7 @@ if (cluster.isMaster) {
     });
   });
 
-  app.get('/uploadAvailable/:source1/:source2/:source1Owner/:source2Owner', (req, res) => {
+  app.get('/uploadAvailable/:source1/:source2', (req, res) => {
     if (!req.params.source1 || !req.params.source2) {
       logger.error({
         error: 'Missing Orgid',
@@ -1298,14 +667,10 @@ if (cluster.isMaster) {
         error: 'Missing Orgid',
       });
     } else {
-      const source1Owner = req.params.source1Owner;
-      const source2Owner = req.params.source2Owner;
-      const source1 = mixin.toTitleCase(req.params.source1 + source1Owner);
-      const source2 = mixin.toTitleCase(req.params.source2 + source2Owner);
-      logger.info(`Checking if data available for ${source1} and ${source2}`);
+      logger.info(`Checking if data available for ${req.params.source1} and ${req.params.source2}`);
       async.parallel({
         source1Availability(callback) {
-          mcsd.getLocations(source1, (source1Data) => {
+          mcsd.getLocations(req.params.source1, (source1Data) => {
             if (source1Data.hasOwnProperty('entry') && source1Data.entry.length > 0) {
               return callback(false, true);
             }
@@ -1313,7 +678,7 @@ if (cluster.isMaster) {
           });
         },
         source2Availability(callback) {
-          mcsd.getLocations(source2, (source2Data) => {
+          mcsd.getLocations(req.params.source2, (source2Data) => {
             if (source2Data.hasOwnProperty('entry') && source2Data.entry.length > 0) {
               return callback(false, true);
             }
@@ -1330,63 +695,6 @@ if (cluster.isMaster) {
             dataUploaded: false,
           });
         }
-      });
-    }
-  });
-
-  app.get('/getArchives/:orgid', (req, res) => {
-    if (!req.params.orgid) {
-      logger.error({
-        error: 'Missing Orgid',
-      });
-      res.set('Access-Control-Allow-Origin', '*');
-      res.status(400).json({
-        error: 'Missing Orgid',
-      });
-    } else {
-      const orgid = req.params.orgid;
-      logger.info(`Getting archived DB for ${orgid}`);
-      mongo.getArchives(orgid, (err, archives) => {
-        res.set('Access-Control-Allow-Origin', '*');
-        if (err) {
-          logger.error(err);
-          logger.error({
-            error: 'Unexpected error has occured',
-          });
-          res.status(400).json({
-            error: 'Unexpected error',
-          });
-          return;
-        }
-        res.status(200).json(archives);
-      });
-    }
-  });
-
-  app.post('/restoreArchive/:orgid', (req, res) => {
-    if (!req.params.orgid) {
-      logger.error({
-        error: 'Missing Orgid',
-      });
-      res.set('Access-Control-Allow-Origin', '*');
-      res.status(400).json({
-        error: 'Missing Orgid',
-      });
-    } else {
-      const orgid = req.params.orgid;
-      logger.info(`Restoring archive DB for ${orgid}`);
-      const form = new formidable.IncomingForm();
-      form.parse(req, (err, fields, files) => {
-        mongo.restoreDB(fields.archive, orgid, (err) => {
-          res.set('Access-Control-Allow-Origin', '*');
-          if (err) {
-            logger.error(err);
-            res.status(400).json({
-              error: 'Unexpected error occured while restoring the database,please retry',
-            });
-          }
-          res.status(200).send();
-        });
       });
     }
   });
@@ -1613,11 +921,11 @@ if (cluster.isMaster) {
     } = req.query;
     const source1DB = mixin.toTitleCase(req.params.source1 + source1Owner);
     const source2DB = mixin.toTitleCase(req.params.source2 + source2Owner);
-    if (!source1LimitOrgId) {
-      source1LimitOrgId = mixin.getTopOrgId(source1DB, 'Location');
+    if (source1LimitOrgId.length === 0) {
+      source1LimitOrgId = [mixin.getTopOrgId(source1DB, 'Location')];
     }
-    if (!source2LimitOrgId) {
-      source2LimitOrgId = mixin.getTopOrgId(source2DB, 'Location');
+    if (source2LimitOrgId.length === 0) {
+      source2LimitOrgId = [mixin.getTopOrgId(source2DB, 'Location')];
     }
     const recoLevel = req.params.level;
     const statusRequestId = `mappingStatus${clientId}`;
@@ -1631,7 +939,7 @@ if (cluster.isMaster) {
     const source2LocationReceived = new Promise((resolve, reject) => {
       mcsd.getLocationChildren({
         database: source2DB,
-        parent: source2LimitOrgId,
+        parent: source2LimitOrgId[0],
       }, (mcsdSource2) => {
         mcsdSource2All = mcsdSource2;
         let level;
@@ -1643,7 +951,7 @@ if (cluster.isMaster) {
         if (levelMaps[source2DB] && levelMaps[source2DB][recoLevel]) {
           level = levelMaps[source2DB][recoLevel];
         }
-        mcsd.filterLocations(mcsdSource2, source2LimitOrgId, level, (mcsdSource2Level) => {
+        mcsd.filterLocations(mcsdSource2, source2LimitOrgId[0], level, (mcsdSource2Level) => {
           resolve(mcsdSource2Level);
         });
       });
@@ -1653,9 +961,9 @@ if (cluster.isMaster) {
     const source1LocationReceived = new Promise((resolve, reject) => {
       mcsd.getLocationChildren({
         database: source1DB,
-        parent: source1LimitOrgId,
+        parent: source1LimitOrgId[0],
       }, (mcsdSource1) => {
-        mcsd.filterLocations(mcsdSource1, source1LimitOrgId, recoLevel, (mcsdSource1Level) => {
+        mcsd.filterLocations(mcsdSource1, source1LimitOrgId[0], recoLevel, (mcsdSource1Level) => {
           resolve(mcsdSource1Level);
         });
       });
@@ -1694,11 +1002,11 @@ if (cluster.isMaster) {
       source2LimitOrgId,
       getPotential,
     } = req.query;
-    if (!source1LimitOrgId) {
-      source1LimitOrgId = mixin.getTopOrgId(mixin.toTitleCase(source1 + source1Owner), 'Location');
+    if (source1LimitOrgId.length === 0) {
+      source1LimitOrgId = [mixin.getTopOrgId(mixin.toTitleCase(source1 + source1Owner), 'Location')];
     }
-    if (!source2LimitOrgId) {
-      source2LimitOrgId = mixin.getTopOrgId(mixin.toTitleCase(source2 + source2Owner), 'Location');
+    if (source2LimitOrgId.length === 0) {
+      source2LimitOrgId = [mixin.getTopOrgId(mixin.toTitleCase(source2 + source2Owner), 'Location')];
     }
     let {
       parentConstraint,
@@ -1747,7 +1055,7 @@ if (cluster.isMaster) {
           const dbSource2 = mixin.toTitleCase(source2 + source2Owner);
           mcsd.getLocationChildren({
             database: dbSource2,
-            parent: source2LimitOrgId,
+            parent: source2LimitOrgId[0],
           }, (mcsdSource2) => {
             mcsdSource2All = mcsdSource2;
             let level;
@@ -1760,14 +1068,14 @@ if (cluster.isMaster) {
             if (levelMaps[orgid] && levelMaps[orgid][recoLevel]) {
               level = levelMaps[orgid][recoLevel];
             }
-            mcsd.filterLocations(mcsdSource2, source2LimitOrgId, level, mcsdSource2Level => callback(false, mcsdSource2Level));
+            mcsd.filterLocations(mcsdSource2, source2LimitOrgId[0], level, mcsdSource2Level => callback(false, mcsdSource2Level));
           });
         },
         source1Loations(callback) {
           const dbSource1 = mixin.toTitleCase(source1 + source1Owner);
           mcsd.getLocationChildren({
             database: dbSource1,
-            parent: source1LimitOrgId,
+            parent: source1LimitOrgId[0],
           }, (mcsdSource1) => {
             mcsdSource1All = mcsdSource1;
             if (id) {
@@ -1783,7 +1091,7 @@ if (cluster.isMaster) {
               }
               return callback(null, mcsdSource1Locations);
             }
-            mcsd.filterLocations(mcsdSource1, source1LimitOrgId, recoLevel, mcsdSource1Level => callback(false, mcsdSource1Level));
+            mcsd.filterLocations(mcsdSource1, source1LimitOrgId[0], recoLevel, mcsdSource1Level => callback(false, mcsdSource1Level));
           });
         },
         mappingData(callback) {
@@ -1902,11 +1210,11 @@ if (cluster.isMaster) {
     const mappingDB = mixin.toTitleCase(req.query.source1 + userID + req.query.source2);
     const topOrgId1 = mixin.getTopOrgId(source1DB, 'Location');
     const topOrgId2 = mixin.getTopOrgId(source2DB, 'Location');
-    if (!source1LimitOrgId) {
-      source1LimitOrgId = topOrgId1;
+    if (source1LimitOrgId.length === 0) {
+      source1LimitOrgId = [topOrgId1];
     }
-    if (!source2LimitOrgId) {
-      source2LimitOrgId = topOrgId2;
+    if (source2LimitOrgId.length === 0) {
+      source2LimitOrgId = [topOrgId2];
     }
     const matched = [];
 
@@ -2178,11 +1486,11 @@ if (cluster.isMaster) {
     const levelMapping2 = JSON.parse(req.query.levelMapping2);
     const topOrgId1 = mixin.getTopOrgId(source1DB, 'Location');
     const topOrgId2 = mixin.getTopOrgId(source2DB, 'Location');
-    if (!source1LimitOrgId) {
-      source1LimitOrgId = topOrgId1;
+    if (source1LimitOrgId.length === 0) {
+      source1LimitOrgId = [topOrgId1];
     }
-    if (!source2LimitOrgId) {
-      source2LimitOrgId = topOrgId2;
+    if (source2LimitOrgId.length === 0) {
+      source2LimitOrgId = [topOrgId2];
     }
 
     if (type == 'FHIR') {
@@ -2190,13 +1498,13 @@ if (cluster.isMaster) {
         source1mCSD(callback) {
           mcsd.getLocationChildren({
             database: source1DB,
-            parent: source1LimitOrgId,
+            parent: source1LimitOrgId[0],
           }, mcsdRes => callback(null, mcsdRes));
         },
         source2mCSD(callback) {
           mcsd.getLocationChildren({
             database: source2DB,
-            parent: source2LimitOrgId,
+            parent: source2LimitOrgId[0],
           }, mcsdRes => callback(null, mcsdRes));
         },
       }, (error, response) => {
@@ -2234,13 +1542,13 @@ if (cluster.isMaster) {
         source1mCSD(callback) {
           mcsd.getLocationChildren({
             database: source1DB,
-            parent: source1LimitOrgId,
+            parent: source1LimitOrgId[0],
           }, mcsdRes => callback(null, mcsdRes));
         },
         source2mCSD(callback) {
           mcsd.getLocationChildren({
             database: source2DB,
-            parent: source2LimitOrgId,
+            parent: source2LimitOrgId[0],
           }, (mcsdRes) => {
             callback(null, mcsdRes);
           });
@@ -2298,7 +1606,7 @@ if (cluster.isMaster) {
                 parentsFields.push(level);
                 thisFields.push(level);
               });
-              mcsd.filterLocations(response.source1mCSD, source1LimitOrgId, level, (mcsdLevel) => {
+              mcsd.filterLocations(response.source1mCSD, source1LimitOrgId[0], level, (mcsdLevel) => {
                 scores.getUnmatched(response.source1mCSD, mcsdLevel, mappingDB, true, 'source1', parentsFields, (unmatched) => {
                   if (unmatched.length > 0) {
                     thisFields.push('status');
@@ -2343,7 +1651,7 @@ if (cluster.isMaster) {
                 thisFields.push(level);
               });
 
-              mcsd.filterLocations(response.source2mCSD, source2LimitOrgId, level, (mcsdLevel) => {
+              mcsd.filterLocations(response.source2mCSD, source2LimitOrgId[0], level, (mcsdLevel) => {
                 scores.getUnmatched(response.source2mCSD, mcsdLevel, mappingDB, true, 'source2', parentsFields, (unmatched) => {
                   if (unmatched.length > 0) {
                     thisFields.push('status');
@@ -2970,57 +2278,6 @@ if (cluster.isMaster) {
     res.status(200).send();
   });
 
-  app.post('/addDataSource', (req, res) => {
-    const form = new formidable.IncomingForm();
-    form.parse(req, (err, fields, files) => {
-      logger.info('Received a request to add a new data source');
-      if (!fields.shareToSameOrgid) {
-        fields.shareToSameOrgid = false;
-      }
-      if (!fields.shareToAll) {
-        fields.shareToAll = false;
-      }
-      if (!fields.limitByUserLocation) {
-        fields.limitByUserLocation = false;
-      }
-      mongo.addDataSource(fields, (err, response) => {
-        if (err) {
-          res.status(500).json({
-            error: 'Unexpected error occured,please retry',
-          });
-          logger.error(err);
-        } else {
-          logger.info('Data source saved successfully');
-          res.status(200).json({
-            status: 'done',
-            password: response,
-          });
-        }
-      });
-    });
-  });
-
-  app.post('/editDataSource', (req, res) => {
-    const form = new formidable.IncomingForm();
-    form.parse(req, (err, fields, files) => {
-      logger.info('Received a request to edit a data source');
-      mongo.editDataSource(fields, (err, response) => {
-        if (err) {
-          res.status(500).json({
-            error: 'Unexpected error occured,please retry',
-          });
-          logger.error(err);
-        } else {
-          logger.info('Data source edited sucessfully');
-          res.status(200).json({
-            status: 'done',
-            password: response,
-          });
-        }
-      });
-    });
-  });
-
   app.post('/updateDatasetAutosync', (req, res) => {
     logger.info('Received a request to edit a data source auto sync');
     const form = new formidable.IncomingForm();
@@ -3037,214 +2294,6 @@ if (cluster.isMaster) {
           res.status(200).send();
         }
       });
-    });
-  });
-
-  app.get('/deleteDataSource/:_id/:name/:sourceOwner/:userID', (req, res) => {
-    const id = req.params._id;
-    const {
-      sourceOwner,
-      userID,
-    } = req.params;
-    const name = mixin.toTitleCase(req.params.name);
-    logger.info(`Received request to delete data source with id ${id}`);
-    const dbName = mixin.toTitleCase(name + userID);
-    hapi.deleteTenancy({ name: dbName }).then(() => {
-      mongo.deleteDataSource(id, name, sourceOwner, userID, (err, response) => {
-        const baseUrl = URI(config.get('mCSD:url')).segment(dbName);
-        mcsd.cleanCache(`url_${baseUrl.toString()}`, true);
-        if (err) {
-          res.status(500).json({
-            error: 'Unexpected error occured while deleting data source,please retry',
-          });
-          logger.error(err);
-        } else {
-          res.status(200).json({
-            status: 'done',
-          });
-        }
-      });
-    }).catch((err) => {
-      logger.error(err);
-      return res.status(500).json({ error: 'Unexpected error occured while deleting data source,please retry' });
-    });
-  });
-
-  app.get('/getDataSources/:userID/:role/:orgId?', (req, res) => {
-    logger.info('received request to get data sources');
-    mongo.getDataSources(req.params.userID, req.params.role, req.params.orgId, (err, servers) => {
-      if (err) {
-        res.status(500).json({
-          error: 'Unexpected error occured,please retry',
-        });
-        logger.error(err);
-      } else {
-        getLastUpdateTime(servers, (servers) => {
-          if (err) {
-            logger.error(err);
-            logger.error('An error has occured while getting data source');
-            res.status(500).send('An error has occured while getting data source');
-            return;
-          }
-          logger.info(`returning list of data sources ${JSON.stringify(servers)}`);
-          res.status(200).json({
-            servers,
-          });
-        });
-      }
-    });
-  });
-
-  app.get('/getDataPairs/:userID', (req, res) => {
-    logger.info('received request to get data sources');
-    mongo.getDataPairs(req.params.userID, (err, pairs) => {
-      if (err) {
-        res.status(500).json({
-          error: 'Unexpected error occured,please retry',
-        });
-        logger.error(err);
-      } else {
-        res.status(200).json(pairs);
-      }
-    });
-  });
-
-  app.get('/getPairForDatasource/:datasource', (req, res) => {
-    logger.info('Received a request to get pairs associated with a datasource');
-    const id = req.params.datasource;
-    mongo.getMappingDBs(id, (pairs) => {
-      res.status(200).json(pairs);
-    });
-  });
-
-  app.post('/addDataSourcePair', (req, res) => {
-    logger.info('Received a request to save data source pairs');
-    const form = new formidable.IncomingForm();
-    form.parse(req, (err, fields, files) => {
-      try {
-        fields.singlePair = JSON.parse(fields.singlePair);
-      } catch (error) {
-        logger.error(error);
-      }
-
-      try {
-        fields.activePairID = JSON.parse(fields.activePairID);
-      } catch (error) {
-        logger.error(error);
-      }
-      const database = mixin.toTitleCase(JSON.parse(fields.source1).name + JSON.parse(fields.source1).userID._id + JSON.parse(fields.source2).name);
-      hapi.addTenancy({ name: database, description: 'mapping data source' }).then(async () => {
-        await mcsd.createFakeOrgID(database).catch((err) => {
-          logger.error(err);
-        });
-        mongo.addDataSourcePair(fields, (error, errMsg, results) => {
-          if (error) {
-            if (errMsg) {
-              logger.error(errMsg);
-            } else {
-              logger.error(error);
-            }
-            res.status(400).json({
-              error: errMsg,
-            });
-          } else {
-            const db1 = mixin.toTitleCase(JSON.parse(fields.source1).name + JSON.parse(fields.source1).userID._id);
-            const db2 = mixin.toTitleCase(JSON.parse(fields.source2).name + JSON.parse(fields.source2).userID._id);
-            async.series({
-              levelMapping1(callback) {
-                mongo.getLevelMapping(db1, levelMapping => callback(false, levelMapping));
-              },
-              levelMapping2(callback) {
-                mongo.getLevelMapping(db2, levelMapping => callback(false, levelMapping));
-              },
-            }, (err, mappings) => {
-              logger.info('Data source pair saved successfully');
-              res.status(200).json(JSON.stringify(mappings));
-            });
-          }
-        });
-      }).catch((err) => {
-        logger.error(err);
-        return res.status(500).json({ error: 'An expected error occured' });
-      });
-    });
-  });
-
-  app.delete('/deleteSourcePair', (req, res) => {
-    logger.info(`Received a request to delete data source pair with id ${req.params.id}`);
-    const {
-      pairId,
-      userID,
-    } = req.query;
-    const mappingDB = mixin.toTitleCase(req.query.source1Name + userID + req.query.source2Name);
-    const src1DB = mixin.toTitleCase(req.query.source1Name + userID);
-    const src2DB = mixin.toTitleCase(req.query.source2Name + userID);
-    hapi.deleteTenancy({ name: mappingDB }).then(() => {
-      mongo.deleteSourcePair(pairId, mappingDB, (err, data) => {
-        const mappingUrl = URI(config.get('mCSD:url')).segment(mappingDB);
-        const src1Url = URI(config.get('mCSD:url')).segment(src1DB);
-        const src2Url = URI(config.get('mCSD:url')).segment(src2DB);
-        mcsd.cleanCache(`url_${mappingUrl.toString()}`, true);
-        mcsd.cleanCache(`url_${src1Url.toString()}`, true);
-        mcsd.cleanCache(`url_${src2Url.toString()}`, true);
-        if (err) {
-          logger.error(err);
-          return res.send(500).send(err);
-        }
-        res.status(200).send();
-      });
-    }).catch((err) => {
-      logger.error(err);
-      return res.send(500).send(err);
-    });
-  });
-
-  app.post('/activateSharedPair', (req, res) => {
-    logger.info('Received a request to activate shared data source pair');
-    const form = new formidable.IncomingForm();
-    form.parse(req, (err, fields, files) => {
-      mongo.activateSharedPair(fields.pairID, fields.userID, (error, results) => {
-        if (error) {
-          logger.error(error);
-          res.status(400).json({
-            error: 'Unexpected error occured while activating shared data source pair',
-          });
-        } else {
-          logger.info('Shared data source pair activated successfully');
-          res.status(200).send();
-        }
-      });
-    });
-  });
-
-  app.get('/resetDataSourcePair/:userID', (req, res) => {
-    logger.info('Received a request to reset data source pair');
-    mongo.resetDataSourcePair(req.params.userID, (error, response) => {
-      if (error) {
-        logger.error(error);
-        res.status(400).json({
-          error: 'Unexpected error occured while saving',
-        });
-      } else {
-        logger.info('Data source pair reseted successfully');
-        res.status(200).send();
-      }
-    });
-  });
-
-  app.get('/getDataSourcePair/:userID/:orgId?', (req, res) => {
-    logger.info('Received a request to get data source pair');
-    mongo.getDataSourcePair(req.params.userID, req.params.orgId, (err, sourcePair) => {
-      if (err) {
-        logger.error('Unexpected error occured while getting data source pairs');
-        logger.error(err);
-        res.status(400).json({
-          error: 'Unexpected error occured while getting data source pairs',
-        });
-      } else {
-        logger.info('Returning list of data source pairs');
-        res.status(200).json(sourcePair);
-      }
     });
   });
 
@@ -3341,17 +2390,18 @@ if (cluster.isMaster) {
           res.end();
           return;
         }
-        res.status(200).end();
 
         logger.info('CSV File Passed Validation');
-        uploadReqPro = JSON.stringify({
-          status: '3/3 Uploading of data started',
-          error: null,
-          percent: null,
-        });
-        redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
         logger.info('Creating HAPI server now');
-        hapi.addTenancy({ name: database, description: 'reco data source' }).then(() => {
+        hapi.addPartition({ name: database, description: 'reco data source', userID: fields.userID }).then((partitionID) => {
+          const levelData = mixin.createLevelMapping(fields);
+          res.status(200).end(JSON.stringify({ partitionID, levelData: JSON.stringify(levelData) }));
+          uploadReqPro = JSON.stringify({
+            status: '3/3 Uploading of data started',
+            error: null,
+            percent: null,
+          });
+          redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
           const oldPath = files[fileName].path;
 
           const newPath = `${__dirname}/csvUploads/${fields.userID}+${mixin.toTitleCase(fields.csvName)}+${moment().format()}.csv`;
@@ -3366,9 +2416,6 @@ if (cluster.isMaster) {
             });
           });
           logger.info(`Uploading data for ${database} now`);
-          mongo.saveLevelMapping(fields, database, (error, response) => {
-
-          });
           mcsd.CSVTomCSD(files[fileName].path, fields, database, clientId, () => {
             logger.info(`Data upload for ${database} is done`);
             const uploadReqPro = JSON.stringify({

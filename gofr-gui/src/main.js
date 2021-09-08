@@ -7,6 +7,8 @@ import vuetify from './plugins/vuetify';
 import vuelidate from 'vuelidate'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
+import VueCookies from 'vue-cookies'
+import * as Keycloak from 'keycloak-js';
 import 'whatwg-fetch'
 import fhirpath from "fhirpath"
 import fhirutils from "./plugins/fhirutils"
@@ -18,7 +20,7 @@ Object.defineProperty(Vue.prototype, '$fhirpath', {
 Object.defineProperty(Vue.prototype, '$fhirutils', {
   value: fhirutils
 })
-
+axios.defaults.withCredentials = true
 Vue.use(vuelidate)
 Vue.use(VueAxios, axios)
 Vue.config.productionTip = false
@@ -76,27 +78,119 @@ getDHIS2StoreConfig((storeConfig) => {
   }
   // get general config of App and pass it to the App component as props
   let defaultGenerConfig = JSON.stringify(store.state.config.generalConfig)
-  axios.get('/config/getGeneralConfig?defaultGenerConfig=' + defaultGenerConfig).then(genConfig => {
+  axios.get('/config/getGeneralConfig?defaultGenerConfig=' + defaultGenerConfig).then(response => {
+    let genConfig = response.data.generalConfig
+    store.state.idp = response.data.otherConfig.idp
+    store.state.keycloak = response.data.otherConfig.keycloak
     if (!genConfig) {
-      genConfig.data = {}
+      genConfig = {}
     }
-    new Vue({
-      router,
-      store,
-      i18n,
-      vuetify,
-      data () {
-        return {
-          config: genConfig.data
+
+    if(!response.data.generalConfig.authDisabled && store.state.idp === 'keycloak') {
+      let initOptions = {
+        realm: response.data.otherConfig.keycloak.realm,
+        clientId: response.data.otherConfig.keycloak.UIClientId,
+        url: response.data.otherConfig.keycloak.baseURL,
+        onLoad: 'login-required'
+      }
+
+      let keycloak = Keycloak(initOptions);
+      const Plugin = {
+        install(Vue) {
+          Vue.$keycloak = keycloak
         }
-      },
-      render: function (createElement) {
-        return createElement(App, {
-          props: {
-            generalConfig: this.config
+      }
+
+      Plugin.install = Vue => {
+        Vue.$keycloak = keycloak
+        Object.defineProperties(Vue.prototype, {
+          $keycloak: {
+            get() {
+              return keycloak
+            }
           }
         })
       }
-    }).$mount('#app')
+      Vue.use(Plugin)
+      keycloak.init({onLoad: initOptions.onLoad}).then( auth => {
+        if (!auth) {
+          window.location.reload();
+        } else {
+          axios.interceptors.request.use((config) => {
+            config.headers['Authorization'] = `Bearer ${keycloak.token}`
+            return config
+          }, (error) => {
+            return Promise.reject(error)
+          })
+          keycloak.loadUserInfo().then((userinfo) => {
+            let user = {
+              resourceType: 'Person',
+              id: userinfo.sub,
+              meta: {
+                profile: ['http://gofr.org/fhir/StructureDefinition/gofr-person-user']
+              },
+              name: [{
+                text: userinfo.name
+              }],
+              active: true
+            }
+            axios({
+              method: 'POST',
+              url: '/users/addUser',
+              data: user
+            }).then((response) => {
+              VueCookies.set('userObj', JSON.stringify(response.data), 'infinity')
+              store.state.auth.userID = userinfo.sub
+              store.state.auth.username = userinfo.preferred_username
+              new Vue({
+                router,
+                store,
+                i18n,
+                vuetify,
+                data () {
+                  return {
+                    config: genConfig
+                  }
+                },
+                render: function (createElement) {
+                  return createElement(App, {
+                    props: {
+                      generalConfig: this.config
+                    }
+                  })
+                }
+              }).$mount('#app')
+            }).catch((err) => {
+              console.error(err)
+            })
+          })
+          setInterval(() =>{
+            keycloak.updateToken(70)
+          }, 60000)
+        }
+      }).catch(() => {
+        alert("Keycloak access failed")
+      });
+    } else {
+      Vue.prototype.$keycloak = null
+      new Vue({
+        router,
+        store,
+        i18n,
+        vuetify,
+        data () {
+          return {
+            config: genConfig
+          }
+        },
+        render: function (createElement) {
+          return createElement(App, {
+            props: {
+              generalConfig: this.config
+            }
+          })
+        }
+      }).$mount('#app')
+    }
   })
 })

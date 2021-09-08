@@ -1,0 +1,40 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-task-view-search-organization",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/gofr-task"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "task",
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
+      "valueString": "view_search_organization"
+    },
+    {
+      "extension": [
+        {
+          "url": "permission",
+          "valueCode": "special"
+        },
+        {
+          "url": "resource",
+          "valueCode": "custom"
+        },
+        {
+          "url": "instance",
+          "valueId": "view-search-organization"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/task-attributes"
+    }
+  ]
+}

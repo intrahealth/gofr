@@ -12,7 +12,7 @@ const async = require('async');
 const mongoose = require('mongoose');
 const models = require('./models');
 const schemas = require('./schemas');
-const mixin = require('./mixin')();
+const mixin = require('./mixin');
 const config = require('./config');
 const logger = require('./winston');
 

@@ -8,6 +8,7 @@ const router = express.Router();
 const fhirAxios = require('../modules/fhirAxios');
 const fhirShortName = require('../modules/fhirShortName');
 const fhirAudit = require('../modules/fhirAudit');
+const fhirFilter = require('../modules/fhirFilter');
 
 const outcomes = require('../../config/operationOutcomes');
 const logger = require('../winston');
@@ -19,8 +20,30 @@ router.get('/:partition/:resource/:id?', (req, res, next) => {
   if (req.params.resource.startsWith('$') || (req.params.id && req.params.id.startsWith('$'))) {
     return next();
   }
+  let allowed = false;
   if (req.params.id) {
-    fhirAxios.read(req.params.resource, req.params.id, '', req.params.partition).then(resource => res.status(200).json(resource)).catch((err) => {
+    allowed = req.user.hasPermissionByName('read', req.params.resource, req.params.id);
+  } else {
+    allowed = req.user.hasPermissionByName('read', req.params.resource);
+  }
+  if (!allowed) {
+    return res.status(401).json(outcomes.DENIED);
+  }
+  if (req.params.id) {
+    fhirAxios.read(req.params.resource, req.params.id, '', req.params.partition).then((resource) => {
+      if (allowed === true) {
+        return res.status(200).json(resource);
+      }
+      // Check permissions against the specific resource and return list
+      // of allowed fields
+      const fieldList = req.user.hasPermissionByObject('read', resource);
+      if (fieldList === true) {
+        return res.status(200).json(resource);
+      } if (!fieldList) {
+        return res.status(401).json(outcomes.DENIED);
+      }
+      return res.status(200).json(fhirFilter.filter(resource, fieldList));
+    }).catch((err) => {
       /* return response from FHIR server */
       // return res.status( err.response.status ).json( err.response.data )
       /* for custom responses */
@@ -30,7 +53,33 @@ router.get('/:partition/:resource/:id?', (req, res, next) => {
       return res.status(500).json(outcome);
     });
   } else {
-    fhirAxios.search(req.params.resource, req.query, req.params.partition).then(resource => res.status(200).json(resource)).catch((err) => {
+    const userFilters = req.user.getFilter(req.params.resource);
+    if (userFilters) {
+      for (const filter of userFilters) {
+        const keyVal = filter.split('=', 2);
+        if (keyVal.length === 2) {
+          req.query[keyVal[0]] = keyVal[1];
+        } else {
+          logger.error(`Unable to process filter constraing for ${req.params.resource} ${filter}`);
+        }
+      }
+    }
+    fhirAxios.search(req.params.resource, req.query, req.params.partition).then((resource) => {
+      // Need to do deeper checking due to possibility of includes
+      if (resource && resource.entry && resource.entry.length > 0) {
+        fhirFilter.filterBundle('read', resource, req.user);
+      }
+      return res.status(200).json(resource);
+
+      // DELETE THE FOLLOWING, ALL NEED TO BE FILTERED
+      /*
+      if ( allowed === true ) {
+        return res.status(200).json(resource)
+      } else {
+        return res.status(200).json({"msg":"more to do filtering object from search"})
+      }
+      */
+    }).catch((err) => {
       logger.error(err.message);
       const outcome = { ...outcomes.ERROR };
       outcome.issue[0].diagnostics = err.message;
@@ -40,15 +89,21 @@ router.get('/:partition/:resource/:id?', (req, res, next) => {
 });
 
 router.post('/:partition/:resource', (req, res) => {
-  const resource = req.body;
+  const allowed = req.user.hasPermissionByObject('write', req.body);
+
+  let resource;
+  if (allowed === true) {
+    resource = req.body;
+  } else if (!allowed) {
+    return res.status(401).json(outcomes.DENIED);
+  } else {
+    resource = fhirFilter.filter(req.body, allowed);
+  }
   fhirAxios.create(resource, req.params.partition).then((output) => {
     fhirAudit.create(req.user, req.ip, `${output.resourceType}/${output.id
     }${output.meta.versionId ? `/_history/${output.meta.versionId}` : ''}`, true);
     return res.status(201).json(output);
   }).catch((err) => {
-    /* return response from FHIR server */
-    // return res.status( err.response.status ).json( err.response.data )
-    /* for custom responses */
     fhirAudit.create(req.user, req.ip, null, false, { resource, err });
     const outcome = { ...outcomes.ERROR };
     outcome.issue[0].diagnostics = err.message;
@@ -57,6 +112,10 @@ router.post('/:partition/:resource', (req, res) => {
 });
 
 router.patch('/:partition/CodeSystem/:id/:code', (req, res) => {
+  const allowed = req.user.hasPermissionByName('write', 'CodeSystem', req.params.id);
+  if (allowed !== true) {
+    return res.status(401).json(outcomes.DENIED);
+  }
   const incrementValueSetVersion = (codeSystem) => {
     const increment = (version) => {
       if (!version) return '0.0.1';
@@ -133,6 +192,17 @@ router.patch('/:partition/CodeSystem/:id/:code', (req, res) => {
 
 router.put('/:partition/:resource/:id', (req, res) => {
   const update = req.body;
+  const allowed = req.user.hasPermissionByObject('write', update);
+  if (!allowed) {
+    return res.status(401).json(outcomes.DENIED);
+  }
+
+  if (allowed !== true) {
+    // Not allowed at this time because it's complicated to combine the filtered
+    // results with the original data.  Due to arrays in FHIR elements.
+    // Should instead use patching with this access level to update one field at a time.
+    return res.status(401).json(outcomes.DENIED);
+  }
   fhirAxios.update(update, req.params.partition).then((resource) => {
     fhirAudit.update(req.user, req.ip, `${resource.resourceType}/${resource.id
     }${resource.meta.versionId ? `/_history/${resource.meta.versionId}` : ''}`, true);
@@ -149,7 +219,17 @@ router.put('/:partition/:resource/:id', (req, res) => {
 });
 
 router.get('/:partition/ValueSet/:id/\\$expand', (req, res) => {
-  fhirAxios.expand(req.params.id, req.query, '', '', req.params.partition).then(resource => res.status(200).json(resource)).catch((err) => {
+  const allowed = req.user.hasPermissionByName('read', 'ValueSet', req.params.id);
+  if (!allowed) {
+    return res.status(401).json(outcomes.DENIED);
+  }
+  fhirAxios.expand(req.params.id, req.query, '', '', req.params.partition).then((resource) => {
+    if (allowed === true) {
+      return res.status(200).json(resource);
+    }
+    // Field level access to ValueSets doesn't really make sense so don't do expansions if not full access
+    return res.status(401).json(outcomes.DENIED);
+  }).catch((err) => {
     /* return response from FHIR server */
     // return res.status( err.response.status ).json( err.response.data )
     /* for custom responses */
@@ -160,7 +240,17 @@ router.get('/:partition/ValueSet/:id/\\$expand', (req, res) => {
 });
 
 router.get('/:partition/CodeSystem/\\$lookup', (req, res) => {
-  fhirAxios.lookup(req.query, req.params.partition).then(resource => res.status(200).json(resource)).catch((err) => {
+  const allowed = req.user.hasPermissionByName('read', 'CodeSystem');
+  if (!allowed) {
+    return res.status(401).json(outcomes.DENIED);
+  }
+  fhirAxios.lookup(req.query, req.params.partition).then((resource) => {
+    if (allowed === true) {
+      return res.status(200).json(resource);
+    }
+    // Field level access to CodeSystems doesn't really make sense so don't do lookups if not full access
+    return res.status(401).json(outcomes.DENIED);
+  }).catch((err) => {
     /* return response from FHIR server */
     // return res.status( err.response.status ).json( err.response.data )
     /* for custom responses */
@@ -171,6 +261,10 @@ router.get('/:partition/CodeSystem/\\$lookup', (req, res) => {
 });
 
 router.get('/:partition/DocumentReference/:id/\\$html', (req, res) => {
+  const allowed = req.user.hasPermissionByName('read', 'DocumentReference', req.params.id);
+  if (!allowed) {
+    return res.status(401).json(outcomes.DENIED);
+  }
   fhirAxios.read('DocumentReference', req.params.id, '', req.params.partition).then((resource) => {
     const docToHTML = (resource) => {
       try {
@@ -191,8 +285,21 @@ router.get('/:partition/DocumentReference/:id/\\$html', (req, res) => {
       }
     };
 
-    const content = docToHTML(resource);
-    return res.status(200).json(content);
+    if (allowed === true) {
+      const content = docToHTML(resource);
+      return res.status(200).json(content);
+    }
+    // Check permissions against the specific resource and return list
+    // of allowed fields
+    const fieldList = req.user.hasPermissionByObject('read', resource);
+    if (fieldList === true) {
+      const content = docToHTML(resource);
+      return res.status(200).json(content);
+    } if (!fieldList) {
+      return res.status(401).json(outcomes.DENIED);
+    }
+    // Field level access to ValueSets doesn't really make sense so don't do expansions if not full access
+    return res.status(401).json(outcomes.DENIED);
   }).catch((err) => {
     /* return response from FHIR server */
     // return res.status( err.response.status ).json( err.response.data )
@@ -204,9 +311,31 @@ router.get('/:partition/DocumentReference/:id/\\$html', (req, res) => {
 });
 
 router.get('/:partition/\\$short-name', (req, res) => {
+  let allowed = false;
   if (req.query.reference) {
+    const refData = req.query.reference.split('/');
+    if (refData.length !== 2) {
+      logger.debug('invalid', req.query);
+      return res.status(401).json(outcomes.DENIED);
+    }
+    allowed = req.user.hasPermissionByName('read', refData[0]);
+
+    // Any read access will give short names
+    if (allowed === false) {
+      logger.debug('not allowed', allowed, req.query);
+      return res.status(401).json(outcomes.DENIED);
+    }
     fhirShortName.lookup(req.query, req.params.partition).then(display => res.status(200).json({ display }));
   } else {
+    // can add more complexity later, but for now just check for access to CodeSystems and ValueSets
+    allowed = req.user.hasPermissionByName('read', 'CodeSystem');
+    if (req.query.valueset) {
+      allowed = allowed && req.user.hasPermissionByName('read', 'ValueSet');
+    }
+    if (allowed !== true) {
+      logger.debug('not allowed', allowed, req.query);
+      return res.status(401).json(outcomes.DENIED);
+    }
     fhirShortName.lookup(req.query, req.params.partition).then(display => res.status(200).json({ display }));
   }
 });

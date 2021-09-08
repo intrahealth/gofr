@@ -33,7 +33,7 @@ router.post('/add', (req, res) => {
     approvRes.meta.profile.push(data.requestUpdatingResource);
     if (approvRes.extension) {
       for (const index in approvRes.extension) {
-        if (approvRes.extension[index].url === `${config.get('baseProfile')}/request-status`) {
+        if (approvRes.extension[index].url === `${config.get('profileBaseUrl')}/StructureDefinition/request-status`) {
           approvRes.extension.splice(index, 1);
           break;
         }
@@ -55,7 +55,7 @@ router.post('/add', (req, res) => {
   }
   let updated = false;
   for (const index in reqRes.extension) {
-    if (reqRes.extension[index].url === `${config.get('baseProfile')}/request-status`) {
+    if (reqRes.extension[index].url === `${config.get('profileBaseUrl')}/StructureDefinition/request-status`) {
       reqRes.extension[index].valueCoding.code = statusCode;
       reqRes.extension[index].valueCoding.display = statusDisplay;
       updated = true;
@@ -63,7 +63,7 @@ router.post('/add', (req, res) => {
   }
   if (!updated) {
     reqRes.extension.push({
-      url: `${config.get('baseProfile')}/request-status`,
+      url: `${config.get('profileBaseUrl')}/StructureDefinition/request-status`,
       valueCoding: {
         code: statusCode,
         display: statusDisplay,
@@ -74,14 +74,14 @@ router.post('/add', (req, res) => {
   if (statusCode === 'approved') {
     updated = false;
     for (const index in reqRes.extension) {
-      if (reqRes.extension[index].url === `${config.get('baseProfile')}/request-affected-resource`) {
+      if (reqRes.extension[index].url === `${config.get('profileBaseUrl')}/StructureDefinition/request-affected-resource`) {
         reqRes.extension[index].valueReference.reference = `Location/${approvRes.id}`;
         updated = true;
       }
     }
     if (!updated) {
       reqRes.extension.push({
-        url: `${config.get('baseProfile')}/request-affected-resource`,
+        url: `${config.get('profileBaseUrl')}/StructureDefinition/request-affected-resource`,
         valueReference: {
           reference: `Location/${approvRes.id}`,
         },
@@ -132,7 +132,7 @@ router.post('/update', (req, res) => {
   }
   let updated = false;
   for (const index in reqRes.extension) {
-    if (reqRes.extension[index].url === `${config.get('baseProfile')}/request-status`) {
+    if (reqRes.extension[index].url === `${config.get('profileBaseUrl')}/StructureDefinition/request-status`) {
       reqRes.extension[index].valueCoding.code = statusCode;
       reqRes.extension[index].valueCoding.display = statusDisplay;
       updated = true;
@@ -140,14 +140,14 @@ router.post('/update', (req, res) => {
   }
   if (!updated) {
     reqRes.extension.push({
-      url: `${config.get('baseProfile')}/request-status`,
+      url: `${config.get('profileBaseUrl')}/StructureDefinition/request-status`,
       valueCoding: {
         code: statusCode,
         display: statusDisplay,
       },
     });
   }
-  let affectingResource = reqRes.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/request-affected-resource');
+  let affectingResource = reqRes.extension.find(ext => ext.url === `${config.get('profileBaseUrl')}/StructureDefinition/request-affected-resource`);
   if (!affectingResource) {
     return res.status(400).send();
   }

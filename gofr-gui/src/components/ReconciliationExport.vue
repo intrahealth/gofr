@@ -135,7 +135,7 @@ export default {
         levelMapping1,
         levelMapping2
       }
-      return axios.get('/matchedLocations', { params })
+      return axios.get('/match/matchedLocations', { params })
     },
     unMatchedLocations (type) {
       let userID = this.$store.state.activePair.userID
@@ -160,7 +160,7 @@ export default {
         levelMapping1,
         levelMapping2
       }
-      return axios.get('/unmatchedLocations', { params })
+      return axios.get('/match/unmatchedLocations', { params })
     },
     csvExport () {
       this.loadingCSV = true

@@ -7,12 +7,16 @@
 import VueCookies from 'vue-cookies'
 export default {
   mounted () {
-    this.$store.state.auth.token = ''
-    VueCookies.remove('token')
     VueCookies.remove('userID')
     VueCookies.remove('role')
     VueCookies.remove('username')
-    this.$router.push('login')
+    VueCookies.remove('userObj')
+    VueCookies.remove('tasks')
+    if(this.$store.state.idp === 'keycloak') {
+      this.$keycloak.logout()
+    } else {
+      this.$router.push('login')
+    }
   }
 }
 </script>

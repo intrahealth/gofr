@@ -16,23 +16,23 @@
   },
   "extension": [
     {
-      "url": "name",
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
       "valueString": "Admin"
     },
     {
-      "url": "primary",
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-role-primary",
       "valueBoolean": true
     },
     {
-      "url": "tasks",
-      "valueCodeableConcept": {
-        "coding": [
-          {
-            "system": "http://gofr.org/fhir/CodeSystem/gofr-task-permission-codesystem",
-            "code": "*",
-            "display": "All"
-          }
-        ]
+      "url": "task",
+      "valueReference": {
+        "reference": "Basic/gofr-task-all-permissions-to-everything"
+      }
+    },
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-assign-role",
+      "valueReference": {
+        "reference": "Basic/gofr-role-open"
       }
     }
   ]

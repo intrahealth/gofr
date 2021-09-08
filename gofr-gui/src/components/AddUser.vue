@@ -84,27 +84,6 @@
               color="deep-purple"
               label="Username*"
             />
-            <label
-              v-for='(type, name) in $store.state.customSignupFields'
-              :key="name"
-            >
-              <v-text-field
-                v-if='type.required'
-                required
-                v-model="customFields[name]"
-                filled
-                color="deep-purple"
-                :label="type.display"
-              />
-              <v-text-field
-                v-else
-                required
-                v-model="customFields[name]"
-                filled
-                color="deep-purple"
-                :label="type.display"
-              />
-            </label>
             <v-text-field
               required
               @blur="$v.password.$touch()"
@@ -239,9 +218,6 @@ export default {
       formData.append('phone', this.phone)
       formData.append('email', this.email)
       formData.append('role', this.role)
-      for (let field in this.customFields) {
-        formData.append(field, this.customFields[field])
-      }
       axios.post('/addUser/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'

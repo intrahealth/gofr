@@ -11,7 +11,7 @@ const fhirAxios = require('../modules/fhirAxios');
 
 const outcomes = require('../../config/operationOutcomes');
 const fhirDefinition = require('../modules/fhirDefinition');
-const mixin = require('../mixin')();
+const mixin = require('../mixin');
 const logger = require('../winston');
 
 const getUKey = () => Math.random().toString(36).replace(/^[^a-z]+/, '') + Math.random().toString(36).substring(2, 15);
@@ -57,6 +57,11 @@ const setupOrder = (fields, sectionOrder) => {
 };
 
 router.get('/questionnaire/:questionnaire', (req, res) => {
+  const allowed = req.user.hasPermissionByName('read', 'Questionnaire', req.params.questionnaire);
+  // Limited access to these don't make sense so not allowing it for now
+  if (allowed !== true) {
+    return res.status(401).json(outcomes.DENIED);
+  }
   fhirAxios.read('Questionnaire', req.params.questionnaire, '', 'DEFAULT').then(async (resource) => {
     let vueOutput = `<ihris-questionnaire :edit=\"isEdit\" :view-page="viewPage" :constraints="constraints" url="${resource.url}" id="${resource.id}" title="${resource.title
     }" description="${resource.description}" purpose="${resource.purpose
@@ -321,7 +326,11 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
 
 router.get('/page/:page/:type?', (req, res) => {
   const page = `gofr-page-${req.params.page}`;
+  const allowed = req.user.hasPermissionByName('read', 'Basic', page);
   // Limited access to these don't make sense so not allowing it for now
+  if (allowed !== true) {
+    return res.status(401).json(outcomes.DENIED);
+  }
   fhirAxios.read('Basic', page, '', 'DEFAULT').then(async (resource) => {
     const pageDisplay = resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/ihris-page-display');
 
@@ -771,7 +780,6 @@ router.get('/page/:page/:type?', (req, res) => {
     };
 
     const createSearchTemplate = async (resource, structure) => {
-      logger.error('here');
       logger.silly(JSON.stringify(structure, null, 2));
       let search = ['id'];
       try {
@@ -983,7 +991,15 @@ router.get('/getGeneralConfig', (req, res) => {
     } else {
       merged = defaultGenerConfig;
     }
-    res.status(200).json(merged);
+    const otherConfig = {
+      idp: config.get('app:idp'),
+      keycloak: {
+        baseURL: config.get('keycloak:baseURL'),
+        realm: config.get('keycloak:realm'),
+        UIClientId: config.get('keycloak:UIClientId'),
+      },
+    };
+    res.status(200).json({ generalConfig: merged, otherConfig });
   }).catch((err) => {
     logger.error(err);
     res.status(500).json({

@@ -122,31 +122,21 @@ export default {
       axios
         .post('/auth/login/', {username: this.username, password: this.password})
         .then(authResp => {
-          this.$store.state.auth.token = authResp.data.token
           this.$store.state.auth.username = this.username
           this.$store.state.auth.userID = authResp.data.userID
           this.$store.state.auth.role = authResp.data.role
           this.$store.state.auth.tasks = authResp.data.tasks
           VueCookies.config('30d')
-          VueCookies.set('token', this.$store.state.auth.token, 'infinity')
           VueCookies.set('userID', this.$store.state.auth.userID, 'infinity')
           VueCookies.set('role', this.$store.state.auth.role, 'infinity')
-          VueCookies.set(
-            'tasks',
-            JSON.stringify(this.$store.state.auth.tasks),
-            'infinity'
-          )
-          VueCookies.set(
-            'username',
-            this.$store.state.auth.username,
-            'infinity'
-          )
+          VueCookies.set('tasks', JSON.stringify(this.$store.state.auth.tasks), 'infinity')
+          VueCookies.set('username', this.$store.state.auth.username, 'infinity')
           this.$store.state.auth.role = authResp.data.role
-          if (authResp.data.token) {
+          if (authResp.data.userID) {
             this.$store.state.clientId = uuid.v4()
             this.$store.state.initializingApp = true
             this.$store.state.denyAccess = false
-            eventBus.$emit('getConfig')
+            eventBus.$emit('getUserConfig')
           } else {
             this.authStatus = true
           }
@@ -155,6 +145,7 @@ export default {
           if (err.hasOwnProperty('response')) {
             console.log(err.response.data.error)
           }
+          this.authStatus = true
         })
     },
     displaySignup () {
@@ -174,21 +165,6 @@ export default {
       !this.$v.password.required && errors.push('Password is required')
       return errors
     }
-  },
-  created () {
-    axios.get('/getSignupConf').then(resp => {
-      if (resp.data) {
-        this.signupEnabled = true
-        this.$store.state.signupFields = resp.data.allSignupFields
-        this.$store.state.customSignupFields = resp.data.customSignupFields
-        VueCookies.set('signupFields', resp.data.allSignupFields, 'infinity')
-        VueCookies.set(
-          'customSignupFields',
-          resp.data.customSignupFields,
-          'infinity'
-        )
-      }
-    })
   },
   beforeCreate () {
     if (this.$store.state.config.generalConfig.authDisabled) {

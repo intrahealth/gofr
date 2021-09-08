@@ -435,57 +435,6 @@
                       v-model="$store.state.config.generalConfig.selfRegistration.enabled"
                     >
                     </v-switch>
-                    <v-layout
-                      row
-                      wrap
-                      v-if='$store.state.config.generalConfig.selfRegistration.enabled'
-                    >
-                      <v-spacer></v-spacer>
-                      <v-flex xs3>
-                        <v-treeview :items="signupFields"></v-treeview>
-                      </v-flex>
-                      <v-spacer></v-spacer>
-                      <v-flex xs8>
-                        <v-btn
-                          small
-                          round
-                          @click='moreFields = !moreFields'
-                          color="primary"
-                        >Add More Fields</v-btn>
-                        <v-text-field
-                          v-if='moreFields'
-                          v-model="fieldLabel"
-                          label="Field Label"
-                        ></v-text-field>
-                        <v-text-field
-                          v-if='moreFields'
-                          v-model="fieldName"
-                          label="Unique Name"
-                        ></v-text-field>
-                        <v-select
-                          v-if='moreFields'
-                          :items="requiredText"
-                          v-model="required"
-                          label="Required"
-                        ></v-select>
-                        <v-btn
-                          color="info"
-                          small
-                          v-if='moreFields'
-                          @click='addMoreFields'
-                        >
-                          <v-icon left>mdi-content-save</v-icon> Save
-                        </v-btn>
-                        <v-btn
-                          color="error"
-                          small
-                          v-if='moreFields'
-                          @click='moreFields = false'
-                        >
-                          <v-icon left>mdi-close</v-icon> Cancel
-                        </v-btn>
-                      </v-flex>
-                    </v-layout>
                     <v-switch
                       @change="saveConfiguration('generalConfig', 'selfRegistration')"
                       color="primary"
@@ -685,7 +634,6 @@
 import axios from 'axios'
 import RemoteSync from './DataSources/RemoteSync'
 import { eventBus } from '@/main'
-import VueCookies from 'vue-cookies'
 import { required } from 'vuelidate/lib/validators'
 import { generalMixin } from '@/mixins/generalMixin'
 export default {
@@ -733,7 +681,6 @@ export default {
       fieldName: '',
       required: 'No',
       requiredText: ['Yes', 'No'],
-      signupFields: [],
       notification_endpoint: '',
       notification_username: '',
       notification_password: '',
@@ -888,68 +835,6 @@ export default {
         this.$store.state.errorDescription = 'SMTP failed to be saved'
       })
     },
-    addMoreFields () {
-      this.$store.state.progressTitle = 'Saving field'
-      this.$store.state.dynamicProgress = true
-      let exist = this.signupFields[0].children.find(child => {
-        return child.id === this.fieldName
-      })
-      if (!exist) {
-        let formData = new FormData()
-        let required
-        if (this.required === 'Yes') {
-          required = true
-        } else {
-          required = false
-        }
-        formData.append('fieldName', this.fieldName)
-        formData.append('fieldLabel', this.fieldLabel)
-        formData.append('fieldRequired', required)
-        formData.append('form', 'signup')
-        axios
-          .post('/addFormField', formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            }
-          })
-          .then(() => {
-            this.$store.state.dynamicProgress = false
-            this.$store.state.dialogError = true
-            this.$store.state.errorTitle = 'Info'
-            this.$store.state.errorDescription = 'Field added successfully'
-
-            this.$store.state.signupFields[this.fieldName] = {
-              type: 'String',
-              display: this.fieldLabel
-            }
-            this.$store.state.customSignupFields[this.fieldName] = {
-              type: 'String',
-              display: this.fieldLabel
-            }
-            VueCookies.set(
-              'signupFields',
-              this.$store.state.signupFields,
-              'infinity'
-            )
-            VueCookies.set(
-              'customSignupFields',
-              this.$store.state.customSignupFields,
-              'infinity'
-            )
-            this.signupFields[0].children.push({
-              id: this.fieldName,
-              name: this.fieldLabel
-            })
-            this.fieldName = ''
-            this.fieldLabel = ''
-            this.required = 'No'
-          })
-      } else {
-        this.$store.state.dialogError = true
-        this.$store.state.errorTitle = 'Error'
-        this.$store.state.errorDescription = 'Field name must be unique'
-      }
-    },
     pullOrgUnits () {
       this.saveConfiguration('generalConfig', 'externalAuth')
       let formData = new FormData()
@@ -1038,17 +923,6 @@ export default {
       this.getDHIS2Roles(roles => {
         this.loadingDhis2Roles = false
         this.dhis2Roles = [...roles.data.userRoles]
-      })
-    }
-    this.signupFields.push({
-      id: 'signupFields',
-      name: 'Self Registration Fields',
-      children: []
-    })
-    for (let field in this.$store.state.signupFields) {
-      this.signupFields[0].children.push({
-        id: field,
-        name: field
       })
     }
     if (

@@ -65,7 +65,7 @@ export default {
           this.$store.state.auth.role = roleText
           this.$store.state.initializingApp = true
           this.$store.state.denyAccess = false
-          eventBus.$emit('getConfig')
+          eventBus.$emit('getUserConfig')
         } else {
           let formData = new FormData()
           formData.append('firstName', dhis2User.data.firstName)
@@ -86,7 +86,7 @@ export default {
                 this.$store.state.auth.role = user.data.role
                 this.$store.state.initializingApp = true
                 this.$store.state.denyAccess = false
-                eventBus.$emit('getConfig')
+                eventBus.$emit('getUserConfig')
               }
             })
           })

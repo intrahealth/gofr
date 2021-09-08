@@ -5,7 +5,7 @@ const Qs = require('qs');
 const async = require('async');
 const logger = require('../winston');
 const config = require('../config');
-const mixin = require('../mixin')();
+const mixin = require('../mixin');
 
 axios.defaults.paramsSerializer = function (params) {
   if (params instanceof URLSearchParams) {

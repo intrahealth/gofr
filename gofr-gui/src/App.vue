@@ -9,7 +9,7 @@
     >
       <v-toolbar-title v-text="title"></v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-toolbar-items v-if="$store.state.auth.token || $store.state.config.generalConfig.authDisabled">
+      <v-toolbar-items v-if="($keycloak && $keycloak.authenticated) || $store.state.auth.userID || $store.state.config.generalConfig.authDisabled">
         <v-btn
           flat
           :href="dhisLink"
@@ -285,41 +285,21 @@ export default {
       let source1 = this.toTitleCase(this.$store.state.activePair.source1.name)
       let source2 = this.toTitleCase(this.$store.state.activePair.source2.name)
       let userID = this.$store.state.activePair.userID
-      axios
-        .get(
-          '/recoStatus/' +
-          source1 +
-          '/' +
-          source2 +
-          '/' +
-          userID
-        )
-        .then(status => {
-          if (status.data.status) {
-            this.$store.state.recoStatus = status.data.status
-          } else {
-            axios
-              .get(
-                '/markRecoUnDone/' +
-                source1 +
-                '/' +
-                source2 +
-                '/' +
-                userID
-              )
-              .then(status => {
-                if (status.data.status) {
-                  this.$store.state.recoStatus = status.data.status
-                }
-              })
-              .catch(err => {
-                console.log(err.response.data.error)
-              })
-          }
-        })
-        .catch(err => {
-          console.log(err.response.data.error)
-        })
+      axios.get('/match/recoStatus/' + source1 + '/' + source2 + '/' + userID).then(status => {
+        if (status.data.status) {
+          this.$store.state.recoStatus = status.data.status
+        } else {
+          axios.get('/match/markRecoUnDone/' + source1 + '/' + source2 + '/' + userID).then(status => {
+            if (status.data.status) {
+              this.$store.state.recoStatus = status.data.status
+            }
+          }).catch(err => {
+            console.log(err.response.data.error)
+          })
+        }
+      }).catch(err => {
+        console.log(err.response.data.error)
+      })
     },
     getDataSources () {
       this.$store.state.loadingServers = true
@@ -347,14 +327,10 @@ export default {
           if (config.data) {
             this.$store.state.config.userConfig = { ...this.$store.state.config.userConfig, ...config.data }
           }
-          this.getGeneralConfig(() => {
-            this.getDataSources()
-          })
+          this.getDataSources()
         })
         .catch(() => {
-          this.getGeneralConfig(() => {
-            this.getDataSources()
-          })
+          this.getDataSources()
         })
     },
     getDataSourcePair () {
@@ -469,26 +445,31 @@ export default {
     'appMenu': Menu
   },
   created () {
+    this.$store.state.auth.role = 'Admin'
     this.$router.push({ name: 'AddDataSources' })
     this.$store.state.config.generalConfig = this.generalConfig
-    if (VueCookies.get('token') && VueCookies.get('userID')) {
-      this.$store.state.auth.token = VueCookies.get('token')
-      this.$store.state.auth.userID = VueCookies.get('userID')
-      this.$store.state.auth.username = VueCookies.get('username')
-      this.$store.state.auth.role = VueCookies.get('role')
-      this.$store.state.auth.tasks = JSON.parse(VueCookies.get('tasks'))
-      this.$store.state.signupFields = VueCookies.get('signupFields')
-      this.$store.state.customSignupFields = VueCookies.get('customSignupFields')
-      if (!this.$store.state.config.generalConfig.authDisabled) {
-        axios.get('/isTokenActive/').then(() => {
-          // will come here only if the token is active
-          this.$store.state.clientId = uuid.v4()
-          this.$store.state.initializingApp = true
-          this.$store.state.denyAccess = false
-          this.getUserConfig()
-        })
-      } else {
-        this.$router.push('login')
+    if(this.$store.state.idp === 'keycloak') {
+      this.$store.state.clientId = uuid.v4()
+      this.$store.state.initializingApp = true
+      this.$store.state.denyAccess = false
+      this.getUserConfig()
+    } else {
+      if (VueCookies.get('userID')) {
+        this.$store.state.auth.userID = VueCookies.get('userID')
+        this.$store.state.auth.username = VueCookies.get('username')
+        this.$store.state.auth.role = VueCookies.get('role')
+        this.$store.state.auth.tasks = JSON.parse(VueCookies.get('tasks'))
+        if (!this.$store.state.config.generalConfig.authDisabled) {
+          axios.get('/isSessionActive/').then(() => {
+            // will come here only if the session is active
+            this.$store.state.clientId = uuid.v4()
+            this.$store.state.initializingApp = true
+            this.$store.state.denyAccess = false
+            this.getUserConfig()
+          })
+        } else {
+          this.$router.push('login')
+        }
       }
     }
 
@@ -502,7 +483,7 @@ export default {
     eventBus.$on('getDataSources', () => {
       this.getDataSources()
     })
-    eventBus.$on('getConfig', () => {
+    eventBus.$on('getUserConfig', () => {
       this.getUserConfig()
     })
     eventBus.$on('getGeneralConfig', () => {

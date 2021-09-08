@@ -2,13 +2,14 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
 import router from '../router'
-import VueCookies from 'vue-cookies'
 
 Vue.use(Vuex)
 
 export const store = new Vuex.Store({
   state: {
     baseRouterViewKey: 0,
+    idp: '',
+    keycloak: {},
     alert: {
       width: '800px',
       show: false,
@@ -20,8 +21,7 @@ export const store = new Vuex.Store({
     auth: {
       username: '',
       userID: '',
-      role: '',
-      token: ''
+      role: ''
     },
     levelMapping: {
       source1: {},
@@ -67,8 +67,6 @@ export const store = new Vuex.Store({
         }
       }
     },
-    signupFields: {},
-    customSignupFields: {},
     recoStatus: {
       'status': 'in-progress'
     },
@@ -178,24 +176,12 @@ export const store = new Vuex.Store({
   }
 })
 
-axios.interceptors.request.use((config) => {
-  let token = store.state.auth.token
-  if (token) {
-    config.headers['Authorization'] = `Bearer ${token}`
-  }
-  return config
-}, (error) => {
-  return Promise.reject(error)
-})
-
 axios.interceptors.response.use((response) => {
   return response
 }, function (error) {
   let status = error.response.status
-  if (status === 401) {
-    store.state.auth.token = ''
-    VueCookies.remove('token')
-    router.push('login')
+  if (status === 401 || status === 403) {
+    router.push('logout')
   }
   return Promise.reject(error)
 })

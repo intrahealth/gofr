@@ -17,14 +17,6 @@ import FacilityReconScores from '@/components/FacilityReconScores'
 import FacilityRecoStatus from '@/components/FacilityRecoStatus'
 import DHIS2Auth from '@/components/disabledAuth/DHIS2Auth'
 import ResourceView from '@/components/FacilityRegistry/ResourceView'
-import RequestBuildingAddition from '@/components/FacilityRegistry/RequestBuildingAddition'
-import FacilitiesReport from '@/components/FacilityRegistry/FacilitiesReport'
-import RequestUpdateBuildingDetails from '@/components/FacilityRegistry/RequestUpdateBuildingDetails'
-import NewFacilitiesRequestsReport from '@/components/FacilityRegistry/NewFacilitiesRequestsReport'
-import FacilitiesUpdateRequestsReport from '@/components/FacilityRegistry/FacilitiesUpdateRequestsReport'
-import ServicesReport from '@/components/FacilityRegistry/ServicesReport'
-import AddCodeSystem from '@/components/FacilityRegistry/AddCodeSystem'
-import AddService from '@/components/FacilityRegistry/AddService'
 import {store} from '../store/store.js'
 import {tasksVerification} from '../modules/tasksVerification'
 
@@ -62,45 +54,9 @@ let router = new Router({
   }, {
     path: '/Configure',
     name: 'Configure',
-    component: Configure
-  }, {
-    path: '/addUser',
-    name: 'AddUser',
-    component: AddUser
-  }, {
-    path: '/ViewDataSources',
-    name: 'ViewDataSources',
-    component: ViewDataSources
-  }, {
-    path: '/AddDataSources',
-    name: 'AddDataSources',
-    component: AddDataSources
-  }, {
-    path: '/dataSourcesPair',
-    name: 'DataSourcesPair',
-    component: DataSourcesPair
-  }, {
-    path: '/view',
-    name: 'FacilityReconView',
-    component: FacilityReconView
-  }, {
-    path: '/scores',
-    name: 'FacilityReconScores',
-    component: FacilityReconScores
-  }, {
-    path: '/recoStatus',
-    name: 'FacilityRecoStatus',
-    component: FacilityRecoStatus
-  }, {
-    path: '/',
-    name: 'FacilityReconHome',
-    component: FacilityReconScores
-  }, {
-    path: "/questionnaire/:questionnaire/:page",
-    name: 'questionnaire',
-    component: () => import("../components/FacilityRegistry/fhir-page-questionnaire.vue"),
+    component: Configure,
     beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.canAdd(to.name)
+      let hasTask = tasksVerification.hasPermissionByName('special', 'custom', 'view-config-page')
       if (hasTask) {
         return next()
       }
@@ -112,6 +68,133 @@ let router = new Router({
         path: from.path
       })
     }
+  }, {
+    path: '/addUser',
+    name: 'AddUser',
+    component: AddUser
+  }, {
+    path: '/ViewDataSources',
+    name: 'ViewDataSources',
+    component: ViewDataSources,
+    beforeEnter: (to, from, next) => {
+      let hasTask = tasksVerification.hasPermissionByName('special', 'custom', 'view-data-source')
+      if (hasTask) {
+        return next()
+      }
+      store.state.dialogError = true
+      store.state.errorTitle = 'Info'
+      store.state.errorColor = 'error'
+      store.state.errorDescription = `You dont have permission to access this page`
+      next({
+        path: from.path
+      })
+    }
+  }, {
+    path: '/AddDataSources',
+    name: 'AddDataSources',
+    component: AddDataSources,
+    beforeEnter: (to, from, next) => {
+      let hasTask = tasksVerification.hasPermissionByName('special', 'custom', 'add-data-source')
+      if (hasTask) {
+        return next()
+      }
+      store.state.dialogError = true
+      store.state.errorTitle = 'Info'
+      store.state.errorColor = 'error'
+      store.state.errorDescription = `You dont have permission to access this page`
+      next({
+        path: from.path
+      })
+    }
+  }, {
+    path: '/dataSourcesPair',
+    name: 'DataSourcesPair',
+    component: DataSourcesPair,
+    beforeEnter: (to, from, next) => {
+      let hasTask = tasksVerification.hasPermissionByName('special', 'custom', 'view-source-pair')
+      if (hasTask) {
+        return next()
+      }
+      store.state.dialogError = true
+      store.state.errorTitle = 'Info'
+      store.state.errorColor = 'error'
+      store.state.errorDescription = `You dont have permission to access this page`
+      next({
+        path: from.path
+      })
+    }
+  }, {
+    path: '/view',
+    name: 'FacilityReconView',
+    component: FacilityReconView,
+    beforeEnter: (to, from, next) => {
+      let hasTask = tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')
+      if (hasTask) {
+        return next()
+      }
+      store.state.dialogError = true
+      store.state.errorTitle = 'Info'
+      store.state.errorColor = 'error'
+      store.state.errorDescription = `You dont have permission to access this page`
+      next({
+        path: from.path
+      })
+    }
+  }, {
+    path: '/scores',
+    name: 'FacilityReconScores',
+    component: FacilityReconScores,
+    beforeEnter: (to, from, next) => {
+      let hasTask = tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')
+      if (hasTask) {
+        return next()
+      }
+      store.state.dialogError = true
+      store.state.errorTitle = 'Info'
+      store.state.errorColor = 'error'
+      store.state.errorDescription = `You dont have permission to access this page`
+      next({
+        path: from.path
+      })
+    }
+  }, {
+    path: '/recoStatus',
+    name: 'FacilityRecoStatus',
+    component: FacilityRecoStatus,
+    beforeEnter: (to, from, next) => {
+      let hasTask = tasksVerification.hasPermissionByName('special', 'custom', 'view-matching-status')
+      if (hasTask) {
+        return next()
+      }
+      store.state.dialogError = true
+      store.state.errorTitle = 'Info'
+      store.state.errorColor = 'error'
+      store.state.errorDescription = `You dont have permission to access this page`
+      next({
+        path: from.path
+      })
+    }
+  }, {
+    path: '/',
+    name: 'FacilityReconHome',
+    component: FacilityReconScores,
+    beforeEnter: (to, from, next) => {
+      let hasTask = tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')
+      if (hasTask) {
+        return next()
+      }
+      store.state.dialogError = true
+      store.state.errorTitle = 'Info'
+      store.state.errorColor = 'error'
+      store.state.errorDescription = `You dont have permission to access this page`
+      next({
+        path: from.path
+      })
+    }
+  }, {
+    path: "/questionnaire/:questionnaire/:page",
+    name: 'questionnaire',
+    component: () => import("../components/FacilityRegistry/fhir-page-questionnaire.vue")
   }, {
     path: "/ViewMap",
     name: "ViewMap",
@@ -123,20 +206,7 @@ let router = new Router({
     props: (route) => ({
       page: route.params.page,
       pageId: route.params.id
-    }),
-    beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.canAdd(to.name)
-      if (hasTask) {
-        return next()
-      }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
-      next({
-        path: from.path
-      })
-    }
+    })
   }, {
     path: "/Resource/Add/:page",
     name: "ResourceAdd",
@@ -152,178 +222,33 @@ let router = new Router({
       page: route.params.page,
       requestAction: route.params.requestAction
     })
-  }, {
-    path: '/RequestBuildingAddition',
-    name: 'RequestBuildingAddition',
-    component: RequestBuildingAddition,
-    beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.canAdd(to.name)
-      if (hasTask) {
-        return next()
-      }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
-      next({
-        path: from.path
-      })
-    }
-  }, {
-    path: '/RequestUpdateBuildingDetails',
-    name: 'RequestUpdateBuildingDetails',
-    component: RequestUpdateBuildingDetails,
-    props: (route) => ({
-      action: route.query.action,
-      requestCategory: route.query.requestCategory,
-      requestType: route.query.requestType
-    }),
-    beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.canAdd(to.name)
-      if (hasTask) {
-        return next()
-      }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
-      next({
-        path: from.path
-      })
-    }
-  }, {
-    path: '/FacilitiesUpdateRequestsReport',
-    name: 'FacilitiesUpdateRequestsReport',
-    component: FacilitiesUpdateRequestsReport,
-    props: (route) => ({
-      action: route.query.action,
-      requestCategory: route.query.requestCategory,
-      requestType: route.query.requestType
-    }),
-    beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.canView(to.name)
-      if (hasTask) {
-        return next()
-      }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
-      next({
-        path: from.path
-      })
-    }
-  }, {
-    path: '/FacilitiesReport',
-    name: 'FacilitiesReport',
-    component: FacilitiesReport,
-    beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.canView(to.name)
-      if (hasTask) {
-        return next()
-      }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
-      next({
-        path: from.path
-      })
-    }
-  }, {
-    path: '/NewFacilitiesRequestsReport',
-    name: 'NewFacilitiesRequestsReport',
-    component: NewFacilitiesRequestsReport,
-    props: (route) => ({
-      action: route.query.action,
-      requestCategory: route.query.requestCategory,
-      requestType: route.query.requestType
-    }),
-    beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.canView(to.name)
-      if (hasTask) {
-        return next()
-      }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
-      next({
-        path: from.path
-      })
-    }
-  }, {
-    path: '/ServicesReport',
-    name: 'ServicesReport',
-    component: ServicesReport,
-    beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.canView(to.name)
-      if (hasTask) {
-        return next()
-      }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
-      next({
-        path: from.path
-      })
-    }
-  }, {
-    path: '/AddCodeSystem',
-    name: 'AddCodeSystem',
-    component: AddCodeSystem,
-    props: (route) => ({
-      codeSystemType: route.query.type,
-      displayText: route.query.displayText
-    }),
-    beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.canAdd(to.name)
-      if (hasTask) {
-        return next()
-      }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
-      next({
-        path: from.path
-      })
-    }
-  }, {
-    path: '/AddService',
-    name: 'AddService',
-    component: AddService,
-    beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.canAdd(to.name)
-      if (hasTask) {
-        return next()
-      }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
-      next({
-        path: from.path
-      })
-    }
   }]
 })
 
 router.beforeEach((to, from, next) => {
   store.state.alert.show = false
-  if (!store.state.auth.token &&
-    (!VueCookies.get('token') || VueCookies.get('token') === 'null' || !VueCookies.get('userID') || VueCookies.get('userID') === 'null')
-  ) {
-    if (to.path !== '/Login' && to.path !== '/Signup' && !store.state.config.generalConfig.authDisabled) {
-      next({
-        path: '/Login'
-      })
+  if(store.state.idp === 'keycloak') {
+    if (!Vue.$keycloak.authenticated) {
+      if (to.path !== '/Login' && to.path !== '/Signup' && !store.state.config.generalConfig.authDisabled) {
+        Vue.$keycloak.logout()
+      } else {
+        return next()
+      }
     } else {
       return next()
     }
   } else {
-    next()
+    if (!VueCookies.get('userID') || VueCookies.get('userID') === 'null') {
+      if (to.path !== '/Login' && to.path !== '/Signup' && !store.state.config.generalConfig.authDisabled) {
+        next({
+          path: '/Login'
+        })
+      } else {
+        return next()
+      }
+    } else {
+      next()
+    }
   }
 })
 export default router

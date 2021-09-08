@@ -7,7 +7,7 @@ const https = require('https');
 const url = require('url');
 const isJSON = require('is-json');
 const redis = require('redis');
-const mixin = require('./mixin')();
+const mixin = require('./mixin');
 const config = require('./config');
 const logger = require('./winston');
 

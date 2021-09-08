@@ -177,27 +177,6 @@
                 </v-layout>
               </v-flex>
             </v-layout>
-            <label
-              v-for='(type, name) in $store.state.customSignupFields'
-              :key="name"
-            >
-              <v-text-field
-                v-if='type.required'
-                required
-                v-model="customFields[name]"
-                filled
-                color="deep-purple"
-                :label="type.display"
-              />
-              <v-text-field
-                v-else
-                required
-                v-model="customFields[name]"
-                filled
-                color="deep-purple"
-                :label="type.display"
-              />
-            </label>
           </v-form>
           <v-divider />
           <v-card-actions>
@@ -234,7 +213,6 @@
 <script>
 import axios from 'axios'
 import { required } from 'vuelidate/lib/validators'
-import VueCookies from 'vue-cookies'
 
 export default {
   validations: {
@@ -377,10 +355,6 @@ export default {
       !this.$v.retype_password.required && errors.push('Re-type Password')
       return errors
     }
-  },
-  created () {
-    this.$store.state.signupFields = VueCookies.get('signupFields')
-    this.$store.state.customSignupFields = VueCookies.get('customSignupFields')
   }
 }
 </script>

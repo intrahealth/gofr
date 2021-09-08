@@ -87,8 +87,23 @@ export default {
         }
         this.$forceUpdate()
       }).catch(err => {
+        if (err.response && err.response.data.resourceType === "OperationOutcome" ) {
+          Vue.component( 'ihris-template', {
+            name: 'ihris-template',
+            data: function() {
+              return {
+                issues: err.response.data.issue
+              }
+            },
+            components: {
+              "ihris-outcome": () => import( "@/components/ihris/ihris-outcome" )
+            },
+            template: '<div><ihris-outcome :issues="issues"></ihris-outcome></div>'
+          } )
+        } else {
+          Vue.component('ihris-template', {template: '<div><h1>Error</h1><p>An error occurred trying to load this page</p>.</div>'})
+        }
         console.log(err)
-        Vue.component('ihris-template', {template: '<div><h1>Error</h1><p>An error occurred trying to load this page</p>.</div>'})
         this.$forceUpdate()
       })
     }

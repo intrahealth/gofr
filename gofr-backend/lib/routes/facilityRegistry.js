@@ -8,7 +8,7 @@ const async = require('async');
 const router = express.Router();
 const mcsd = require('../mcsd')();
 const config = require('../config');
-const mixin = require('../mixin')();
+const mixin = require('../mixin');
 const logger = require('../winston');
 
 const topOrgId = mixin.getTopOrgId(config.get('mCSD:registryDB'), 'Location');

@@ -4,13 +4,13 @@
   "name": "GofrTaskPermissionValueSet",
   "id": "gofr-task-permission",
   "title": "Code system for task permissions.",
-  "version": "0.0.1",
+  "version": "0.3.0",
   "url": "http://gofr.org/fhir/ValueSet/gofr-task-permission",
-  "date": "2021-07-27T12:11:04.362Z",
+  "date": "2021-03-26T09:25:04.362Z",
   "compose": {
     "include": [
       {
-        "system": "http://gofr.org/fhir/CodeSystem/gofr-task-permission-codesystem"
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-task-permission"
       }
     ]
   }

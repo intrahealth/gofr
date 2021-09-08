@@ -14,7 +14,7 @@ const redisClient = redis.createClient({
 });
 const geodist = require('geodist');
 const lodash = require('lodash');
-const mixin = require('./mixin')();
+const mixin = require('./mixin');
 const config = require('./config');
 const mcsd = require('./mcsd')();
 const logger = require('./winston');

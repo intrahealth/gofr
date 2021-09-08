@@ -828,7 +828,7 @@ export default {
       })
     },
     getUsers () {
-      axios.get('/auth/getUsers').then((response) => {
+      axios.get('/users/getUsers').then((response) => {
         this.users = response.data
       })
     },

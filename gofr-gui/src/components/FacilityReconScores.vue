@@ -1333,7 +1333,7 @@ export default {
       this.$store.state.dynamicProgress = true
       this.$store.state.progressTitle = 'Getting potential matches from server'
       axios
-        .get('/reconcile/?' + path)
+        .get('/match/reconcile/?' + path)
         .then(response => {
           this.$store.state.dynamicProgress = false
           if (response.data) {
@@ -1524,7 +1524,7 @@ export default {
       formData.append('totalLevels', this.$store.state.totalSource1Levels)
       formData.append('userID', this.$store.state.activePair.userID)
       axios
-        .post('/match/' + this.matchType, formData, {
+        .post('/match/performMatch/' + this.matchType, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -1596,7 +1596,7 @@ export default {
       formData.append('source1Id', source1Id)
       let userID = this.$store.state.activePair.userID
       axios
-        .post('/acceptFlag/' + this.getSource1() + '/' + this.getSource2() + '/' + userID, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        .post('/match/acceptFlag/' + this.getSource1() + '/' + this.getSource2() + '/' + userID, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
         .then(() => {
           this.$store.state.dynamicProgress = false
           // Add from a list of Source 1 Matched and remove from list of Flagged
@@ -1637,7 +1637,7 @@ export default {
       let sourcesOwner = this.getDatasourceOwner()
       formData.append('source1Id', source1Id)
       axios
-        .post('/breakMatch/' + this.getSource1() + '/' + this.getSource2() + '/' + sourcesOwner.source1Owner + '/' + sourcesOwner.source2Owner + '/' + userID, formData, {
+        .post('/match/breakMatch/' + this.getSource1() + '/' + this.getSource2() + '/' + sourcesOwner.source1Owner + '/' + sourcesOwner.source2Owner + '/' + userID, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -1683,7 +1683,7 @@ export default {
       let sourcesOwner = this.getDatasourceOwner()
       formData.append('source1Id', source1Id)
       axios
-        .post('/breakMatch/' + this.getSource1() + '/' + this.getSource2() + '/' + sourcesOwner.source1Owner + '/' + sourcesOwner.source2Owner + '/' + userID, formData, {
+        .post('/match/breakMatch/' + this.getSource1() + '/' + this.getSource2() + '/' + sourcesOwner.source1Owner + '/' + sourcesOwner.source2Owner + '/' + userID, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -1729,7 +1729,7 @@ export default {
       formData.append('totalLevels', this.$store.state.totalSource1Levels)
       let userID = this.$store.state.activePair.userID
       axios
-        .post('/breakNoMatch/' + type + '/' + this.getSource1() + '/' + this.getSource2() + '/' + userID, formData, {
+        .post('/match/breakNoMatch/' + type + '/' + this.getSource1() + '/' + this.getSource2() + '/' + userID, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -1787,7 +1787,7 @@ export default {
       formData.append('totalLevels', this.$store.state.totalSource1Levels)
 
       axios
-        .post(`/noMatch/${type}/${this.getSource1()}/${this.getSource2()}/${source1Owner}/${source2Owner}/${userID}`, formData, {
+        .post(`/match/noMatch/${type}/${this.getSource1()}/${this.getSource2()}/${source1Owner}/${source2Owner}/${userID}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }

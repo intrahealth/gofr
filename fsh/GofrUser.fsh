@@ -24,16 +24,31 @@ Description:    "GOFR profile of the Person resource to manage user access."
 * extension contains
       organization 1..1 MS and
       role 1..1 MS and
-      password 1..1 MS
-* extension[password].value[x] only string
-* extension[password].valueString 1..1 MS
-* extension[password].valueString ^label = "Password"
+      GofrPassword named password 1..1 MS
+* extension[password] MS
+* extension[password] ^label = "Password"
 * extension[role].value[x] only Reference
 * extension[role].valueReference 1..1 MS
 * extension[role].valueReference ^label = "Role"
 * extension[organization].value[x] only Reference(Basic)
 * extension[organization].valueReference 1..1 MS
 * extension[organization].valueReference ^label = "Owning Organization"
+
+Extension:      GofrPassword
+Id:             gofr-password
+Title:          "GOFR Password"
+Description:    "GOFR password extension for local users."
+* ^context.type = #element
+* ^context.expression = "Person"
+* extension contains
+      hash 1..1 MS and
+      salt 1..1 MS
+* extension[hash].value[x] only string
+* extension[hash].valueString ^label = "Password"
+* extension[hash].valueString 1..1 MS
+* extension[salt].value[x] only string
+* extension[salt].valueString ^label = "Salt"
+* extension[salt].valueString 1..1 MS
 
 Instance:       gofr-user-admin
 InstanceOf:     GofrPersonUser
@@ -46,5 +61,6 @@ Usage:          #example
 * telecom[1].value = ""
 * active = true
 * extension[organization].valueReference = Reference(Organization/54cdcbe3-87e0-421f-b657-8313fce5f418)
-* extension[password].valueString = "$2b$08$GUhIcB0sC3CBhFi7TmZ41.B53gbrl2/.kRzlYydo8ZiZtUFSR7mjW"
+* extension[password].extension[salt].valueString = "be664906fbbe50918d8cadb5ebd22093"
+* extension[password].extension[hash].valueString = "727c00bcb3d604db9b807155240b97347951e5e89e4c69b823279287694501fcaa683d883f5854a05c2c50c5b31413c6bb4a5949876a42b5c5bd74247e5777fc"
 * extension[role].valueReference = Reference(Basic/gofr-role-admin)

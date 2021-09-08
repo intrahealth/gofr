@@ -1,10 +1,20 @@
 {
   "app": {
-    "installed": false
+    "installed": true,
+    "idp": "keycloak"
   },
   "server": {
     "hostname": "0.0.0.0",
     "port": 4000
+  },
+  "keycloak": {
+    "baseURL": "http://localhost:8080/auth",
+    "realm": "GOFR",
+    "UIClientId": "app-vue",
+    "RESTClientId": "gofr-rest-client",
+    "backendClientId": "nodejs",
+    "RESTClientUser": "ashaban",
+    "RESTClientPassword": "ashaban"
   },
   "defaults": {
     "components": {
@@ -34,7 +44,7 @@
     "processor": {},
     "questionnaire": {}
   },
-  "baseProfile": "http://gofr.org/fhir/StructureDefinition",
+  "profileBaseUrl": "http://gofr.org/fhir",
   "mCSD": {
     "url": "http://localhost:8081/hapi54/fhir",
     "protocal": "http",
@@ -58,8 +68,16 @@
     "secret": "3084e343-71bc-4247-86e4-ea210af89c28",
     "tokenDuration": 5400
   },
+  "session": {
+    "secret": "b35133ff-c038-4575-bd47-02dcb86bad9b"
+  },
   "logger": {
     "level": "info"
+  },
+  "levelMaps": {
+    "ds0ADyc9UCU": {
+      "4": 5
+    }
   },
   "levels": [
     "level1",

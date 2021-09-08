@@ -724,7 +724,7 @@ export default {
       this.$store.state.progressTitle = 'Marking reconciliation as Done'
       this.$store.state.dynamicProgress = true
       let userID = this.$store.state.activePair.userID
-      axios.get('/markRecoDone/' + this.source1 + '/' + this.source2 + '/' + userID).then((status) => {
+      axios.get('/match/markRecoDone/' + this.source1 + '/' + this.source2 + '/' + userID).then((status) => {
         this.$store.state.dynamicProgress = false
         if (status.data.status) {
           this.$store.state.recoStatus = status.data.status

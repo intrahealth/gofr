@@ -145,7 +145,7 @@ export default {
           'Content-Type': 'multipart/form-data'
         }
       }).then((authResp) => {
-        if (authResp.data.token) {
+        if (authResp.data.userID) {
           this.changePassword()
         } else {
           this.alertFail = true

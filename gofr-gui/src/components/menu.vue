@@ -19,7 +19,9 @@
             >mdi-play</v-icon>
           </a>
           <ul class="child">
-            <v-list class="lastMenu">
+            <v-list class="lastMenu"
+              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'add-data-source')"
+            >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
                   <v-list-item
@@ -38,7 +40,9 @@
                 <span>{{ $t('App.menu.addDataSources.tooltip')}}</span>
               </v-tooltip>
             </v-list>
-            <v-list class="lastMenu">
+            <v-list class="lastMenu"
+              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-data-source')"
+            >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
                   <v-list-item
@@ -58,7 +62,10 @@
             </v-list>
           </ul>
         </li>
-        <v-list :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length===0,lastMenu: true }">
+        <v-list
+          :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length===0,lastMenu: true }"
+          v-if="tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')"
+        >
           <v-tooltip right>
             <template v-slot:activator="{ on }">
               <v-list-item
@@ -93,7 +100,10 @@
             >mdi-play</v-icon>
           </a>
           <ul class="child">
-            <v-list :class="{ disabledMenu: $store.state.dataSources.length <= 1 || $store.state.dataSourcePairs.length <= 0,lastMenu: true }">
+            <v-list
+              :class="{ disabledMenu: $store.state.dataSources.length <= 1 || $store.state.dataSourcePairs.length <= 0,lastMenu: true }"
+              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-source-pair')"
+            >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
                   <v-list-item
@@ -112,7 +122,10 @@
                 <span>{{ $t('App.menu.createPair.tooltip')}}</span>
               </v-tooltip>
             </v-list>
-            <v-list :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length === 0,lastMenu: true }">
+            <v-list
+              :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length === 0,lastMenu: true }"
+              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')"
+            >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
                   <v-list-item
@@ -131,7 +144,10 @@
                 <span>{{ $t('App.menu.reconcile.tooltip') }}</span>
               </v-tooltip>
             </v-list>
-            <v-list :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length===0,lastMenu: true }">
+            <v-list
+              :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length===0,lastMenu: true }"
+              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-matching-status')"
+            >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
                   <v-list-item
@@ -158,7 +174,7 @@
       <a href="#">
         <v-icon>mdi-map-marker</v-icon>{{ $t('App.menu.facilityRegistry.msg')}}
       </a>
-      <ul class="child">
+      <ul class="child" v-if="tasksVerification.hasPermissionByName('special', 'navigation', 'search-records')">
         <li class="parent">
           <a href="#">
             <v-icon
@@ -175,7 +191,7 @@
           <ul class="child">
             <v-list
               class="lastMenu"
-              v-if="tasksVerification.canAdd('AddFacility')"
+              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-search-facility-page')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -196,7 +212,7 @@
             </v-list>
             <v-list
               class="lastMenu"
-              v-if="tasksVerification.canAdd('AddFacility')"
+              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-search-jurisdiction-page')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -217,7 +233,7 @@
             </v-list>
             <v-list
               class="lastMenu"
-              v-if="tasksVerification.canAdd('AddFacility')"
+              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-search-organization-page')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -238,7 +254,7 @@
             </v-list>
             <v-list
               class="lastMenu"
-              v-if="tasksVerification.canAdd('AddService')"
+              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-search-service-page')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -259,7 +275,7 @@
             </v-list>
             <v-list
               class="lastMenu"
-              v-if="tasksVerification.canAdd('AddService')"
+              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-add-facility-requests')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -280,7 +296,7 @@
             </v-list>
             <v-list
               class="lastMenu"
-              v-if="tasksVerification.canAdd('AddService')"
+              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-update-facility-requests')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -303,7 +319,7 @@
         </li>
         <v-list
           class="lastMenu"
-          v-if="tasksVerification.canAdd('AddJurisdiction')"
+          v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-add-jurisdiction-page')"
         >
           <v-tooltip right>
             <template v-slot:activator="{ on }">
@@ -324,7 +340,7 @@
         </v-list>
         <v-list
           class="lastMenu"
-          v-if="tasksVerification.canAdd('AddFacility')"
+          v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-add-facility-page')"
         >
           <v-tooltip right>
             <template v-slot:activator="{ on }">
@@ -345,7 +361,7 @@
         </v-list>
         <v-list
           class="lastMenu"
-          v-if="tasksVerification.canAdd('AddJurisdiction')"
+          v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-add-organization-page')"
         >
           <v-tooltip right>
             <template v-slot:activator="{ on }">
@@ -366,7 +382,7 @@
         </v-list>
         <v-list
           class="lastMenu"
-          v-if="tasksVerification.canAdd('AddService')"
+          v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-add-healthcare-service-page')"
         >
           <v-tooltip right>
             <template v-slot:activator="{ on }">
@@ -387,7 +403,6 @@
         </v-list>
         <v-list
           class="lastMenu"
-          v-if="tasksVerification.canAdd('AddService')"
         >
           <v-tooltip right>
             <template v-slot:activator="{ on }">
@@ -420,11 +435,13 @@
             >mdi-play</v-icon>
           </a>
           <ul class="child">
-            <v-list class="lastMenu">
+            <v-list
+              class="lastMenu"
+              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-request-add-facility-page')"
+            >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
                   <v-list-item
-                    v-if="tasksVerification.canAdd('RequestBuildingAddition')"
                     to="/questionnaire/gofr-facility-add-request-questionnaire/facility-add-request"
                     v-on="on"
                   >
@@ -439,11 +456,13 @@
                 <span>{{ $t('App.menu.requestNewFacility.tooltip')}}</span>
               </v-tooltip>
             </v-list>
-            <v-list class="lastMenu">
+            <v-list
+              class="lastMenu"
+              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-request-update-facility-page')"
+            >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
                   <v-list-item
-                    v-if="tasksVerification.canAdd('RequestUpdateBuildingDetails')"
                     to="/Resource/Search/facility?searchAction=send-update-request"
                     v-on="on"
                   >
@@ -457,90 +476,6 @@
                 </template>
                 <span>{{ $t('App.menu.requestUpdateFacility.tooltip')}}</span>
               </v-tooltip>
-            </v-list>
-          </ul>
-        </li>
-        <li class="parent">
-          <a href="#">
-            <v-icon
-              left
-              color="black"
-            >mdi-format-list-bulleted-square</v-icon>
-            {{ $t('App.menu.facilityRegReports.msg')}}
-            <v-icon
-              color="black"
-              small
-              class="menuArrow"
-            >mdi-play</v-icon>
-          </a>
-          <ul class="child">
-            <v-list
-              class="lastMenu"
-              v-if="tasksVerification.canView('FacilitiesReport')"
-            >
-              <v-list-item to="/FacilitiesReport">
-                <v-list-item-title class="menuText">
-                  <v-icon
-                    left
-                    color="black"
-                  >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.facilitiesReport.msg')}}
-                </v-list-item-title>
-              </v-list-item>
-            </v-list>
-            <v-list
-              class="lastMenu"
-              v-if="tasksVerification.canView('NewFacilitiesRequestsReport')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/NewFacilitiesRequestsReport"
-                    v-on="on"
-                  >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.newFacilitiesRequestsReport.msg')}}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.newFacilitiesRequestsReport.tooltip')}}</span>
-              </v-tooltip>
-            </v-list>
-            <v-list
-              class="lastMenu"
-              v-if="tasksVerification.canView('FacilitiesUpdateRequestsReport')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/FacilitiesUpdateRequestsReport"
-                    v-on="on"
-                  >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.facilitiesUpdateRequestsReport.msg')}}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.facilitiesUpdateRequestsReport.tooltip')}}</span>
-              </v-tooltip>
-            </v-list>
-            <v-list
-              class="lastMenu"
-              v-if="tasksVerification.canView('ServicesReport')"
-            >
-              <v-list-item to="/ServicesReport">
-                <v-list-item-title class="menuText">
-                  <v-icon
-                    left
-                    color="black"
-                  >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.servicesReport.msg')}}
-                </v-list-item-title>
-              </v-list-item>
             </v-list>
           </ul>
         </li>
@@ -620,7 +555,7 @@
         </v-list>
       </ul>
     </li>
-    <li class="parent">
+    <li class="parent" v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-config-page')">
       <v-list-item
         to="/configure"
         v-if='!$store.state.denyAccess'

@@ -20,8 +20,17 @@
       }
     },
     {
-      "url": "password",
-      "valueString": "$2b$08$GUhIcB0sC3CBhFi7TmZ41.B53gbrl2/.kRzlYydo8ZiZtUFSR7mjW"
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-password",
+      "extension": [
+        {
+          "url": "hash",
+          "valueString": "727c00bcb3d604db9b807155240b97347951e5e89e4c69b823279287694501fcaa683d883f5854a05c2c50c5b31413c6bb4a5949876a42b5c5bd74247e5777fc"
+        },
+        {
+          "url": "salt",
+          "valueString": "be664906fbbe50918d8cadb5ebd22093"
+        }
+      ]
     }
   ],
   "name": [

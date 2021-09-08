@@ -117,7 +117,7 @@ export const generalMixin = {
       )
       axios.get('/config/getGeneralConfig?defaultGenerConfig=' + defaultGenerConfig).then(config => {
         if (config) {
-          this.$store.state.config.generalConfig = config.data
+          this.$store.state.config.generalConfig = config.data.generalConfig
         }
         return callback()
       })
@@ -333,7 +333,7 @@ export const generalMixin = {
     },
     setDHIS2Credentials () {
       // tell the backend that auth is disabled
-      this.$store.state.auth.token = ''
+      this.$store.state.auth.userID = ''
       if (process.env.NODE_ENV === 'production') {
         let href = location.href.split('api')
         if (href.length < 2) {

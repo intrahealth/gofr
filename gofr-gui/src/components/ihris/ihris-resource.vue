@@ -35,7 +35,7 @@
                 small
                 @click="processRequest('approved')"
                 color="success"
-                v-if="$store.state.requestResourceUpdateData.requestAction"
+                v-if="$store.state.requestResourceUpdateData.requestAction && hasPermission"
                 :disabled="currentRequestStatus === 'approved' || currentRequestStatus === ''"
               >
                 <v-icon left>mdi-check-circle</v-icon> Approve
@@ -45,7 +45,7 @@
                 small
                 @click="processRequest('rejected')"
                 color="error"
-                v-if="$store.state.requestResourceUpdateData.requestAction"
+                v-if="$store.state.requestResourceUpdateData.requestAction && hasPermission"
                 :disabled="currentRequestStatus !== 'pending'"
               >
                 <v-icon left>mdi-cancel</v-icon> Reject
@@ -102,6 +102,7 @@
 
 <script>
 import axios from 'axios'
+import {tasksVerification} from '@/modules/tasksVerification'
 export default {
   name: "ihris-resource",
   props: ["title","field","fhirId","page","profile","section-menu","edit","links","constraints" ],
@@ -116,7 +117,8 @@ export default {
       isEdit: false,
       linktext: [ ],
       advancedValid: true,
-      currentRequestStatus: ''
+      currentRequestStatus: '',
+      tasksVerification: tasksVerification
     }
   },
   created: function() {
@@ -215,6 +217,14 @@ export default {
       } else {
         return true
       }
+    },
+    hasPermission() {
+      if(this.$store.state.requestResourceUpdateData.requestAction === 'process-update-request' && tasksVerification.hasPermissionByName('special', 'custom', 'process-update-facility-request') ||
+        this.$store.state.requestResourceUpdateData.requestAction === 'process-add-request' && tasksVerification.hasPermissionByName('special', 'custom', 'process-add-facility-request')
+      ) {
+        return true
+      }
+      return false
     }
   },
   methods: {

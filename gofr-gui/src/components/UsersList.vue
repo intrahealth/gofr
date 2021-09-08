@@ -262,7 +262,7 @@ export default {
       formData.append('password', this.password)
       this.users = []
       this.loadingUsers = true
-      axios.get('/auth/getUsers/').then((users) => {
+      axios.get('/users/getUsers/').then((users) => {
         this.loadingUsers = false
         this.users = users.data
       }).catch((err) => {

@@ -268,7 +268,7 @@ export const scoresMixin = {
       let parentConstraint = JSON.stringify(this.$store.state.config.generalConfig.reconciliation.parentConstraint)
       let path = `source1=${source1}&source2=${source2}&source1Owner=${source1Owner}&source2Owner=${source2Owner}&source1LimitOrgId=${source1LimitOrgId}&source2LimitOrgId=${source2LimitOrgId}&totalSource1Levels=${totalSource1Levels}&totalSource2Levels=${totalSource2Levels}`
       path += `&recoLevel=${recoLevel}&clientId=${clientId}&userID=${userID}&parentConstraint=` + parentConstraint + '&getPotential=' + getPotential
-      axios.get('/reconcile/?' + path).then(() => {
+      axios.get('/match/reconcile/?' + path).then(() => {
         this.checkScoreProgress()
       })
       // this.$store.state.scoresProgressData.scoreProgressTimer = setInterval(this.checkScoreProgress, 2000)

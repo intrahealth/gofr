@@ -1,0 +1,40 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-task-read-practitioner-page-resource",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/gofr-task"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "task",
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
+      "valueString": "read-practitioner-page-resource"
+    },
+    {
+      "extension": [
+        {
+          "url": "permission",
+          "valueCode": "read"
+        },
+        {
+          "url": "resource",
+          "valueCode": "Basic"
+        },
+        {
+          "url": "instance",
+          "valueId": "ihris-page-practitioner"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/task-attributes"
+    }
+  ]
+}

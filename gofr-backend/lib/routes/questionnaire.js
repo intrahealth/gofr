@@ -25,7 +25,6 @@ router.post('/:partition/QuestionnaireResponse', (req, res, next) => {
     return false;
   };
 
-logger.error('here');
   const workflowQuestionnaires = config.get('workflow:questionnaire');
   const workflow = Object.keys(workflowQuestionnaires).find(wf => workflowQuestionnaires[wf].url === req.body.questionnaire);
   if (workflow) {
@@ -74,7 +73,6 @@ logger.error('here');
     });
   } else {
     fhirQuestionnaire.processQuestionnaire(req.body, req.params.partition).then((bundle) => {
-      logger.error('hello');
       fhirAxios.create(bundle, req.params.partition).then((results) => {
         if (results.entry && results.entry.length > 0 && results.entry[0].response.location) {
           req.body.subject = { reference: results.entry[0].response.location };

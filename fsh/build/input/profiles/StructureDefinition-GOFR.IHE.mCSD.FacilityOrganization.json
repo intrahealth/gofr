@@ -43,7 +43,7 @@
   "kind": "resource",
   "abstract": false,
   "type": "Organization",
-  "baseDefinition": "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.FacilityOrganization",
+  "baseDefinition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.FacilityOrganization",
   "derivation": "constraint",
   "snapshot": {
     "element": [
@@ -434,7 +434,7 @@
           {
             "code": "Extension",
             "profile": [
-              "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension"
+              "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension"
             ]
           }
         ],

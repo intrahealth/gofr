@@ -11,7 +11,7 @@
       "valueCode": "business"
     }
   ],
-  "url": "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.FacilityOrganization",
+  "url": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.FacilityOrganization",
   "version": "0.1.0",
   "name": "MCSDFacilityOrganization",
   "title": "mCSD Organization for Facilities",
@@ -43,7 +43,7 @@
   "kind": "resource",
   "abstract": false,
   "type": "Organization",
-  "baseDefinition": "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.Organization",
+  "baseDefinition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.Organization",
   "derivation": "constraint",
   "snapshot": {
     "element": [
@@ -434,7 +434,7 @@
           {
             "code": "Extension",
             "profile": [
-              "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension"
+              "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension"
             ]
           }
         ],

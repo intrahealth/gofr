@@ -11,7 +11,7 @@
       "valueCode": "business"
     }
   ],
-  "url": "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.LocationDistance",
+  "url": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.LocationDistance",
   "version": "0.1.0",
   "name": "MCSDLocationDistance",
   "title": "mCSD Location with Distance",
@@ -33,7 +33,7 @@
   "kind": "resource",
   "abstract": false,
   "type": "Location",
-  "baseDefinition": "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.Location",
+  "baseDefinition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.Location",
   "derivation": "constraint",
   "snapshot": {
     "element": [

@@ -1,7 +1,7 @@
 {
   "resourceType": "StructureDefinition",
   "id": "IHE.mCSD.hierarchy.extension",
-  "url": "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension",
+  "url": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension",
   "version": "0.1.0",
   "name": "MCSDOrganizationHierarchy",
   "title": "mCSD Additional Hierarchies extension for mCSD Organization.",
@@ -650,7 +650,7 @@
           {
             "code": "Reference",
             "targetProfile": [
-              "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.Organization"
+              "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.Organization"
             ]
           }
         ],
@@ -690,7 +690,7 @@
           {
             "code": "Reference",
             "targetProfile": [
-              "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.Organization"
+              "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.Organization"
             ]
           }
         ],
@@ -741,7 +741,7 @@
             ]
           }
         ],
-        "fixedUri": "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension",
+        "fixedUri": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension",
         "isModifier": false,
         "isSummary": false,
         "mapping": [
@@ -1024,7 +1024,7 @@
           {
             "code": "Reference",
             "targetProfile": [
-              "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.Organization"
+              "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.Organization"
             ]
           }
         ]
@@ -1039,7 +1039,7 @@
       {
         "id": "Extension.url",
         "path": "Extension.url",
-        "fixedUri": "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension"
+        "fixedUri": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension"
       },
       {
         "id": "Extension.value[x]",

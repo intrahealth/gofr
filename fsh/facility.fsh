@@ -4,6 +4,7 @@ Id:           IHE.mCSD.FacilityOrganization
 Title:        "mCSD Organization for Facilities"
 Description:  "A profile on the mCSD Organization profile for mCSD Facilities."
 
+* ^url = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.FacilityOrganization"
 * type 2..*
 * type ^slicing.discriminator.type = #value
 * type ^slicing.discriminator.path = "coding.system"
@@ -20,6 +21,7 @@ Id:           IHE.mCSD.FacilityLocation
 Title:        "mCSD Location for Facilities"
 Description:  "A profile on the mCSD Location profile for mCSD Facilities."
 
+* ^url = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.FacilityLocation"
 * type 2..*
 * type ^slicing.discriminator.type = #value
 * type ^slicing.discriminator.path = "coding.system"

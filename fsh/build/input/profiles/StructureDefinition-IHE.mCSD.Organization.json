@@ -11,7 +11,7 @@
       "valueCode": "business"
     }
   ],
-  "url": "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.Organization",
+  "url": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.Organization",
   "version": "0.1.0",
   "name": "MCSDOrganization",
   "title": "mCSD Organization",
@@ -434,7 +434,7 @@
           {
             "code": "Extension",
             "profile": [
-              "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension"
+              "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension"
             ]
           }
         ],
@@ -1348,7 +1348,7 @@
           {
             "code": "Extension",
             "profile": [
-              "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension"
+              "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension"
             ]
           }
         ],

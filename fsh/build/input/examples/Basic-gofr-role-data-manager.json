@@ -26,7 +26,7 @@
     {
       "url": "task",
       "valueReference": {
-        "reference": "Basic/gofr-task-view-search-organization"
+        "reference": "Basic/gofr-task-view-search-organization-page"
       }
     },
     {

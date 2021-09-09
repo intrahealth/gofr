@@ -572,7 +572,7 @@ Usage:          #example
 * code = GofrResourceCodeSystem#role
 * extension[name].valueString = "Data Manager"
 * extension[primary].valueBoolean = false
-* extension[task][0].valueReference = Reference(Basic/gofr-task-view-search-organization)
+* extension[task][0].valueReference = Reference(Basic/gofr-task-view-search-organization-page)
 * extension[task][1].valueReference = Reference(Basic/gofr-task-break-matched-location)
 * extension[task][2].valueReference = Reference(Basic/gofr-task-accept-flagged-location)
 * extension[task][3].valueReference = Reference(Basic/gofr-task-match-location)

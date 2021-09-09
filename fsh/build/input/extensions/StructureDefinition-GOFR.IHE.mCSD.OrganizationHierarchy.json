@@ -24,7 +24,7 @@
     }
   ],
   "type": "Extension",
-  "baseDefinition": "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension",
+  "baseDefinition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension",
   "derivation": "constraint",
   "snapshot": {
     "element": [

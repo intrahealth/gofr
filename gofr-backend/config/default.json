@@ -1,6 +1,6 @@
 {
   "app": {
-    "installed": true,
+    "installed": false,
     "idp": "gofr"
   },
   "server": {

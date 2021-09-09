@@ -10,5 +10,5 @@
     "Organization"
   ],
   "type": "token",
-  "expression": "extension('http://profiles.ihe.net/ITI/mCSD/StructureDefinition/IHE.mCSD.OrganizationHierarchy').extension('hierarchy-type').value as CodeableConcept"
+  "expression": "extension('http://profiles.ihe.net/ITI/mCSD/StructureDefinition/IHE.mCSD.hierarchy.extension').extension('hierarchy-type').value as CodeableConcept"
 }

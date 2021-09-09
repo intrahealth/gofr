@@ -434,7 +434,7 @@
           {
             "code": "Extension",
             "profile": [
-              "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.OrganizationHierarchy"
+              "http://gofr.org/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension"
             ]
           }
         ],

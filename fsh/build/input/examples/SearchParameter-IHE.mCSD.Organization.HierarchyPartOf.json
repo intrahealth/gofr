@@ -10,5 +10,5 @@
     "Organization"
   ],
   "type": "reference",
-  "expression": "extension('http://profiles.ihe.net/ITI/mCSD/StructureDefinition/IHE.mCSD.OrganizationHierarchy').extension('part-of').value as Reference"
+  "expression": "extension('http://profiles.ihe.net/ITI/mCSD/StructureDefinition/IHE.mCSD.hierarchy.extension').extension('part-of').value as Reference"
 }

@@ -11,7 +11,7 @@ Description:  "A profile on the Organization resource for mCSD."
 
 
 Extension:    MCSDOrganizationHierarchy
-Id:           IHE.mCSD.OrganizationHierarchy
+Id:           IHE.mCSD.hierarchy.extension
 Title:        "mCSD Additional Hierarchies extension for mCSD Organization."
 Description:  "If there are additional hierarchies (such as funding source),then use this extension."
 
@@ -36,7 +36,7 @@ Title:        "Search on the IHE defined extension for hierarchy type."
 * code = #ihe-mcsd-hierarchy-type
 * base = #Organization
 * type = #token
-* expression = "extension('http://profiles.ihe.net/ITI/mCSD/StructureDefinition/IHE.mCSD.OrganizationHierarchy').extension('hierarchy-type').value as CodeableConcept"
+* expression = "extension('http://profiles.ihe.net/ITI/mCSD/StructureDefinition/IHE.mCSD.hierarchy.extension').extension('hierarchy-type').value as CodeableConcept"
 
 Instance:     MCSDSearchOrganizationHierarchyPartOf
 InstanceOf:   SearchParameter
@@ -49,5 +49,5 @@ Title:        "Search on the IHE defined extension for hierarchy part of."
 * code = #ihe-mcsd-hierarchy-partof
 * base = #Organization
 * type = #reference
-* expression = "extension('http://profiles.ihe.net/ITI/mCSD/StructureDefinition/IHE.mCSD.OrganizationHierarchy').extension('part-of').value as Reference"
+* expression = "extension('http://profiles.ihe.net/ITI/mCSD/StructureDefinition/IHE.mCSD.hierarchy.extension').extension('part-of').value as Reference"
 

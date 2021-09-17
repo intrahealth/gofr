@@ -1,4 +1,4 @@
-<img src="../docs/img/GOFR_RGB_high-res.png" width="500">
+<img src="../img/GOFR_RGB_high-res.png" width="400">
 
 # Introduction
 

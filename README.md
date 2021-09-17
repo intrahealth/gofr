@@ -1,5 +1,7 @@
 # Global Open Facility Registry (GOFR)
 
+<img src="GOFR_RGB_high-res.png" width="400">
+
 ![docs](https://github.com/intrahealth/gofr/workflows/docs/badge.svg)
 
 This is the main repository for the next iteration of GOFR, which is based on the original codebase of the [Facility Reconciliation Tool](https://github.com/openhie/facility-recon).

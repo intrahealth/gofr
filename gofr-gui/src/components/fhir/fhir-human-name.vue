@@ -1,5 +1,5 @@
 <template>
-  <ihris-complex-card 
+  <gofr-complex-card
     :complexField="field"
     :slotProps="slotProps"
     :label="label"
@@ -8,12 +8,12 @@
     <template #default="slotProps">
       <slot :source="slotProps.source"></slot>
     </template>
-  </ihris-complex-card>
+  </gofr-complex-card>
 
 </template>
 
 <script>
-import IhrisComplexCard from "../ihris/ihris-complex-card.vue"
+import GofrComplexCard from "../gofr/gofr-complex-card.vue"
 
 export default {
   name: "fhir-human-name",
@@ -24,7 +24,7 @@ export default {
     }
   },
   components: {
-    IhrisComplexCard
+    GofrComplexCard
   }
 }
 </script>

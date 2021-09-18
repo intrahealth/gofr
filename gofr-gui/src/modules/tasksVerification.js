@@ -1,11 +1,8 @@
-import VueCookies from 'vue-cookies'
+import {store} from '../store/store'
 export const tasksVerification = {
   hasPermissionByName: (permission, resource, id) => {
-    let userObj
-    try {
-      userObj = VueCookies.get('userObj')
-    } catch (error) {
-      console.log(error);
+    let userObj = store.state.auth.userObj
+    if(!userObj || !userObj.permissions || Object.keys(userObj.permissions).length === 0) {
       return false
     }
     if(userObj.permissions['*'] && userObj.permissions['*']['*']) {

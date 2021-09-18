@@ -1,5 +1,5 @@
 <template>
-  <ihris-element :edit="edit" :loading="false">
+  <gofr-element :edit="edit" :loading="false">
     <template #form>
       <v-text-field :error-messages="errors" @change="errors = []" :label="display" :disabled="disabled" :name="field" v-model.number="value" outlined hide-details="auto" :rules="rules" dense>
         <template #label>{{display}} <span v-if="required" class="red--text font-weight-bold">*</span></template>
@@ -11,18 +11,18 @@
     <template #value>
       {{value}}
     </template>
-  </ihris-element>
+  </gofr-element>
 </template>
 
 <script>
-import IhrisElement from "../ihris/ihris-element.vue"
+import GofrElement from "../gofr/gofr-element.vue"
 
 export default {
   name: "fhir-integer",
   props: ["field", "label", "min", "max", "id", "path", "slotProps", "sliceName","base-min","base-max", "edit", "readOnlyIfSet",
     "constraints"],
   components: {
-    IhrisElement
+    GofrElement
   },
   data: function() {
     return {

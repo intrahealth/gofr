@@ -12,6 +12,8 @@ RUN git clone --branch ${branch} https://github.com/intrahealth/gofr /src/
 WORKDIR /src/gofr-backend
 RUN npm install
 
+RUN cp /src/gofr-backend/config/default.json.example /src/gofr-backend/config/default.json
+
 # add app
 # ADD . /src/
 

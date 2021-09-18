@@ -1,10 +1,16 @@
 <template>
   <ul id="menu">
-    <li class="parent"><a href="#">
+    <li
+      class="parent"
+      v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'access-facility-reconciliation-mod')"
+    ><a href="#">
         <v-icon>mdi-spellcheck</v-icon> {{$t('App.menu.facilityRecon.msg')}}
       </a>
       <ul class="child">
-        <li class="parent">
+        <li
+          class="parent"
+          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'manage-data-source')"
+        >
           <a
             href="#"
             style="margin-left: 15px"
@@ -20,7 +26,7 @@
           </a>
           <ul class="child">
             <v-list class="lastMenu"
-              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'add-data-source')"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'add-data-source')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -41,7 +47,7 @@
               </v-tooltip>
             </v-list>
             <v-list class="lastMenu"
-              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-data-source')"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-data-source')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -64,7 +70,7 @@
         </li>
         <v-list
           :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length===0,lastMenu: true }"
-          v-if="tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')"
+          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')"
         >
           <v-tooltip right>
             <template v-slot:activator="{ on }">
@@ -85,7 +91,10 @@
             <span>{{ $t('App.menu.view.tooltip') }}</span>
           </v-tooltip>
         </v-list>
-        <li class="parent">
+        <li
+          class="parent"
+          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'manage-reconciliations')"
+        >
           <a
             href="#"
             style="margin-left: 15px"
@@ -102,7 +111,7 @@
           <ul class="child">
             <v-list
               :class="{ disabledMenu: $store.state.dataSources.length <= 1 || $store.state.dataSourcePairs.length <= 0,lastMenu: true }"
-              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-source-pair')"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-source-pair')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -124,7 +133,7 @@
             </v-list>
             <v-list
               :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length === 0,lastMenu: true }"
-              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -146,7 +155,7 @@
             </v-list>
             <v-list
               :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length===0,lastMenu: true }"
-              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-matching-status')"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-matching-status')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -170,11 +179,17 @@
         </li>
       </ul>
     </li>
-    <li class="parent">
+    <li
+      class="parent"
+      v-if="$tasksVerification.hasPermissionByName('special', 'navigation', 'access-facility-registry-mod')"
+    >
       <a href="#">
         <v-icon>mdi-map-marker</v-icon>{{ $t('App.menu.facilityRegistry.msg')}}
       </a>
-      <ul class="child" v-if="tasksVerification.hasPermissionByName('special', 'navigation', 'search-records')">
+      <ul
+        class="child"
+        v-if="$tasksVerification.hasPermissionByName('special', 'navigation', 'search-records')"
+      >
         <li class="parent">
           <a href="#">
             <v-icon
@@ -191,7 +206,7 @@
           <ul class="child">
             <v-list
               class="lastMenu"
-              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-search-facility-page')"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-search-facility-page')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -212,7 +227,7 @@
             </v-list>
             <v-list
               class="lastMenu"
-              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-search-jurisdiction-page')"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-search-jurisdiction-page')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -233,7 +248,7 @@
             </v-list>
             <v-list
               class="lastMenu"
-              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-search-organization-page')"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-search-organization-page')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -254,7 +269,7 @@
             </v-list>
             <v-list
               class="lastMenu"
-              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-search-service-page')"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-search-service-page')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -275,7 +290,7 @@
             </v-list>
             <v-list
               class="lastMenu"
-              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-add-facility-requests')"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-add-facility-requests')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -296,7 +311,7 @@
             </v-list>
             <v-list
               class="lastMenu"
-              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-update-facility-requests')"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-update-facility-requests')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -319,7 +334,7 @@
         </li>
         <v-list
           class="lastMenu"
-          v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-add-jurisdiction-page')"
+          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-add-jurisdiction-page')"
         >
           <v-tooltip right>
             <template v-slot:activator="{ on }">
@@ -340,7 +355,7 @@
         </v-list>
         <v-list
           class="lastMenu"
-          v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-add-facility-page')"
+          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-add-facility-page')"
         >
           <v-tooltip right>
             <template v-slot:activator="{ on }">
@@ -361,7 +376,7 @@
         </v-list>
         <v-list
           class="lastMenu"
-          v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-add-organization-page')"
+          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-add-organization-page')"
         >
           <v-tooltip right>
             <template v-slot:activator="{ on }">
@@ -382,7 +397,7 @@
         </v-list>
         <v-list
           class="lastMenu"
-          v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-add-healthcare-service-page')"
+          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-add-healthcare-service-page')"
         >
           <v-tooltip right>
             <template v-slot:activator="{ on }">
@@ -437,7 +452,7 @@
           <ul class="child">
             <v-list
               class="lastMenu"
-              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-request-add-facility-page')"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-request-add-facility-page')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -458,7 +473,7 @@
             </v-list>
             <v-list
               class="lastMenu"
-              v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-request-update-facility-page')"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-request-update-facility-page')"
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -481,7 +496,12 @@
         </li>
       </ul>
     </li>
-    <li class="parent">
+    <li class="parent" v-if="$store.state.idp === 'keycloak'">
+      <a :href="keycloak_account" target="_blank">
+        <v-icon>mdi-account-outline</v-icon>{{ $t('App.menu.account.msg') }}
+      </a>
+    </li>
+    <li class="parent" v-else-if="$tasksVerification.hasPermissionByName('special', 'custom', 'manage-account')">
       <a href="#">
         <v-icon>mdi-account-outline</v-icon>{{ $t('App.menu.account.msg')}}
       </a>
@@ -492,7 +512,7 @@
               <v-list-item
                 to="/addUser"
                 v-on="on"
-                v-if='$store.state.auth.role === "Admin"'
+                v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'add-user')"
               >
                 <v-list-item-title class="menuText">
                   <v-icon
@@ -511,7 +531,7 @@
               <v-list-item
                 to="/usersList"
                 v-on="on"
-                v-if='$store.state.auth.role === "Admin"'
+                v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-user')"
               >
                 <v-list-item-title class="menuText">
                   <v-icon
@@ -530,7 +550,7 @@
               <v-list-item
                 to="/rolesManagement"
                 v-on="on"
-                v-if='$store.state.auth.role === "Admin"'
+                v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'add-user')"
               >
                 <v-list-item-title class="menuText">
                   <v-icon
@@ -555,7 +575,7 @@
         </v-list>
       </ul>
     </li>
-    <li class="parent" v-if="tasksVerification.hasPermissionByName('special', 'custom', 'view-config-page')">
+    <li class="parent" v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-config-page')">
       <v-list-item
         to="/configure"
         v-if='!$store.state.denyAccess'
@@ -569,7 +589,7 @@
     <li class="parent">
       <v-list-item
         to="/logout"
-        v-if='!$store.state.denyAccess && !$store.state.config.generalConfig.authDisabled'
+        v-if='!$store.state.denyAccess && !$store.state.config.generalConfig.authDisabled && $store.state.auth.userObj'
         class="newClass"
       >
         <v-list-item-title>
@@ -580,13 +600,10 @@
   </ul>
 </template>
 <script>
-import {
-  tasksVerification
-} from '@/modules/tasksVerification'
 export default {
-  data () {
-    return {
-      tasksVerification: tasksVerification
+  computed: {
+    keycloak_account() {
+      return this.$store.state.keycloak.baseURL + '/realms/' + this.$store.state.keycloak.realm + '/account'
     }
   }
 }

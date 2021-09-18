@@ -1,7 +1,7 @@
 <template>
-  <ihris-template :key="$route.path">
+  <gofr-template :key="$route.path">
     Loading...
-  </ihris-template>
+  </gofr-template>
 </template>
 
 <script>
@@ -26,21 +26,21 @@ export default {
       axios.get( "/config/page/"+this.page ).then(response => {
         let data = response.data
         if ( data.resourceType === "OperationOutcome" ) {
-          Vue.component( 'ihris-template', {
-            name: 'ihris-template',
+          Vue.component( 'gofr-template', {
+            name: 'gofr-template',
             data: function() {
               return {
                 issues: data.issue
               }
             },
             components: {
-              "ihris-outcome": () => import( "@/components/ihris/ihris-outcome" )
+              "gofr-outcome": () => import( "@/components/gofr/gofr-outcome" )
             },
-            template: '<div><ihris-outcome :issues="issues"></ihris-outcome></div>'
+            template: '<div><gofr-outcome :issues="issues"></gofr-outcome></div>'
           } )
         } else {
-          Vue.component('ihris-template', {
-            name: 'ihris-template',
+          Vue.component('gofr-template', {
+            name: 'gofr-template',
             data: function() {
               return {
                 fhirId: pageId,
@@ -54,11 +54,11 @@ export default {
               }
             },
             components: {
-              "ihris-resource": () => import("@/components/ihris/ihris-resource" ),
-              "ihris-codesystem": () => import("@/components/ihris/ihris-codesystem" ),
-              "ihris-section": () => import("@/components/ihris/ihris-section" ),
-              "ihris-secondary": () => import("@/components/ihris/ihris-secondary" ),
-              "ihris-array": () => import("@/components/ihris/ihris-array" ),
+              "gofr-resource": () => import("@/components/gofr/gofr-resource" ),
+              "gofr-codesystem": () => import("@/components/gofr/gofr-codesystem" ),
+              "gofr-section": () => import("@/components/gofr/gofr-section" ),
+              "gofr-secondary": () => import("@/components/gofr/gofr-secondary" ),
+              "gofr-array": () => import("@/components/gofr/gofr-array" ),
               "fhir-extension": () => import("@/components/fhir/fhir-extension" ),
               "fhir-reference": () => import("@/components/fhir/fhir-reference" ),
               "fhir-backbone-element": () => import("@/components/fhir/fhir-backbone-element" ),
@@ -94,7 +94,7 @@ export default {
         this.$forceUpdate()
       }).catch(err => {
         console.log(err)
-        Vue.component('ihris-template', {template: '<div><h1>Error</h1><p>An error occurred trying to load this page</p>.</div>'})
+        Vue.component('gofr-template', {template: '<div><h1>Error</h1><p>An error occurred trying to load this page</p>.</div>'})
         this.$forceUpdate()
       })
     }
@@ -102,7 +102,7 @@ export default {
   components: {
   },
   beforeCreate: function() {
-    Vue.component('ihris-template', { template: '<div>Loading...</div>' } )
+    Vue.component('gofr-template', { template: '<div>Loading...</div>' } )
   }
 }
 

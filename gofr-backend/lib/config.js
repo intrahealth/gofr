@@ -1,7 +1,7 @@
 const nconf = require('nconf');
 
 nconf.argv()
-  .env({ separator: '__' })
+  .env({ separator: ':' })
   .file(`${__dirname}/../config/default.json`);
 
 nconf.set('DB_HOST', process.env.DB_HOST || 'localhost');

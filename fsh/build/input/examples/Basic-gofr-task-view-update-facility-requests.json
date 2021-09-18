@@ -39,7 +39,7 @@
     {
       "url": "compositeTask",
       "valueReference": {
-        "reference": "Basic/gofr-task-search-records"
+        "reference": "Basic/gofr-task-access-facility-registry-mod"
       }
     }
   ]

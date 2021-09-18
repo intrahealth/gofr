@@ -26,6 +26,24 @@
     {
       "url": "task",
       "valueReference": {
+        "reference": "Basic/gofr-task-read-structure-definition"
+      }
+    },
+    {
+      "url": "task",
+      "valueReference": {
+        "reference": "Basic/gofr-task-read-code-system"
+      }
+    },
+    {
+      "url": "task",
+      "valueReference": {
+        "reference": "Basic/gofr-task-read-value-set"
+      }
+    },
+    {
+      "url": "task",
+      "valueReference": {
         "reference": "Basic/gofr-task-read-document-reference"
       }
     }

@@ -21,6 +21,7 @@
     "vue-cookies": "^1.7.4",
     "vue-i18n": "^8.24.3",
     "vue-router": "^3.2.0",
+    "vue-session": "^1.0.0",
     "vue-uuid": "^2.0.2",
     "vuelidate": "^0.7.6",
     "vuetify": "^2.4.0",

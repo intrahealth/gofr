@@ -1,7 +1,7 @@
 <template>
-  <ihris-template :key="$route.path">
+  <gofr-template :key="$route.path">
     Loading...
-  </ihris-template>
+  </gofr-template>
 </template>
 
 <script>
@@ -29,21 +29,21 @@ export default {
       axios.get( "/config/page/"+this.page+"/search" ).then(response => {
         let data = response.data
         if ( data.resourceType === "OperationOutcome" ) {
-          Vue.component( 'ihris-template', {
-            name: 'ihris-template',
+          Vue.component( 'gofr-template', {
+            name: 'gofr-template',
             data: function() {
               return {
                 issues: data.issue
               }
             },
             components: {
-              "ihris-outcome": () => import("@/components/ihris/ihris-outcome" )
+              "gofr-outcome": () => import("@/components/gofr/gofr-outcome" )
             },
-            template: '<div><ihris-outcome :issues="issues"></ihris-outcome></div>'
+            template: '<div><gofr-outcome :issues="issues"></gofr-outcome></div>'
           } )
         } else {
-          Vue.component( 'ihris-template', {
-            name: 'ihris-template',
+          Vue.component( 'gofr-template', {
+            name: 'gofr-template',
             data: function() {
               return {
                 fields: data.data.fields,
@@ -54,9 +54,9 @@ export default {
               }
             },
             components: {
-              "ihris-search": () => import("@/components/ihris/ihris-search" ),
-              "ihris-search-code": () => import("@/components/ihris/ihris-search-code" ),
-              "ihris-search-term": () => import("@/components/ihris/ihris-search-term" )
+              "gofr-search": () => import("@/components/gofr/gofr-search" ),
+              "gofr-search-code": () => import("@/components/gofr/gofr-search-code" ),
+              "gofr-search-term": () => import("@/components/gofr/gofr-search-term" )
             },
             template: data.template,
             methods: {
@@ -69,7 +69,7 @@ export default {
         this.$forceUpdate()
       }).catch(err => {
         console.log(err)
-        Vue.component( 'ihris-template', {template: '<div><h1>Error</h1><p>An error occurred trying to load this page</p>.</div>'})
+        Vue.component( 'gofr-template', {template: '<div><h1>Error</h1><p>An error occurred trying to load this page</p>.</div>'})
         this.$forceUpdate()
       })
     }
@@ -79,7 +79,7 @@ export default {
     requestAction = ""
   },
   beforeCreate: function() {
-    Vue.component('ihris-template', { template: '<div>Loading...</div>' } )
+    Vue.component('gofr-template', { template: '<div>Loading...</div>' } )
   }
 }
 

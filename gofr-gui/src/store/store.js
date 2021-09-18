@@ -21,6 +21,7 @@ export const store = new Vuex.Store({
     auth: {
       username: '',
       userID: '',
+      userObj: {},
       role: ''
     },
     levelMapping: {
@@ -180,8 +181,19 @@ axios.interceptors.response.use((response) => {
   return response
 }, function (error) {
   let status = error.response.status
-  if (status === 401 || status === 403) {
+  if (status === 403) {
+    router.push({
+      name: 'GofrOutcome',
+      params: {
+        issues: [{
+          diagnostics: 'Access Denied'
+        }]
+      }
+    })
+    store.state.initializingApp = false
+  } else if(status === 401) {
     router.push('logout')
+    store.state.initializingApp = false
   }
   return Promise.reject(error)
 })

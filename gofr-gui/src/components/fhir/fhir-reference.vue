@@ -1,5 +1,5 @@
 <template>
-  <ihris-element :edit="edit" :loading="loading">
+  <gofr-element :edit="edit" :loading="loading">
     <template #form>
       <v-menu
         v-if="displayType == 'tree'"
@@ -68,12 +68,12 @@
     <template #value>
       {{displayValue}}
     </template>
-  </ihris-element>
+  </gofr-element>
 </template>
 
 <script>
 import axios from 'axios'
-import IhrisElement from "../ihris/ihris-element.vue"
+import GofrElement from "../gofr/gofr-element.vue"
 
 const querystring = require('querystring')
 const fhirurl = "http://hl7.org/fhir/StructureDefinition/"
@@ -82,7 +82,7 @@ export default {
   props: ["field","label","sliceName","targetProfile","targetResource","min","max","base-min","base-max",
     "slotProps","path","sub-fields","edit","readOnlyIfSet","constraints", "displayType", "initialValue", "overrideValue"],
   components: {
-    IhrisElement
+    GofrElement
   },
   data: function() {
     return {

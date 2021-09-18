@@ -1,5 +1,5 @@
 <template>
-  <ihris-element :edit="edit" :loading="loading">
+  <gofr-element :edit="edit" :loading="loading">
     <template #form>
       <v-select
         :loading="loading"
@@ -25,11 +25,11 @@
     <template #value>
       {{valueDisplay || value.display || ""}}
     </template>
-  </ihris-element>
+  </gofr-element>
 </template>
 
 <script>
-import IhrisElement from "../ihris/ihris-element.vue"
+import GofrElement from "../gofr/gofr-element.vue"
 
 /*
 const itemSort = (a,b) => {
@@ -41,7 +41,7 @@ export default {
   props: ["field","label","sliceName","targetprofile","min","max","base-min","base-max","slotProps","path","binding","edit","readOnlyIfSet",
     "constraints"],
   components: {
-    IhrisElement
+    GofrElement
   },
   data: function() {
     return {

@@ -60,10 +60,10 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
   const allowed = req.user.hasPermissionByName('read', 'Questionnaire', req.params.questionnaire);
   // Limited access to these don't make sense so not allowing it for now
   if (allowed !== true) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   fhirAxios.read('Questionnaire', req.params.questionnaire, '', 'DEFAULT').then(async (resource) => {
-    let vueOutput = `<ihris-questionnaire :edit=\"isEdit\" :view-page="viewPage" :constraints="constraints" url="${resource.url}" id="${resource.id}" title="${resource.title
+    let vueOutput = `<gofr-questionnaire :edit=\"isEdit\" :view-page="viewPage" :constraints="constraints" url="${resource.url}" id="${resource.id}" title="${resource.title
     }" description="${resource.description}" purpose="${resource.purpose
     }"__SECTIONMENU__>` + '\n';
 
@@ -117,13 +117,13 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
           displayType = linkDetails[1];
         }
         if (item.repeats && !item.readOnly) {
-          vueOutput += `<ihris-array :edit="isEdit" path="${item.linkId}" label="${
+          vueOutput += `<gofr-array :edit="isEdit" path="${item.linkId}" label="${
             item.text}" max="*" min="${item.required ? '1' : '0'}"><template #default="slotProps">\n`;
         }
         const itemType = fhirDefinition.camelToKebab(item.type);
         if (itemType === 'group') {
           const label = item.text.split('|', 2);
-          vueOutput += `<ihris-questionnaire-group :edit=\"isEdit\" path="${item.linkId}" label="${label[0]}"`;
+          vueOutput += `<gofr-questionnaire-group :edit=\"isEdit\" path="${item.linkId}" label="${label[0]}"`;
           if (label.length === 2) {
             vueOutput += ` description="${label[1]}"`;
           }
@@ -135,9 +135,9 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
           }
           vueOutput += '>\n\n';
           vueOutput += await processQuestionnaireItems(item.item);
-          vueOutput += '</ihris-questionnaire-group>\n';
+          vueOutput += '</gofr-questionnaire-group>\n';
         } else if (item.readOnly) {
-          vueOutput += `<ihris-hidden path="${item.linkId}" label="${
+          vueOutput += `<gofr-hidden path="${item.linkId}" label="${
             item.text}"`;
           if (item.answerOption[0].initialSelected) {
             const answerTypes = Object.keys(item.answerOption[0]);
@@ -151,7 +151,7 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
               }
             }
           }
-          vueOutput += '></ihris-hidden>\n';
+          vueOutput += '></gofr-hidden>\n';
         } else {
           vueOutput += `<fhir-${itemType} :edit="isEdit" path="${item.linkId}"`;
 
@@ -271,7 +271,7 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
           vueOutput += `></fhir-${itemType}>\n`;
         }
         if (item.repeats && !item.readOnly) {
-          vueOutput += '</template></ihris-array>\n';
+          vueOutput += '</template></gofr-array>\n';
         }
       }
       return vueOutput;
@@ -285,7 +285,7 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
         const sectionId = md5sum.digest('hex');
 
         const label = item.text.split('|', 2);
-        vueOutput += `<ihris-questionnaire-section id="${sectionId}" path="${item.linkId}" label="${label[0]}"`;
+        vueOutput += `<gofr-questionnaire-section id="${sectionId}" path="${item.linkId}" label="${label[0]}"`;
         if (label.length === 2) {
           vueOutput += ` description="${label[1]}"`;
         }
@@ -298,7 +298,7 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
         sectionMenu.push({ title: label[0], desc: label[1] || '', id: sectionId });
         vueOutput += '>\n';
         vueOutput += await processQuestionnaireItems(item.item);
-        vueOutput += '</ihris-questionnaire-section>\n';
+        vueOutput += '</gofr-questionnaire-section>\n';
       } else {
         logger.warn('Invalid entry for questionnaire.  All top level items must be type group.');
       }
@@ -310,7 +310,7 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
       vueOutput = vueOutput.replace('__SECTIONMENU__', " :section-menu='sectionMenu'");
       templateData.sectionMenu = sectionMenu;
     }
-    vueOutput += '</ihris-questionnaire>\n';
+    vueOutput += '</gofr-questionnaire>\n';
 
     logger.debug(vueOutput);
     return res.status(200).json({ template: vueOutput, data: templateData });
@@ -329,7 +329,7 @@ router.get('/page/:page/:type?', (req, res) => {
   const allowed = req.user.hasPermissionByName('read', 'Basic', page);
   // Limited access to these don't make sense so not allowing it for now
   if (allowed !== true) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   fhirAxios.read('Basic', page, '', 'DEFAULT').then(async (resource) => {
     const pageDisplay = resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/ihris-page-display');
@@ -543,9 +543,9 @@ router.get('/page/:page/:type?', (req, res) => {
         }
         const sectionKeys = Object.keys(sections);
 
-        let resourceElement = 'ihris-resource';
+        let resourceElement = 'gofr-resource';
         if (resource.resourceType === 'CodeSystem') {
-          resourceElement = 'ihris-codesystem';
+          resourceElement = 'gofr-codesystem';
         }
 
         vueOutput = `<${resourceElement} :fhirId="fhirId" :edit="isEdit" v-on:set-edit="setEdit($event)" profile="${resource.url}" :key="$route.params.page+($route.params.id || '')" page="${req.params.page}" field="${fhir}" title="${sections[fhir].title}" :constraints="constraints"`;
@@ -603,7 +603,7 @@ router.get('/page/:page/:type?', (req, res) => {
             let isArray = false;
             if (fields[field].max !== '1') {
               isArray = true;
-              output += `<ihris-array :edit="isEdit" fieldType="${eleName}" :slotProps="slotProps"`;
+              output += `<gofr-array :edit="isEdit" fieldType="${eleName}" :slotProps="slotProps"`;
               const arr_attrs = ['field', 'label', 'min', 'max', 'id', 'path', 'profile', 'targetProfile', 'targetResource', 'sliceName'];
               for (const attr of arr_attrs) {
                 if (fields[field].hasOwnProperty(attr)) {
@@ -723,13 +723,13 @@ router.get('/page/:page/:type?', (req, res) => {
 
             output += `</fhir-${eleName}>\n`;
             if (isArray) {
-              output += '</template>\n</ihris-array>\n';
+              output += '</template>\n</gofr-array>\n';
             }
           }
           return output;
         };
         for (const name of sectionKeys) {
-          vueOutput += `<ihris-section :slotProps="slotProps" :edit="isEdit" name="${name}" title="${sections[name].title}" description="${sections[name].description}" :secondary="${!!sections[name].resource}">\n<template #default="slotProps">\n`;
+          vueOutput += `<gofr-section :slotProps="slotProps" :edit="isEdit" name="${name}" title="${sections[name].title}" description="${sections[name].description}" :secondary="${!!sections[name].resource}">\n<template #default="slotProps">\n`;
           if (sections[name].resource) {
             const secondary = await getDefinition(sections[name].resource);
 
@@ -745,7 +745,7 @@ router.get('/page/:page/:type?', (req, res) => {
               const sectionKey = getUKey();
               allColumns[sectionKey] = sections[name].columns;
               allActions[sectionKey] = sections[name].actions;
-              vueOutput += `<ihris-secondary :edit="isEdit" :link-id="fhirId" profile="${secondary.url
+              vueOutput += `<gofr-secondary :edit="isEdit" :link-id="fhirId" profile="${secondary.url
               }" field="${second_fhir
               }" title="${sections[name].title
               }" link-field="${sections[name].linkfield
@@ -754,12 +754,12 @@ router.get('/page/:page/:type?', (req, res) => {
               }' :actions='actions.${sectionKey
               }'><template #default="slotProps">` + '\n';
               // vueOutput += await processFields( secondaryStructure[second_fhir].fields, second_fhir, secondaryOrder )
-              vueOutput += '</template></ihris-secondary>';
+              vueOutput += '</template></gofr-secondary>';
             }
           } else {
             vueOutput += await processFields(sections[name].elements, fhir, sections[name].order);
           }
-          vueOutput += '</template></ihris-section>\n';
+          vueOutput += '</template></gofr-section>\n';
         }
 
         vueOutput += `</template></${resourceElement}>` + '\n';
@@ -807,7 +807,7 @@ router.get('/page/:page/:type?', (req, res) => {
       logger.silly(filters);
       logger.silly(search);
 
-      let searchElement = 'ihris-search';
+      let searchElement = 'gofr-search';
       if (resource.resourceType === 'CodeSystem') {
         searchElement += '-code';
       }
@@ -822,7 +822,7 @@ router.get('/page/:page/:type?', (req, res) => {
       }
       searchTemplate += '>' + '\n';
       for (const filter of filters) {
-        searchTemplate += '<ihris-search-term v-on:termChange="searchData"';
+        searchTemplate += '<gofr-search-term v-on:termChange="searchData"';
         if (filter[1]) {
           searchTemplate += ` label="${filter[0]}" expression="${filter[1]}"`;
         } else {
@@ -831,7 +831,7 @@ router.get('/page/:page/:type?', (req, res) => {
         if (filter[2]) {
           searchTemplate += ` binding="${filter[2]}"`;
         }
-        searchTemplate += '></ihris-search-term>\n';
+        searchTemplate += '></gofr-search-term>\n';
       }
       searchTemplate += `</${searchElement}>\n`;
       logger.debug(searchTemplate);
@@ -969,10 +969,26 @@ router.get('/getUserConfig/:userID', (req, res) => {
     const usrConfig = response.parameter.find(param => param.name === 'config');
     return res.status(200).json(JSON.parse(usrConfig.valueString));
   }).catch((err) => {
-    logger.error(err);
-    res.status(500).json({
-      error: 'internal error occured while getting configurations',
-    });
+    if (err.response && err.response.status === 404) {
+      const configRes = {
+        resourceType: 'Parameters',
+        id: `gofr-user-config-${req.params.userID}`,
+        parameter: [{
+          name: 'config',
+          valueString: '{}',
+        }],
+      };
+      fhirAxios.update(configRes, 'DEFAULT').then(() => {
+        logger.info('User Config Saved');
+        return res.status(200).json({});
+      }).catch((err) => {
+        logger.error(err);
+      });
+    } else {
+      res.status(500).json({
+        error: 'internal error occured while getting configurations',
+      });
+    }
   });
 });
 

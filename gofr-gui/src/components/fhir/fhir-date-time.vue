@@ -1,12 +1,12 @@
 <template>
-  <ihris-element :edit="edit" :loading="false">
+  <gofr-element :edit="edit" :loading="false">
     <template #form>
-     <v-menu 
-        ref="menu" 
-        v-model="menu" 
-        :close-on-content-click="false" 
-        transition="scale-transition" 
-        offset-y 
+     <v-menu
+        ref="menu"
+        v-model="menu"
+        :close-on-content-click="false"
+        transition="scale-transition"
+        offset-y
         min-width="290px"
       >
         <template v-slot:activator="{ on }">
@@ -41,15 +41,15 @@
               </v-card-title>
               <v-card-text v-if="pickerType==='year'">
                 <br />
-                <v-text-field 
-                  v-model="etValue" 
+                <v-text-field
+                  v-model="etValue"
                   clearable
-                  type="number" 
-                  :disabled="disabled" 
-                  :label="label" 
-                  :min="minYear" 
-                  :max="maxYear" 
-                  :rules="rules" 
+                  type="number"
+                  :disabled="disabled"
+                  :label="label"
+                  :min="minYear"
+                  :max="maxYear"
+                  :rules="rules"
                   :error-messages="errors"
                   @change="errors = []"
                   dense
@@ -84,15 +84,15 @@
               </v-card-title>
               <v-card-text v-if="pickerType==='year'">
                 <br />
-                <v-text-field 
-                  v-model="value" 
+                <v-text-field
+                  v-model="value"
                   clearable
-                  type="number" 
-                  :disabled="disabled" 
-                  :label="label" 
-                  :min="minYear" 
-                  :max="maxYear" 
-                  :rules="rules" 
+                  type="number"
+                  :disabled="disabled"
+                  :label="label"
+                  :min="minYear"
+                  :max="maxYear"
+                  :rules="rules"
                   :error-messages="errors"
                   @change="errors = []"
                   dense
@@ -117,14 +117,14 @@
         <v-card min-width="300px" v-else-if="pickerType==='year'" >
           <v-card-text>
             <br />
-            <v-text-field 
-              v-model="value" 
-              type="number" 
-              :disabled="disabled" 
-              :label="label" 
-              :min="minYear" 
-              :max="maxYear" 
-              :rules="rules" 
+            <v-text-field
+              v-model="value"
+              type="number"
+              :disabled="disabled"
+              :label="label"
+              :min="minYear"
+              :max="maxYear"
+              :rules="rules"
               :error-messages="errors"
               @change="errors = []"
               dense
@@ -153,21 +153,21 @@
     <template #value>
       {{displayValue}}
     </template>
-  </ihris-element>
+  </gofr-element>
 </template>
 
 <script>
-import IhrisElement from "../ihris/ihris-element.vue"
+import GofrElement from "../gofr/gofr-element.vue"
 import VEthiopianDatePicker from "vuetify-ethiopian-calendar"
 import ethiopic from "ethiopic-calendar"
 
 export default {
   name: "fhir-date-time",
-  props: ["field","min","max","base-min","base-max", "label", "slotProps", "path", "edit","sliceName", 
+  props: ["field","min","max","base-min","base-max", "label", "slotProps", "path", "edit","sliceName",
     "minValueDateTime", "maxValueDateTime", "minValueQuantity", "maxValueQuantity", "displayType","readOnlyIfSet", "calendar",
     "constraints"],
   components: {
-    IhrisElement,
+    GofrElement,
     VEthiopianDatePicker
   },
   data: function() {
@@ -195,7 +195,7 @@ export default {
         if ( maxDate ) {
           return maxDate
         }
-      } 
+      }
       if ( this.maxValueDate ) {
         return this.maxValueDate
       }
@@ -243,7 +243,7 @@ export default {
     },
     displayValue: function() {
       if ( this.isEthiopian ) {
-        return this.value && "Ethiopian: "+this.etValue + " Gregorian: " + this.value 
+        return this.value && "Ethiopian: "+this.etValue + " Gregorian: " + this.value
       } else {
         return this.value
       }
@@ -337,7 +337,7 @@ export default {
       const [ year, month, day ] = val.split('-').map(Number)
       if ( this.pickerType === 'year' ) {
         let etDate = ethiopic.ge( year, month || 6, day || 1) // so it will be the same year in both directions
-        return etDate.year.toString().padStart(4,'0') 
+        return etDate.year.toString().padStart(4,'0')
       } else {
         let etDate = ethiopic.ge( year, month || 1, day || 1)
         return etDate.year.toString().padStart(4,'0') + "-" + etDate.month.toString().padStart(2,'0') + "-" + etDate.day.toString().padStart(2, '0')
@@ -348,7 +348,7 @@ export default {
       const [ etYear, etMonth, etDay ] = val.split('-').map(Number)
       if ( this.pickerType === 'year' ) {
         let gDate = ethiopic.eg( etYear, etMonth|| 6, etDay || 1) // so it will be the same year in both directions
-        return gDate.year.toString().padStart(4,'0') 
+        return gDate.year.toString().padStart(4,'0')
       } else {
         let gDate = ethiopic.eg( etYear, etMonth || 1, etDay || 1)
         return gDate.year.toString().padStart(4,'0') + "-" + gDate.month.toString().padStart(2,'0') + "-" + gDate.day.toString().padStart(2, '0')

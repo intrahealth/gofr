@@ -23,8 +23,8 @@ Description:    "GOFR profile of the Person resource to manage user access."
 * active ^label = "Active"
 * extension contains
       organization 1..1 MS and
-      role 1..1 MS and
-      GofrPassword named password 1..1 MS
+      GofrPassword named password 1..1 MS and
+      GofrAssignRole named role 1..1 MS
 * extension[password] MS
 * extension[password] ^label = "Password"
 * extension[role].value[x] only Reference
@@ -63,4 +63,4 @@ Usage:          #example
 * extension[organization].valueReference = Reference(Organization/54cdcbe3-87e0-421f-b657-8313fce5f418)
 * extension[password].extension[salt].valueString = "be664906fbbe50918d8cadb5ebd22093"
 * extension[password].extension[hash].valueString = "727c00bcb3d604db9b807155240b97347951e5e89e4c69b823279287694501fcaa683d883f5854a05c2c50c5b31413c6bb4a5949876a42b5c5bd74247e5777fc"
-* extension[role].valueReference = Reference(Basic/gofr-role-admin)
+* extension[role][0].valueReference = Reference(Basic/gofr-role-admin)

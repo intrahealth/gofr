@@ -8,10 +8,12 @@ import vuelidate from 'vuelidate'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import VueCookies from 'vue-cookies'
+import VueSession from 'vue-session'
 import * as Keycloak from 'keycloak-js';
 import 'whatwg-fetch'
 import fhirpath from "fhirpath"
 import fhirutils from "./plugins/fhirutils"
+import { tasksVerification } from '@/modules/tasksVerification'
 import guiConfig from '../config/config.json'
 
 Object.defineProperty(Vue.prototype, '$fhirpath', {
@@ -20,9 +22,29 @@ Object.defineProperty(Vue.prototype, '$fhirpath', {
 Object.defineProperty(Vue.prototype, '$fhirutils', {
   value: fhirutils
 })
+
+const tasksVerificationPlugin = {
+  install(Vue) {
+    Vue.$tasksVerification = tasksVerification
+  }
+}
+
+tasksVerificationPlugin.install = Vue => {
+  Vue.$tasksVerification = tasksVerification
+  Object.defineProperties(Vue.prototype, {
+    $tasksVerification: {
+      get() {
+        return tasksVerification
+      }
+    }
+  })
+}
+Vue.use(tasksVerificationPlugin)
 axios.defaults.withCredentials = true
+Vue.use(VueCookies)
 Vue.use(vuelidate)
 Vue.use(VueAxios, axios)
+Vue.use(VueSession)
 Vue.config.productionTip = false
 
 export const eventBus = new Vue()
@@ -130,16 +152,24 @@ getDHIS2StoreConfig((storeConfig) => {
                 profile: ['http://gofr.org/fhir/StructureDefinition/gofr-person-user']
               },
               name: [{
+                use: 'official',
                 text: userinfo.name
               }],
               active: true
             }
+            if(userinfo.email) {
+              user.telecom = [{
+                system: 'email',
+                value: userinfo.email
+              }]
+            }
             axios({
               method: 'POST',
-              url: '/users/addUser',
+              url: '/auth',
               data: user
             }).then((response) => {
               VueCookies.set('userObj', JSON.stringify(response.data), 'infinity')
+              store.state.auth.userObj = response.data
               store.state.auth.userID = userinfo.sub
               store.state.auth.username = userinfo.preferred_username
               new Vue({
@@ -172,25 +202,40 @@ getDHIS2StoreConfig((storeConfig) => {
         alert("Keycloak access failed")
       });
     } else {
-      Vue.prototype.$keycloak = null
-      new Vue({
-        router,
-        store,
-        i18n,
-        vuetify,
-        data () {
-          return {
-            config: genConfig
-          }
-        },
-        render: function (createElement) {
-          return createElement(App, {
-            props: {
-              generalConfig: this.config
-            }
+      axios({
+        method: 'GET',
+        url: '/auth'
+      }).then((authResp) => {
+        if(authResp.data.userObj && authResp.data.userObj.resource) {
+          let telecom = authResp.data.userObj.resource.telecom.find((telecom) => {
+            return telecom.system === 'email'
           })
+          if(telecom) {
+            store.state.auth.username = telecom.value
+          }
         }
-      }).$mount('#app')
+        store.state.auth.userObj = authResp.data.userObj
+        store.state.auth.userID = authResp.data.userObj.resource.id
+        Vue.prototype.$keycloak = null
+        new Vue({
+          router,
+          store,
+          i18n,
+          vuetify,
+          data () {
+            return {
+              config: genConfig
+            }
+          },
+          render: function (createElement) {
+            return createElement(App, {
+              props: {
+                generalConfig: this.config
+              }
+            })
+          }
+        }).$mount('#app')
+      })
     }
   })
 })

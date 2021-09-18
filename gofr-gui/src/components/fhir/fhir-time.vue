@@ -1,5 +1,5 @@
 <template>
-  <ihris-element :edit="edit" :loading="false">
+  <gofr-element :edit="edit" :loading="false">
     <template #form>
      <v-menu
         ref="menu"
@@ -43,11 +43,11 @@
     <template #value>
       {{displayValue}}
     </template>
-  </ihris-element>
+  </gofr-element>
 </template>
 
 <script>
-import IhrisElement from "../ihris/ihris-element.vue"
+import GofrElement from "../gofr/gofr-element.vue"
 
 export default {
   name: "fhir-date-time",
@@ -55,7 +55,7 @@ export default {
     "minValueDateTime", "maxValueDateTime", "minValueQuantity", "maxValueQuantity", "displayType","readOnlyIfSet", "calendar",
     "constraints"],
   components: {
-    IhrisElement
+    GofrElement
   },
   data: function() {
     return {

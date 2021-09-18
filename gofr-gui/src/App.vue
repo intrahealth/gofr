@@ -174,7 +174,6 @@ import { generalMixin } from './mixins/generalMixin'
 import { dataSourcePairMixin } from './components/DataSourcesPair/dataSourcePairMixin'
 import { eventBus } from './main'
 import { uuid } from 'vue-uuid'
-import VueCookies from 'vue-cookies'
 import {
   tasksVerification
 } from './modules/tasksVerification'
@@ -305,10 +304,9 @@ export default {
       this.$store.state.loadingServers = true
       this.$store.state.dataSources = []
       let userID = this.$store.state.auth.userID
-      let role = this.$store.state.auth.role
       let orgId = this.$store.state.dhis.user.orgId
       axios
-        .get('/datasource/getSource/' + userID + '/' + role + '/' + orgId)
+        .get('/datasource/getSource/' + userID + '/' + orgId)
         .then(response => {
           this.$store.state.loadingServers = false
           this.$store.state.dataSources = response.data.sources
@@ -316,7 +314,7 @@ export default {
         })
         .catch(err => {
           this.$store.state.loadingServers = false
-          console.log(JSON.stringify(err))
+          console.log(err)
         })
     },
     getUserConfig () {
@@ -445,7 +443,6 @@ export default {
     'appMenu': Menu
   },
   created () {
-    this.$store.state.auth.role = 'Admin'
     this.$router.push({ name: 'AddDataSources' })
     this.$store.state.config.generalConfig = this.generalConfig
     if(this.$store.state.idp === 'keycloak') {
@@ -454,11 +451,7 @@ export default {
       this.$store.state.denyAccess = false
       this.getUserConfig()
     } else {
-      if (VueCookies.get('userID')) {
-        this.$store.state.auth.userID = VueCookies.get('userID')
-        this.$store.state.auth.username = VueCookies.get('username')
-        this.$store.state.auth.role = VueCookies.get('role')
-        this.$store.state.auth.tasks = JSON.parse(VueCookies.get('tasks'))
+      if (this.$store.state.auth.userObj.resource) {
         if (!this.$store.state.config.generalConfig.authDisabled) {
           axios.get('/isSessionActive/').then(() => {
             // will come here only if the session is active

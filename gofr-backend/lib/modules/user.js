@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const config = require('../config')
 const fhirAxios = require('./fhirAxios');
 const fhirFilter = require('./fhirFilter');
 const logger = require('../winston');
@@ -101,7 +102,7 @@ const user = {
         logger.error(`Invalid role passed to addRole: ${roleRef}`);
         rej();
       } else {
-        fhirAxios.read(role[0], role[1]).then((response) => {
+        fhirAxios.read(role[0], role[1], '', 'DEFAULT').then((response) => {
           roleResource = response;
           return res();
         }).catch((err) => {
@@ -111,6 +112,7 @@ const user = {
       }
     });
     findRoleResource.then(async () => {
+      await resolveTasks(roleResource);
       await user.loadTaskList();
       const tasks = roleResource.extension.filter(ext => ext.url === TASK_EXTENSION);
       for (const task of tasks) {
@@ -153,6 +155,39 @@ const user = {
       }
       resolve();
     }).catch(err => reject(err));
+
+    function resolveTasks(role) {
+      return new Promise((resolve, reject) => {
+        if (Array.isArray(role.extension)) {
+          const promises = [];
+          role.extension.forEach((extension, index) => {
+            promises.push(new Promise((resolve, reject) => {
+              if (extension.url !== 'task' || !extension.valueReference) {
+                return resolve();
+              }
+              const id = extension.valueReference.reference.split('/')[1];
+              fhirAxios.read('Basic', id, '', 'DEFAULT').then((task) => {
+                const taskExt = task.extension && task.extension.find(ext => ext.url === `${config.get('profileBaseUrl')}/StructureDefinition/task-attributes`);
+                if (taskExt) {
+                  role.extension[index] = {};
+                  role.extension[index].url = TASK_EXTENSION;
+                  role.extension[index].extension = taskExt.extension;
+                }
+                resolve();
+              }).catch((err) => {
+                logger.error(err);
+                return reject();
+              });
+            }));
+          });
+          Promise.all(promises).then(() => {
+            resolve();
+          }).catch(() => {
+            reject();
+          });
+        }
+      });
+    }
   }),
   addPermission: (permissions, permission, resource, id, constraint, field) => {
     if (!user.tasksLoaded) {
@@ -243,7 +278,7 @@ User.prototype.updatePermissions = async function (roleResources) {
     const roles = this.resource.extension.filter(ext => ext.url === ROLE_EXTENSION);
     for (const role of roles) {
       try {
-        const roleResource = roleResources.find(resource => resource.id === role.valueReference.reference.split('/')[1]);
+        const roleResource = roleResources && roleResources.find(resource => resource.id === role.valueReference.reference.split('/')[1]);
         await user.addRole({ permissions: this.permissions, roleRef: role.valueReference.reference, roleResource });
       } catch (err) {
         logger.error('Unable to load permissions', role, err);

@@ -1,13 +1,13 @@
 <template>
-  <ihris-element :edit="edit" :loading="loading">
+  <gofr-element :edit="edit" :loading="loading">
     <template #form>
-      <v-select 
-        :loading="loading" 
-        :label="'Currency ('+display+')'" 
-        v-model="valueCurrency" 
-        :items="items" 
-        outlined 
-        hide-details="auto" 
+      <v-select
+        :loading="loading"
+        :label="'Currency ('+display+')'"
+        v-model="valueCurrency"
+        :items="items"
+        outlined
+        hide-details="auto"
         :error-messages="err_messages"
         item-text="display"
         item-value="code"
@@ -27,11 +27,11 @@
     <template #value>
       {{valueDisplay}} {{value.value}}
     </template>
-  </ihris-element>
+  </gofr-element>
 </template>
 
 <script>
-import IhrisElement from "../ihris/ihris-element.vue"
+import GofrElement from "../gofr/gofr-element.vue"
 
 /*
 const itemSort = (a,b) => {
@@ -43,7 +43,7 @@ export default {
   props: ["field","label","sliceName","targetprofile","min","max","base-min","base-max","slotProps","path","binding","edit","readOnlyIfSet",
     "constraints"],
   components: {
-    IhrisElement
+    GofrElement
   },
   data: function() {
     return {
@@ -121,7 +121,7 @@ export default {
       }
       let binding = this.currencyValueSet
       this.$fhirutils.expand( binding ).then( items => {
-        this.items = items 
+        this.items = items
         this.loading = false
       } ).catch( err => {
         console.log(err)
@@ -141,7 +141,7 @@ export default {
       else return this.label
     },
     required: function() {
-      return (this.index || 0) < this.min 
+      return (this.index || 0) < this.min
     },
     rules: function() {
       if ( this.required ) {

@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import VueCookies from 'vue-cookies'
 import Login from '@/components/Login.vue'
 import Logout from '@/components/Logout.vue'
 import Signup from '@/components/Signup.vue'
@@ -17,8 +16,8 @@ import FacilityReconScores from '@/components/FacilityReconScores'
 import FacilityRecoStatus from '@/components/FacilityRecoStatus'
 import DHIS2Auth from '@/components/disabledAuth/DHIS2Auth'
 import ResourceView from '@/components/FacilityRegistry/ResourceView'
+import GofrOutcome from '@/components/gofr/gofr-outcome'
 import {store} from '../store/store.js'
-import {tasksVerification} from '../modules/tasksVerification'
 
 Vue.use(Router)
 
@@ -56,37 +55,53 @@ let router = new Router({
     name: 'Configure',
     component: Configure,
     beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.hasPermissionByName('special', 'custom', 'view-config-page')
+      let hasTask = Vue.$tasksVerification.hasPermissionByName('special', 'custom', 'view-config-page')
       if (hasTask) {
         return next()
       }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
       next({
-        path: from.path
+        name: 'GofrOutcome',
+        params: {
+          issues: [{
+            diagnostics: 'Access Denied'
+          }]
+        }
       })
     }
   }, {
     path: '/addUser',
     name: 'AddUser',
-    component: AddUser
+    component: AddUser,
+    beforeEnter: (to, from, next) => {
+      let hasTask = Vue.$tasksVerification.hasPermissionByName('special', 'custom', 'add-users')
+      if (hasTask) {
+        return next()
+      }
+      next({
+        name: 'GofrOutcome',
+        params: {
+          issues: [{
+            diagnostics: 'Access Denied'
+          }]
+        }
+      })
+    }
   }, {
     path: '/ViewDataSources',
     name: 'ViewDataSources',
     component: ViewDataSources,
     beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.hasPermissionByName('special', 'custom', 'view-data-source')
+      let hasTask = Vue.$tasksVerification.hasPermissionByName('special', 'custom', 'view-data-source')
       if (hasTask) {
         return next()
       }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
       next({
-        path: from.path
+        name: 'GofrOutcome',
+        params: {
+          issues: [{
+            diagnostics: 'Access Denied'
+          }]
+        }
       })
     }
   }, {
@@ -94,16 +109,17 @@ let router = new Router({
     name: 'AddDataSources',
     component: AddDataSources,
     beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.hasPermissionByName('special', 'custom', 'add-data-source')
+      let hasTask = Vue.$tasksVerification.hasPermissionByName('special', 'custom', 'add-data-source')
       if (hasTask) {
         return next()
       }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
       next({
-        path: from.path
+        name: 'GofrOutcome',
+        params: {
+          issues: [{
+            diagnostics: 'Access Denied'
+          }]
+        }
       })
     }
   }, {
@@ -111,16 +127,17 @@ let router = new Router({
     name: 'DataSourcesPair',
     component: DataSourcesPair,
     beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.hasPermissionByName('special', 'custom', 'view-source-pair')
+      let hasTask = Vue.$tasksVerification.hasPermissionByName('special', 'custom', 'view-source-pair')
       if (hasTask) {
         return next()
       }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
       next({
-        path: from.path
+        name: 'GofrOutcome',
+        params: {
+          issues: [{
+            diagnostics: 'Access Denied'
+          }]
+        }
       })
     }
   }, {
@@ -128,16 +145,17 @@ let router = new Router({
     name: 'FacilityReconView',
     component: FacilityReconView,
     beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')
+      let hasTask = Vue.$tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')
       if (hasTask) {
         return next()
       }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
       next({
-        path: from.path
+        name: 'GofrOutcome',
+        params: {
+          issues: [{
+            diagnostics: 'Access Denied'
+          }]
+        }
       })
     }
   }, {
@@ -145,16 +163,17 @@ let router = new Router({
     name: 'FacilityReconScores',
     component: FacilityReconScores,
     beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')
+      let hasTask = Vue.$tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')
       if (hasTask) {
         return next()
       }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
       next({
-        path: from.path
+        name: 'GofrOutcome',
+        params: {
+          issues: [{
+            diagnostics: 'Access Denied'
+          }]
+        }
       })
     }
   }, {
@@ -162,16 +181,17 @@ let router = new Router({
     name: 'FacilityRecoStatus',
     component: FacilityRecoStatus,
     beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.hasPermissionByName('special', 'custom', 'view-matching-status')
+      let hasTask = Vue.$tasksVerification.hasPermissionByName('special', 'custom', 'view-matching-status')
       if (hasTask) {
         return next()
       }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
       next({
-        path: from.path
+        name: 'GofrOutcome',
+        params: {
+          issues: [{
+            diagnostics: 'Access Denied'
+          }]
+        }
       })
     }
   }, {
@@ -179,16 +199,17 @@ let router = new Router({
     name: 'FacilityReconHome',
     component: FacilityReconScores,
     beforeEnter: (to, from, next) => {
-      let hasTask = tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')
+      let hasTask = Vue.$tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')
       if (hasTask) {
         return next()
       }
-      store.state.dialogError = true
-      store.state.errorTitle = 'Info'
-      store.state.errorColor = 'error'
-      store.state.errorDescription = `You dont have permission to access this page`
       next({
-        path: from.path
+        name: 'GofrOutcome',
+        params: {
+          issues: [{
+            diagnostics: 'Access Denied'
+          }]
+        }
       })
     }
   }, {
@@ -222,6 +243,11 @@ let router = new Router({
       page: route.params.page,
       requestAction: route.params.requestAction
     })
+  }, {
+    path: '/GofrOutcome',
+    name: 'GofrOutcome',
+    component: GofrOutcome,
+    props: true
   }]
 })
 
@@ -238,7 +264,7 @@ router.beforeEach((to, from, next) => {
       return next()
     }
   } else {
-    if (!VueCookies.get('userID') || VueCookies.get('userID') === 'null') {
+    if (!store.state.auth.userObj.resource) {
       if (to.path !== '/Login' && to.path !== '/Signup' && !store.state.config.generalConfig.authDisabled) {
         next({
           path: '/Login'

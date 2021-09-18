@@ -404,7 +404,7 @@ function deleteSourcePair({ pairID, userID }) {
 router.post('/addSource', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'add-data-source');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields, files) => {
@@ -566,7 +566,7 @@ router.post('/addSource', (req, res) => {
 router.post('/editSource', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'adddatasource');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields, files) => {
@@ -617,10 +617,10 @@ router.post('/editSource', (req, res) => {
   });
 });
 
-router.get('/getSource/:userID/:role/:orgId?', (req, res) => {
+router.get('/getSource/:userID/:orgId?', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'view-data-source');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   let resources = [];
   async.parallel({
@@ -630,7 +630,8 @@ router.get('/getSource/:userID/:role/:orgId?', (req, res) => {
         _revinclude: 'Basic:datasourcepartition',
         _include: ['Basic:partitionowner', 'Basic:partitionshareduser'],
       };
-      if (req.params.role !== 'Admin') {
+      //if admin
+      if (req.user.permissions['*'] && req.user.permissions['*']['*']) {
         searchParams.partitionowner = `Person/${req.params.userID}`;
       }
       fhirAxios.searchAll('Basic', searchParams, 'DEFAULT').then((data) => {
@@ -784,7 +785,7 @@ router.get('/getSource/:userID/:role/:orgId?', (req, res) => {
 router.get('/countLevels', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'viewdatasource');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   logger.info('Received a request to get total levels');
   const sourcesLimitOrgId = JSON.parse(req.query.sourcesLimitOrgId);
@@ -910,7 +911,7 @@ router.get('/countLevels', (req, res) => {
 router.post('/shareSource', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'share-data-source');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   logger.info('Received a request to share data source');
   const form = new formidable.IncomingForm();
@@ -982,7 +983,7 @@ router.post('/shareSource', (req, res) => {
 router.post('/createSourcePair', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'create-source-pair');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields, files) => {
@@ -1077,7 +1078,7 @@ router.post('/createSourcePair', (req, res) => {
 router.post('/shareSourcePair', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'share-source-pair');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   logger.info('Received a request to share data source pair');
   const form = new formidable.IncomingForm();
@@ -1144,7 +1145,7 @@ router.post('/shareSourcePair', (req, res) => {
 router.post('/activateSharedPair', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'activate-source-pair');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   logger.info('Received a request to activate shared data source pair');
   const form = new formidable.IncomingForm();
@@ -1199,7 +1200,7 @@ router.post('/activateSharedPair', (req, res) => {
 router.post('/resetDataSourcePair/:userID', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'deactivate-source-pair');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   logger.info('Received a request to reset data source pair');
   Promise.all([deactivatePair(req.params.userID), deactivateSharedPair(req.params.userID)]).then(() => {
@@ -1212,7 +1213,7 @@ router.post('/resetDataSourcePair/:userID', (req, res) => {
 router.get('/getSourcePair/:userID/:dhis2OrgId?', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'view-source-pair');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   getSourcePair({ userID: req.params.userID, dhis2OrgId: req.params.dhis2OrgId }).then((pairs) => {
     res.status(200).json(pairs);
@@ -1303,7 +1304,7 @@ router.get('/getPairForSource/:datasource', (req, res) => {
 router.delete('/deleteDataSource/:id', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'delete-data-source');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   const {
     id,
@@ -1358,7 +1359,7 @@ router.delete('/deleteDataSource/:id', (req, res) => {
 router.delete('/deleteSourcePair', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'delete-source-pair');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   const {
     pairId,

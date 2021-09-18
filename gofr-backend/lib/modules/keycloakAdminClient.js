@@ -18,9 +18,10 @@ const credentials = {
   username: config.get('keycloak:RESTClientUser'),
   password: config.get('keycloak:RESTClientPassword'),
   grantType: 'password',
-  clientId: config.get('keycloak:RESTClientId'),
+  clientId: config.get('keycloak:UIClientId'),
 };
 kcAdminClient.auth(credentials).catch((err) => {
+  logger.error('Failed to initialize keycloak');
   logger.error(err);
 });
 setInterval(() => {
@@ -36,7 +37,7 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
   }
   const fshDir = config.get('builtFSHFIles');
   const clients = await kcAdminClient.clients.find();
-  const client = clients.find(clt => clt.clientId === config.get('keycloak:backendClientId'));
+  const client = clients.find(clt => clt.clientId === config.get('keycloak:UIClientId'));
   if (!client) {
     return reject();
   }
@@ -183,7 +184,7 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
 const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
   const fshDir = config.get('builtFSHFIles');
   const clients = await kcAdminClient.clients.find();
-  const client = clients.find(clt => clt.clientId === config.get('keycloak:backendClientId'));
+  const client = clients.find(clt => clt.clientId === config.get('keycloak:UIClientId'));
   if (!client) {
     return reject();
   }
@@ -382,7 +383,7 @@ const populateRoleTasks = ({ token, user }) => new Promise(async (resolve, rejec
   }
   let roleBasicName;
   kcAdminClient.clients.find().then((clients) => {
-    const client = clients.find(clt => clt.clientId === config.get('keycloak:backendClientId'));
+    const client = clients.find(clt => clt.clientId === config.get('keycloak:UIClientId'));
     if (!client) {
       return reject();
     }
@@ -439,13 +440,16 @@ const populateRoleTasks = ({ token, user }) => new Promise(async (resolve, rejec
       });
     }
     Promise.all(promises).then(() => {
+      if (tasks.length === 0) {
+        return resolve({ user, role: {}, tasks });
+      }
       const extension = [{
-        url: 'http://gofr.org/fhir/StructureDefinition/gofr-basic-name',
+        url: `${config.get('profileBaseUrl')}/StructureDefinition/gofr-basic-name`,
         valueString: roleBasicName,
       }];
       tasks.forEach((task) => {
         const tasksExt = {
-          url: 'http://gofr.org/fhir/StructureDefinition/gofr-task',
+          url: TASK_EXTENSION,
           extension: [],
         };
         for (const taskInd in task) {
@@ -482,19 +486,19 @@ const populateRoleTasks = ({ token, user }) => new Promise(async (resolve, rejec
         resourceType: 'Basic',
         id: `ihris-role-${roleBasicName.split(' ').join('')}`,
         meta: {
-          profile: 'http://gofr.org/fhir/StructureDefinition/gofr-role',
+          profile: ROLE_EXTENSION,
         },
         extension,
       };
       if (!user.extension) {
         user.extension = [];
       }
-      const roleExt = user.extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/gofr-assign-role');
+      const roleExt = user.extension.findIndex(ext => ext.url === ASSIGN_ROLE_EXTENSION);
       if (roleExt !== -1) {
         user.extension.splice(roleExt, 1);
       }
       user.extension.push({
-        url: 'http://gofr.org/fhir/StructureDefinition/gofr-assign-role',
+        url: ASSIGN_ROLE_EXTENSION,
         valueReference: {
           reference: `Basic/${role.id}`,
         },
@@ -514,4 +518,4 @@ module.exports = {
 
 setTimeout(() => {
   loadTasksToKeycloak();
-}, 500);
+}, 1000);

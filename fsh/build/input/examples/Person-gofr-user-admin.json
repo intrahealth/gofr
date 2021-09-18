@@ -14,12 +14,6 @@
       }
     },
     {
-      "url": "role",
-      "valueReference": {
-        "reference": "Basic/gofr-role-admin"
-      }
-    },
-    {
       "url": "http://gofr.org/fhir/StructureDefinition/gofr-password",
       "extension": [
         {
@@ -31,6 +25,12 @@
           "valueString": "be664906fbbe50918d8cadb5ebd22093"
         }
       ]
+    },
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-assign-role",
+      "valueReference": {
+        "reference": "Basic/gofr-role-admin"
+      }
     }
   ],
   "name": [

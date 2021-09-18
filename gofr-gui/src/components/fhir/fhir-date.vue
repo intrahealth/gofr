@@ -1,5 +1,5 @@
 <template>
-  <ihris-element :edit="edit" :loading="false">
+  <gofr-element :edit="edit" :loading="false">
     <template #form>
       <v-menu
         ref="menu"
@@ -152,11 +152,11 @@
     <template #value>
       {{displayValue}}
     </template>
-  </ihris-element>
+  </gofr-element>
 </template>
 
 <script>
-import IhrisElement from "../ihris/ihris-element.vue"
+import GofrElement from "../gofr/gofr-element.vue"
 import VEthiopianDatePicker from "vuetify-ethiopian-calendar"
 import ethiopic from "ethiopic-calendar"
 
@@ -166,7 +166,7 @@ export default {
     "minValueDate", "maxValueDate", "minValueQuantity", "maxValueQuantity", "displayType","readOnlyIfSet", "calendar",
     "constraints" ],
   components: {
-    IhrisElement,
+    GofrElement,
     VEthiopianDatePicker
   },
   data: function() {

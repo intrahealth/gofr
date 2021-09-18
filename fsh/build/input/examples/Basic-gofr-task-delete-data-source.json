@@ -35,6 +35,12 @@
         }
       ],
       "url": "http://gofr.org/fhir/StructureDefinition/task-attributes"
+    },
+    {
+      "url": "compositeTask",
+      "valueReference": {
+        "reference": "Basic/gofr-task-view-data-source"
+      }
     }
   ]
 }

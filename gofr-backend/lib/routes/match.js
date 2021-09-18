@@ -37,7 +37,7 @@ const levelMaps = config.get('levelMaps');
 router.get('/reconcile', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'data-source-reconciliation');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   const {
     totalSource1Levels,
@@ -742,7 +742,7 @@ router.get('/unmatchedLocations', (req, res) => {
 router.post('/performMatch/:type', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'match-location');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   logger.info('Received data for matching');
   const {
@@ -823,7 +823,7 @@ router.post('/performMatch/:type', (req, res) => {
 router.post('/acceptFlag/:source1/:source2/:userID', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'accept-flagged-location');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   logger.info('Received data for marking flag as a match');
   if (!req.params.source1 || !req.params.source2) {
@@ -892,7 +892,7 @@ router.post('/acceptFlag/:source1/:source2/:userID', (req, res) => {
 router.post('/noMatch/:type/:source1/:source2/:source1Owner/:source2Owner/:userID', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'match-location');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   logger.info('Received data for matching');
   if (!req.params.source1 || !req.params.source2) {
@@ -969,7 +969,7 @@ router.post('/noMatch/:type/:source1/:source2/:source1Owner/:source2Owner/:userI
 router.post('/breakMatch/:source1/:source2/:source1Owner/:source2Owner/:userID', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'break-matched-location');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   if (!req.params.source1) {
     logger.error({
@@ -1028,7 +1028,7 @@ router.post('/breakMatch/:source1/:source2/:source1Owner/:source2Owner/:userID',
 router.post('/breakNoMatch/:type/:source1/:source2/:userID', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'break-matched-location');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   if (!req.params.source1 || !req.params.source2) {
     logger.error({
@@ -1090,7 +1090,7 @@ router.post('/breakNoMatch/:type/:source1/:source2/:userID', (req, res) => {
 router.get('/markRecoUnDone/:source1/:source2/:userID', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'open-matching');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   logger.info(`received a request to mark reconciliation for ${req.params.userID} as undone`);
   const {
@@ -1160,7 +1160,7 @@ router.get('/markRecoUnDone/:source1/:source2/:userID', (req, res) => {
 router.get('/markRecoDone/:source1/:source2/:userID', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'close-matching');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   logger.info(`received a request to mark reconciliation for ${req.params.source1}${req.params.source2} as done`);
   const {
@@ -1291,7 +1291,7 @@ router.get('/markRecoDone/:source1/:source2/:userID', (req, res) => {
 router.get('/recoStatus/:source1/:source2/:userID', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'view-matching-status');
   if (!allowed) {
-    return res.status(401).json(outcomes.DENIED);
+    return res.status(403).json(outcomes.DENIED);
   }
   const {
     source1,

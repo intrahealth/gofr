@@ -212,18 +212,6 @@
     {
       "url": "task",
       "valueReference": {
-        "reference": "Basic/gofr-task-read-practitioner-role-page-resource"
-      }
-    },
-    {
-      "url": "task",
-      "valueReference": {
-        "reference": "Basic/gofr-task-read-practitioner-page-resource"
-      }
-    },
-    {
-      "url": "task",
-      "valueReference": {
         "reference": "Basic/gofr-task-read-location-resource"
       }
     },

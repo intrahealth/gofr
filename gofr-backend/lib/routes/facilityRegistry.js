@@ -395,7 +395,7 @@ router.get('/getCodeSystem', (req, res) => {
     codeSystemURI = codeSyst.uri;
   } else {
     logger.warn(`Codesystem URI ${codeSystemType} was not found on the configuration`);
-    return res.status(401).send();
+    return res.status(403).send();
   }
   mcsd.getCodeSystem({
     codeSystemURI,

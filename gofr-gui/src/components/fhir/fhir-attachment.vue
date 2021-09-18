@@ -1,5 +1,5 @@
 <template>
-  <ihris-element :edit="edit" :loading="false">
+  <gofr-element :edit="edit" :loading="false">
     <template #form>
       <v-file-input
         :disabled="disabled"
@@ -60,19 +60,19 @@
       </v-menu>
       <a v-else :href="objURL">{{value.title}}</a>
     </template>
-  </ihris-element>
+  </gofr-element>
 </template>
 
 <script>
 import axios from 'axios'
-import IhrisElement from "../ihris/ihris-element.vue"
+import GofrElement from "../gofr/gofr-element.vue"
 
 export default {
   name: "fhir-attachment",
   props: ["field", "label", "min", "max", "id", "path", "slotProps", "sliceName","base-min","base-max","edit","readOnlyIfSet",
     "constraints"],
   components: {
-    IhrisElement
+    GofrElement
   },
   data: function() {
     return {

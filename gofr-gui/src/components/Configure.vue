@@ -199,7 +199,7 @@
         <v-divider></v-divider>
         <v-divider></v-divider>
         <v-divider></v-divider>
-        <v-card v-if='$store.state.auth.role == "Admin"'>
+        <v-card v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'change-admin-config')">
           <v-card-title>
             Admin Configurations
           </v-card-title>

@@ -14,20 +14,20 @@ const keycloakConfig = {
 
 function initKeycloak(store) {
   if (_keycloak) {
-    logger.warn('Trying to init Keycloak again!');
+    logger.warn('Trying to init Keycloak Connect again!');
     return _keycloak;
   }
 
-  logger.info('Initializing Keycloak...');
+  logger.info('Initializing Keycloak Connect...');
   _keycloak = new Keycloak({ store }, keycloakConfig);
   return _keycloak;
 }
 
 function getKeycloak() {
   if (!_keycloak) {
-    logger.error('Keycloak has not been initialized. Please called init first.');
+    logger.error('Keycloak Connect has not been initialized. Please called init first.');
   }
-  logger.info('Keycloak Initialized');
+  logger.info('Keycloak Connect Initialized');
   return _keycloak;
 }
 

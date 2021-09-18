@@ -1,3 +1,5 @@
+<img src="img/GOFR_RGB_high-res.png" width="400">
+
 # Introduction
 
 !!! important "Welcome!"

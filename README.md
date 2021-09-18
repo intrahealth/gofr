@@ -1,3 +1,5 @@
+<img src="docs/img/GOFR_RGB_high-res.png" width="500">
+
 # Global Open Facility Registry (GOFR)
 
 ![docs](https://github.com/intrahealth/gofr/workflows/docs/badge.svg)

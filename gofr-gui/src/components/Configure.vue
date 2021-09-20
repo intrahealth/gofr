@@ -472,10 +472,13 @@
                         v-slot:item="{ item }"
                       >
                         <tr>
-                          <td>{{item.name}}</td>
-                          <td>{{item.userID.userName}}</td>
+                          <td>{{item.display}}</td>
+                          <td>{{item.owner}}</td>
                           <td>
                             {{item.createdTime}}
+                          </td>
+                          <td>
+                            {{item.lastUpdate}}
                           </td>
                           <td>
                             <v-switch
@@ -672,6 +675,7 @@ export default {
         { text: 'Source Name', align: 'left', value: 'name' },
         { text: 'Owner', value: 'owner', sortable: false },
         { text: 'Created Time', value: 'createdTime' },
+        { text: 'Last Updated Time', value: 'createdTime' },
         { text: 'Enabled', value: 'enabled' }
       ],
       datasetsAutosyncState: {},
@@ -695,7 +699,7 @@ export default {
       let formData = new FormData()
       formData.append('id', dataset.id)
       formData.append('enabled', this.datasetsAutosyncState[dataset.id])
-      axios.post('/updateDatasetAutosync', formData)
+      axios.post('/datasource/updateDatasetAutosync', formData)
     },
     checkDatasetsAdditionWays (way) {
       if (this.$store.state.config.generalConfig.datasetsAdditionWays.length === 0) {
@@ -808,32 +812,16 @@ export default {
       this.saveConfiguration('generalConfig')
     },
     saveSMTP () {
-      let formData = new FormData()
-      this.$store.state.progressTitle = 'Saving SMTP'
-      this.$store.state.dynamicProgress = true
-      formData.append('host', this.smtp.host)
-      formData.append('port', this.smtp.port)
-      formData.append('username', this.smtp.username)
-      formData.append('password', this.smtp.password)
-      formData.append('secured', this.smtp.secured)
-      axios.post('/saveSMTP', formData, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }).then(() => {
-        this.$store.state.dynamicProgress = false
-        this.$store.state.dialogError = true
-        this.$store.state.errorColor = 'primary'
-        this.$store.state.errorTitle = 'Info'
-        this.$store.state.errorDescription = 'SMTP saved successfully'
-      }).catch((err) => {
-        console.log(err)
-        this.$store.state.dynamicProgress = false
-        this.$store.state.dialogError = true
-        this.$store.state.errorColor = 'error'
-        this.$store.state.errorTitle = 'Error'
-        this.$store.state.errorDescription = 'SMTP failed to be saved'
-      })
+      this.$store.state.config.generalConfig.smtp.host = this.smtp.host
+      this.$store.state.config.generalConfig.smtp.port = this.smtp.port
+      this.$store.state.config.generalConfig.smtp.username = this.smtp.username
+      this.$store.state.config.generalConfig.smtp.password = this.smtp.password
+      this.$store.state.config.generalConfig.smtp.secured = this.smtp.secured
+      this.saveConfiguration('generalConfig', 'smtp')
+      this.$store.state.dialogError = true
+      this.$store.state.errorColor = 'primary'
+      this.$store.state.errorTitle = 'Info'
+      this.$store.state.errorDescription = 'SMTP saved'
     },
     pullOrgUnits () {
       this.saveConfiguration('generalConfig', 'externalAuth')
@@ -900,21 +888,11 @@ export default {
     }
   },
   created () {
-    axios.get('/getSMTP').then((response) => {
-      if (response && response.data) {
-        this.smtp.host = response.data.host
-        this.smtp.port = response.data.port
-        this.smtp.username = response.data.username
-        this.smtp.password = response.data.password
-        this.smtp.secured = response.data.secured
-      }
-    }).catch((err) => {
-      console.log(err)
-      this.$store.state.dialogError = true
-      this.$store.state.errorColor = 'error'
-      this.$store.state.errorTitle = 'Error'
-      this.$store.state.errorDescription = 'An error occured while getting SMTP config'
-    })
+    this.smtp.host = this.$store.state.config.generalConfig.smtp.host
+    this.smtp.port = this.$store.state.config.generalConfig.smtp.port
+    this.smtp.username = this.$store.state.config.generalConfig.smtp.username
+    this.smtp.password = this.$store.state.config.generalConfig.smtp.password
+    this.smtp.secured = this.$store.state.config.generalConfig.smtp.secured
     if (
       this.$store.state.config.generalConfig.authDisabled &&
       this.$store.state.config.generalConfig.authMethod === 'dhis2'
@@ -937,7 +915,7 @@ export default {
 
     for (let sources of this.$store.state.dataSources) {
       if (sources.source === 'syncServer') {
-        if (sources.enableAutosync) {
+        if (sources.autoSync) {
           this.datasetsAutosyncState[sources.id] = true
         } else {
           this.datasetsAutosyncState[sources.id] = false

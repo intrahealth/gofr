@@ -9,8 +9,8 @@ const router = express.Router();
 const logger = require('../winston');
 const fhirAxios = require('../modules/fhirAxios');
 const mixin = require('../mixin');
-const fhir = require('../fhir')();
-const dhis = require('../dhis')();
+const fhir = require('../fhir');
+const dhis = require('../dhis');
 const mcsd = require('../mcsd')();
 const hapi = require('../hapi');
 const config = require('../config');
@@ -20,19 +20,18 @@ function getLastUpdateTime(sources) {
   return new Promise((resolve) => {
     async.eachOfSeries(sources, (server, key, nxtServer) => {
       if (server.sourceType === 'FHIR') {
-        fhir.getLastUpdate(server.name, (lastUpdate) => {
+        fhir.getLastUpdate(server.id, (lastUpdate) => {
           if (lastUpdate) {
             sources[key].lastUpdate = lastUpdate;
           }
           return nxtServer();
         });
       } else if (server.sourceType === 'DHIS2') {
-        const password = '';
         if (server.password) {
-          server = mixin.decrypt(extensions.password);
+          server.password = mixin.decrypt(server.password);
         }
-        const auth = `Basic ${Buffer.from(`${server.username}:${password}`).toString('base64')}`;
-        const dhis2URL = URL.parse(extensions.host);
+        const auth = `Basic ${Buffer.from(`${server.username}:${server.password}`).toString('base64')}`;
+        const dhis2URL = new URI(server.host);
         dhis.getLastUpdate(server.name, dhis2URL, auth, (lastUpdate) => {
           if (lastUpdate) {
             sources[key].lastUpdate = lastUpdate.split('.').shift();
@@ -574,11 +573,11 @@ router.post('/editSource', (req, res) => {
     fhirAxios.read('Basic', fields.id.split('/')[1], '', 'DEFAULT').then((source) => {
       let password;
       if (fields.password) {
-        password = this.encrypt(fields.password);
+        password = mixin.encrypt(fields.password);
       }
       for (const index in source.extension) {
-        if (source.extension[index].url === 'http://gofr.org/fhir/StructureDefinition/name' && fields.name) {
-          source.extension[index].valueString = fields.name;
+        if (source.extension[index].url === 'http://gofr.org/fhir/StructureDefinition/name' && fields.display) {
+          source.extension[index].valueString = fields.display;
         }
         if (source.extension[index].url === 'http://gofr.org/fhir/StructureDefinition/host' && fields.host) {
           source.extension[index].valueString = fields.host;
@@ -630,7 +629,7 @@ router.get('/getSource/:userID/:orgId?', (req, res) => {
         _revinclude: 'Basic:datasourcepartition',
         _include: ['Basic:partitionowner', 'Basic:partitionshareduser'],
       };
-      //if admin
+      // if admin
       if (req.user.permissions['*'] && req.user.permissions['*']['*']) {
         searchParams.partitionowner = `Person/${req.params.userID}`;
       }
@@ -755,6 +754,7 @@ router.get('/getSource/:userID/:orgId?', (req, res) => {
         const source = {
           id: entry.resource.id,
           source: sourceExt['http://gofr.org/fhir/StructureDefinition/source'],
+          autoSync: sourceExt['http://gofr.org/fhir/StructureDefinition/autoSync'],
           sourceType: sourceExt['http://gofr.org/fhir/StructureDefinition/sourceType'],
           name: partExt['http://gofr.org/fhir/StructureDefinition/name'],
           display: sourceExt['http://gofr.org/fhir/StructureDefinition/name'],
@@ -1034,6 +1034,9 @@ router.post('/createSourcePair', (req, res) => {
               }, {
                 url: 'http://gofr.org/fhir/StructureDefinition/status',
                 valueString: 'active',
+              }, {
+                url: 'http://gofr.org/fhir/StructureDefinition/recoStatus',
+                valueString: 'in-progress',
               }],
             };
             // get active pair and deactivate
@@ -1377,6 +1380,34 @@ router.delete('/deleteSourcePair', (req, res) => {
   }).catch((err) => {
     logger.error(err);
     return res.status(500).send();
+  });
+});
+
+router.post('/updateDatasetAutosync', (req, res) => {
+  logger.info('Received a request to edit a data source auto sync');
+  const form = new formidable.IncomingForm();
+  form.parse(req, (err, fields, files) => {
+    fields.enabled = JSON.parse(fields.enabled);
+    fhirAxios.read('Basic', fields.id, '', 'DEFAULT').then((dataSource) => {
+      let updated = false;
+      dataSource.extension.forEach((ext, index) => {
+        if (ext.url === 'http://gofr.org/fhir/StructureDefinition/autoSync') {
+          dataSource.extension[index].valueBoolean = fields.enabled;
+          updated = true;
+        }
+      });
+      if (!updated) {
+        dataSource.extension.push({
+          url: 'http://gofr.org/fhir/StructureDefinition/autoSync',
+          valueBoolean: fields.enabled,
+        });
+      }
+      fhirAxios.update(dataSource, 'DEFAULT').catch((err) => {
+        logger.error(err);
+      });
+    }).catch((err) => {
+      logger.error(err);
+    });
   });
 });
 

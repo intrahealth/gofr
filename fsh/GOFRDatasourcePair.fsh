@@ -9,7 +9,8 @@ Description:    "GOFR Profile of the Basic resource to manage data sources."
       name 1..1 MS and
       source1 1..1 MS and
       source2 1..1 MS and
-      status 1..1 MS
+      status 1..1 MS and
+      recoStatus 1..1 MS
 * extension[partition].value[x] only Reference(Basic)
 * extension[partition].valueReference 1..1 MS
 * extension[partition].valueReference ^label = "partition ID"
@@ -27,6 +28,9 @@ Description:    "GOFR Profile of the Basic resource to manage data sources."
 * extension[status].value[x] only string
 * extension[status].valueString 0..1 MS
 * extension[status].valueString ^label = "Status"
+* extension[recoStatus].value[x] only string
+* extension[recoStatus].valueString 0..1 MS
+* extension[recoStatus].valueString ^label = "Reconciliation Status"
 
 Instance:       gofr-search-pairpartition
 InstanceOf:     SearchParameter

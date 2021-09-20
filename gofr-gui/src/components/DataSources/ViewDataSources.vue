@@ -84,7 +84,7 @@
           <v-layout column>
             <v-flex xs1>
               <v-text-field
-                v-model="server.name"
+                v-model="server.display"
                 label="Name"
                 disabled
               ></v-text-field>
@@ -427,24 +427,24 @@
                       ></v-radio>
                     </td>
                   </v-radio-group>
-                  <td>{{item.resource.flatExtension.name}}</td>
-                  <td>{{item.resource.flatExtension.host}}</td>
-                  <td>{{item.resource.flatExtension.sourceType}}</td>
-                  <td>{{item.resource.flatExtension.username}}</td>
-                  <td v-if="item.resource.flatExtension.username">*****</td>
+                  <td>{{item.display}}</td>
+                  <td>{{item.host}}</td>
+                  <td>{{item.sourceType}}</td>
+                  <td>{{item.username}}</td>
+                  <td v-if="item.username">*****</td>
                   <td v-else></td>
                   <td>{{item.lastUpdate}}</td>
-                  <td>{{item.resource.flatExtension.userID.reference}}</td>
+                  <td>{{item.owner}}</td>
                   <td>
-                    {{item.resource.flatExtension.sharedUsers | mergeUsers}}
+                    {{item.sharedUsers | mergeUsers}}
                   </td>
                   <td>
-                    {{item.resource.flatExtension.createdTime}}
+                    {{item.createdTime}}
                   </td>
-                  <td v-if='item.resource.flatExtension.userID.reference === $store.state.auth.userID'>
+                  <td v-if='item.userID === $store.state.auth.userID'>
                     <v-btn
                       color="success"
-                      flat
+                      text
                       @click="share(item, 'showDialog')"
                     >
                       <v-icon>mdi-share-variant-outline</v-icon> Share
@@ -562,6 +562,10 @@
     <appRemoteSync
       v-if='server.name'
       :syncType="syncType"
+      :id="server.id"
+      :host="server.host"
+      :username="server.username"
+      :password="server.password"
       :serverName="server.name"
       :userID="$store.state.auth.userID"
       :sourceOwner="server.userID"
@@ -708,8 +712,8 @@ export default {
       formData.append('username', this.server.username)
       formData.append('password', this.server.password)
       formData.append('userID', this.server.userID)
-      formData.append('name', this.server.name)
-      formData.append('id', this.server.id)
+      formData.append('display', this.server.display)
+      formData.append('id', 'Basic/' + this.server.id)
       formData.append('clientId', clientId)
       this.editDialog = false
       axios.post('/datasource/editSource', formData, {

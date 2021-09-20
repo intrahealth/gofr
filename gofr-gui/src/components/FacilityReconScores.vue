@@ -1523,6 +1523,7 @@ export default {
       formData.append('recoLevel', this.$store.state.recoLevel)
       formData.append('totalLevels', this.$store.state.totalSource1Levels)
       formData.append('userID', this.$store.state.activePair.userID)
+      formData.append('pairId', this.$store.state.activePair.id)
       axios
         .post('/match/performMatch/' + this.matchType, formData, {
           headers: {
@@ -1594,6 +1595,7 @@ export default {
       this.$store.state.dynamicProgress = true
       let formData = new FormData()
       formData.append('source1Id', source1Id)
+      formData.append('pairId', this.$store.state.activePair.id)
       let userID = this.$store.state.activePair.userID
       axios
         .post('/match/acceptFlag/' + this.getSource1() + '/' + this.getSource2() + '/' + userID, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
@@ -1636,6 +1638,7 @@ export default {
       let userID = this.$store.state.activePair.userID
       let sourcesOwner = this.getDatasourceOwner()
       formData.append('source1Id', source1Id)
+      formData.append('pairId', this.$store.state.activePair.id)
       axios
         .post('/match/breakMatch/' + this.getSource1() + '/' + this.getSource2() + '/' + sourcesOwner.source1Owner + '/' + sourcesOwner.source2Owner + '/' + userID, formData, {
           headers: {
@@ -1682,6 +1685,7 @@ export default {
       let userID = this.$store.state.activePair.userID
       let sourcesOwner = this.getDatasourceOwner()
       formData.append('source1Id', source1Id)
+      formData.append('pairId', this.$store.state.activePair.id)
       axios
         .post('/match/breakMatch/' + this.getSource1() + '/' + this.getSource2() + '/' + sourcesOwner.source1Owner + '/' + sourcesOwner.source2Owner + '/' + userID, formData, {
           headers: {
@@ -1727,6 +1731,7 @@ export default {
       formData.append('source1Id', source1Id)
       formData.append('recoLevel', this.$store.state.recoLevel)
       formData.append('totalLevels', this.$store.state.totalSource1Levels)
+      formData.append('pairId', this.$store.state.activePair.id)
       let userID = this.$store.state.activePair.userID
       axios
         .post('/match/breakNoMatch/' + type + '/' + this.getSource1() + '/' + this.getSource2() + '/' + userID, formData, {
@@ -1785,6 +1790,7 @@ export default {
       formData.append('source1Id', this.selectedSource1Id)
       formData.append('recoLevel', this.$store.state.recoLevel)
       formData.append('totalLevels', this.$store.state.totalSource1Levels)
+      formData.append('pairId', this.$store.state.activePair.id)
 
       axios
         .post(`/match/noMatch/${type}/${this.getSource1()}/${this.getSource2()}/${source1Owner}/${source2Owner}/${userID}`, formData, {

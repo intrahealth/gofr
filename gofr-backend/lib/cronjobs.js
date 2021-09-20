@@ -1,33 +1,24 @@
 /* eslint-disable no-underscore-dangle */
-require('./connection');
 const cron = require('node-cron');
 const async = require('async');
 const uuid4 = require('uuid/v4');
-const mongo = require('./mongo')();
-const models = require('./models');
+const mixin = require('./mixin');
 const config = require('./config');
-const dhis = require('./dhis')();
-const fhir = require('./fhir')();
+const dhis = require('./dhis');
+const fhir = require('./fhir');
 const logger = require('./winston');
+const fhirAxios = require('./modules/fhirAxios');
 
 const topOrgName = config.get('mCSD:fakeOrgName');
 
 function getCrontime(callback) {
-  mongo.getGeneralConfig((err, resData) => {
-    if (err) {
-      logger.error(err);
-      return callback();
+  fhirAxios.read('Parameters', 'gofr-general-config', '', 'DEFAULT').then((response) => {
+    const resData = response.parameter.find(param => param.name === 'config');
+    const adminConfig = JSON.parse(resData.valueString);
+    if (adminConfig.datasetsAutosyncTime) {
+      return callback(adminConfig.datasetsAutosyncTime);
     }
-    const data = JSON.parse(JSON.stringify(resData));
-    if (data) {
-      if (data.config.generalConfig.datasetsAutosyncTime) {
-        callback(data.config.generalConfig.datasetsAutosyncTime);
-      } else {
-        return callback();
-      }
-    } else {
-      return callback();
-    }
+    callback();
   });
 }
 
@@ -37,29 +28,36 @@ getCrontime((time) => {
   }
   cron.schedule(time, () => {
     logger.info('Running cronjob for auto data source sync');
-    models.DataSourcesModel.find({}, (err, data) => {
-      const dataSources = JSON.parse(JSON.stringify(data));
-      async.eachSeries(dataSources, (dtSrc, nxtDtSrc) => {
-        if (dtSrc.enableAutosync && dtSrc.source === 'syncServer') {
-          logger.info(`Running auto sync for ${dtSrc.name}`);
-          const {
-            name,
-            host,
-            username,
-          } = dtSrc;
-          let {
-            password,
-          } = dtSrc;
-          password = mongo.decrypt(password);
-          const sourceOwner = dtSrc.userID;
+    fhirAxios.searchAll('Basic', { sourceType: 'DHIS2,FHIR', _include: 'Basic:datasourcepartition' }, 'DEFAULT').then((response) => {
+      const partsRes = response.entry && response.entry.filter(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-partition'));
+      const sourcesRes = response.entry && response.entry.filter(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-datasource'));
+      async.eachSeries(sourcesRes, (entry, nxtDtSrc) => {
+        const autoSync = entry.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/autoSync');
+        const source = entry.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/source');
+        if (autoSync && autoSync.valueBoolean && source && source.valueString === 'syncServer') {
+          const partitionRef = entry.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
+          if (!partitionRef) {
+            return nxtDtSrc();
+          }
+          const partRes = partsRes.find(part => part.resource.id === partitionRef.valueReference.reference.split('/')[1]);
+          const name = partRes.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/name');
+          const host = entry.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/host');
+          const sourceType = entry.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/sourceType');
+          let username = entry.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/username');
+          let password = entry.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/password');
+          if (password) {
+            password = mixin.decrypt(password.valueString);
+          }
+          if (username) {
+            username = username.valueString;
+          }
           const clientId = uuid4();
-          if (dtSrc.sourceType === 'DHIS2') {
+          if (sourceType.valueString === 'DHIS2') {
             dhis.sync(
-              host,
+              host.valueString,
               username,
               password,
-              name,
-              sourceOwner,
+              name.valueString,
               clientId,
               topOrgName,
               false,
@@ -67,20 +65,21 @@ getCrontime((time) => {
               false,
               false,
             );
-          } else if (dtSrc.sourceType === 'FHIR') {
+          } else if (sourceType.valueString === 'FHIR') {
             fhir.sync(
-              host,
+              entry.resource.id,
+              host.valueString,
               username,
               password,
               'update',
-              name,
-              sourceOwner,
+              name.valueString,
               clientId,
               topOrgName,
             );
           }
+        } else {
+          return nxtDtSrc();
         }
-        return nxtDtSrc();
       }, () => {
         logger.info('Done running cronjob for auto data source sync');
       });

@@ -723,8 +723,7 @@ export default {
     markRecoDone () {
       this.$store.state.progressTitle = 'Marking reconciliation as Done'
       this.$store.state.dynamicProgress = true
-      let userID = this.$store.state.activePair.userID
-      axios.get('/match/markRecoDone/' + this.source1 + '/' + this.source2 + '/' + userID).then((status) => {
+      axios.get('/match/markRecoDone/' + this.$store.state.activePair.id).then((status) => {
         this.$store.state.dynamicProgress = false
         if (status.data.status) {
           this.$store.state.recoStatus = status.data.status
@@ -739,10 +738,9 @@ export default {
       })
     },
     markRecoUnDone () {
-      let userID = this.$store.state.activePair.userID
       this.$store.state.progressTitle = 'Marking reconciliation as Un Done'
       this.$store.state.dynamicProgress = true
-      axios.get('/markRecoUnDone/' + this.source1 + '/' + this.source2 + '/' + userID).then((status) => {
+      axios.get('/markRecoUnDone/' + this.$store.state.activePair.id).then((status) => {
         this.$store.state.dynamicProgress = false
         if (status.data.status) {
           this.$store.state.recoStatus = status.data.status

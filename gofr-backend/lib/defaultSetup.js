@@ -4,10 +4,8 @@ const axios = require('axios');
 const URI = require('urijs');
 const async = require('async');
 const moment = require('moment');
-require('./connection');
 const config = require('./config');
 const logger = require('./winston');
-const models = require('./models');
 const mixin = require('./mixin');
 const fhirAxios = require('./modules/fhirAxios');
 

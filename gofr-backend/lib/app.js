@@ -22,7 +22,6 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const moment = require('moment');
 const async = require('async');
-const mongoose = require('mongoose');
 const config = require('./config');
 const user = require('./modules/user');
 const outcomes = require('../config/operationOutcomes');
@@ -37,13 +36,9 @@ let keycloak;
 if (config.get('app:idp') === 'keycloak') {
   keycloak = require('./modules/keycloakConnect').initKeycloak(store);
 }
-const models = require('./models');
-const schemas = require('./schemas');
+
 require('./cronjobs');
-require('./connection');
-const mail = require('./mail')();
 const mixin = require('./mixin');
-const mongo = require('./mongo')();
 const AuthRouter = require('./routes/auth');
 const UsersRouter = require('./routes/users');
 const DataSourcesRouter = require('./routes/dataSources');
@@ -54,14 +49,13 @@ const questionnaireRouter = require('./routes/questionnaire');
 const facilitiesRequests = require('./routes/facilitiesRequests');
 const fhirRouter = require('./routes/fhir');
 const mcsd = require('./mcsd')();
-const dhis = require('./dhis')();
-const fhir = require('./fhir')();
+const dhis = require('./dhis');
+const fhir = require('./fhir');
 const hapi = require('./hapi');
 const scores = require('./scores')();
 const defaultSetups = require('./defaultSetup.js');
 
 const levelMaps = config.get('levelMaps');
-const cryptr = new Cryptr(config.get('auth:secret'));
 
 const app = express();
 const server = require('http').createServer(app);
@@ -145,203 +139,18 @@ http.globalAgent.maxSockets = 32;
 
 const topOrgName = config.get('mCSD:fakeOrgName');
 
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', () => {
-  defaultSetups.initialize().then(() => {
-    const defaultDB = config.get('mCSD:registryDB');
-    mcsd.createFakeOrgID(defaultDB).then(() => {
+defaultSetups.initialize().then(() => {
+  const defaultDB = config.get('mCSD:registryDB');
+  mcsd.createFakeOrgID(defaultDB).then(() => {
 
-    }).catch((error) => {
-      logger.error(error);
-    });
+  }).catch((error) => {
+    logger.error(error);
   });
 });
 process.on('message', (message) => {
   if (message.content === 'clean') {
     mcsd.cleanCache(message.url, true);
   }
-});
-
-app.post('/updateRole', (req, res) => {
-  logger.info('Received a request to change account status');
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields) => {
-    let role;
-    try {
-      role = JSON.parse(fields.role);
-    } catch (error) {
-      return res.status(500).send('Invalid JSON of roles submitted');
-    }
-    logger.info('Received a request to update role');
-    models.RolesModel.findByIdAndUpdate(role.value, {
-      $set: {
-        tasks: [],
-      },
-    }, (err, data) => {
-      if (err) {
-        logger.error(err);
-        logger.error('An error occured while removing tasks from role');
-        return res.status(500).send();
-      }
-      models.RolesModel.findByIdAndUpdate(role.value, {
-        $push: {
-          tasks: {
-            $each: role.tasks,
-          },
-        },
-      }, (err, data) => {
-        if (err) {
-          logger.error(err);
-          res.status(500).send(err);
-        } else {
-          logger.info('Role updated successfully');
-          res.status(200).send();
-        }
-      });
-    });
-  });
-});
-
-app.post('/saveSMTP', (req, res) => {
-  logger.info('Received a request to save SMTP Config');
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields) => {
-    models.SMTPModel.findOne({}, (err, data) => {
-      if (data) {
-        let password;
-        if (fields.password !== data.password) {
-          password = cryptr.encrypt(fields.password); // bcrypt.hashSync(fields.password, 8);
-        } else {
-          password = data.password;
-        }
-        models.SMTPModel.findByIdAndUpdate(data.id, {
-          host: fields.host,
-          port: fields.port,
-          username: fields.username,
-          password,
-          secured: fields.secured,
-        }, (err, data) => {
-          if (err) {
-            logger.error(err);
-            logger.error('An error has occured while saving SMTP config');
-            return res.status(500).send();
-          }
-          res.status(200).send();
-        });
-      } else {
-        const smtp = new models.SMTPModel({
-          host: fields.host,
-          port: fields.port,
-          username: fields.username,
-          password: cryptr.encrypt(fields.password),
-          secured: fields.secured,
-        });
-        smtp.save((err, data) => {
-          if (err) {
-            logger.error(err);
-            logger.error('An error has occured while saving SMTP config');
-            return res.status(500).send();
-          }
-          res.status(200).send();
-        });
-      }
-    });
-  });
-});
-
-app.get('/getSMTP', (req, res) => {
-  logger.info('Received a request to get SMTP Config');
-  mongo.getSMTP((err, data) => {
-    if (err) {
-      logger.error('An error occured while getting SMTP config');
-      return res.status(500).send();
-    }
-    res.status(200).json(data);
-  });
-});
-
-app.post('/processUserAccoutRequest', (req, res) => {
-  logger.info('Received a request to change account status');
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields) => {
-    const {
-      role,
-      status,
-      id,
-    } = fields;
-    const updates = {};
-    if (role) {
-      updates.role = role;
-    }
-    updates.status = status;
-    models.UsersModel.findByIdAndUpdate(id, updates, (err, data) => {
-      if (err) {
-        logger.error('An error has occured while changing account status');
-        logger.error(err);
-        res.status(500).send();
-        return;
-      }
-      const subject = 'Account status on facility registry';
-      let statusText = 'Rejected';
-      if (fields.status === 'Active') {
-        statusText = 'Approved';
-      }
-      const emailText = `Your account has been ${statusText}, you may now access the facility registry. Your username is ${data.userName}`;
-      const emails = [data.email];
-      mail.send(subject, emailText, emails, () => {
-
-      });
-      logger.info('Account status has been changed');
-      res.status(200).send();
-    });
-  });
-});
-
-app.post('/changeAccountStatus', (req, res) => {
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    logger.info(`Received a request to ${fields.status} account for userID ${fields.id}`);
-    mongo.changeAccountStatus(fields.status, fields.id, (error, resp) => {
-      if (error) {
-        logger.error(error);
-        return res.status(400).send();
-      }
-      res.status(200).send();
-    });
-  });
-});
-
-app.get('/getRoles/:id?', (req, res) => {
-  logger.info('Received a request to get roles');
-  let idFilter;
-  if (req.params.id) {
-    idFilter = {
-      _id: req.params.id,
-    };
-  } else {
-    idFilter = {};
-  }
-  models.RolesModel.find(idFilter).lean().exec((err, roles) => {
-    logger.info(`sending back a list of ${roles.length} roles`);
-    res.status(200).json(roles);
-  });
-});
-
-app.get('/getTasks/:id?', (req, res) => {
-  logger.info('Received a request to get tasks');
-  let idFilter;
-  if (req.params.id) {
-    idFilter = {
-      _id: req.params.id,
-    };
-  } else {
-    idFilter = {};
-  }
-  models.TasksModel.find(idFilter).lean().exec((err, tasks) => {
-    logger.info(`sending back a list of ${tasks.length} tasks`);
-    res.status(200).json(tasks);
-  });
 });
 
 app.get('/getLevelData/:source/:sourceOwner/:level', (req, res) => {
@@ -379,23 +188,6 @@ app.post('/editLocation', (req, res) => {
         res.status(200).send();
       }
     });
-  });
-});
-
-app.delete('/deleteLocation', (req, res) => {
-  const {
-    sourceId,
-    sourceName,
-    id,
-    userID,
-    sourceOwner,
-  } = req.query;
-  mcsd.deleteLocation(id, sourceId, sourceName, sourceOwner, userID, (resp, err) => {
-    if (err) {
-      res.status(400).send(err);
-    } else {
-      res.status(200).send();
-    }
   });
 });
 
@@ -446,31 +238,23 @@ app.post('/dhisSync', (req, res) => {
   const form = new formidable.IncomingForm();
   res.status(200).end();
   form.parse(req, (err, fields, files) => {
-    mongo.getServer(fields.sourceOwner, fields.name, (err, server) => {
-      if (err) {
-        logger.error(err);
-        return res.status(500).send();
-      }
-      const mode = fields.mode;
-      let full = true;
-      if (mode === 'update') {
-        full = false;
-      }
-      server.password = mongo.decrypt(server.password);
-      dhis.sync(
-        server.host,
-        server.username,
-        server.password,
-        fields.name,
-        fields.sourceOwner,
-        fields.clientId,
-        topOrgName,
-        false,
-        full,
-        false,
-        false,
-      );
-    });
+    const { mode } = fields;
+    let full = true;
+    if (mode === 'update') {
+      full = false;
+    }
+    dhis.sync(
+      fields.host,
+      fields.username,
+      fields.password,
+      fields.name,
+      fields.clientId,
+      topOrgName,
+      false,
+      full,
+      false,
+      false,
+    );
   });
 });
 
@@ -479,23 +263,16 @@ app.post('/fhirSync', (req, res) => {
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields, files) => {
     logger.info(`Received a request to sync FHIR server ${fields.host}`);
-    mongo.getServer(fields.sourceOwner, fields.name, (err, server) => {
-      if (err) {
-        logger.error(err);
-        return res.status(500).send();
-      }
-      server.password = mongo.decrypt(server.password);
-      fhir.sync(
-        server.host,
-        server.username,
-        server.password,
-        fields.mode,
-        fields.name,
-        fields.sourceOwner,
-        fields.clientId,
-        topOrgName,
-      );
-    });
+    fhir.sync(
+      fields.id,
+      fields.host,
+      fields.username,
+      fields.password,
+      fields.mode,
+      fields.name,
+      fields.clientId,
+      topOrgName,
+    );
   });
 });
 
@@ -764,25 +541,6 @@ app.get('/clearProgress/:type/:clientId', (req, res) => {
   res.status(200).send();
 });
 
-app.post('/updateDatasetAutosync', (req, res) => {
-  logger.info('Received a request to edit a data source auto sync');
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    fields.enabled = JSON.parse(fields.enabled);
-    mongo.updateDatasetAutosync(fields.id, fields.enabled, (err, resp) => {
-      if (err) {
-        res.status(500).json({
-          error: 'Unexpected error occured,please retry',
-        });
-        logger.error(err);
-      } else {
-        logger.info('Data source edited sucessfully');
-        res.status(200).send();
-      }
-    });
-  });
-});
-
 app.get('/getUploadedCSV/:sourceOwner/:name', (req, res) => {
   logger.info('Received a request to export CSV file');
   const {
@@ -922,22 +680,6 @@ app.post('/uploadCSV', (req, res) => {
       });
     });
   });
-});
-
-// merging signup custom fields into Users model
-models.MetaDataModel.find({
-  'forms.name': 'signup',
-}, (err, data) => {
-  let Users;
-  if (data && data.length > 0) {
-    let signupFields = Object.assign({}, data[0].forms[0].fields);
-    signupFields = Object.assign(signupFields, schemas.usersFields);
-    Users = new mongoose.Schema(signupFields);
-  } else {
-    Users = new mongoose.Schema(schemas.usersFields);
-  }
-  delete mongoose.connection.models.Users;
-  models.UsersModel = mongoose.model('Users', Users);
 });
 
 app.get('/', (req, res) => {

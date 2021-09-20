@@ -12,28 +12,38 @@ const redis = require('redis');
 
 const json2csv = require('json2csv').parse;
 const async = require('async');
-const mongoose = require('mongoose');
 const config = require('../config');
 
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST || '127.0.0.1',
 });
-const models = require('../models');
-const schemas = require('../schemas');
-require('../connection');
 const mixin = require('../mixin');
 const mcsd = require('../mcsd')();
 const scores = require('../scores')();
 
-const mongoUser = config.get('DB_USER');
-const mongoPasswd = config.get('DB_PASSWORD');
-const mongoHost = config.get('DB_HOST');
-const mongoPort = config.get('DB_PORT');
 const logger = require('../winston');
 const outcomes = require('../../config/operationOutcomes');
+const fhirAxios = require('../modules/fhirAxios');
 
 const levelMaps = config.get('levelMaps');
 
+function recoStatus(pairId) {
+  return new Promise((resolve) => {
+    if (pairId.split('/').length === 2) {
+      pairId = pairId.split('/')[1];
+    }
+    fhirAxios.read('Basic', pairId, 'DEFAULT').then((pair) => {
+      const tatus = pair && pair.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/recoStatus');
+      if (tatus) {
+        return resolve(tatus.valueString);
+      }
+      return resolve('Done');
+    }).catch((err) => {
+      logger.error(err);
+      return resolve('Done');
+    });
+  });
+}
 router.get('/reconcile', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'data-source-reconciliation');
   if (!allowed) {
@@ -749,7 +759,13 @@ router.post('/performMatch/:type', (req, res) => {
     type,
   } = req.params;
   const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
+    const status = await recoStatus(fields.pairId);
+    if (status !== 'in-progress') {
+      return res.status(400).send({
+        error: 'Reconciliation closed',
+      });
+    }
     if (!fields.source1DB || !fields.source2DB) {
       logger.error({
         error: 'Missing Source1 or Source2',
@@ -781,41 +797,18 @@ router.post('/performMatch/:type', (req, res) => {
       });
       return;
     }
-    let uri;
-    if (mongoUser && mongoPasswd) {
-      uri = `mongodb://${mongoUser}:${mongoPasswd}@${mongoHost}:${mongoPort}/${mappingDB}`;
-    } else {
-      uri = `mongodb://${mongoHost}:${mongoPort}/${mappingDB}`;
-    }
-    const connection = mongoose.createConnection(uri, {
-      useNewUrlParser: true,
-    });
-    connection.on('error', () => {
-      logger.error(`An error occured while connecting to DB ${mappingDB}`);
-    });
-    connection.once('open', () => {
-      connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
-        connection.close();
-        if (data && data.recoStatus === 'in-progress') {
-          mcsd.saveMatch(source1Id, source2Id, source1DB, source2DB, mappingDB, recoLevel, totalLevels, type, false, flagComment, (err, matchComments) => {
-            logger.info('Done matching');
-            if (err) {
-              logger.error(err);
-              res.status(400).send({
-                error: err,
-              });
-            } else {
-              res.status(200).json({
-                matchComments,
-              });
-            }
-          });
-        } else {
-          res.status(400).send({
-            error: 'Reconciliation closed',
-          });
-        }
-      });
+    mcsd.saveMatch(source1Id, source2Id, source1DB, source2DB, mappingDB, recoLevel, totalLevels, type, false, flagComment, (err, matchComments) => {
+      logger.info('Done matching');
+      if (err) {
+        logger.error(err);
+        res.status(400).send({
+          error: err,
+        });
+      } else {
+        res.status(200).json({
+          matchComments,
+        });
+      }
     });
   });
 });
@@ -840,7 +833,13 @@ router.post('/acceptFlag/:source1/:source2/:userID', (req, res) => {
   } = req.params;
   const mappingDB = mixin.toTitleCase(req.params.source1 + userID + req.params.source2);
   const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
+    const status = await recoStatus(fields.pairId);
+    if (status !== 'in-progress') {
+      return res.status(400).send({
+        error: 'Reconciliation closed',
+      });
+    }
     const {
       source1Id,
     } = fields;
@@ -853,38 +852,13 @@ router.post('/acceptFlag/:source1/:source2/:userID', (req, res) => {
       });
       return;
     }
-
-    let uri;
-    if (mongoUser && mongoPasswd) {
-      uri = `mongodb://${mongoUser}:${mongoPasswd}@${mongoHost}:${mongoPort}/${mappingDB}`;
-    } else {
-      uri = `mongodb://${mongoHost}:${mongoPort}/${mappingDB}`;
-    }
-    const connection = mongoose.createConnection(uri, {
-      useNewUrlParser: true,
-    });
-    connection.on('error', () => {
-      logger.error(`An error occured while connecting to DB ${mappingDB}`);
-    });
-
-    connection.once('open', () => {
-      connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
-        connection.close();
-        if (data.recoStatus === 'in-progress') {
-          mcsd.acceptFlag(source1Id, mappingDB, (err) => {
-            logger.info('Done marking flag as a match');
-            if (err) {
-              res.status(400).send({
-                error: err,
-              });
-            } else res.status(200).send();
-          });
-        } else {
-          res.status(400).send({
-            error: 'Reconciliation closed',
-          });
-        }
-      });
+    mcsd.acceptFlag(source1Id, mappingDB, (err) => {
+      logger.info('Done marking flag as a match');
+      if (err) {
+        res.status(400).send({
+          error: err,
+        });
+      } else res.status(200).send();
     });
   });
 });
@@ -915,7 +889,13 @@ router.post('/noMatch/:type/:source1/:source2/:source1Owner/:source2Owner/:userI
   const source2DB = mixin.toTitleCase(req.params.source2 + source2Owner);
   const mappingDB = mixin.toTitleCase(req.params.source1 + userID + req.params.source2);
   const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
+    const status = await recoStatus(fields.pairId);
+    if (status !== 'in-progress') {
+      return res.status(400).send({
+        error: 'Reconciliation closed',
+      });
+    }
     const {
       source1Id,
       recoLevel,
@@ -932,36 +912,13 @@ router.post('/noMatch/:type/:source1/:source2/:source1Owner/:source2Owner/:userI
       return;
     }
 
-    let uri;
-    if (mongoUser && mongoPasswd) {
-      uri = `mongodb://${mongoUser}:${mongoPasswd}@${mongoHost}:${mongoPort}/${mappingDB}`;
-    } else {
-      uri = `mongodb://${mongoHost}:${mongoPort}/${mappingDB}`;
-    }
-    const connection = mongoose.createConnection(uri, {
-      useNewUrlParser: true,
-    });
-    connection.on('error', () => {
-      logger.error(`An error occured while connecting to DB ${mappingDB}`);
-    });
-    connection.once('open', () => {
-      connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
-        connection.close();
-        if (!data || data.recoStatus === 'in-progress') {
-          mcsd.saveNoMatch(source1Id, source1DB, source2DB, mappingDB, recoLevel, totalLevels, type, (err) => {
-            logger.info('Done matching');
-            if (err) {
-              res.status(400).send({
-                error: 'Un expected error has occured',
-              });
-            } else res.status(200).send();
-          });
-        } else {
-          res.status(400).send({
-            error: 'Reconciliation closed',
-          });
-        }
-      });
+    mcsd.saveNoMatch(source1Id, source1DB, source2DB, mappingDB, recoLevel, totalLevels, type, (err) => {
+      logger.info('Done matching');
+      if (err) {
+        res.status(400).send({
+          error: 'Un expected error has occured',
+        });
+      } else res.status(200).send();
     });
   });
 });
@@ -985,42 +942,25 @@ router.post('/breakMatch/:source1/:source2/:source1Owner/:source2Owner/:userID',
   const source1DB = mixin.toTitleCase(req.params.source1 + source1Owner);
   const mappingDB = mixin.toTitleCase(req.params.source1 + userID + req.params.source2);
   const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
+    const status = await recoStatus(fields.pairId);
+    if (status !== 'in-progress') {
+      return res.status(400).send({
+        error: 'Reconciliation closed',
+      });
+    }
     logger.info(`Received break match request for ${fields.source1Id}`);
     const source1Id = fields.source1Id;
 
-    let uri;
-    if (mongoUser && mongoPasswd) {
-      uri = `mongodb://${mongoUser}:${mongoPasswd}@${mongoHost}:${mongoPort}/${mappingDB}`;
-    } else {
-      uri = `mongodb://${mongoHost}:${mongoPort}/${mappingDB}`;
-    }
-    const connection = mongoose.createConnection(uri, {
-      useNewUrlParser: true,
-    });
-    connection.on('error', () => {
-      logger.error(`An error occured while connecting to DB ${mappingDB}`);
-    });
-    connection.once('open', () => {
-      connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
-        connection.close();
-        if (data.recoStatus === 'in-progress') {
-          mcsd.breakMatch(source1Id, mappingDB, source1DB, (err, results) => {
-            if (err) {
-              logger.error(err);
-              return res.status(500).json({
-                error: err,
-              });
-            }
-            logger.info(`break match done for ${fields.source1Id}`);
-            res.status(200).send(err);
-          });
-        } else {
-          res.status(400).send({
-            error: 'Reconciliation closed',
-          });
-        }
-      });
+    mcsd.breakMatch(source1Id, mappingDB, source1DB, (err, results) => {
+      if (err) {
+        logger.error(err);
+        return res.status(500).json({
+          error: err,
+        });
+      }
+      logger.info(`break match done for ${fields.source1Id}`);
+      res.status(200).send(err);
     });
   });
 });
@@ -1040,7 +980,13 @@ router.post('/breakNoMatch/:type/:source1/:source2/:userID', (req, res) => {
     return;
   }
   const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
+    const status = await recoStatus(fields.pairId);
+    if (status !== 'in-progress') {
+      return res.status(400).send({
+        error: 'Reconciliation closed',
+      });
+    }
     logger.info(`Received break no match request for ${fields.source1Id}`);
     const source1Id = fields.source1Id;
     if (!source1Id) {
@@ -1053,215 +999,122 @@ router.post('/breakNoMatch/:type/:source1/:source2/:userID', (req, res) => {
     }
     const {
       userID,
-      type,
     } = req.params;
     const mappingDB = mixin.toTitleCase(req.params.source1 + userID + req.params.source2);
 
-    let uri;
-    if (mongoUser && mongoPasswd) {
-      uri = `mongodb://${mongoUser}:${mongoPasswd}@${mongoHost}:${mongoPort}/${mappingDB}`;
-    } else {
-      uri = `mongodb://${mongoHost}:${mongoPort}/${mappingDB}`;
-    }
-    const connection = mongoose.createConnection(uri, {
-      useNewUrlParser: true,
-    });
-    connection.on('error', () => {
-      logger.error(`An error occured while connecting to DB ${mappingDB}`);
-    });
-    connection.once('open', () => {
-      connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
-        connection.close();
-        if (data.recoStatus === 'in-progress') {
-          mcsd.breakNoMatch(source1Id, mappingDB, (err) => {
-            logger.info(`break no match done for ${fields.source1Id}`);
-            res.status(200).send(err);
-          });
-        } else {
-          res.status(400).send({
-            error: 'Reconciliation closed',
-          });
-        }
-      });
+    mcsd.breakNoMatch(source1Id, mappingDB, (err) => {
+      logger.info(`break no match done for ${fields.source1Id}`);
+      res.status(200).send(err);
     });
   });
 });
 
-router.get('/markRecoUnDone/:source1/:source2/:userID', (req, res) => {
+router.get('/markRecoUnDone/:pairId', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'open-matching');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
-  logger.info(`received a request to mark reconciliation for ${req.params.userID} as undone`);
-  const {
-    source1,
-    source2,
-    userID,
-  } = req.params;
-  const mappingDB = mixin.toTitleCase(source1 + userID + source2);
-
-  let uri;
-  if (mongoUser && mongoPasswd) {
-    uri = `mongodb://${mongoUser}:${mongoPasswd}@${mongoHost}:${mongoPort}/${mappingDB}`;
-  } else {
-    uri = `mongodb://${mongoHost}:${mongoPort}/${mappingDB}`;
+  logger.info(`received a request to mark reconciliation for ${req.params.pairId} as undone`);
+  let { pairId } = req.params;
+  if (pairId.split('/').length === 2) {
+    pairId = pairId.split('/')[1];
   }
-  const connection = mongoose.createConnection(uri, {
-    useNewUrlParser: true,
-  });
-  connection.on('error', () => {
-    logger.error(`An error occured while connecting to DB ${mappingDB}`);
-  });
-  connection.once('open', () => {
-    connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
-      if (!data) {
-        const MetaDataModel = connection.model('MetaData', schemas.MetaData);
-        const MetaData = new MetaDataModel({
-          recoStatus: 'in-progress',
-        });
-        MetaData.save((err, data) => {
-          connection.close();
-          if (err) {
-            logger.error(err);
-            logger.error('Failed to save reco status');
-            res.status(500).json({
-              error: 'Unexpected error occured,please retry',
-            });
-          } else {
-            logger.info('Reco status saved successfully');
-            res.status(200).json({
-              status: 'in-progress',
-            });
-          }
-        });
-      } else {
-        connection.model('MetaData', schemas.MetaData).findByIdAndUpdate(data.id, {
-          recoStatus: 'in-progress',
-        }, (err, data) => {
-          connection.close();
-          if (err) {
-            logger.error(err);
-            logger.error('Failed to save reco status');
-            res.status(500).json({
-              error: 'Unexpected error occured,please retry',
-            });
-          } else {
-            logger.info('Reco status saved successfully');
-            res.status(200).json({
-              status: 'in-progress',
-            });
-          }
-        });
+  fhirAxios.read('Basic', pairId, '', 'DEFAULT').then((pair) => {
+    let updated = false;
+    pair.extension.forEach((ext, index) => {
+      if (ext.url === 'http://gofr.org/fhir/StructureDefinition/recoStatus') {
+        pair.extension[index].valueString = 'in-progress';
+        updated = true;
       }
+    });
+    if (!updated) {
+      pair.extension.push({
+        url: 'http://gofr.org/fhir/StructureDefinition/lastUpdated',
+        valueString: 'in-progress',
+      });
+    }
+    fhirAxios.update(pair, 'DEFAULT').then(() => {
+      res.status(200).json({
+        status: 'in-progress',
+      });
+    }).catch((err) => {
+      logger.error(err);
+      return res.status(500).json({
+        error: 'Unexpected error occured,please retry',
+      });
+    });
+  }).catch((err) => {
+    logger.error(err);
+    return res.status(500).json({
+      error: 'Unexpected error occured,please retry',
     });
   });
 });
 
-router.get('/markRecoDone/:source1/:source2/:userID', (req, res) => {
+router.get('/markRecoDone/:pairId', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'close-matching');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
-  logger.info(`received a request to mark reconciliation for ${req.params.source1}${req.params.source2} as done`);
-  const {
-    source1,
-    source2,
-    userID,
-  } = req.params;
-  const mappingDB = mixin.toTitleCase(source1 + userID + source2);
-
-  let uri;
-  if (mongoUser && mongoPasswd) {
-    uri = `mongodb://${mongoUser}:${mongoPasswd}@${mongoHost}:${mongoPort}/${mappingDB}`;
-  } else {
-    uri = `mongodb://${mongoHost}:${mongoPort}/${mappingDB}`;
+  let source1;
+  let source2;
+  logger.info(`received a request to mark reconciliation for ${req.params.pairId} as done`);
+  let { pairId } = req.params;
+  if (pairId.split('/').length === 2) {
+    pairId = pairId.split('/')[1];
   }
-  const connection = mongoose.createConnection(uri, {
-    useNewUrlParser: true,
-  });
-  connection.on('error', () => {
-    logger.error(`An error occured while connecting to DB ${mappingDB}`);
-  });
-  connection.once('open', () => {
-    connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
-      if (!data) {
-        const MetaDataModel = connection.model('MetaData', schemas.MetaData);
-        const MetaData = new MetaDataModel({
-          recoStatus: 'Done',
-        });
-        MetaData.save((err, data) => {
-          connection.close();
-          if (err) {
-            logger.error(err);
-            logger.error('Failed to save reco status');
-            res.status(500).json({
-              error: 'Unexpected error occured,please retry',
-            });
-          } else {
-            logger.info('Reco status saved successfully');
-            sendNotification((err, not) => {
-              res.status(200).json({
-                status: 'Done',
-              });
-            });
-          }
-        });
-      } else {
-        connection.model('MetaData', schemas.MetaData).findByIdAndUpdate(data.id, {
-          recoStatus: 'Done',
-        }, (err, data) => {
-          connection.close();
-          if (err) {
-            logger.error(err);
-            logger.error('Failed to save reco status');
-            res.status(500).json({
-              error: 'Unexpected error occured,please retry',
-            });
-          } else {
-            logger.info('Reco status saved successfully');
-            sendNotification((err, not) => {
-              res.status(200).json({
-                status: 'Done',
-              });
-            });
-          }
-        });
+  fhirAxios.read('Basic', pairId, '', 'DEFAULT').then((pair) => {
+    let updated = false;
+    pair.extension.forEach((ext, index) => {
+      if (ext.url === 'http://gofr.org/fhir/StructureDefinition/recoStatus') {
+        pair.extension[index].valueString = 'Done';
+        updated = true;
+      } else if (ext.url === 'http://gofr.org/fhir/StructureDefinition/source1') {
+        source1 = ext.valueReference.display;
+      } else if (ext.url === 'http://gofr.org/fhir/StructureDefinition/source2') {
+        source2 = ext.valueReference.display;
       }
+    });
+    if (!updated) {
+      pair.extension.push({
+        url: 'http://gofr.org/fhir/StructureDefinition/lastUpdated',
+        valueString: 'Done',
+      });
+    }
+    fhirAxios.update(pair, 'DEFAULT').then(() => {
+      sendNotification(() => {
+        res.status(200).json({
+          status: 'Done',
+        });
+      });
+    }).catch((err) => {
+      logger.error(err);
+      return res.status(500).json({
+        error: 'Unexpected error occured,please retry',
+      });
+    });
+  }).catch((err) => {
+    logger.error(err);
+    return res.status(500).json({
+      error: 'Unexpected error occured,please retry',
     });
   });
 
   function sendNotification(callback) {
     logger.info('received a request to send notification to endpoint regarding completion of reconciliation');
-    models.MetaDataModel.findOne({}, {
-      'config.generalConfig': 1,
-    }, (err, data) => {
-      if (err) {
-        logger.error(err);
-        return callback(true, false);
-      }
-      if (!data) {
-        return callback(false, false);
-      }
-      let configData = {};
-      try {
-        configData = JSON.parse(JSON.stringify(data));
-      } catch (error) {
-        logger.error(error);
-        return callback(true, false);
-      }
-
-      if (configData.hasOwnProperty('config')
-        && configData.config.hasOwnProperty('generalConfig')
-        && configData.config.generalConfig.hasOwnProperty('recoProgressNotification')
-        && configData.config.generalConfig.recoProgressNotification.enabled
-        && configData.config.generalConfig.recoProgressNotification.url
+    fhirAxios.read('Parameters', 'gofr-general-config', '', 'DEFAULT').then((response) => {
+      const resData = response.parameter.find(param => param.name === 'config');
+      const adminConfig = JSON.parse(resData.valueString);
+      if (adminConfig.recoProgressNotification
+        && adminConfig.recoProgressNotification.enabled
+        && adminConfig.recoProgressNotification.url
       ) {
         const {
           url,
           username,
           password,
-        } = configData.config.generalConfig.recoProgressNotification;
-        const auth = `Basic ${new Buffer(`${username}:${password}`).toString('base64')}`;
+        } = adminConfig.recoProgressNotification;
+        const auth = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
         const options = {
           url,
           headers: {
@@ -1288,42 +1141,17 @@ router.get('/markRecoDone/:source1/:source2/:userID', (req, res) => {
   }
 });
 
-router.get('/recoStatus/:source1/:source2/:userID', (req, res) => {
+router.get('/recoStatus/:pairId', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'view-matching-status');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
-  const {
-    source1,
-    source2,
-    userID,
-  } = req.params;
-  const mappingDB = mixin.toTitleCase(source1 + userID + source2);
-  let uri;
-  if (mongoUser && mongoPasswd) {
-    uri = `mongodb://${mongoUser}:${mongoPasswd}@${mongoHost}:${mongoPort}/${mappingDB}`;
-  } else {
-    uri = `mongodb://${mongoHost}:${mongoPort}/${mappingDB}`;
-  }
-  const connection = mongoose.createConnection(uri, {
-    useNewUrlParser: true,
-  });
-  connection.on('error', () => {
-    logger.error(`An error occured while connecting to DB ${mappingDB}`);
-  });
-  connection.once('open', () => {
-    connection.model('MetaData', schemas.MetaData).findOne({}, (err, data) => {
-      connection.close();
-      if (data && data.recoStatus) {
-        res.status(200).json({
-          status: data.recoStatus,
-        });
-      } else {
-        res.status(200).json({
-          status: false,
-        });
-      }
+  recoStatus(req.params.pairId).then((status) => {
+    res.status(200).json({
+      status,
     });
+  }).catch(() => {
+    res.status(500).send();
   });
 });
 

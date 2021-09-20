@@ -943,7 +943,7 @@ router.post('/updateGeneralConfig', (req, res) => {
       const _config = JSON.parse(configRes.parameter[index].valueString);
       if (!_config.externalAuth || appConfig.generalConfig.externalAuth.password != _config.externalAuth.password) {
         if (appConfig.generalConfig.externalAuth.password) {
-          appConfig.generalConfig.externalAuth.password = mongo.encrypt(appConfig.generalConfig.externalAuth.password);
+          appConfig.generalConfig.externalAuth.password = mixin.encrypt(appConfig.generalConfig.externalAuth.password);
         }
       } else {
         appConfig.generalConfig.externalAuth.password = _config.externalAuth.password;

@@ -47,38 +47,6 @@
       </v-dialog>
       <v-dialog
         persistent
-        transition="scale-transition"
-        v-model="confirmDelete"
-        max-width="500px"
-      >
-        <v-card>
-          <v-toolbar
-            color="primary"
-            dark
-          >
-            <v-toolbar-title>
-              Warning
-            </v-toolbar-title>
-          </v-toolbar>
-          <v-card-text>
-            Are you sure that you want to delete {{deleteLocationData.facility}}
-          </v-card-text>
-          <v-card-actions>
-            <v-btn
-              color="error"
-              @click.native="confirmDelete = false"
-            >Cancel</v-btn>
-            <v-spacer></v-spacer>
-            <v-btn
-              color="primary"
-              dark
-              @click.native="deleteLocation()"
-            >Proceed</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      <v-dialog
-        persistent
         v-model="editDialog"
         transition="scale-transition"
         max-width="500px"
@@ -266,11 +234,7 @@
                         <v-icon
                           @click="edit(props.item, 'source1')"
                           style="cursor: pointer"
-                        >edit</v-icon> |
-                        <v-icon
-                          @click="deleteLocation(props.item, 'source1', 'requestConfirmation')"
-                          style="cursor: pointer"
-                        >delete</v-icon>
+                        >edit</v-icon>
                       </template>
                       <template v-else>
                         {{props.item[header.value]}}
@@ -330,11 +294,7 @@
                         <v-icon
                           @click="edit(props.item, 'source2')"
                           style="cursor: pointer"
-                        >edit</v-icon> |
-                        <v-icon
-                          @click="deleteLocation(props.item, 'source2', 'requestConfirmation')"
-                          style="cursor: pointer"
-                        >delete</v-icon>
+                        >edit</v-icon>
                       </template>
                       <template v-else>
                         {{props.item[header.value]}}
@@ -390,8 +350,6 @@ export default {
   mixins: [scoresMixin, generalMixin],
   data () {
     return {
-      confirmDelete: false,
-      deleteLocationData: '',
       deleteSource: {
         name: '',
         value: ''
@@ -494,39 +452,6 @@ export default {
       }).catch((err) => {
         console.log(JSON.stringify(err))
       })
-    },
-    deleteLocation (location, source, stage) {
-      if (stage === 'requestConfirmation') {
-        let sourcesOwner = this.getDatasourceOwner()
-        if (source === 'source1') {
-          this.sourceOwner = sourcesOwner.source1Owner
-          this.deleteSource = {
-            name: 'source1',
-            sourceId: this.$store.state.activePair.source1.id,
-            sourceName: this.source1
-          }
-        } else if (source === 'source2') {
-          this.sourceOwner = sourcesOwner.source2Owner
-          this.deleteSource = {
-            name: 'source2',
-            sourceId: this.$store.state.activePair.source2.id,
-            sourceName: this.source2
-          }
-        }
-        this.deleteLocationData = location
-        this.confirmDelete = true
-      } else {
-        this.confirmDelete = false
-        let userID = this.$store.state.activePair.userID
-        let query = `id=${this.deleteLocationData.id}&sourceId=${this.deleteSource.sourceId}&sourceName=${this.deleteSource.sourceName}&userID=${userID}&sourceOwner=${this.sourceOwner}`
-        axios.delete(`/deleteLocation?${query}`).then(() => {
-          if (this.deleteSource.name === 'source1') {
-            this.getSource1Grid(false)
-          } else {
-            this.getSource2Grid(false)
-          }
-        })
-      }
     },
     getLevelData (level) {
       axios.get('/getLevelData/' + this.editSource + '/' + this.sourceOwner + '/' + level).then((data) => {

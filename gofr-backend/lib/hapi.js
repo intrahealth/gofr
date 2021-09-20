@@ -114,7 +114,6 @@ function addPartition({
             valueDateTime: moment().format(),
           }],
         };
-        logger.error(JSON.stringify(resource,0,2));
         fhirAxios.create(resource, 'DEFAULT').then((response) => {
           logger.info(`Partition with name ${name} added successfully`);
           return resolve(`Basic/${response.id}`);

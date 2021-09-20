@@ -4,7 +4,6 @@ const async = require('async');
 const URI = require('urijs');
 const http = require('http');
 const https = require('https');
-const url = require('url');
 const isJSON = require('is-json');
 const redis = require('redis');
 const mixin = require('./mixin');
@@ -19,214 +18,222 @@ const credentials = {
   dhis2URL: '',
   username: '',
   password: '',
-  name: '',
-  sourceOwner: '',
+  name: ''
 };
 
-module.exports = function () {
-  return {
-    sync(host, username, password, name, sourceOwner, clientId, topOrgName, reset, full, dousers, doservices) {
-      const dhis2URL = url.parse(host);
-      const auth = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
-      credentials.dhis2URL = dhis2URL;
-      credentials.clientId = clientId;
-      credentials.auth = auth;
-      credentials.name = name;
-      credentials.sourceOwner = sourceOwner;
-      credentials.topOrgId = mixin.getTopOrgId(name + sourceOwner, 'Location');
-      credentials.topOrgName = topOrgName;
+const dhis = {
+  processMetaData: (full, dousers, doservices) => {
+    const {
+      clientId,
+    } = credentials;
+    let dhisSyncRequestId = `dhisSyncRequest${clientId}`;
+    let dhisSyncRequest = JSON.stringify({
+      status: '1/2 - Loading all DHIS2 data from host',
+      error: null,
+      percent: null,
+    });
+    redisClient.set(dhisSyncRequestId, dhisSyncRequest);
 
-      if (reset) {
-        logger.info(`Attempting to reset time on ${host}\n`);
+    // const hasKey = true // await checkLoaderDataStore();
+    /* let lastUpdate = false;
+    if (!full && hasKey) {
+      lastUpdate = await getLastUpdate(credentials.name, credentials.dhis2URL, credentials.auth);
+      // Convert to yyyy-mm-dd format (dropping time as it is ignored by DHIS2)
+      lastUpdate = new Date(Date.parse(lastUpdate)).toISOString().substr(0, 10);
+    } */
+    const database = credentials.name;
+    dhis.getLastUpdate(database, credentials.dhis2URL, credentials.auth, (lastUpdate) => {
+      if (!full && lastUpdate) {
+        lastUpdate = new Date(Date.parse(lastUpdate)).toISOString().substr(0, 10);
+      }
+      let uflag = 'false';
+      if (dousers) {
+        uflag = 'true';
+      }
+      let sflag = 'false';
+      if (doservices) {
+        sflag = 'true';
+      }
 
-        const req = (dhis2URL.protocol == 'https:' ? https : http).request({
-          hostname: dhis2URL.hostname,
-          port: dhis2URL.port,
-          path: `${dhis2URL.path}api/dataStore/CSD-Loader-Last-Export/${mixin.toTitleCase(name)}`,
-          headers: {
-            Authorization: auth,
-          },
-          method: 'DELETE',
-        }, (res) => {
-          logger.info(`Reset request returned with code ${res.statusCode}`);
-          res.on('end', () => {});
-          res.on('error', (e) => {
-            console.log(`ERROR: ${e.message}`);
-          });
-        }).end();
-      } else {
-        this.processMetaData(full, dousers, doservices);
+      const metadataOpts = [
+        'assumeTrue=false',
+        'organisationUnits=true',
+        'organisationUnitGroups=true',
+        'organisationUnitLevels=true',
+        'organisationUnitGroupSets=true',
+        `categoryOptions=${sflag}`,
+        `optionSets=${sflag}`,
+        `dataElementGroupSets=${sflag}`,
+        `categoryOptionGroupSets=${sflag}`,
+        `categoryCombos=${sflag}`,
+        `options=${sflag}`,
+        `categoryOptionCombos=${sflag}`,
+        `dataSets=${sflag}`,
+        `dataElementGroups=${sflag}`,
+        `dataElements=${sflag}`,
+        `categoryOptionGroups=${sflag}`,
+        `categories=${sflag}`,
+        `users=${uflag}`,
+        `userGroups=${uflag}`,
+        `userRoles=${uflag}`,
+      ];
+
+      if (!full && lastUpdate) {
+        metadataOpts.push(`filter=lastUpdated:gt:${lastUpdate}`);
       }
-    },
-    getLastUpdate(name, dhis2URL, auth, callback) {
-      logger.info('getting lastupdated time');
-      if (dhis2URL.port < 0 || dhis2URL.port >= 65536) {
-        logger.error('port number is out of range');
-        return callback(false);
+      const {
+        dhis2URL,
+      } = credentials;
+      const {
+        auth,
+      } = credentials;
+      logger.info(`GETTING ${dhis2URL.protocol()}://${dhis2URL.hostname()}:${dhis2URL.port()}${dhis2URL.path()}/api/metadata.json?${metadataOpts.join('&')}`);
+      let reqMod = https;
+      if (dhis2URL.protocol() === 'http') {
+        reqMod = http;
       }
-      const req = (dhis2URL.protocol == 'https:' ? https : http).request({
-        hostname: dhis2URL.hostname,
-        port: dhis2URL.port,
-        path: `${dhis2URL.path}api/dataStore/CSD-Loader-Last-Export/${mixin.toTitleCase(name)}`,
+      reqMod.request({
+        hostname: dhis2URL.hostname(),
+        port: dhis2URL.port(),
+        path: `${dhis2URL.path()}/api/metadata.json?${metadataOpts.join('&')}`,
         headers: {
           Authorization: auth,
         },
+        timeout: 300000,
         method: 'GET',
-      });
-      req.on('response', (res) => {
-        logger.info(`Request to get lastupdated time has responded with code ${res.statusCode}`);
+      }, (res) => {
+        logger.info(`Request to get Metadata responded with code ${res.statusCode}`);
         let body = '';
         res.on('data', (chunk) => {
           body += chunk;
         });
         res.on('end', () => {
-          let dataStore;
-          try {
-            dataStore = JSON.parse(body);
-          } catch (error) {
-            return callback(false);
+          if (!isJSON(body)) {
+            logger.error(body);
+            logger.error('Non JSON response received while getting DHIS2 data');
+            dhisSyncRequestId = `dhisSyncRequest${clientId}`;
+            dhisSyncRequest = JSON.stringify({
+              status: '1/2 - Getting DHIS2 Data',
+              error: `Invalid response with code ${res.statusCode} received while getting DHIS2 data,cross check the host name,username and password`,
+              percent: null,
+            });
+            redisClient.set(dhisSyncRequestId, dhisSyncRequest);
+          } else {
+            let metadata;
+            try {
+              metadata = JSON.parse(body);
+            } catch (error) {
+              logger.error(error);
+              logger.error(body);
+              logger.error('An error occured while parsing response from DHIS2 server');
+            }
+
+            if (!metadata.hasOwnProperty('organisationUnits')) {
+              logger.info('No organization unit found in metadata');
+              dhisSyncRequestId = `dhisSyncRequest${clientId}`;
+              dhisSyncRequest = JSON.stringify({
+                status: 'Done',
+                error: null,
+                percent: 100,
+              });
+              redisClient.set(dhisSyncRequestId, dhisSyncRequest);
+              const thisRunTime = new Date().toISOString();
+              setLastUpdate(lastUpdate, thisRunTime);
+            } else {
+              processOrgUnit(metadata, lastUpdate);
+            }
           }
-          if (!dataStore.hasOwnProperty('value')) {
-            return callback(false);
-          }
-          return callback(dataStore.value);
         });
         res.on('error', (e) => {
           logger.error(`ERROR: ${e.message}`);
-          return callback(false);
         });
+      }).end();
+    });
+  },
+  sync: (host, username, password, name, clientId, topOrgName, reset, full, dousers, doservices) => {
+    const dhis2URL = new URI(host);
+    const auth = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+    credentials.dhis2URL = dhis2URL;
+    credentials.clientId = clientId;
+    credentials.auth = auth;
+    credentials.name = name;
+    const database = name;
+    credentials.topOrgId = mixin.getTopOrgId(database, 'Location');
+    credentials.topOrgName = topOrgName;
+
+    if (reset) {
+      logger.info(`Attempting to reset time on ${host}\n`);
+      let reqMod = https;
+      if (dhis2URL.protocol() === 'http') {
+        reqMod = http;
+      }
+      reqMod.request({
+        hostname: dhis2URL.hostname(),
+        port: dhis2URL.port(),
+        path: `${dhis2URL.path()}/api/dataStore/CSD-Loader-Last-Export/${database}`,
+        headers: {
+          Authorization: auth,
+        },
+        method: 'DELETE',
+      }, (res) => {
+        logger.info(`Reset request returned with code ${res.statusCode}`);
+        res.on('end', () => {});
+        res.on('error', (e) => {
+          console.log(`ERROR: ${e.message}`);
+        });
+      }).end();
+    } else {
+      dhis.processMetaData(full, dousers, doservices);
+    }
+  },
+  getLastUpdate: (name, dhis2URL, auth, callback) => {
+    logger.info('getting lastupdated time');
+    if (dhis2URL.port() < 0 || dhis2URL.port() >= 65536) {
+      logger.error('port number is out of range');
+      return callback(false);
+    }
+    let reqMod = https;
+    if (dhis2URL.protocol() === 'http') {
+      reqMod = http;
+    }
+    const req = reqMod.request({
+      hostname: dhis2URL.hostname(),
+      port: dhis2URL.port(),
+      path: `${dhis2URL.path()}/api/dataStore/CSD-Loader-Last-Export/${name}`,
+      headers: {
+        Authorization: auth,
+      },
+      method: 'GET',
+    });
+    req.on('response', (res) => {
+      logger.info(`Request to get lastupdated time has responded with code ${res.statusCode}`);
+      let body = '';
+      res.on('data', (chunk) => {
+        body += chunk;
       });
-      req.on('error', (err) => {
-        logger.error(err);
+      res.on('end', () => {
+        let dataStore;
+        try {
+          dataStore = JSON.parse(body);
+        } catch (error) {
+          return callback(false);
+        }
+        if (!dataStore.hasOwnProperty('value')) {
+          return callback(false);
+        }
+        return callback(dataStore.value);
+      });
+      res.on('error', (e) => {
+        logger.error(`ERROR: ${e.message}`);
         return callback(false);
       });
-      req.end();
-    },
-    processMetaData(full, dousers, doservices) {
-      const {
-        clientId,
-      } = credentials;
-      let dhisSyncRequestId = `dhisSyncRequest${clientId}`;
-      let dhisSyncRequest = JSON.stringify({
-        status: '1/2 - Loading all DHIS2 data from host',
-        error: null,
-        percent: null,
-      });
-      redisClient.set(dhisSyncRequestId, dhisSyncRequest);
-
-      // const hasKey = true // await checkLoaderDataStore();
-      /* let lastUpdate = false;
-      if (!full && hasKey) {
-        lastUpdate = await getLastUpdate(credentials.name, credentials.dhis2URL, credentials.auth);
-        // Convert to yyyy-mm-dd format (dropping time as it is ignored by DHIS2)
-        lastUpdate = new Date(Date.parse(lastUpdate)).toISOString().substr(0, 10);
-      } */
-      const database = credentials.name + credentials.sourceOwner;
-      this.getLastUpdate(database, credentials.dhis2URL, credentials.auth, (lastUpdate) => {
-        if (!full && lastUpdate) {
-          lastUpdate = new Date(Date.parse(lastUpdate)).toISOString().substr(0, 10);
-        }
-        let uflag = 'false';
-        if (dousers) {
-          uflag = 'true';
-        }
-        let sflag = 'false';
-        if (doservices) {
-          sflag = 'true';
-        }
-
-        const metadataOpts = [
-          'assumeTrue=false',
-          'organisationUnits=true',
-          'organisationUnitGroups=true',
-          'organisationUnitLevels=true',
-          'organisationUnitGroupSets=true',
-          `categoryOptions=${sflag}`,
-          `optionSets=${sflag}`,
-          `dataElementGroupSets=${sflag}`,
-          `categoryOptionGroupSets=${sflag}`,
-          `categoryCombos=${sflag}`,
-          `options=${sflag}`,
-          `categoryOptionCombos=${sflag}`,
-          `dataSets=${sflag}`,
-          `dataElementGroups=${sflag}`,
-          `dataElements=${sflag}`,
-          `categoryOptionGroups=${sflag}`,
-          `categories=${sflag}`,
-          `users=${uflag}`,
-          `userGroups=${uflag}`,
-          `userRoles=${uflag}`,
-        ];
-
-        if (!full && lastUpdate) {
-          metadataOpts.push(`filter=lastUpdated:gt:${lastUpdate}`);
-        }
-        const {
-          dhis2URL,
-        } = credentials;
-        const {
-          auth,
-        } = credentials;
-        logger.info(`GETTING ${dhis2URL.protocol}//${dhis2URL.hostname}:${dhis2URL.port}${dhis2URL.path}api/metadata.json?${metadataOpts.join('&')}`);
-        const req = (dhis2URL.protocol == 'https:' ? https : http).request({
-          hostname: dhis2URL.hostname,
-          port: dhis2URL.port,
-          path: `${dhis2URL.path}api/metadata.json?${metadataOpts.join('&')}`,
-          headers: {
-            Authorization: auth,
-          },
-          timeout: 300000,
-          method: 'GET',
-        }, (res) => {
-          logger.info(`Request to get Metadata responded with code ${res.statusCode}`);
-          let body = '';
-          res.on('data', (chunk) => {
-            body += chunk;
-          });
-          res.on('end', () => {
-            if (!isJSON(body)) {
-              logger.error(body);
-              logger.error('Non JSON response received while getting DHIS2 data');
-              dhisSyncRequestId = `dhisSyncRequest${clientId}`;
-              dhisSyncRequest = JSON.stringify({
-                status: '1/2 - Getting DHIS2 Data',
-                error: `Invalid response with code ${res.statusCode} received while getting DHIS2 data,cross check the host name,username and password`,
-                percent: null,
-              });
-              redisClient.set(dhisSyncRequestId, dhisSyncRequest);
-            } else {
-              let metadata;
-              try {
-                metadata = JSON.parse(body);
-              } catch (error) {
-                logger.error(error);
-                logger.error(body);
-                logger.error('An error occured while parsing response from DHIS2 server');
-              }
-
-              if (!metadata.hasOwnProperty('organisationUnits')) {
-                logger.info('No organization unit found in metadata');
-                dhisSyncRequestId = `dhisSyncRequest${clientId}`;
-                dhisSyncRequest = JSON.stringify({
-                  status: 'Done',
-                  error: null,
-                  percent: 100,
-                });
-                redisClient.set(dhisSyncRequestId, dhisSyncRequest);
-                const thisRunTime = new Date().toISOString();
-                setLastUpdate(lastUpdate, thisRunTime);
-              } else {
-                processOrgUnit(metadata, lastUpdate);
-              }
-            }
-          });
-          res.on('error', (e) => {
-            logger.error(`ERROR: ${e.message}`);
-          });
-        }).end();
-      });
-    },
-  };
+    });
+    req.on('error', (err) => {
+      logger.error(err);
+      return callback(false);
+    });
+    req.end();
+  },
 };
 
 function processOrgUnit(metadata, hasKey) {
@@ -236,7 +243,7 @@ function processOrgUnit(metadata, hasKey) {
     clientId,
   } = credentials;
 
-  const database = mixin.toTitleCase(name + credentials.sourceOwner);
+  const database = name;
   let counter = 0;
   const max = metadata.organisationUnits.length;
   // adding the fake orgid as the top orgid
@@ -259,7 +266,6 @@ function processOrgUnit(metadata, hasKey) {
     text: 'Jurisdiction',
   };
   let hostURL = URI(config.get('mCSD:url')).segment(database)
-    .segment('fhir')
     .segment('Location')
     .segment(fhir.id)
     .toString();
@@ -277,6 +283,7 @@ function processOrgUnit(metadata, hasKey) {
   });
 
   let i = 0;
+  metadata.organisationUnits.sort((a, b) => a.level - b.level);
   async.eachSeries(metadata.organisationUnits, (org, nxtOrg) => {
     logger.info(`Processing (${++i}/${max}) ${org.id}`);
     const fhir = {
@@ -286,13 +293,13 @@ function processOrgUnit(metadata, hasKey) {
       mode: 'instance',
     };
     fhir.identifier = [{
-        system: 'http://dhis2.org/code',
-        value: org.code,
-      },
-      {
-        system: 'http://dhis2.org/id',
-        value: org.id,
-      },
+      system: 'http://dhis2.org/code',
+      value: org.code,
+    },
+    {
+      system: 'http://dhis2.org/id',
+      value: org.id,
+    },
     ];
     fhir.meta = {
       lastUpdated: org.lastUpdated,
@@ -369,8 +376,8 @@ function processOrgUnit(metadata, hasKey) {
       }
     }
 
-    hostURL = URI(config.get('mCSD:url')).segment(database)
-      .segment('fhir')
+    hostURL = URI(config.get('mCSD:url'))
+      .segment(database)
       .segment('Location')
       .segment(fhir.id)
       .toString();
@@ -417,7 +424,7 @@ function checkLoaderDataStore() {
     const req = (dhis2URL.protocol == 'https:' ? https : http).request({
       hostname: dhis2URL.hostname,
       port: dhis2URL.port,
-      path: `${dhis2URL.path}api/dataStore/CSD-Loader-Last-Export/${mixin.toTitleCase(name)}`,
+      path: `${dhis2URL.path}api/dataStore/CSD-Loader-Last-Export/${name}`,
       headers: {
         Authorization: auth,
       },
@@ -444,13 +451,16 @@ function setLastUpdate(hasKey, lastUpdate) {
     auth,
     dhis2URL,
   } = credentials;
-  const userID = credentials.sourceOwner;
-  const database = mixin.toTitleCase(name + userID);
+  const database = name;
   logger.info('setting lastupdated time');
-  const req = (dhis2URL.protocol == 'https:' ? https : http).request({
-    hostname: dhis2URL.hostname,
-    port: dhis2URL.port,
-    path: `${dhis2URL.path}api/dataStore/CSD-Loader-Last-Export/${database}`,
+  let reqMod = https;
+  if (dhis2URL.protocol() === 'http') {
+    reqMod = http;
+  }
+  const req = reqMod.request({
+    hostname: dhis2URL.hostname(),
+    port: dhis2URL.port(),
+    path: `${dhis2URL.path()}/api/dataStore/CSD-Loader-Last-Export/${database}`,
     headers: {
       Authorization: auth,
       'Content-Type': 'application/json',
@@ -481,3 +491,5 @@ function setLastUpdate(hasKey, lastUpdate) {
   req.write(JSON.stringify(payload));
   req.end();
 }
+
+module.exports = dhis;

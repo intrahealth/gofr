@@ -47,6 +47,13 @@ export const store = new Vuex.Store({
           fixSource2To: null,
           fixSource2: false
         },
+        smtp: {
+          host: '',
+          port: '',
+          username: '',
+          password: '',
+          secured: ''
+        },
         recoProgressNotification: {
           enabled: false
         },

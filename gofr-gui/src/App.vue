@@ -284,7 +284,7 @@ export default {
       let source1 = this.toTitleCase(this.$store.state.activePair.source1.name)
       let source2 = this.toTitleCase(this.$store.state.activePair.source2.name)
       let userID = this.$store.state.activePair.userID
-      axios.get('/match/recoStatus/' + source1 + '/' + source2 + '/' + userID).then(status => {
+      axios.get('/match/recoStatus/' + this.$store.state.activePair.id).then(status => {
         if (status.data.status) {
           this.$store.state.recoStatus = status.data.status
         } else {

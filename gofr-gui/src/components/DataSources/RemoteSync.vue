@@ -13,9 +13,8 @@
 import axios from 'axios'
 import { eventBus } from '../../main'
 import SyncProgress from './SyncProgress'
-const backendServer = process.env.BACKEND_SERVER
 export default {
-  props: ['syncType', 'serverName', 'userID', 'sourceOwner', 'mode'],
+  props: ['id', 'syncType', 'serverName', 'host', 'username', 'password', 'userID', 'mode'],
   data () {
     return {
       syncProgrIndeter: false,
@@ -34,14 +33,17 @@ export default {
       }
       let formData = new FormData()
       const clientId = this.$store.state.clientId
+      formData.append('id', this.id)
       formData.append('name', this.serverName)
+      formData.append('host', this.host)
+      formData.append('username', this.username)
+      formData.append('password', this.password)
       formData.append('userID', this.userID)
-      formData.append('sourceOwner', this.sourceOwner)
       formData.append('clientId', clientId)
       formData.append('mode', mode)
       this.syncRunning = true
       this.syncProgrIndeter = true
-      axios.post(backendServer + '/' + this.syncType + '/', formData, {
+      axios.post('/' + this.syncType + '/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -63,7 +65,7 @@ export default {
       } else if (this.syncType === 'fhirSync') {
         syncProgressType = 'fhirSyncRequest'
       }
-      axios.get(backendServer + '/progress/' + syncProgressType + '/' + clientId).then((syncProgress) => {
+      axios.get('/progress/' + syncProgressType + '/' + clientId).then((syncProgress) => {
         if (syncProgress.data === null || syncProgress.data === undefined || syncProgress.data === false) {
           this.$store.state.uploadRunning = false
           this.syncProgrIndeter = false

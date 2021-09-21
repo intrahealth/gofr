@@ -1,6 +1,6 @@
 {
   "resourceType": "Basic",
-  "id": "gofr-task-read-practitioner-role-page-resource",
+  "id": "gofr-task-read-gofr-page-search",
   "meta": {
     "profile": [
       "http://gofr.org/fhir/StructureDefinition/gofr-task"
@@ -17,7 +17,7 @@
   "extension": [
     {
       "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
-      "valueString": "read-practitioner-role-page-resource"
+      "valueString": "read-gofr-page-search"
     },
     {
       "extension": [
@@ -31,7 +31,7 @@
         },
         {
           "url": "instance",
-          "valueId": "ihris-page-practitionerrole"
+          "valueId": "gofr-page-search"
         }
       ],
       "url": "http://gofr.org/fhir/StructureDefinition/task-attributes"

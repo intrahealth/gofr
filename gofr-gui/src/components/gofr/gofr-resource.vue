@@ -102,7 +102,6 @@
 
 <script>
 import axios from 'axios'
-import {tasksVerification} from '@/modules/tasksVerification'
 export default {
   name: "gofr-resource",
   props: ["title","field","fhirId","page","profile","section-menu","edit","links","constraints" ],
@@ -117,8 +116,7 @@ export default {
       isEdit: false,
       linktext: [ ],
       advancedValid: true,
-      currentRequestStatus: '',
-      tasksVerification: tasksVerification
+      currentRequestStatus: ''
     }
   },
   created: function() {
@@ -219,8 +217,8 @@ export default {
       }
     },
     hasPermission() {
-      if(this.$store.state.requestResourceUpdateData.requestAction === 'process-update-request' && tasksVerification.hasPermissionByName('special', 'custom', 'process-update-facility-request') ||
-        this.$store.state.requestResourceUpdateData.requestAction === 'process-add-request' && tasksVerification.hasPermissionByName('special', 'custom', 'process-add-facility-request')
+      if(this.$store.state.requestResourceUpdateData.requestAction === 'process-update-request' && this.$tasksVerification.hasPermissionByName('special', 'custom', 'process-update-facility-request') ||
+        this.$store.state.requestResourceUpdateData.requestAction === 'process-add-request' && this.$tasksVerification.hasPermissionByName('special', 'custom', 'process-add-facility-request')
       ) {
         return true
       }

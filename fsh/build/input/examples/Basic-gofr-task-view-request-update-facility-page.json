@@ -1,6 +1,6 @@
 {
   "resourceType": "Basic",
-  "id": "gofr-task-search-records",
+  "id": "gofr-task-view-request-update-facility-page",
   "meta": {
     "profile": [
       "http://gofr.org/fhir/StructureDefinition/gofr-task"
@@ -17,7 +17,7 @@
   "extension": [
     {
       "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
-      "valueString": "search-records"
+      "valueString": "view-request-update-facility-page"
     },
     {
       "extension": [
@@ -27,11 +27,11 @@
         },
         {
           "url": "resource",
-          "valueCode": "navigation"
+          "valueCode": "custom"
         },
         {
           "url": "instance",
-          "valueId": "search-records"
+          "valueId": "view-request-update-facility-page"
         }
       ],
       "url": "http://gofr.org/fhir/StructureDefinition/task-attributes"
@@ -39,13 +39,7 @@
     {
       "url": "compositeTask",
       "valueReference": {
-        "reference": "Basic/gofr-task-access-facility-registry-mod"
-      }
-    },
-    {
-      "url": "compositeTask",
-      "valueReference": {
-        "reference": "Basic/gofr-task-read-gofr-page-search"
+        "reference": "Basic/gofr-task-make-facilityregistry-requests"
       }
     }
   ]

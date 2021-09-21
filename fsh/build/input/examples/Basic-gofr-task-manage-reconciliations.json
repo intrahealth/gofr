@@ -17,7 +17,7 @@
   "extension": [
     {
       "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
-      "valueString": "manage-data-source"
+      "valueString": "manage-reconciliations"
     },
     {
       "extension": [
@@ -31,7 +31,7 @@
         },
         {
           "url": "instance",
-          "valueId": "manage-data-source"
+          "valueId": "manage-reconciliations"
         }
       ],
       "url": "http://gofr.org/fhir/StructureDefinition/task-attributes"

@@ -11,7 +11,6 @@ const formidable = require('formidable');
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
-const Cryptr = require('cryptr');
 const fsFinder = require('fs-finder');
 const cors = require('cors');
 const redis = require('redis');

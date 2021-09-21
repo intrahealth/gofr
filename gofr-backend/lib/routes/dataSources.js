@@ -629,8 +629,8 @@ router.get('/getSource/:userID/:orgId?', (req, res) => {
         _revinclude: 'Basic:datasourcepartition',
         _include: ['Basic:partitionowner', 'Basic:partitionshareduser'],
       };
-      // if admin
-      if (req.user.permissions['*'] && req.user.permissions['*']['*']) {
+      // if not admin
+      if (!req.user.permissions['*'] || !req.user.permissions['*']['*']) {
         searchParams.partitionowner = `Person/${req.params.userID}`;
       }
       fhirAxios.searchAll('Basic', searchParams, 'DEFAULT').then((data) => {

@@ -1,6 +1,6 @@
 {
   "resourceType": "Basic",
-  "id": "gofr-task-search-records",
+  "id": "gofr-task-read-healthcareservice-resource",
   "meta": {
     "profile": [
       "http://gofr.org/fhir/StructureDefinition/gofr-task"
@@ -17,36 +17,20 @@
   "extension": [
     {
       "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
-      "valueString": "search-records"
+      "valueString": "read-healthcareservice-resource"
     },
     {
       "extension": [
         {
           "url": "permission",
-          "valueCode": "special"
+          "valueCode": "read"
         },
         {
           "url": "resource",
-          "valueCode": "navigation"
-        },
-        {
-          "url": "instance",
-          "valueId": "search-records"
+          "valueCode": "HealthcareService"
         }
       ],
       "url": "http://gofr.org/fhir/StructureDefinition/task-attributes"
-    },
-    {
-      "url": "compositeTask",
-      "valueReference": {
-        "reference": "Basic/gofr-task-access-facility-registry-mod"
-      }
-    },
-    {
-      "url": "compositeTask",
-      "valueReference": {
-        "reference": "Basic/gofr-task-read-gofr-page-search"
-      }
     }
   ]
 }

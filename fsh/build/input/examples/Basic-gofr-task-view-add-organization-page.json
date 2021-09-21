@@ -41,6 +41,12 @@
       "valueReference": {
         "reference": "Basic/gofr-task-access-facility-registry-mod"
       }
+    },
+    {
+      "url": "compositeTask",
+      "valueReference": {
+        "reference": "Basic/gofr-task-read-gofr-page-organization"
+      }
     }
   ]
 }

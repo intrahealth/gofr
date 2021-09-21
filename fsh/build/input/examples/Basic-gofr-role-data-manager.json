@@ -218,6 +218,18 @@
     {
       "url": "task",
       "valueReference": {
+        "reference": "Basic/gofr-task-read-organization-resource"
+      }
+    },
+    {
+      "url": "task",
+      "valueReference": {
+        "reference": "Basic/gofr-task-read-healthcareservice-resource"
+      }
+    },
+    {
+      "url": "task",
+      "valueReference": {
         "reference": "Basic/gofr-task-read-document-reference"
       }
     },

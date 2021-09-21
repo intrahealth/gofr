@@ -1,6 +1,6 @@
 {
   "resourceType": "Basic",
-  "id": "gofr-task-read-practitioner-page-resource",
+  "id": "gofr-task-read-organization-resource",
   "meta": {
     "profile": [
       "http://gofr.org/fhir/StructureDefinition/gofr-task"
@@ -17,7 +17,7 @@
   "extension": [
     {
       "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
-      "valueString": "read-practitioner-page-resource"
+      "valueString": "read-organization-resource"
     },
     {
       "extension": [
@@ -27,11 +27,7 @@
         },
         {
           "url": "resource",
-          "valueCode": "Basic"
-        },
-        {
-          "url": "instance",
-          "valueId": "ihris-page-practitioner"
+          "valueCode": "Organization"
         }
       ],
       "url": "http://gofr.org/fhir/StructureDefinition/task-attributes"

@@ -1,6 +1,6 @@
 {
   "resourceType": "Basic",
-  "id": "gofr-task-search-records",
+  "id": "gofr-task-make-facilityregistry-requests",
   "meta": {
     "profile": [
       "http://gofr.org/fhir/StructureDefinition/gofr-task"
@@ -17,7 +17,7 @@
   "extension": [
     {
       "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
-      "valueString": "search-records"
+      "valueString": "make-facilityregistry-requests"
     },
     {
       "extension": [
@@ -27,26 +27,14 @@
         },
         {
           "url": "resource",
-          "valueCode": "navigation"
+          "valueCode": "custom"
         },
         {
           "url": "instance",
-          "valueId": "search-records"
+          "valueId": "make-facilityregistry-requests"
         }
       ],
       "url": "http://gofr.org/fhir/StructureDefinition/task-attributes"
-    },
-    {
-      "url": "compositeTask",
-      "valueReference": {
-        "reference": "Basic/gofr-task-access-facility-registry-mod"
-      }
-    },
-    {
-      "url": "compositeTask",
-      "valueReference": {
-        "reference": "Basic/gofr-task-read-gofr-page-search"
-      }
     }
   ]
 }

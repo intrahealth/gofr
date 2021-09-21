@@ -181,7 +181,7 @@
     </li>
     <li
       class="parent"
-      v-if="$tasksVerification.hasPermissionByName('special', 'navigation', 'access-facility-registry-mod')"
+      v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'access-facility-registry-mod')"
     >
       <a href="#">
         <v-icon>mdi-map-marker</v-icon>{{ $t('App.menu.facilityRegistry.msg')}}
@@ -436,7 +436,10 @@
             <span>{{ $t('App.menu.viewMap.tooltip')}}</span>
           </v-tooltip>
         </v-list>
-        <li class="parent">
+        <li
+          class="parent"
+          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'make-facilityregistry-requests')"
+        >
           <a href="#">
             <v-icon
               left

@@ -387,6 +387,27 @@
     },
     "notBefore" : 0,
     "groups" : [ ]
+  }, {
+    "id" : "e9b41c35-7c85-46df-aeea-a4e8dbf0364e",
+    "createdTimestamp" : 1632218468015,
+    "username" : "root@gofr.org",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "GOFR Admin",
+    "email" : "root@gofr.org",
+    "credentials" : [ {
+      "id" : "8b3f3282-c091-4d22-a20e-30f707630be7",
+      "type" : "password",
+      "createdDate" : 1632218481558,
+      "secretData" : "{\"value\":\"lYd4sUmCoyqy6GL7Snu80/pq7uHX4ttO7En6lBGhGaETtyzPk3BG/ejssimznil5ZGRDDYFFYJtqRL9OgBrExg==\",\"salt\":\"xWMAykPXIUtIQT764ruuWQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ "UPDATE_PASSWORD" ],
+    "realmRoles" : [ "Admin", "default-roles-gofr" ],
+    "notBefore" : 0,
+    "groups" : [ ]
   } ],
   "scopeMappings" : [ {
     "clientScope" : "offline_access",

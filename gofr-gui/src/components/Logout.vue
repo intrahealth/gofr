@@ -8,9 +8,6 @@ import VueCookies from 'vue-cookies'
 import axios from 'axios'
 export default {
   mounted () {
-    this.$store.state.auth.username = ''
-    this.$store.state.auth.userObj = {}
-    VueCookies.remove('userObj')
     this.$store.state.auth.userID = ''
     if(this.$store.state.idp === 'keycloak') {
       this.$keycloak.logout()
@@ -23,6 +20,9 @@ export default {
       })
       this.$router.push('login')
     }
+    this.$store.state.auth.username = ''
+    this.$store.state.auth.userObj = {}
+    VueCookies.remove('userObj')
   }
 }
 </script>

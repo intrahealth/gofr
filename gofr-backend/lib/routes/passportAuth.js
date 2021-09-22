@@ -106,10 +106,10 @@ router.passport = passport;
 router.get('/', (req, res, next) => {
   if (req.user) {
     res.status(200).json({
-      userObj: req.user
+      userObj: req.user,
     });
   } else {
-    next();
+    return res.status(200).send()
   }
 },
 passport.authenticate('custom-loggedout', {}), (req, res) => {
@@ -119,7 +119,8 @@ passport.authenticate('custom-loggedout', {}), (req, res) => {
     res.status(200).json({ ok: false });
   }
 });
-router.get('/logout', passport.authenticate('custom-loggedout', {}), (req, res) => {
+router.get('/logout', (req, res) => {
+  req.logout();
   if (req.user) {
     res.status(200).json({ ok: true });
   } else {
@@ -132,7 +133,7 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
 
 router.post('/login', passport.authenticate('local', {}), (req, res) => {
   res.status(200).json({
-    userObj: req.user
+    userObj: req.user,
   });
 });
 

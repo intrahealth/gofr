@@ -213,9 +213,9 @@ getDHIS2StoreConfig((storeConfig) => {
           if(telecom) {
             store.state.auth.username = telecom.value
           }
+          store.state.auth.userObj = authResp.data.userObj
+          store.state.auth.userID = authResp.data.userObj.resource.id
         }
-        store.state.auth.userObj = authResp.data.userObj
-        store.state.auth.userID = authResp.data.userObj.resource.id
         Vue.prototype.$keycloak = null
         new Vue({
           router,

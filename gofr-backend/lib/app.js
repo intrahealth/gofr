@@ -69,6 +69,7 @@ const isLoggedIn = (req, res, next) => {
   if (req.method == 'OPTIONS'
     || (req.query.hasOwnProperty('authDisabled') && req.query.authDisabled)
     || req.path.startsWith('/auth/login')
+    || req.path === '/auth'
     || req.path === '/getSignupConf'
     || req.path === '/config/getGeneralConfig'
     || req.path === '/addUser/'

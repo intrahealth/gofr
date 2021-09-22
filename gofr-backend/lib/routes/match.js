@@ -32,7 +32,7 @@ function recoStatus(pairId) {
     if (pairId.split('/').length === 2) {
       pairId = pairId.split('/')[1];
     }
-    fhirAxios.read('Basic', pairId, 'DEFAULT').then((pair) => {
+    fhirAxios.read('Basic', pairId, '', 'DEFAULT').then((pair) => {
       const tatus = pair && pair.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/recoStatus');
       if (tatus) {
         return resolve(tatus.valueString);

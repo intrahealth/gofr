@@ -421,7 +421,6 @@ router.post('/addSource', (req, res) => {
           return reject();
         });
       } else {
-        logger.error('here');
         return resolve(fields.partitionID);
       }
     });
@@ -783,7 +782,7 @@ router.get('/getSource/:userID/:orgId?', (req, res) => {
 });
 
 router.get('/countLevels', (req, res) => {
-  const allowed = req.user.hasPermissionByName('special', 'custom', 'viewdatasource');
+  const allowed = req.user.hasPermissionByName('special', 'custom', 'view-data-source');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }

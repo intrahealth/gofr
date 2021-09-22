@@ -203,9 +203,7 @@ const fhirAxios = {
     } else if (resource.resourceType === 'Bundle') {
       for (const index in resource.entry) {
         const resType = resource.entry[index].resource.resourceType;
-        console.log(resType);
         if (!resource.entry[index].resource.partOf && ['Location', 'Organization'].includes(resType)) {
-          console.log(resType);
           resource.entry[index].resource.partOf = {
             reference: `${resType}/${mixin.getTopOrgId(partitionName, resType)}`,
           };

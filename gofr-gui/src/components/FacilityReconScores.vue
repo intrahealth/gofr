@@ -101,7 +101,7 @@
             <v-textarea
               v-model="flagComment"
               auto-grow
-              box
+              filled
               color="deep-purple"
               label="Flag Comment"
               rows="1"

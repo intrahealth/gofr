@@ -423,12 +423,12 @@
       </v-col>
       <v-spacer></v-spacer>
       <v-col cols="3">
-        <template v-if="$store.state.activePair.userID === $store.state.auth.userID || $store.state.auth.role == 'Admin'">
+        <template>
           <v-btn
             color="success"
             rounded
             @click='markRecoDone'
-            v-if="$store.state.recoStatus !== 'Done'"
+            v-if="$store.state.recoStatus !== 'Done' && ($store.state.activePair.userID === $store.state.auth.userID || $tasksVerification.hasPermissionByName('special', 'custom', 'close-matching'))"
           >
             <v-icon>mdi-lock</v-icon>Mark Reconciliation As Done
           </v-btn>
@@ -436,7 +436,7 @@
             color="success"
             rounded
             @click='markRecoUnDone'
-            v-if="$store.state.recoStatus === 'Done' && $store.state.auth.role == 'Admin'"
+            v-if="$store.state.recoStatus === 'Done' && ($store.state.activePair.userID === $store.state.auth.userID || $tasksVerification.hasPermissionByName('special', 'custom', 'close-matching'))"
           >
             <v-icon left>mdi-lock-open-variant</v-icon>Mark Reconciliation As UnDone
           </v-btn>
@@ -740,7 +740,7 @@ export default {
     markRecoUnDone () {
       this.$store.state.progressTitle = 'Marking reconciliation as Un Done'
       this.$store.state.dynamicProgress = true
-      axios.get('/markRecoUnDone/' + this.$store.state.activePair.id).then((status) => {
+      axios.get('/match/markRecoUnDone/' + this.$store.state.activePair.id).then((status) => {
         this.$store.state.dynamicProgress = false
         if (status.data.status) {
           this.$store.state.recoStatus = status.data.status

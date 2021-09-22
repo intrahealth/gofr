@@ -82,7 +82,7 @@
                 <v-select
                   :items="editParents"
                   v-model="editLocationParent"
-                  box
+                  filled
                   label="Parent"
                 ></v-select>
               </v-flex>

@@ -832,3 +832,5 @@ Usage:          #example
 * extension[task][35].valueReference = Reference(Basic/gofr-task-read-value-set)
 * extension[task][36].valueReference = Reference(Basic/gofr-task-read-code-system)
 * extension[task][37].valueReference = Reference(Basic/gofr-task-read-structure-definition)
+* extension[task][38].valueReference = Reference(Basic/gofr-task-close-matching)
+* extension[task][39].valueReference = Reference(Basic/gofr-task-open-matching)

@@ -8,13 +8,6 @@ services:
       - "6379:6379"
     restart: always
 
-  mongo:
-    container_name: mongo-gofr
-    image: mongo:3.6
-    ports:
-      - "27017:27017"
-    restart: always
-
   fhir:
     container_name: hapi-fhir
     image: hapiproject/hapi:latest
@@ -27,6 +20,12 @@ services:
       - hapi.fhir.partitioning.enabled=true
       - hapi.fhir.partitioning.allow_references_across_partitions=false
       - hapi.fhir.partitioning.partitioning_include_in_search_hashes=false
+      - spring.jpa.properties.hibernate.search.enabled=true
+      - spring.jpa.properties.hibernate.search.backend.type=lucene
+      - spring.jpa.properties.hibernate.search.backend.analysis.configurer=ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer
+      - spring.jpa.properties.hibernate.search.backend.directory.type=local-filesystem
+      - spring.jpa.properties.hibernate.search.backend.directory.root=target/lucenefiles
+      - spring.jpa.properties.hibernate.search.backend.lucene_version=lucene_current
       # file:// can only deal with absolute paths, have to use classpath
     #   SPRING_CONFIG_LOCATION: 'classpath:./application.yaml'
 
@@ -35,11 +34,8 @@ services:
     container_name: gofr
     image: intrahealth/gofr:latest
     environment:
-      - FHIR_BASE_URL=http://fhir:8080/fhir
+      - mCSD.url=http://fhir:8080/fhir
       - REDIS_HOST=redis
-      # use instant core mongo
-      # - DB_HOST=mongo-1
-      - DB_HOST=mongo-gofr
     ports:
       - "4000:4000"
     restart: always

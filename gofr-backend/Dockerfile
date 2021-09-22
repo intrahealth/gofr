@@ -17,7 +17,7 @@ RUN cp /src/gofr-backend/config/default.json.example /src/gofr-backend/config/de
 # add app
 # ADD . /src/
 
-ARG FHIR_BASE_URL=http://localhost:8080/fhir
+ARG FHIR_BASE_URL=http://fhir:8080/fhir
 ENV FHIR_BASE_URL=${FHIR_BASE_URL}
 
 ENV DOCKERIZE_VERSION v0.5.0

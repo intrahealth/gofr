@@ -34,7 +34,10 @@ services:
     container_name: gofr
     image: intrahealth/gofr:latest
     environment:
-      - mCSD.url=http://fhir:8080/fhir
+      - mCSD__server__protocal=http
+      - mCSD__server__host=fhir
+      - mCSD__server__port=8080
+      - mCSD__server__basePath=fhir
       - REDIS_HOST=redis
     ports:
       - "4000:4000"

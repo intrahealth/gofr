@@ -46,12 +46,14 @@
   "profileBaseUrl": "http://gofr.org/fhir",
   "mCSD": {
     "url": "http://localhost:8081/hapi54/fhir",
-    "protocal": "http",
-    "host": "localhost",
-    "port": "8081",
-    "basePath": "hapi54/fhir",
-    "username": "",
-    "password": "",
+    "server": {
+      "protocal": "http",
+      "host": "localhost",
+      "port": "8081",
+      "basePath": "hapi54/fhir",
+      "username": "",
+      "password": ""
+    },
     "fakeOrgId": "eac583d2-d1ba-11e8-a8d5-f2801f1b9fd1",
     "fakeOrgName": "Taifafeki",
     "cacheTime": 1200,

@@ -46,7 +46,7 @@ const addDataPartition = () => new Promise((resolve, reject) => {
             url: 'http://gofr.org/fhir/StructureDefinition/shareToAll',
             extension: [{
               url: 'activated',
-              valueBoolean: false,
+              valueBoolean: true,
             }, {
               url: 'limitByUserLocation',
               valueBoolean: false,
@@ -182,7 +182,7 @@ module.exports = {
         reject(err);
       });
     }).catch(() => {
-      Promise.all([initializeTasks(), loadFSHFiles()]).then(() => {
+      Promise.all([loadFSHFiles()]).then(() => {
         mixin.updateConfigFile(['app', 'installed'], true, () => {
           logger.info('Done loading FSH files');
           resolve();

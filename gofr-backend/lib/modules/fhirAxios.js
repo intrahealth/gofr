@@ -65,14 +65,14 @@ const fhirAxios = {
       }
     }
     if (!database) {
-      database = config.get('mCSD:basePath');
+      database = config.get('mCSD:server:basePath');
     } else {
       database += '/fhir';
     }
     let url = new URI({
-      protocol: config.get('mCSD:protocal').replace(':', ''),
-      hostname: config.get('mCSD:host'),
-      port: config.get('mCSD:port').toString(),
+      protocol: config.get('mCSD:server:protocal').replace(':', ''),
+      hostname: config.get('mCSD:server:host'),
+      port: config.get('mCSD:server:port').toString(),
     });
     if (database) {
       url = url.segment(database);

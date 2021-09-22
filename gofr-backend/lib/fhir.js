@@ -10,7 +10,6 @@ const redisClient = redis.createClient({
 const moment = require('moment');
 const mcsd = require('./mcsd')();
 const mixin = require('./mixin');
-const config = require('./config');
 const logger = require('./winston');
 const fhirAxios = require('./modules/fhirAxios');
 
@@ -96,8 +95,7 @@ const fhir = {
             }],
             text: 'Jurisdiction',
           };
-          const url = URI(config.get('mCSD:url'))
-            .segment(database)
+          const url = URI(fhirAxios.__genUrl(database))
             .segment('Location')
             .segment(fhir.id)
             .toString();

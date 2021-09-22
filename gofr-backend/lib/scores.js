@@ -18,6 +18,7 @@ const mixin = require('./mixin');
 const config = require('./config');
 const mcsd = require('./mcsd')();
 const logger = require('./winston');
+const fhirAxios = require('./modules/fhirAxios');
 
 const topOrgName = config.get('mCSD:fakeOrgName');
 
@@ -98,8 +99,7 @@ module.exports = function () {
               mcsd.getLocationParentsFromData(entityParent, mcsdSource2All, 'all', (parents) => {
                 // lets make sure that we use the mapped parent for comparing against Source1
                 async.each(parents, (parent, parentCallback) => {
-                  const parentIdentifier = URI(config.get('mCSD:url'))
-                    .segment(source2DB)
+                  const parentIdentifier = URI(fhirAxios.__genUrl(source2DB))
                     .segment('Location')
                     .segment(parent.id)
                     .toString()
@@ -149,8 +149,7 @@ module.exports = function () {
               matchBroken = true;
             }
           }
-          const source1Identifier = URI(config.get('mCSD:url'))
-            .segment(source1DB)
+          const source1Identifier = URI(fhirAxios.__genUrl(source1DB))
             .segment('Location')
             .segment(source1Id)
             .toString();
@@ -313,8 +312,7 @@ module.exports = function () {
                   promises2.push(new Promise((resolve) => {
                     const matchComments = [];
                     const id = source2Entry.resource.id;
-                    const source2Identifier = URI(config.get('mCSD:url'))
-                      .segment(source2DB)
+                    const source2Identifier = URI(fhirAxios.__genUrl(source2DB))
                       .segment('Location')
                       .segment(id)
                       .toString();
@@ -568,8 +566,7 @@ module.exports = function () {
           logger.info('Populating parents');
           for (let i = 0, len = mcsdSource2.entry.length; i < len; i++) {
             const entry = mcsdSource2.entry[i];
-            const source2Identifier = URI(config.get('mCSD:url'))
-              .segment(source2DB)
+            const source2Identifier = URI(fhirAxios.__genUrl(source2DB))
               .segment('Location')
               .segment(entry.resource.id)
               .toString();
@@ -589,8 +586,7 @@ module.exports = function () {
               mcsd.getLocationParentsFromData(entityParent, mcsdSource2All, 'all', (parents) => {
                 // lets make sure that we use the mapped parent for comparing against Source1
                 async.each(parents, (parent, parentCallback) => {
-                  const parentIdentifier = URI(config.get('mCSD:url'))
-                    .segment(source2DB)
+                  const parentIdentifier = URI(fhirAxios.__genUrl(source2DB))
                     .segment('Location')
                     .segment(parent.id)
                     .toString();
@@ -651,8 +647,7 @@ module.exports = function () {
               matchBroken = true;
             }
           }
-          const source1Identifier = URI(config.get('mCSD:url'))
-            .segment(source1DB)
+          const source1Identifier = URI(fhirAxios.__genUrl(source1DB))
             .segment('Location')
             .segment(source1Id)
             .toString();

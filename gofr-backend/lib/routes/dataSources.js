@@ -1371,10 +1371,10 @@ router.delete('/deleteSourcePair', (req, res) => {
   deleteSourcePair({ pairID: pairId, userID }).then(() => {
     const src1DB = mixin.toTitleCase(req.query.source1Name + pairOwner);
     const src2DB = mixin.toTitleCase(req.query.source2Name + pairOwner);
-    const src1Url = URI(config.get('mCSD:url')).segment(src1DB);
-    const src2Url = URI(config.get('mCSD:url')).segment(src2DB);
-    mcsd.cleanCache(`url_${src1Url.toString()}`, true);
-    mcsd.cleanCache(`url_${src2Url.toString()}`, true);
+    const src1Url = fhirAxios.__genUrl(src1DB);
+    const src2Url = fhirAxios.__genUrl(src2DB);
+    mcsd.cleanCache(`url_${src1Url}`, true);
+    mcsd.cleanCache(`url_${src2Url}`, true);
     return res.status(200).send();
   }).catch((err) => {
     logger.error(err);

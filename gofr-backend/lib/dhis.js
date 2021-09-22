@@ -7,8 +7,8 @@ const https = require('https');
 const isJSON = require('is-json');
 const redis = require('redis');
 const mixin = require('./mixin');
-const config = require('./config');
 const logger = require('./winston');
+const fhirAxios = require('./modules/fhirAxios');
 
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST || '127.0.0.1',
@@ -265,7 +265,7 @@ function processOrgUnit(metadata, hasKey) {
     }],
     text: 'Jurisdiction',
   };
-  let hostURL = URI(config.get('mCSD:url')).segment(database)
+  let hostURL = URI(fhirAxios.__genUrl(database))
     .segment('Location')
     .segment(fhir.id)
     .toString();
@@ -376,8 +376,7 @@ function processOrgUnit(metadata, hasKey) {
       }
     }
 
-    hostURL = URI(config.get('mCSD:url'))
-      .segment(database)
+    hostURL = URI(fhirAxios.__genUrl(database))
       .segment('Location')
       .segment(fhir.id)
       .toString();

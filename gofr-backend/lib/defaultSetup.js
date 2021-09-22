@@ -136,7 +136,7 @@ const loadFSHFiles = () => new Promise(async (resolvePar, rejectPar) => {
           if (fhir.resourceType === 'Bundle'
               && (fhir.type === 'transaction' || fhir.type === 'batch')) {
             logger.info(`Saving ${fhir.type}`);
-            const url = URI(config.get('mCSD:url')).segment(config.get('mCSD:registryDB')).toString();
+            const url = fhirAxios.__genUrl('DEFAULT');
             axios.post(url, fhir).then((res) => {
               logger.info(`${url}: ${res.status}`);
               logger.info(JSON.stringify(res.data, null, 2));
@@ -148,8 +148,7 @@ const loadFSHFiles = () => new Promise(async (resolvePar, rejectPar) => {
             });
           } else {
             logger.info(`Saving ${fhir.resourceType} - ${fhir.id}`);
-            const url = URI(config.get('mCSD:url')).segment(config.get('mCSD:registryDB')).segment(fhir.resourceType).segment(fhir.id)
-              .toString();
+            const url = new URI(fhirAxios.__genUrl('DEFAULT')).segment(fhir.resourceType).segment(fhir.id).toString();
             axios.put(url, fhir).then((res) => {
               logger.info(`${url}: ${res.status}`);
               logger.info(res.headers['content-location']);

@@ -19,6 +19,7 @@ const mixin = require('./mixin');
 const config = require('./config');
 const logger = require('./winston');
 const codesystem = require('../terminologies/gofr-codesystem.json');
+const fhirAxios = require('./modules/fhirAxios');
 
 const topOrgName = config.get('mCSD:fakeOrgName');
 
@@ -39,7 +40,7 @@ module.exports = () => ({
     if (!database) {
       database = config.get('mCSD:registryDB');
     }
-    let url = URI(config.get('mCSD:url'));
+    let url = URI(fhirAxios.__genUrl());
     if (database) {
       url = url.segment(database);
     }
@@ -112,7 +113,7 @@ module.exports = () => ({
     if (!database) {
       database = config.get('mCSD:registryDB');
     }
-    let url = URI(config.get('mCSD:url'));
+    let url = URI(fhirAxios.__genUrl());
     if (database) {
       url = url.segment(database);
     }
@@ -162,7 +163,7 @@ module.exports = () => ({
     if (!database) {
       database = config.get('mCSD:registryDB');
     }
-    const baseUrl = URI(config.get('mCSD:url')).segment(database).segment('HealthcareService');
+    const baseUrl = URI(fhirAxios.__genUrl(database)).segment('HealthcareService');
     let url = baseUrl;
     baseUrl.toString();
     if (id) {
@@ -239,7 +240,7 @@ module.exports = () => ({
   },
 
   getLocations(database, callback) {
-    const baseUrl = URI(config.get('mCSD:url')).segment(database).segment('Location')
+    const baseUrl = URI(fhirAxios.__genUrl(database)).segment('Location')
       .toString();
     let url = `${baseUrl}?_count=37000`;
     let locations;
@@ -321,7 +322,7 @@ module.exports = () => ({
     if (!database) {
       database = config.get('mCSD:registryDB');
     }
-    let url = URI(config.get('mCSD:url'));
+    let url = URI(fhirAxios.__genUrl());
     if (database) {
       url = url.segment(database);
     }
@@ -371,7 +372,7 @@ module.exports = () => ({
     const locations = {};
     locations.entry = [];
     if (identifier) {
-      var url = `${URI(config.get('mCSD:url')).segment(database).segment('Location')}?identifier=${identifier}`.toString();
+      var url = `${URI(fhirAxios.__genUrl(database)).segment('Location')}?identifier=${identifier}`.toString();
     } else {
       return callback(locations);
     }
@@ -416,7 +417,7 @@ module.exports = () => ({
     if (!parent) {
       parent = '';
     }
-    let baseUrl = URI(config.get('mCSD:url'));
+    let baseUrl = URI(fhirAxios.__genUrl());
     if (database) {
       baseUrl = baseUrl.segment(database);
     }
@@ -465,7 +466,7 @@ module.exports = () => ({
   },
 
   getImmediateChildren(database, id, callback) {
-    let url = `${URI(config.get('mCSD:url')).segment(database).segment('Location')}?partof=${id.toString()}`;
+    let url = `${URI(fhirAxios.__genUrl(database)).segment('Location')}?partof=${id.toString()}`;
     const locations = {};
     locations.entry = [];
     async.doWhilst(
@@ -519,7 +520,7 @@ module.exports = () => ({
 
       const splParent = entityParent.split('/');
       entityParent = splParent[(splParent.length - 1)];
-      const url = `${URI(config.get('mCSD:url')).segment(database).segment('Location')}?_id=${entityParent.toString()}`;
+      const url = `${URI(fhirAxios.__genUrl(database)).segment('Location')}?_id=${entityParent.toString()}`;
 
       const options = {
         url,
@@ -750,9 +751,7 @@ module.exports = () => ({
 
   countLevels(db, topOrgId, callback) {
     function constructURL(id, callback) {
-      const url = `${URI(config.get('mCSD:url'))
-        .segment(db)
-
+      const url = `${URI(fhirAxios.__genUrl(db))
         .segment('Location')}?partof=Location/${id.toString()}`;
       return callback(url);
     }
@@ -1447,8 +1446,7 @@ module.exports = () => ({
     if (!database) {
       database = config.get('mCSD:registryDB');
     }
-    const urlPrefix = URI(config.get('mCSD:url'))
-      .segment(database)
+    const urlPrefix = URI(fhirAxios.__genUrl(database))
       .segment(resource);
     const url = URI(urlPrefix).segment(id).toString();
     const options = {
@@ -1560,7 +1558,7 @@ module.exports = () => ({
     if (!database) {
       database = config.get('mCSD:registryDB');
     }
-    let url = URI(config.get('mCSD:url'));
+    let url = URI(fhirAxios.__genUrl());
     if (database) {
       url = url.segment(database);
     }
@@ -1618,8 +1616,7 @@ module.exports = () => ({
     const me = this;
     async.parallel({
       source2Mapped(callback) {
-        const source2Identifier = URI(config.get('mCSD:url'))
-          .segment(source2DB)
+        const source2Identifier = URI(fhirAxios.__genUrl(source2DB))
           .segment('Location')
           .segment(source2Id)
           .toString();
@@ -1740,10 +1737,10 @@ module.exports = () => ({
         resource.alias = res.source2mCSD.entry[0].resource.name; // take source1 name
         resource.id = mixin.getMappingId(source1Id);
         resource.identifier = [];
-        const source2URL = URI(config.get('mCSD:url')).segment(source2DB).segment('Location')
+        const source2URL = URI(fhirAxios.__genUrl(source2DB)).segment('Location')
           .segment(source2Id)
           .toString();
-        const source1URL = URI(config.get('mCSD:url')).segment(source1DB).segment('Location')
+        const source1URL = URI(fhirAxios.__genUrl(source1DB)).segment('Location')
           .segment(source1Id)
           .toString();
         resource.identifier.push({
@@ -1840,7 +1837,7 @@ module.exports = () => ({
         });
         fhir.entry = fhir.entry.concat(entry);
         me.saveLocations(fhir, mappingDB, (err, res) => {
-          const url_prefix = URI(config.get('mCSD:url')).segment(mappingDB).segment('Location');
+          const url_prefix = URI(fhirAxios.__genUrl(mappingDB)).segment('Location');
           this.cleanCache(`url_${url_prefix.toString()}`, true);
           this.cleanCache(`parents${recoLevel}${source2DB}`);
           if (err) {
@@ -1881,7 +1878,7 @@ module.exports = () => ({
       flagged.type = 'batch';
 
       // deleting existing location
-      const url_prefix = URI(config.get('mCSD:url')).segment(mappingDB).segment('Location');
+      const url_prefix = URI(fhirAxios.__genUrl(mappingDB)).segment('Location');
       const url = URI(url_prefix).segment(mappingId).toString();
       const options = {
         url,
@@ -1972,7 +1969,7 @@ module.exports = () => ({
           }],
         };
         resource.identifier = [];
-        const url_prefix = URI(config.get('mCSD:url')).segment(source1DB).segment('Location');
+        const url_prefix = URI(fhirAxios.__genUrl(source1DB)).segment('Location');
         const source1URL = URI(url_prefix).segment(source1Id).toString();
         resource.identifier.push({
           system: source1System,
@@ -2015,11 +2012,9 @@ module.exports = () => ({
     if (!source1Id) {
       return callback(true, false);
     }
-    const url_prefix = URI(config.get('mCSD:url'))
-      .segment(mappingDB)
+    const url_prefix = URI(fhirAxios.__genUrl(mappingDB))
       .segment('Location');
-    const source1UrlPrefix = URI(config.get('mCSD:url'))
-      .segment(source1DB)
+    const source1UrlPrefix = URI(fhirAxios.__genUrl(source1DB))
       .segment('Location');
     const mappingId = mixin.getMappingId(source1Id);
     const url = URI(url_prefix).segment(mappingId).toString();
@@ -2084,8 +2079,7 @@ module.exports = () => ({
   },
   breakNoMatch(source1Id, mappingDB, callback) {
     const mappingId = mixin.getMappingId(source1Id);
-    const url_prefix = URI(config.get('mCSD:url'))
-      .segment(mappingDB)
+    const url_prefix = URI(fhirAxios.__genUrl(mappingDB))
       .segment('Location');
     const url = URI(url_prefix)
       .segment(mappingId)

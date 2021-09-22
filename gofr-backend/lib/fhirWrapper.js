@@ -4,6 +4,7 @@ const async = require('async');
 const isJSON = require('is-json');
 const logger = require('./winston');
 const config = require('./config');
+const fhirAxios = require('./modules/fhirAxios');
 
 module.exports = {
   /**
@@ -31,7 +32,7 @@ module.exports = {
         if (!partition) {
           partition = config.get('mCSD:registryDB');
         }
-        url = URI(config.get('mCSD:url')).segment(partition).segment(resource);
+        url = URI(fhirAxios.__genUrl(partition)).segment(resource);
         for (const path of extraPath) {
           url.segment(path);
         }
@@ -135,8 +136,7 @@ module.exports = {
     if (!partition) {
       partition = config.get('mCSD:registryDB');
     }
-    const url = URI(config.get('mCSD:url'))
-      .segment(partition)
+    const url = URI(fhirAxios.__genUrl(partition))
       .segment(resource)
       .toString();
     const options = {
@@ -167,7 +167,7 @@ module.exports = {
     if (!partition) {
       partition = config.get('mCSD:registryDB');
     }
-    const url = URI(config.get('mCSD:url')).segment(partition).toString();
+    const url = URI(fhirAxios.__genUrl(partition)).toString();
     const options = {
       url,
       headers: {
@@ -205,8 +205,7 @@ module.exports = {
       if (!partition) {
         partition = config.get('mCSD:registryDB');
       }
-      const url = URI(config.get('mCSD:url'))
-        .segment(partition)
+      const url = URI(fhirAxios.__genUrl(partition))
         .segment(resourceType)
         .segment(resourceID)
         .segment('$meta-delete')

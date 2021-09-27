@@ -59,6 +59,7 @@ const levelMaps = config.get('levelMaps');
 const app = express();
 const server = require('http').createServer(app);
 const logger = require('./winston');
+const { default: axios } = require('axios');
 
 const cleanReqPath = function (req, res, next) {
   req.url = req.url.replace('//', '/');
@@ -80,8 +81,26 @@ const isLoggedIn = (req, res, next) => {
   if (config.get('app:idp') === 'keycloak') {
     if (req.cookies && req.cookies.userObj) {
       req.user = user.restoreUser(JSON.parse(req.cookies.userObj));
+      return keycloak.protect()(req, res, next);
     }
-    return keycloak.protect()(req, res, next);
+    // for backend processes making API Calls
+    if (req.headers.authorization) {
+      axios({
+        url: `http://localhost:${config.get('server:port')}/auth`,
+        method: 'POST',
+        headers: {
+          Authorization: req.headers.authorization,
+        },
+      }).then((resp) => {
+        if (resp.data.resource) {
+          req.user = user.restoreUser(resp.data);
+          return keycloak.protect()(req, res, next);
+        }
+      }).catch((err) => {
+        logger.error(err);
+        return res.status(500).send();
+      });
+    }
   }
   if (config.get('app:idp') === 'gofr') {
     if (!req.user) {

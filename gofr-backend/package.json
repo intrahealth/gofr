@@ -44,6 +44,7 @@
     "fs-extra": "^7.0.0",
     "fs-finder": "^1.8.1",
     "geodist": "^0.2.1",
+    "http-proxy-middleware": "^2.0.1",
     "is-empty": "^1.2.0",
     "is-json": "^2.0.1",
     "jsdom": "^16.5.3",

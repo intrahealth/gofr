@@ -1,4 +1,5 @@
 const express = require('express');
+const jwtDecode = require('jwt-decode');
 const user = require('../modules/user');
 const kcadmin = require('../modules/keycloakAdminClient');
 
@@ -8,9 +9,37 @@ const logger = require('../winston');
 const fhirAxios = require('../modules/fhirAxios');
 
 router.post('/', (req, res) => {
-  fhirAxios.search('Person', { _id: req.body.id }, 'DEFAULT').then((usersRes) => {
+  let userResource = req.body;
+  if (!userResource || !userResource.id) {
+    const userDetails = jwtDecode(req.headers.authorization.split(' ')[1]);
+    if (!userDetails.sub) {
+      logger.error('User details are missing');
+      return res.status(401).send();
+    }
+    userResource = {
+      resourceType: 'Person',
+      id: userDetails.sub,
+      meta: {
+        profile: ['http://gofr.org/fhir/StructureDefinition/gofr-person-user'],
+      },
+      active: true,
+    };
+    if (userDetails.name) {
+      userResource.name = [{
+        use: 'official',
+        text: userDetails.name,
+      }];
+    }
+    if (userDetails.email) {
+      userResource.telecom = [{
+        system: 'email',
+        value: userDetails.email,
+      }];
+    }
+  }
+  fhirAxios.search('Person', { _id: userResource.id }, 'DEFAULT').then((usersRes) => {
     if (!usersRes.entry || (usersRes.entry && usersRes.entry.length === 0)) {
-      fhirAxios.update(req.body, 'DEFAULT').then((resp) => {
+      fhirAxios.update(userResource, 'DEFAULT').then((resp) => {
         kcadmin.populateRoleTasks({
           token: req.headers.authorization.split(' ')[1],
           user: resp,

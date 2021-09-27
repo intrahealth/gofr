@@ -1,4 +1,4 @@
-const fhirWrapper = require('../fhirWrapper');
+const fhirAxios = require('./fhirAxios');
 
 let cache = {};
 
@@ -33,10 +33,7 @@ const fhirDefinition = {
     const exp = expression.split('#');
     const defId = exp[0].substring(exp[0].lastIndexOf('/') + 1);
     if (!cache.hasOwnProperty(exp[0])) {
-      fhirWrapper.getResource({
-        resource: 'StructureDefinition',
-        id: defId,
-      }).then((resource) => {
+      fhirAxios.read('StructureDefinition', defId, '', 'DEFAULT').then((resource) => {
         cache[exp[0]] = resource;
         fhirDefinition._getFieldDefinition(exp[1], cache[exp[0]]).then((field) => {
           resolve(field);

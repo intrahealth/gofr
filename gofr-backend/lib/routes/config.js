@@ -4,7 +4,6 @@ const crypto = require('crypto');
 const express = require('express');
 
 const router = express.Router();
-const fhirWrapper = require('../fhirWrapper');
 const config = require('../config');
 
 const fhirAxios = require('../modules/fhirAxios');
@@ -18,10 +17,7 @@ const getUKey = () => Math.random().toString(36).replace(/^[^a-z]+/, '') + Math.
 
 const getDefinition = (resource) => {
   const structureDef = resource.split('/');
-  return fhirWrapper.getResource({
-    resource: structureDef[0],
-    id: structureDef[1],
-  });
+  return fhirAxios.read( structureDef[0], structureDef[1], '', 'DEFAULT' )
 };
 const profileResources = {};
 const getProfileResource = profile => new Promise((resolve, reject) => {

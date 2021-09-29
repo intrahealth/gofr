@@ -179,40 +179,21 @@ const fhirAxios = {
   }),
   create: (resource, partition) => new Promise((resolve, reject) => {
     let url = fhirAxios.__genUrl(partition);
+    let err;
     if (resource === undefined) {
       err = new InvalidRequestError('resource must be defined');
       err.response = { status: 404 };
       reject(err);
     }
     url = new URI(url);
-    let partitionName;
-    if (partition.split(':').length === 2) {
-      partitionName = partition.split(':')[1];
-    } else if (partition.split(':').length === 1) {
-      partitionName = partition;
-    }
-    if (resource.resourceType !== 'Bundle') {
-      url = url.segment(resource.resourceType);
-      if (['Location', 'Organization'].includes(resource.resourceType)) {
-        if (!resource.partOf || (resource.partOf && !resource.partOf.reference)) {
-          resource.partOf = {
-            reference: `${resource.resourceType}/${mixin.getTopOrgId(partitionName, resource.resourceType)}`,
-          };
-        }
+    if ( resource.resourceType !== "Bundle" ) {
+      url.pathname += resource.resourceType
+    } else {
+      if ( !( resource.type === "transaction" || resource.type === "batch" ) ) {
+        err = new InvalidRequestError( "Bundles must of type 'transaction' or 'batch'" )
+        err.response = { status: 404 }
+        reject( err )
       }
-    } else if (resource.resourceType === 'Bundle') {
-      for (const index in resource.entry) {
-        const resType = resource.entry[index].resource.resourceType;
-        if (!resource.entry[index].resource.partOf && ['Location', 'Organization'].includes(resType)) {
-          resource.entry[index].resource.partOf = {
-            reference: `${resType}/${mixin.getTopOrgId(partitionName, resType)}`,
-          };
-        }
-      }
-    } else if (!(resource.type === 'transaction' || resource.type === 'batch')) {
-      err = new InvalidRequestError("Bundles must of type 'transaction' or 'batch'");
-      err.response = { status: 404 };
-      reject(err);
     }
     const auth = fhirAxios.__getAuth();
     axios.post(url.toString(), resource, { auth }).then((response) => {
@@ -226,7 +207,7 @@ const fhirAxios = {
     if (resource === undefined) {
       reject(new InvalidRequestError('resource must be defined'));
     }
-    url = new URI(url).segment(resource)
+    url = new URI(url).segment(resource);
 
     const auth = fhirAxios.__getAuth();
     axios.delete(url.toString(), { auth, params }).then((response) => {

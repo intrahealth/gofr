@@ -339,7 +339,7 @@
           <v-tooltip right>
             <template v-slot:activator="{ on }">
               <v-list-item
-                to="/Resource/Add/jurisdiction"
+                to="/questionnaire/gofr-jurisdiction-questionnaire/jurisdiction"
                 v-on="on"
               >
                 <v-list-item-title class="menuText">

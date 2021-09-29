@@ -8,154 +8,160 @@ const redisClient = redis.createClient({
   host: process.env.REDIS_HOST || '127.0.0.1',
 });
 const moment = require('moment');
-const mcsd = require('./mcsd')();
-const mixin = require('./mixin');
 const logger = require('./winston');
 const fhirAxios = require('./modules/fhirAxios');
+const { default: axios } = require('axios');
 
 const fhir = {
   sync: (id, host, username, password, mode, name, clientId, topOrgName) => {
-    const fhirSyncRequestId = `fhirSyncRequest${clientId}`;
-    const fhirSyncRequest = JSON.stringify({
-      status: '1/2 - Loading all data from the FHIR Server specified',
-      error: null,
-      percent: null,
-    });
-    redisClient.set(fhirSyncRequestId, fhirSyncRequest);
-
     const database = name;
-    const topOrgId = mixin.getTopOrgId(database, 'Location');
     let saveBundle = {
       id: uuid4(),
       resourceType: 'Bundle',
       type: 'batch',
       entry: [],
     };
+    const fhirSyncRequestId = `fhirSyncRequest${clientId}`;
     fhir.getLastUpdate(id, (lastUpdated) => {
-      let url;
-      const baseURL = URI(host).segment('Location').segment('_history').addQuery('_count', 200);
-      if (mode === 'update') {
-        url = baseURL.addQuery('_since', `${lastUpdated}`);
-      }
-      url = baseURL.toString();
+      const resources = ['Location', 'Organization', 'HealthcareService'];
+      async.eachSeries(resources, (resource, nxtRes) => {
+        let fhirSyncRequest = JSON.stringify({
+          status: `${resource} - 1/2 - Loading data from remote FHIR Server`,
+          error: null,
+          percent: null,
+        });
+        redisClient.set(fhirSyncRequestId, fhirSyncRequest);
+        let url;
+        const baseURL = URI(host).segment(resource).segment('_history').addQuery('_count', 200);
+        if (mode === 'update') {
+          url = baseURL.addQuery('_since', `${lastUpdated}`);
+        }
+        url = baseURL.toString();
 
-      lastUpdated = moment().format('YYYY-MM-DDTHH:mm:ss');
-      const auth = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
-      const locations = {
-        entry: [],
-      };
-      async.doWhilst(
-        (callback) => {
-          const options = {
-            url,
-            headers: {
-              Authorization: auth,
-            },
-          };
-          url = false;
-          request.get(options, (err, res, body) => {
-            try {
-              body = JSON.parse(body);
-            } catch (error) {
-              logger.error(error);
-              return callback(false, false);
-            }
-            if (body.entry) {
-              locations.entry = locations.entry.concat(body.entry);
-            }
-            const next = body.link.find(link => link.relation == 'next');
-            if (next) {
-              url = next.url;
-            }
-            return callback(false, url);
-          });
-        },
-        () => url != false,
-        () => {
-          let countSaved = 0;
-          const totalRows = locations.entry.length;
-          let count = 0;
-
-          // adding the fake orgid as the top orgid
-          const fhir = {
-            resourceType: 'Location',
-            id: topOrgId,
-            status: 'active',
-            mode: 'instance',
-          };
-          fhir.identifier = [{
-            system: 'https://digitalhealth.intrahealth.org/source1',
-            value: topOrgId,
-          }];
-          fhir.physicalType = {
-            coding: [{
-              system: 'http://hl7.org/fhir/location-physical-type',
-              code: 'jdn',
-              display: 'Jurisdiction',
-            }],
-            text: 'Jurisdiction',
-          };
-          const url = URI(fhirAxios.__genUrl(database))
-            .segment('Location')
-            .segment(fhir.id)
-            .toString();
-          const options = {
-            url: url.toString(),
-            headers: {
-              'Content-Type': 'application/fhir+json',
-            },
-            json: fhir,
-          };
-          request.put(options, (err, res, body) => {
-            if (err) {
-              logger.error('An error occured while saving the top org of hierarchy, this will cause issues with reconciliation');
-            }
-          });
-          async.each(locations.entry, (entry, nxtEntry) => {
-            if (!entry.resource.hasOwnProperty('partOf') || !entry.resource.partOf.reference) {
-              entry.resource.partOf = {
-                reference: `Location/${topOrgId}`,
-                display: topOrgName,
-              };
-            }
-            count++;
-            saveBundle.entry.push(entry);
-            if (saveBundle.entry.length >= 250 || totalRows === count) {
-              const tmpBundle = {
-                ...saveBundle,
-              };
-              saveBundle = {
-                id: uuid4(),
-                resourceType: 'Bundle',
-                type: 'batch',
-                entry: [],
-              };
-              mcsd.saveLocations(tmpBundle, database, (err, res, body) => {
-                countSaved += tmpBundle.entry.length;
-                const percent = parseFloat((countSaved * 100 / totalRows).toFixed(2));
-                const fhirSyncRequest = JSON.stringify({
-                  status: '2/2 Writing Data Into Server',
-                  error: null,
-                  percent,
-                });
-                redisClient.set(fhirSyncRequestId, fhirSyncRequest);
-                return nxtEntry();
-              });
-            } else {
-              return nxtEntry();
-            }
-          }, () => {
-            logger.info(`Done syncing FHIR Server ${host}`);
-            setLastUpdated(lastUpdated, id);
-            const fhirSyncRequest = JSON.stringify({
-              status: 'Done',
-              error: null,
-              percent: 100,
+        lastUpdated = moment().format('YYYY-MM-DDTHH:mm:ss');
+        const auth = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+        const locations = {
+          entry: [],
+        };
+        let offset = 0;
+        async.doWhilst(
+          (callback) => {
+            const options = {
+              url,
+              headers: {
+                Authorization: auth,
+              },
+            };
+            url = false;
+            request.get(options, (err, res, body) => {
+              try {
+                body = JSON.parse(body);
+              } catch (error) {
+                logger.error(error);
+                return callback(false, false);
+              }
+              if (body.entry) {
+                locations.entry = locations.entry.concat(body.entry);
+              }
+              const next = body.link.find(link => link.relation == 'next');
+              if (next) {
+                url = next.url;
+              }
+              if (body.entry && body.entry.length > 0) {
+                // if hapi server doesnt have support for returning the next cursor then use _getpagesoffset
+                offset += body.entry.length;
+                if (offset <= body.total && !url) {
+                  const baseURL = URI(host)
+                    .segment(resource)
+                    .segment('_history')
+                    .addQuery('_count', 200)
+                    .addQuery('_getpagesoffset', offset);
+                  if (mode === 'update') {
+                    url = baseURL.addQuery('_since', `${lastUpdated}`);
+                  }
+                  url = baseURL.toString();
+                }
+              } else {
+                url = false;
+              }
+              return callback(false, url);
             });
-            redisClient.set(fhirSyncRequestId, fhirSyncRequest);
+          },
+          () => url != false,
+          () => {
+            let countSaved = 0;
+            const totalRows = locations.entry.length;
+            let count = 0;
+            async.each(locations.entry, (entry, nxtEntry) => {
+              count++;
+              saveBundle.entry.push({
+                resource: entry.resource,
+                request: {
+                  method: 'PUT',
+                  url: `${entry.resource.resourceType}/${entry.resource.id}`,
+                },
+              });
+              if (saveBundle.entry.length >= 250 || totalRows === count) {
+                const tmpBundle = {
+                  ...saveBundle,
+                };
+                saveBundle = {
+                  id: uuid4(),
+                  resourceType: 'Bundle',
+                  type: 'batch',
+                  entry: [],
+                };
+                fhirAxios.create(tmpBundle, database).then(() => {
+                  countSaved += tmpBundle.entry.length;
+                  const percent = parseFloat((countSaved * 100 / totalRows).toFixed(2));
+                  fhirSyncRequest = JSON.stringify({
+                    status: `${resource} - 2/2 Writing Data Into Server`,
+                    error: null,
+                    percent,
+                  });
+                  redisClient.set(fhirSyncRequestId, fhirSyncRequest);
+                  return nxtEntry();
+                }).catch((err) => {
+                  logger.error(err);
+                  return nxtEntry();
+                });
+              } else {
+                return nxtEntry();
+              }
+            }, () => {
+              logger.info(`Done syncing ${resource} FHIR Server ${host}`);
+              return nxtRes();
+            });
+          },
+        );
+      }, () => {
+        logger.info(`Done syncing FHIR Server ${host}`);
+        setLastUpdated(lastUpdated, id);
+        const params = {
+          resourceType: 'Parameters',
+          parameter: [],
+        };
+        resources.forEach((resource) => {
+          params.parameter.push({
+            name: 'type',
+            valueString: resource,
           });
-        },
-      );
+        });
+        const auth = fhirAxios.__getAuth();
+        let url = fhirAxios.__genUrl(database);
+        url = new URI(url).segment('$mark-all-resources-for-reindexing').toString();
+        axios.post(url, params, { auth }).then((response) => {
+          logger.info(response.data);
+        }).catch((err) => {
+          logger.error(err);
+        });
+        const fhirSyncRequest = JSON.stringify({
+          status: 'Done',
+          error: null,
+          percent: 100,
+        });
+        redisClient.set(fhirSyncRequestId, fhirSyncRequest);
+      });
     });
   },
   getLastUpdate: (id, callback) => {

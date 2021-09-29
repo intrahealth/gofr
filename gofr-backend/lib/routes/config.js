@@ -17,7 +17,7 @@ const getUKey = () => Math.random().toString(36).replace(/^[^a-z]+/, '') + Math.
 
 const getDefinition = (resource) => {
   const structureDef = resource.split('/');
-  return fhirAxios.read( structureDef[0], structureDef[1], '', 'DEFAULT' )
+  return fhirAxios.read(structureDef[0], structureDef[1], '', 'DEFAULT');
 };
 const profileResources = {};
 const getProfileResource = profile => new Promise((resolve, reject) => {
@@ -202,14 +202,15 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
             for (const attr of field_attrs) {
               if (config.get(`defaults:fields:${field.id}:${attr}`)) {
                 vueOutput += ` ${attr}="${config.get(`defaults:fields:${field.id}:${attr}`)}"`;
-              } else if (attr === 'initialValue' && displayType === 'tree') {
-                const resType = field.id.split('.')[0];
-                let topOrgId = '';
-                if (['Location', 'Organization'].includes(resType)) {
-                  topOrgId = mixin.getTopOrgId(config.get('mCSD:registryDB'), resType);
-                }
-                vueOutput += ` initialValue="${topOrgId}"`;
               }
+              // else if (attr === 'initialValue' && displayType === 'tree') {
+              //   const resType = field.id.split('.')[0];
+              //   let topOrgId = '';
+              //   if (['Location', 'Organization'].includes(resType)) {
+              //     topOrgId = mixin.getTopOrgId(config.get('mCSD:registryDB'), resType);
+              //   }
+              //   vueOutput += ` initialValue="${topOrgId}"`;
+              // }
             }
           } else {
             for (const mm of minmax) {
@@ -678,12 +679,12 @@ router.get('/page/:page/:type?', (req, res) => {
               } else if (config.get(`defaults:fields:${fields[field].id}:${attr}`)) {
                 output += `${attr}="${config.get(`defaults:fields:${fields[field].id}:${attr}`)}"`;
               } else if (config.get(`defaults:components:${eleName}:${attr}`)) {
-                output += ` ${attr}="${
-                  config.get(`defaults:components:${eleName}:${attr}`)}"`;
-              } else if (attr === 'initialValue' && displayType === 'tree') {
-                const topOrgId = mixin.getTopOrgId(config.get('mCSD:registryDB'), resource.type);
-                output += ` initialValue="${topOrgId}"`;
+                output += ` ${attr}="${config.get(`defaults:components:${eleName}:${attr}`)}"`;
               }
+              // else if (attr === 'initialValue' && displayType === 'tree') {
+              //   const topOrgId = mixin.getTopOrgId(config.get('mCSD:registryDB'), resource.type);
+              //   output += ` initialValue="${topOrgId}"`;
+              // }
             }
             let subFields;
             if (eleName === 'reference' && fields[field].hasOwnProperty('fields')) {
@@ -728,7 +729,6 @@ router.get('/page/:page/:type?', (req, res) => {
           vueOutput += `<gofr-section :slotProps="slotProps" :edit="isEdit" name="${name}" title="${sections[name].title}" description="${sections[name].description}" :secondary="${!!sections[name].resource}">\n<template #default="slotProps">\n`;
           if (sections[name].resource) {
             const secondary = await getDefinition(sections[name].resource);
-
             if (!secondary.hasOwnProperty('snapshot')) {
               logger.error('StructureDefinitions (', sections[name].resource, ') must be saved with a snapshot.');
               continue;
@@ -866,7 +866,6 @@ router.get('/page/:page/:type?', (req, res) => {
           outcome.issue[0].diagnostics = 'StructureDefinitions must be saved with a snapshot.';
           return res.status(404).json(outcome);
         }
-
         const structure = fhirDefinition.parseStructureDefinition(resource);
         if (req.params.type === 'search') {
           return createSearchTemplate(resource, structure);

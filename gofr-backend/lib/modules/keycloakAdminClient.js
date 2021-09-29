@@ -1,4 +1,5 @@
 const fs = require('fs');
+const https = require('https');
 const jwtDecode = require('jwt-decode');
 const KcAdminClient = require('@keycloak/keycloak-admin-client').default;
 
@@ -13,6 +14,11 @@ const ASSIGN_ROLE_EXTENSION = `${config.get('profileBaseUrl')}/StructureDefiniti
 const kcAdminClient = new KcAdminClient({
   realmName: config.get('keycloak:realm'),
   baseUrl: config.get('keycloak:baseURL'),
+  requestConfig: {
+    httpsAgent: new https.Agent({
+      rejectUnauthorized: false,
+    }),
+  },
 });
 const credentials = {
   username: config.get('keycloak:RESTClientUser'),

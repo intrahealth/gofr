@@ -1,0 +1,19 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "gofr-search-pairpartition",
+  "url": "http://gofr.org/fhir/SearchParameter/gofr-search-pairpartition",
+  "description": "search parameter for data source pair partition",
+  "name": "search parameter for data source pair partition",
+  "status": "active",
+  "experimental": false,
+  "code": "pairpartition",
+  "base": [
+    "Basic"
+  ],
+  "type": "reference",
+  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/partition')",
+  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/partition']",
+  "target": [
+    "Basic"
+  ]
+}

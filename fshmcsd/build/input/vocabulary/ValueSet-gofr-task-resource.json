@@ -1,0 +1,17 @@
+{
+  "resourceType": "ValueSet",
+  "status": "active",
+  "name": "GofrTaskResourceValueSet",
+  "id": "gofr-task-resource",
+  "title": "Code system for task permissions.",
+  "version": "0.3.0",
+  "url": "http://gofr.org/fhir/ValueSet/gofr-task-resource",
+  "date": "2021-03-26T09:25:04.362Z",
+  "compose": {
+    "include": [
+      {
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-task-resource"
+      }
+    ]
+  }
+}

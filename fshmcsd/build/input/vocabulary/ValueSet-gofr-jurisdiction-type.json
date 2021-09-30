@@ -1,0 +1,17 @@
+{
+  "resourceType": "ValueSet",
+  "status": "active",
+  "name": "GofrJurisdictionType",
+  "id": "gofr-jurisdiction-type",
+  "title": "GOFR Jurisdiction Type ValueSet",
+  "version": "0.3.0",
+  "url": "http://gofr.org/fhir/ValueSet/gofr-jurisdiction-type",
+  "date": "2020-11-12T08:41:04.362Z",
+  "compose": {
+    "include": [
+      {
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-jurisdiction-type"
+      }
+    ]
+  }
+}

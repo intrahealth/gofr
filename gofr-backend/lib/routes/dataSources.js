@@ -643,7 +643,7 @@ router.get('/getSource/:userID/:orgId?', (req, res) => {
       });
     },
     sharedUser: (callback) => {
-      if (req.params.role === 'Admin') {
+      if (req.user.permissions['*'] && req.user.permissions['*']['*']) {
         return callback(null);
       }
       const searchParams = {
@@ -663,7 +663,7 @@ router.get('/getSource/:userID/:orgId?', (req, res) => {
       });
     },
     sharedAll: (callback) => {
-      if (req.params.role === 'Admin') {
+      if (req.user.permissions['*'] && req.user.permissions['*']['*']) {
         return callback(null);
       }
       const searchParams = {
@@ -683,7 +683,7 @@ router.get('/getSource/:userID/:orgId?', (req, res) => {
       });
     },
     sameOrgid: (callback) => {
-      if (req.params.role === 'Admin' || !req.params.orgId) {
+      if ((req.user.permissions['*'] && req.user.permissions['*']['*']) || !req.params.orgId) {
         return callback(null);
       }
       const searchParams = {

@@ -16,6 +16,7 @@ const addDataPartition = () => new Promise((resolve, reject) => {
   }
   const bundle = {
     resourceType: 'Bundle',
+    type: 'batch',
     entry: [{
       resource: {
         resourceType: 'Basic',
@@ -34,7 +35,7 @@ const addDataPartition = () => new Promise((resolve, reject) => {
           extension: [{
             url: 'userID',
             valueReference: {
-              reference: 'Person/gofr-user-admin',
+              reference: 'Person/e9b41c35-7c85-46df-aeea-a4e8dbf0364e',
             },
           }],
         }, {
@@ -170,25 +171,26 @@ const loadFSHFiles = () => new Promise(async (resolvePar, rejectPar) => {
 
 module.exports = {
   initialize: () => new Promise((resolve, reject) => {
-    addDataPartition().then(() => {
-      Promise.all([loadDefaultConfig(), loadFSHFiles()]).then(() => {
-        mixin.updateConfigFile(['app', 'installed'], true, () => {
-          logger.info('Done loading FSH files');
-          resolve();
+    async.series([
+      (callback) => {
+        Promise.all([loadDefaultConfig(), loadFSHFiles()]).then(() => callback(null)).catch((err) => {
+          logger.error(err);
+          return callback(err);
         });
-      }).catch((err) => {
-        logger.error('Some errors occured');
-        reject(err);
-      });
-    }).catch(() => {
-      Promise.all([loadFSHFiles()]).then(() => {
-        mixin.updateConfigFile(['app', 'installed'], true, () => {
-          logger.info('Done loading FSH files');
-          resolve();
+      },
+      (callback) => {
+        addDataPartition().then(() => callback(null)).catch((err) => {
+          logger.error(err);
+          return callback(err);
         });
-      }).catch((err) => {
-        logger.error('Some errors occured');
-        reject(err);
+      },
+    ], (err) => {
+      if (err) {
+        return reject();
+      }
+      mixin.updateConfigFile(['app', 'installed'], true, () => {
+        logger.info('Done loading FSH files');
+        return resolve();
       });
     });
   }),

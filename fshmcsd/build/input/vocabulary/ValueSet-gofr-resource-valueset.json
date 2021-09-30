@@ -1,0 +1,16 @@
+{
+  "resourceType": "ValueSet",
+  "status": "active",
+  "name": "GofrResourceValueSet",
+  "id": "gofr-resource-valueset",
+  "title": "Value Set for GOFR Basic Resources.",
+  "version": "0.1.0",
+  "url": "http://gofr.org/fhir/ValueSet/gofr-resource-valueset",
+  "compose": {
+    "include": [
+      {
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem"
+      }
+    ]
+  }
+}

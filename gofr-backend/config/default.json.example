@@ -38,7 +38,7 @@
       }
     }
   },
-  "builtFSHFIles": "../../fsh/build/input",
+  "builtFSHFIles": "../../fshmcsd/build/input",
   "workflow": {
     "processor": {},
     "questionnaire": {}

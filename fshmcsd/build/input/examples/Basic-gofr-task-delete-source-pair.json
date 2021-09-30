@@ -1,0 +1,46 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-task-delete-source-pair",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/gofr-task"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "task",
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
+      "valueString": "delete-source-pair"
+    },
+    {
+      "extension": [
+        {
+          "url": "permission",
+          "valueCode": "special"
+        },
+        {
+          "url": "resource",
+          "valueCode": "custom"
+        },
+        {
+          "url": "instance",
+          "valueId": "delete-source-pair"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/task-attributes"
+    },
+    {
+      "url": "compositeTask",
+      "valueReference": {
+        "reference": "Basic/gofr-task-view-source-pair"
+      }
+    }
+  ]
+}

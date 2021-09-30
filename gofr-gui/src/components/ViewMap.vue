@@ -15,7 +15,6 @@ export default {
   name: "App",
   data: () => ({
     accessToken: 'pk.eyJ1IjoiYWxseXNoYWJhbjUiLCJhIjoiY2twbzFpODRtMDFkMTJwbWFvNXUza3hodCJ9.mhcv_KlLLtvR0x73E90WAw',
-    fhirServerUrl: "http://localhost:8081/hapi54/fhir/DEFAULT",
     options: {
       "center": [
         8.521441,
@@ -74,6 +73,11 @@ export default {
   components: {
     FhirMap,
   },
+  computed: {
+    fhirServerUrl() {
+      return '/fhir/' + this.$store.state.config.userConfig.FRDatasource
+    }
+  }
 };
 </script>
 

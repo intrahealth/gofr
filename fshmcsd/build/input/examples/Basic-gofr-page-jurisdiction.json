@@ -1,0 +1,216 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-page-jurisdiction",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/ihris-page"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "page",
+        "system": "http://gofr.org/fhir/CodeSystem/ihris-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-display",
+      "extension": [
+        {
+          "url": "resource",
+          "valueReference": {
+            "reference": "StructureDefinition/IHE.mCSD.JurisdictionLocation"
+          }
+        },
+        {
+          "url": "search",
+          "valueString": "Name|name"
+        },
+        {
+          "url": "search",
+          "valueString": "Type|type.coding.display"
+        },
+        {
+          "url": "search",
+          "valueString": "Physical Type|physicalType.text"
+        },
+        {
+          "url": "search",
+          "valueString": "Parent|partOf.reference"
+        },
+        {
+          "url": "filter",
+          "valueString": "Name|name:contains"
+        },
+        {
+          "url": "filter",
+          "valueString": "Type|type|http://gofr.org/fhir/ValueSet/gofr-jurisdiction-type"
+        },
+        {
+          "url": "filter",
+          "valueString": "Parent|partOf"
+        }
+      ]
+    },
+    {
+      "extension": [
+        {
+          "url": "title",
+          "valueString": "Details"
+        },
+        {
+          "url": "description",
+          "valueString": "Jurisdiction details"
+        },
+        {
+          "url": "name",
+          "valueString": "Geographical Location"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.name"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.alias"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.type"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.partOf"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.status"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+    },
+    {
+      "extension": [
+        {
+          "url": "title",
+          "valueString": "Managing Organization"
+        },
+        {
+          "url": "description",
+          "valueString": "Organizations Managing This Jurisdiction"
+        },
+        {
+          "url": "name",
+          "valueString": "Managing Organization"
+        },
+        {
+          "extension": [
+            {
+              "url": "resource",
+              "valueReference": {
+                "reference": "StructureDefinition/IHE.mCSD.Organization"
+              }
+            },
+            {
+              "url": "linkfield",
+              "valueString": "Organization.id"
+            },
+            {
+              "url": "column",
+              "extension": [
+                {
+                  "url": "header",
+                  "valueString": "Organization"
+                },
+                {
+                  "url": "field",
+                  "valueString": "extension.where(url='http://ihe.net/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension').extension.where(url='part-of').valueReference"
+                }
+              ]
+            },
+            {
+              "url": "searchfield",
+              "valueString": "Location:organization"
+            },
+            {
+              "extension": [
+                {
+                  "url": "header",
+                  "valueString": "Organization Type"
+                },
+                {
+                  "url": "field",
+                  "valueString": "extension.where(url='http://ihe.net/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension').extension.where(url='hierarchy-type').valueCodeableConcept.coding"
+                }
+              ],
+              "url": "column"
+            },
+            {
+              "extension": [
+                {
+                  "url": "header",
+                  "valueString": "Actions"
+                },
+                {
+                  "url": "field",
+                  "valueString": "_action"
+                }
+              ],
+              "url": "column"
+            },
+            {
+              "extension": [
+                {
+                  "url": "link",
+                  "valueString": "/resource/view/jurisdictionorganization/ITEMID"
+                },
+                {
+                  "url": "text",
+                  "valueString": "Edit"
+                },
+                {
+                  "url": "row",
+                  "valueBoolean": true
+                },
+                {
+                  "url": "emptyDisplay",
+                  "valueBoolean": false
+                },
+                {
+                  "url": "class",
+                  "valueString": "secondary"
+                }
+              ],
+              "url": "action"
+            }
+          ],
+          "url": "resource"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+    },
+    {
+      "extension": [
+        {
+          "url": "title",
+          "valueString": "Geo-Coordinates"
+        },
+        {
+          "url": "description",
+          "valueString": "Facility Geo-Coordinates"
+        },
+        {
+          "url": "name",
+          "valueString": "Geo-Coordinates"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.position"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+    }
+  ]
+}

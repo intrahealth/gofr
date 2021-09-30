@@ -1,0 +1,35 @@
+{
+  "resourceType": "CodeSystem",
+  "status": "active",
+  "content": "complete",
+  "name": "GofrResourceCodeSystem",
+  "id": "gofr-resource-codesystem",
+  "title": "Code System for GOFR Basic Resources.",
+  "version": "0.1.0",
+  "url": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem",
+  "concept": [
+    {
+      "code": "role",
+      "display": "GOFR Role",
+      "definition": "User roles that are available to be assigned to users."
+    },
+    {
+      "code": "task",
+      "display": "GOFR Task",
+      "definition": "Role tasks that are available to be assigned to roles"
+    },
+    {
+      "code": "partition",
+      "display": "GOFR Partitions"
+    },
+    {
+      "code": "datasource",
+      "display": "GOFR Datasources"
+    },
+    {
+      "code": "datasourcepair",
+      "display": "GOFR Datasources Pair"
+    }
+  ],
+  "count": 5
+}

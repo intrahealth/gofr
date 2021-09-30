@@ -1,0 +1,40 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-task-data-source-reconciliation",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/gofr-task"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "task",
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
+      "valueString": "data-source-reconciliation"
+    },
+    {
+      "extension": [
+        {
+          "url": "permission",
+          "valueCode": "special"
+        },
+        {
+          "url": "resource",
+          "valueCode": "custom"
+        },
+        {
+          "url": "instance",
+          "valueId": "data-source-reconciliation"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/task-attributes"
+    }
+  ]
+}

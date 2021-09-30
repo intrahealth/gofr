@@ -3,9 +3,9 @@ const URL = require('url').URL;
 const URI = require('urijs');
 const Qs = require('qs');
 const async = require('async');
+const uuid4 = require('uuid/v4');
 const logger = require('../winston');
 const config = require('../config');
-const mixin = require('../mixin');
 
 axios.defaults.paramsSerializer = function (params) {
   if (params instanceof URLSearchParams) {
@@ -186,14 +186,12 @@ const fhirAxios = {
       reject(err);
     }
     url = new URI(url);
-    if ( resource.resourceType !== "Bundle" ) {
-      url.pathname += resource.resourceType
-    } else {
-      if ( !( resource.type === "transaction" || resource.type === "batch" ) ) {
-        err = new InvalidRequestError( "Bundles must of type 'transaction' or 'batch'" )
-        err.response = { status: 404 }
-        reject( err )
-      }
+    if (resource.resourceType !== 'Bundle') {
+      url = url.segment(resource.resourceType);
+    } else if (!(resource.type === 'transaction' || resource.type === 'batch')) {
+      err = new InvalidRequestError("Bundles must of type 'transaction' or 'batch'");
+      err.response = { status: 404 };
+      reject(err);
     }
     const auth = fhirAxios.__getAuth();
     axios.post(url.toString(), resource, { auth }).then((response) => {

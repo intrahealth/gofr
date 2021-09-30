@@ -159,12 +159,12 @@ http.globalAgent.maxSockets = 32;
 const topOrgName = config.get('mCSD:fakeOrgName');
 
 defaultSetups.initialize().then(() => {
-  const defaultDB = config.get('mCSD:registryDB');
-  mcsd.createFakeOrgID(defaultDB).then(() => {
+  // const defaultDB = config.get('mCSD:registryDB');
+  // mcsd.createFakeOrgID(defaultDB).then(() => {
 
-  }).catch((error) => {
-    logger.error(error);
-  });
+  // }).catch((error) => {
+  //   logger.error(error);
+  // });
 });
 process.on('message', (message) => {
   if (message.content === 'clean') {

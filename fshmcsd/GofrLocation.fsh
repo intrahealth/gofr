@@ -283,6 +283,7 @@ Title:            "GOFR Jurisdiction Type ValueSet"
 * ^date = "2020-11-12T08:41:04.362Z"
 * ^version = "0.3.0"
 * codes from system GofrJurisdictionType
+* include codes from system McsdLocationTypeCodeSystem
 
 CodeSystem:      GofrJurisdictionType
 Id:              gofr-jurisdiction-type

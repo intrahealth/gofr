@@ -464,7 +464,7 @@ Usage:          #definition
 * item[0].item[3].definition = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.type"
 * item[0].item[3].text = "Facility Types"
 * item[0].item[3].type = #choice
-* item[0].item[3].answerValueSet = "http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType"
+* item[0].item[3].answerValueSet = "http://gofr.org/fhir/ValueSet/gofr-jurisdiction-type"
 * item[0].item[3].repeats = true
 * item[0].item[3].required = true
 

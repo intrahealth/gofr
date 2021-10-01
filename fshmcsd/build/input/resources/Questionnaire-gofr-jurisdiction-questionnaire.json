@@ -50,7 +50,7 @@
           "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.type",
           "text": "Facility Types",
           "type": "choice",
-          "answerValueSet": "http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType",
+          "answerValueSet": "http://gofr.org/fhir/ValueSet/gofr-jurisdiction-type",
           "repeats": true,
           "required": true
         },

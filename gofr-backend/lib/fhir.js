@@ -15,6 +15,7 @@ const { default: axios } = require('axios');
 const fhir = {
   sync: (id, host, username, password, mode, name, clientId, topOrgName) => {
     const database = name;
+    let reindex = false;
     let saveBundle = {
       id: uuid4(),
       resourceType: 'Bundle',
@@ -23,6 +24,8 @@ const fhir = {
     };
     const fhirSyncRequestId = `fhirSyncRequest${clientId}`;
     fhir.getLastUpdate(id, (lastUpdated) => {
+      let newLastUpdated = moment().format('YYYY-MM-DDTHH:mm:ss.SSSZZ');
+      let zoneOffset;
       const resources = ['Location', 'Organization', 'HealthcareService'];
       async.eachSeries(resources, (resource, nxtRes) => {
         let fhirSyncRequest = JSON.stringify({
@@ -38,7 +41,7 @@ const fhir = {
         }
         url = baseURL.toString();
 
-        lastUpdated = moment().format('YYYY-MM-DDTHH:mm:ss');
+
         const auth = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
         const locations = {
           entry: [],
@@ -59,6 +62,14 @@ const fhir = {
               } catch (error) {
                 logger.error(error);
                 return callback(false, false);
+              }
+              if (!zoneOffset && body.meta && body.meta.lastUpdated) {
+                const time = body.meta.lastUpdated.split('+');
+                if (body.meta.lastUpdated.split('+').length === 2) {
+                  zoneOffset = `+${time[1]}`;
+                } else if (body.meta.lastUpdated.split('-').length === 2) {
+                  zoneOffset = `-${time[1]}`;
+                }
               }
               if (body.entry) {
                 locations.entry = locations.entry.concat(body.entry);
@@ -112,6 +123,7 @@ const fhir = {
                   entry: [],
                 };
                 fhirAxios.create(tmpBundle, database).then(() => {
+                  reindex = true;
                   countSaved += tmpBundle.entry.length;
                   const percent = parseFloat((countSaved * 100 / totalRows).toFixed(2));
                   fhirSyncRequest = JSON.stringify({
@@ -135,8 +147,21 @@ const fhir = {
           },
         );
       }, () => {
+        if (!zoneOffset) {
+          zoneOffset = '+00:00';
+        }
+        newLastUpdated = moment(newLastUpdated).utc().utcOffset(zoneOffset).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
         logger.info(`Done syncing FHIR Server ${host}`);
-        setLastUpdated(lastUpdated, id);
+        setLastUpdated(newLastUpdated, id);
+        const fhirSyncRequest = JSON.stringify({
+          status: 'Done',
+          error: null,
+          percent: 100,
+        });
+        redisClient.set(fhirSyncRequestId, fhirSyncRequest);
+        if (!reindex) {
+          return;
+        }
         const params = {
           resourceType: 'Parameters',
           parameter: [],
@@ -155,12 +180,6 @@ const fhir = {
         }).catch((err) => {
           logger.error(err);
         });
-        const fhirSyncRequest = JSON.stringify({
-          status: 'Done',
-          error: null,
-          percent: 100,
-        });
-        redisClient.set(fhirSyncRequestId, fhirSyncRequest);
       });
     });
   },

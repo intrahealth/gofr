@@ -54,4 +54,3 @@ Title:        "Search on the IHE defined extension for hierarchy part of."
 * base = #Organization
 * type = #reference
 * expression = "extension('http://ihe.net/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension').extension('part-of').value as Reference"
-

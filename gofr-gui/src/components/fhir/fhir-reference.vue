@@ -113,7 +113,6 @@ export default {
   watch: {
     slotProps: {
       handler() {
-        //console.log("WATCH REFERENCE",this.path,this.slotProps)
         if ( !this.lockWatch ) {
           this.setupData()
         }
@@ -186,7 +185,8 @@ export default {
       } else {
         params = { "partof:missing": true }
       }
-      params._count = 500
+      params._count = 200
+      params._profile = this.targetProfile
       let url = "/fhir/"+this.$store.state.config.userConfig.FRDatasource+"/"+this.resource+"?"+querystring.stringify( params )
       this.items = []
       this.addItems( url, this.items )

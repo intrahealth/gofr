@@ -21,7 +21,7 @@
         {
           "url": "resource",
           "valueReference": {
-            "reference": "StructureDefinition/gofr-facility-service"
+            "reference": "StructureDefinition/IHE.mCSD.HealthcareService"
           }
         },
         {

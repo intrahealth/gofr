@@ -107,3 +107,18 @@ Usage:          #definition
 * item[0].item[2].item[1].answerValueSet = "http://gofr.org/fhir/ValueSet/gofr-organization-hiearchy-type-valueset"
 * item[0].item[2].item[1].repeats = false
 * item[0].item[2].item[1].required = false
+
+Instance:     MCSDSearchOrganizationHierarchyPartOf
+InstanceOf:   SearchParameter
+Title:        "Search on the IHE defined extension for hierarchy part of."
+
+* url = "http://ihe.net/fhir/SearchParameter/IHE.mCSD.Organization.HierarchyPartOf"
+* id = "IHE.mCSD.Organization.HierarchyPartOf"
+* description = "This Search Parameter enables finding Organizations by the hierarchy part of."
+* name = "ihe-mcsd-hierarchy-partof"
+* status = #active
+* code = #ihe-mcsd-hierarchy-partof
+* base = #Organization
+* target = #Organization
+* type = #reference
+* expression = "Organization.extension('http://ihe.net/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension').extension('part-of')"

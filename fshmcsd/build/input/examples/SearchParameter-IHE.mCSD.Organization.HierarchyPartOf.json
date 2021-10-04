@@ -1,0 +1,17 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "IHE.mCSD.Organization.HierarchyPartOf",
+  "url": "http://ihe.net/fhir/SearchParameter/IHE.mCSD.Organization.HierarchyPartOf",
+  "description": "This Search Parameter enables finding Organizations by the hierarchy part of.",
+  "name": "ihe-mcsd-hierarchy-partof",
+  "status": "active",
+  "code": "ihe-mcsd-hierarchy-partof",
+  "base": [
+    "Organization"
+  ],
+  "target": [
+    "Organization"
+  ],
+  "type": "reference",
+  "expression": "Organization.extension('http://ihe.net/fhir/StructureDefinition/IHE.mCSD.hierarchy.extension').extension('part-of')"
+}

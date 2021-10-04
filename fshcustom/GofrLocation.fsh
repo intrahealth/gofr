@@ -460,37 +460,3 @@ Usage:          #example
 * extension[section][0].extension[field][2].valueString = "Location.type"
 * extension[section][0].extension[field][3].valueString = "Location.partOf"
 * extension[section][0].extension[field][4].valueString = "Location.status"
-
-Instance:       gofr-page-service
-InstanceOf:     IhrisPage
-Title:          "GOFR Facility Service Page"
-Usage:          #example
-* code = IhrisResourceCodeSystem#page
-* extension[display].extension[resource].valueReference = Reference(StructureDefinition/gofr-facility-service)
-* extension[display].extension[search][0].valueString = "Name|name"
-* extension[display].extension[search][1].valueString = "Active|active"
-* extension[display].extension[filter][0].valueString = "Name|name:contains"
-* extension[display].extension[filter][1].valueString = "Active|active"
-* extension[section][0].extension[title].valueString = "Details"
-* extension[section][0].extension[description].valueString = "Healthcare service details"
-* extension[section][0].extension[name].valueString = "Healthcare service"
-* extension[section][0].extension[field][0].valueString = "HealthcareService.name"
-* extension[section][0].extension[field][1].valueString = "HealthcareService.comment"
-* extension[section][0].extension[field][2].valueString = "HealthcareService.identifier"
-* extension[section][0].extension[field][3].valueString = "HealthcareService.telecom"
-* extension[section][0].extension[field][4].valueString = "HealthcareService.type"
-* extension[section][0].extension[field][5].valueString = "HealthcareService.category"
-* extension[section][0].extension[field][6].valueString = "HealthcareService.specialty"
-* extension[section][0].extension[field][7].valueString = "HealthcareService.referralMethod"
-* extension[section][0].extension[field][8].valueString = "HealthcareService.communication"
-* extension[section][0].extension[field][9].valueString = "HealthcareService.program"
-* extension[section][0].extension[field][10].valueString = "HealthcareService.eligibility"
-* extension[section][0].extension[field][11].valueString = "HealthcareService.serviceProvisionCode"
-* extension[section][0].extension[field][12].valueString = "HealthcareService.availableTime"
-* extension[section][0].extension[field][13].valueString = "HealthcareService.notAvailable"
-* extension[section][0].extension[field][14].valueString = "HealthcareService.appointmentRequired"
-* extension[section][0].extension[field][15].valueString = "HealthcareService.active"
-* extension[section][1].extension[title].valueString = "Facilities Service Is Offered"
-* extension[section][1].extension[description].valueString = "Facilities Service Is Offered"
-* extension[section][1].extension[name].valueString = "Facilities Service Is Offered"
-* extension[section][1].extension[field][0].valueString = "HealthcareService.location"

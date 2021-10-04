@@ -22,6 +22,9 @@ export default {
       ],
       "zoom": 3,
       "isFacility" : true,
+      "hierarchyExtension": {
+        "parameter": "ihe-mcsd-hierarchy-partof"
+      },
       "root": "cf12e355-a553-5875-b271-2dfb97b22355",
       "includeRoot": false,
       "contextServices": [],

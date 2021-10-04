@@ -448,7 +448,8 @@ export default {
     'appMenu': Menu
   },
   created () {
-    this.$router.push({ name: 'AddDataSources' })
+    // this.$router.push({ name: 'AddDataSources' })
+    this.$router.push({ name: 'ViewMap' })
     this.$store.state.config.generalConfig = this.generalConfig
     if(this.$store.state.idp === 'keycloak') {
       this.$store.state.clientId = uuid.v4()

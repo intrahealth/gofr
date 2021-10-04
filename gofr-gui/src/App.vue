@@ -221,25 +221,30 @@ export default {
         (this.$store.state.dataSources.length > 1 ||
           this.$store.state.dataSourcePairs.length > 0)
       ) {
-        this.$router.push({ name: 'DataSourcesPair' })
+        this.$router.push({ name: 'ViewMap' })
+        // this.$router.push({ name: 'DataSourcesPair' })
         return
       }
       if (!source1DB || !source2DB) {
-        this.$router.push({ name: 'AddDataSources' })
+        // this.$router.push({ name: 'AddDataSources' })
+        this.$router.push({ name: 'ViewMap' })
         return
       }
       axios.get( '/uploadAvailable/' + source1DB + '/' + source2DB ).then(results => {
         this.$store.state.initializingApp = false
         if (results.data.dataUploaded) {
           this.$store.state.recalculateScores = true
-          this.$router.push({ name: 'FacilityReconScores' })
+          // this.$router.push({ name: 'FacilityReconScores' })
+          this.$router.push({ name: 'ViewMap' })
         } else {
-          this.$router.push({ name: 'AddDataSources' })
+          // this.$router.push({ name: 'AddDataSources' })
+          this.$router.push({ name: 'ViewMap' })
         }
       })
       .catch(err => {
         console.log(err)
-        this.$router.push({ name: 'AddDataSources' })
+        // this.$router.push({ name: 'AddDataSources' })
+        this.$router.push({ name: 'ViewMap' })
       })
     },
     getTotalLevels () {

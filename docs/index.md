@@ -5,7 +5,7 @@
 !!! important "Welcome!"
     These are the docs for the next iteration of GOFR, which is based on the original codebase of the [Facility Reconciliation Tool](https://github.com/openhie/facility-recon).
 
-!!! Important 
+!!! Important
     The [design document](https://docs.google.com/document/d/1LGzwyxDzH6BmnVn94-V2waCmr0igIhZxxTHD-wnBX50) outlines the next steps in the creation of GOFR based on community feedback. If you have ZenHub installed, you may view the [2021 roadmap](https://github.com/intrahealth/gofr/blob/master/LICENSE#workspaces/gofr-60495960906eba0017c751ea/roadmap?repos=346409080).
 
 ## Features

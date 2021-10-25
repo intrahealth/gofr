@@ -3,6 +3,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const LocalStrategy = require('passport-local').Strategy;
 const CustomStrategy = require('passport-custom').Strategy;
 const express = require('express');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 const logger = require('../winston');
@@ -109,7 +110,7 @@ router.get('/', (req, res, next) => {
       userObj: req.user,
     });
   } else {
-    return res.status(200).send()
+    return res.status(200).send();
   }
 },
 passport.authenticate('custom-loggedout', {}), (req, res) => {
@@ -134,6 +135,34 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
 router.post('/login', passport.authenticate('local', {}), (req, res) => {
   res.status(200).json({
     userObj: req.user,
+  });
+});
+
+router.post('/token', (req, res) => {
+  // For API Access only
+  logger.info('Generating token');
+  const secret = config.get('auth:secret');
+  const tokenDuration = config.get('auth:tokenDuration');
+  const { username, password } = req.body;
+
+  user.lookupByEmail(username).then((userObj) => {
+    if (!userObj) {
+      logger.error('User not found');
+      fhirAudit.login(userObj, req.ip, false, username);
+      return res.status(401).send();
+    }
+    if (userObj.checkPassword(password)) {
+      fhirAudit.login(userObj, req.ip, true, username);
+      const token = jwt.sign({ user: userObj }, secret, { expiresIn: tokenDuration });
+      res.status(200).json({ access_token: token });
+    } else {
+      logger.error('Invalid password');
+      fhirAudit.login(userObj, req.ip, false, username);
+      return res.status(401).send();
+    }
+  }).catch((err) => {
+    fhirAudit.login({}, req.ip, false, username);
+    return res.status(500).send();
   });
 });
 

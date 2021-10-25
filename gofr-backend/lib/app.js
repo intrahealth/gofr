@@ -21,6 +21,7 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const moment = require('moment');
 const async = require('async');
+const jwt = require('jsonwebtoken');
 const config = require('./config');
 const user = require('./modules/user');
 const outcomes = require('../config/operationOutcomes');
@@ -70,6 +71,7 @@ const isLoggedIn = (req, res, next) => {
   if (req.method == 'OPTIONS'
     || (req.query.hasOwnProperty('authDisabled') && req.query.authDisabled)
     || req.path.startsWith('/auth/login')
+    || req.path.startsWith('/auth/token')
     || req.path === '/auth'
     || req.path === '/getSignupConf'
     || req.path === '/config/getGeneralConfig'
@@ -103,6 +105,19 @@ const isLoggedIn = (req, res, next) => {
     }
   }
   if (config.get('app:idp') === 'gofr') {
+    if (!req.user && req.headers.authorization && req.headers.authorization.split(' ').length === 2) {
+      // Only for API Access when using gofr as IDP
+      const token = req.headers.authorization.split(' ')[1];
+      let decoded;
+      jwt.verify(token, config.get('auth:secret'), (err, dec) => {
+        if (!err) {
+          decoded = dec;
+        }
+      });
+      if (decoded && decoded.user) {
+        req.user = user.restoreUser(decoded.user);
+      }
+    }
     if (!req.user) {
       res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
       res.set('Access-Control-Allow-Credentials', true);

@@ -36,6 +36,8 @@ nav:
     - 'working_with_fhir/mcsd.md'
   - Server administration:
     - 'server_administration/server_administration.md'
+  - User Interface:
+    - 'user_interface/user.md'
 
 markdown_extensions:
   - admonition
@@ -44,12 +46,12 @@ markdown_extensions:
   - toc:
       toc_depth : "1"
   - footnotes
-  
+
 # https://github.com/zhaoterryy/mkdocs-pdf-export-plugin not working
 plugins:
   - search
   - git-revision-date-localized
-  - mknotebooks
+  #- mknotebooks
   # - pdf-export:
   #     combined: true
 

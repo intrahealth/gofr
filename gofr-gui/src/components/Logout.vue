@@ -10,7 +10,8 @@ export default {
   mounted () {
     this.$store.state.auth.userID = ''
     if(this.$store.state.idp === 'keycloak') {
-      this.$keycloak.logout()
+      let redirect = window.location.href.split('#')[0]
+      this.$keycloak.logout({ redirectUri : redirect })
     } else {
       axios({
         method: 'GET',

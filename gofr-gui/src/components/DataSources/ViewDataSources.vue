@@ -529,6 +529,7 @@
                   >
                     <td>
                       <v-radio
+                        :disabled="item.display === 'DEFAULT'"
                         :value="item"
                         color="blue"
                       ></v-radio>
@@ -844,14 +845,14 @@ export default {
         return
       }
       let sourceOwner = this.server.userID
-      axios.get('/getUploadedCSV/' + sourceOwner + '/' + this.server.name).then((resp) => {
+      axios.get('/getUploadedCSV/' + sourceOwner + '/' + this.server.display).then((resp) => {
         let blob = new Blob([resp.data])
         if (window.navigator.msSaveOrOpenBlob) {
-          window.navigator.msSaveBlob(blob, `${this.server.name}.csv`)
+          window.navigator.msSaveBlob(blob, `${this.server.display}.csv`)
         } else {
           let a = window.document.createElement('a')
           a.href = window.URL.createObjectURL(blob, { type: 'text/plain' })
-          a.download = `${this.server.name}.csv`
+          a.download = `${this.server.display}.csv`
           document.body.appendChild(a)
           a.click()
           document.body.removeChild(a)

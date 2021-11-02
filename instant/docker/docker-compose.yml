@@ -20,6 +20,9 @@ services:
       - hapi.fhir.partitioning.enabled=true
       - hapi.fhir.partitioning.allow_references_across_partitions=false
       - hapi.fhir.partitioning.partitioning_include_in_search_hashes=false
+      - hapi.fhir.enable_index_missing_fields=true
+      - hapi.fhir.auto_create_placeholder_reference_targets=true
+      - hapi.fhir.client_id_strategy=ANY
       - spring.jpa.properties.hibernate.search.enabled=true
       - spring.jpa.properties.hibernate.search.backend.type=lucene
       - spring.jpa.properties.hibernate.search.backend.analysis.configurer=ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer

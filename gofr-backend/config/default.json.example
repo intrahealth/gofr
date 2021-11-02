@@ -8,7 +8,10 @@
     "port": 4000
   },
   "keycloak": {
-    "baseURL": "http://localhost:8080/auth",
+    "adminUser": "admin",
+    "adminPassword": "admin",
+    "installedLocation": "/home/user/keycloak-15.0.2",
+    "baseURL": "http://localhost:8080/keycloak/auth",
     "realm": "GOFR",
     "UIClientId": "gofr-gui",
     "backendClientId": "gofr-backend",

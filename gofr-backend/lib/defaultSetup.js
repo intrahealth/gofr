@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 const fs = require('fs');
+const exec = require('child_process').exec;
 const axios = require('axios');
 const URI = require('urijs');
 const async = require('async');
@@ -8,6 +9,65 @@ const config = require('./config');
 const logger = require('./winston');
 const mixin = require('./mixin');
 const fhirAxios = require('./modules/fhirAxios');
+
+const loadKeycloakData = () => new Promise((resolve, reject) => {
+  const installed = config.get('app:installed');
+  if (installed) {
+    return resolve();
+  }
+
+  const kcadm = `${config.get('keycloak:installedLocation')}/bin/kcadm.sh`;
+  const keycloakBase = config.get('keycloak:baseURL');
+  const adminUser = config.get('keycloak:adminUser');
+  const adminPassword = config.get('keycloak:adminPassword');
+  async.parallel({
+    realm: (callback) => {
+      exec(`sh ${kcadm} config credentials --server ${keycloakBase} --realm master --user ${adminUser} --password ${adminPassword}`, (err, stdout, stderr) => {
+        if (err) {
+          return callback(err);
+        }
+        if (stdout) {
+          logger.info(stdout);
+        }
+        if (stderr) {
+          logger.info(stderr);
+        }
+
+        exec(`sh ${kcadm} create realms -f ${__dirname}/../../resources/keycloak/realm.json`, (err, stdout, stderr) => {
+          if (err) {
+            return callback(err);
+          }
+          if (stdout) {
+            logger.info(stdout);
+          }
+          if (stderr) {
+            logger.info(stderr);
+          }
+          return callback();
+        });
+      });
+    },
+    theme: (callback) => {
+      exec(`cp -r ${__dirname}/../../resources/keycloak/themes/gofr ${config.get('keycloak:installedLocation')}/themes`, (err, stdout, stderr) => {
+        if (err) {
+          return callback(err);
+        }
+        if (stdout) {
+          logger.info(stdout);
+        }
+        if (stderr) {
+          logger.info(stderr);
+        }
+        return callback();
+      });
+    },
+  }, (err) => {
+    if (err) {
+      return reject(err);
+    }
+    return resolve();
+  });
+});
 
 const addDataPartition = () => new Promise((resolve, reject) => {
   const installed = config.get('app:installed');
@@ -173,23 +233,26 @@ module.exports = {
   initialize: () => new Promise((resolve, reject) => {
     async.series([
       (callback) => {
-        Promise.all([loadDefaultConfig(), loadFSHFiles()]).then(() => callback(null)).catch((err) => {
-          logger.error(err);
-          return callback(err);
-        });
+        loadKeycloakData().then(() => callback(null)).catch(err => reject(err));
       },
       (callback) => {
-        addDataPartition().then(() => callback(null)).catch((err) => {
-          logger.error(err);
-          return callback(err);
-        });
+        // const kcadmin = require('./modules/keycloakAdminClient');
+        Promise.all([loadDefaultConfig(), loadFSHFiles()]).then(() => {
+          const kcadmin = require('./modules/keycloakAdminClient');
+          setTimeout(() => {
+            kcadmin.loadTasksToKeycloak().then(() => callback(null)).catch(err => callback(err));
+          }, 1000);
+        }).catch(err => callback(err));
+      },
+      (callback) => {
+        addDataPartition().then(() => callback(null)).catch(err => callback(err));
       },
     ], (err) => {
       if (err) {
-        return reject();
+        return reject(err);
       }
       mixin.updateConfigFile(['app', 'installed'], true, () => {
-        logger.info('Done loading FSH files');
+        logger.info('Done loading Default data');
         return resolve();
       });
     });

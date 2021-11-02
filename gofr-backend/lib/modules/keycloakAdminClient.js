@@ -45,7 +45,7 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
   const clients = await kcAdminClient.clients.find();
   const client = clients.find(clt => clt.clientId === config.get('keycloak:UIClientId'));
   if (!client) {
-    return reject();
+    return reject('no UI Client ID');
   }
   mixin.getFilesFromDir(`${__dirname}/../${fshDir}`).then((files) => {
     const filesPromises = [];
@@ -54,7 +54,7 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
         fs.readFile(file, { encoding: 'utf8', flag: 'r' }, (err, data) => {
           if (err) {
             logger.error(err);
-            return freject();
+            return freject(err);
           }
           const fhir = JSON.parse(data);
           if (!fhir.meta || !fhir.meta.profile || !fhir.meta.profile.includes(TASK_EXTENSION)) {
@@ -96,7 +96,7 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
             } else {
               logger.error(err);
             }
-            return freject();
+            return freject(err);
           });
         });
       }));
@@ -138,7 +138,7 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
                   fs.readFile(`${dir}/${compFile}`, { encoding: 'utf8', flag: 'r' }, (err, data) => {
                     if (err) {
                       logger.error(err);
-                      return creject();
+                      return creject(err);
                     }
                     const fhir = JSON.parse(data);
                     const compositeName = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profileBaseUrl')}/StructureDefinition/gofr-basic-name`);
@@ -153,7 +153,7 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
                       } else {
                         logger.error(err);
                       }
-                      creject();
+                      creject(err);
                     });
                   });
                 }));
@@ -167,7 +167,7 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
                   } else {
                     logger.error(err);
                   }
-                  freject();
+                  freject(err);
                 });
               });
             });
@@ -177,14 +177,14 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
       Promise.all(filesPromises).then(() => {
         loadRolesToKeycloak().then(() => {
           resolve();
-        }).catch(() => {
-          reject();
+        }).catch((err) => {
+          reject(err);
         });
-      }).catch(() => {
-        reject();
+      }).catch((err) => {
+        reject(rr);
       });
     });
-  }).catch(() => reject());
+  }).catch((err) => reject(err));
 });
 
 const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
@@ -192,7 +192,7 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
   const clients = await kcAdminClient.clients.find();
   const client = clients.find(clt => clt.clientId === config.get('keycloak:UIClientId'));
   if (!client) {
-    return reject();
+    return reject('No UI client ID');
   }
   mixin.getFilesFromDir(`${__dirname}/../${fshDir}`).then((files) => {
     const filesPromises = [];
@@ -201,7 +201,7 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
         fs.readFile(file, { encoding: 'utf8', flag: 'r' }, (err, data) => {
           if (err) {
             logger.error(err);
-            return freject();
+            return freject(err);
           }
           const fhir = JSON.parse(data);
           if (!fhir.meta || !fhir.meta.profile || !fhir.meta.profile.includes(ROLE_EXTENSION)) {
@@ -227,7 +227,7 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
             } else {
               logger.error(err);
             }
-            return freject();
+            return freject(err);
           });
         });
       }));
@@ -273,7 +273,7 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
                     fs.readFile(`${dir}/${compFile}`, { encoding: 'utf8', flag: 'r' }, (err, data) => {
                       if (err) {
                         logger.error(err);
-                        return creject();
+                        return creject(err);
                       }
                       const fhir = JSON.parse(data);
                       const compositeName = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profileBaseUrl')}/StructureDefinition/gofr-basic-name`);
@@ -288,7 +288,7 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
                         } else {
                           logger.error(err);
                         }
-                        creject();
+                        creject(err);
                       });
                     });
                   }));
@@ -302,7 +302,7 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
                     } else {
                       logger.error(err);
                     }
-                    return sreject();
+                    return sreject(err);
                   });
                 });
               });
@@ -329,7 +329,7 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
                     fs.readFile(`${dir}/${compFile}`, { encoding: 'utf8', flag: 'r' }, (err, data) => {
                       if (err) {
                         logger.error(err);
-                        return creject();
+                        return creject(err);
                       }
                       const fhir = JSON.parse(data);
                       const compositeName = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profileBaseUrl')}/StructureDefinition/gofr-basic-name`);
@@ -344,7 +344,7 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
                         } else {
                           logger.error(err);
                         }
-                        creject();
+                        creject(err);
                       });
                     });
                   }));
@@ -358,26 +358,26 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
                     } else {
                       logger.error(err);
                     }
-                    return sreject();
+                    return sreject(err);
                   });
                 });
               });
             });
             Promise.all([subroles, roletasks]).then(() => {
               fresolve();
-            }).catch(() => {
-              freject();
+            }).catch((err) => {
+              freject(err);
             });
           });
         }));
       });
       Promise.all(filesPromises).then(() => {
         resolve();
-      }).catch(() => {
-        reject();
+      }).catch((err) => {
+        reject(err);
       });
-    }).catch(() => {
-      reject();
+    }).catch((err) => {
+      reject(err);
     });
   });
 });
@@ -521,7 +521,3 @@ module.exports = {
   populateRoleTasks,
   loadTasksToKeycloak,
 };
-
-setTimeout(() => {
-  loadTasksToKeycloak();
-}, 1000);

@@ -22,6 +22,7 @@ const cookieParser = require('cookie-parser');
 const moment = require('moment');
 const async = require('async');
 const jwt = require('jsonwebtoken');
+const defaultSetups = require('./defaultSetup.js');
 const config = require('./config');
 const user = require('./modules/user');
 const outcomes = require('../config/operationOutcomes');
@@ -32,14 +33,9 @@ const redisClient = redis.createClient({
 const store = new RedisStore({
   client: redisClient,
 });
-let keycloak;
-if (config.get('app:idp') === 'keycloak') {
-  keycloak = require('./modules/keycloakConnect').initKeycloak(store);
-}
 
 require('./cronjobs');
 const mixin = require('./mixin');
-const AuthRouter = require('./routes/auth');
 const UsersRouter = require('./routes/users');
 const DataSourcesRouter = require('./routes/dataSources');
 const MatchRouter = require('./routes/match');
@@ -53,8 +49,8 @@ const dhis = require('./dhis');
 const fhir = require('./fhir');
 const hapi = require('./hapi');
 const scores = require('./scores')();
-const defaultSetups = require('./defaultSetup.js');
 
+let keycloak;
 const levelMaps = config.get('levelMaps');
 
 const app = express();
@@ -144,28 +140,44 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
 }));
-if (keycloak) {
-  app.use(keycloak.middleware());
-} else {
-  app.use(AuthRouter.passport.initialize());
-  app.use(AuthRouter.passport.session());
-}
-app.use(express.static(`${__dirname}/../gui`));
+const postInitialization = () => {
+  const AuthRouter = require('./routes/auth');
+  if (config.get('app:idp') === 'keycloak') {
+    keycloak = require('./modules/keycloakConnect').initKeycloak(store);
+  }
+  if (keycloak) {
+    app.use(keycloak.middleware());
+  } else {
+    app.use(AuthRouter.passport.initialize());
+    app.use(AuthRouter.passport.session());
+  }
+  app.use(express.static(`${__dirname}/../gui`));
 
-app.use(bodyParser.urlencoded({
-  extended: true,
-}));
-app.use(bodyParser.json());
-app.use(isLoggedIn);
-app.use('/auth', AuthRouter);
-app.use('/users', UsersRouter);
-app.use('/datasource', DataSourcesRouter);
-app.use('/match', MatchRouter);
-app.use('/FR/', FRRouter);
-app.use('/config/', FRConfig);
-app.use('/fhir', questionnaireRouter);
-app.use('/fhir', fhirRouter);
-app.use('/facilitiesRequests', facilitiesRequests);
+  app.use(bodyParser.urlencoded({
+    extended: true,
+  }));
+  app.use(bodyParser.json());
+  app.use(isLoggedIn);
+  app.use('/auth', AuthRouter);
+  app.use('/users', UsersRouter);
+  app.use('/datasource', DataSourcesRouter);
+  app.use('/match', MatchRouter);
+  app.use('/FR/', FRRouter);
+  app.use('/config/', FRConfig);
+  app.use('/fhir', questionnaireRouter);
+  app.use('/fhir', fhirRouter);
+  app.use('/facilitiesRequests', facilitiesRequests);
+};
+
+defaultSetups.initialize().then(() => {
+  postInitialization();
+}).catch((err) => {
+  logger.error(err);
+  logger.warn('GOFR may have issues running because of above error(s)');
+  postInitialization();
+});
+
+
 // socket config - large documents can cause machine to max files open
 
 https.globalAgent.maxSockets = 32;
@@ -173,14 +185,6 @@ http.globalAgent.maxSockets = 32;
 
 const topOrgName = config.get('mCSD:fakeOrgName');
 
-defaultSetups.initialize().then(() => {
-  // const defaultDB = config.get('mCSD:registryDB');
-  // mcsd.createFakeOrgID(defaultDB).then(() => {
-
-  // }).catch((error) => {
-  //   logger.error(error);
-  // });
-});
 process.on('message', (message) => {
   if (message.content === 'clean') {
     mcsd.cleanCache(message.url, true);

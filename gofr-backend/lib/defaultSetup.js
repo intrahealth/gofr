@@ -16,7 +16,12 @@ const loadKeycloakData = () => new Promise((resolve, reject) => {
     return resolve();
   }
 
-  const kcadm = `${config.get('keycloak:installedLocation')}/bin/kcadm.sh`;
+  let keycloakInstalledLocation = config.get('keycloak:installedLocation');
+  const last = keycloakInstalledLocation.slice(-1);
+  if (last !== '/') {
+    keycloakInstalledLocation += '/';
+  }
+  const kcadm = `${keycloakInstalledLocation}bin/kcadm.sh`;
   const keycloakBase = config.get('keycloak:baseURL');
   const adminUser = config.get('keycloak:adminUser');
   const adminPassword = config.get('keycloak:adminPassword');
@@ -48,7 +53,7 @@ const loadKeycloakData = () => new Promise((resolve, reject) => {
       });
     },
     theme: (callback) => {
-      exec(`cp -r ${__dirname}/../../resources/keycloak/themes/gofr ${config.get('keycloak:installedLocation')}/themes`, (err, stdout, stderr) => {
+      exec(`cp -r ${__dirname}/../../resources/keycloak/themes/gofr ${keycloakInstalledLocation}themes`, (err, stdout, stderr) => {
         if (err) {
           return callback(err);
         }

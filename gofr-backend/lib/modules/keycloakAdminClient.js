@@ -7,9 +7,9 @@ const config = require('../config');
 const logger = require('../winston');
 const mixin = require('../mixin');
 
-const TASK_EXTENSION = `${config.get('profileBaseUrl')}/StructureDefinition/gofr-task`;
-const ROLE_EXTENSION = `${config.get('profileBaseUrl')}/StructureDefinition/gofr-role`;
-const ASSIGN_ROLE_EXTENSION = `${config.get('profileBaseUrl')}/StructureDefinition/gofr-assign-role`;
+const TASK_EXTENSION = `${config.get('profiles:baseURL')}/StructureDefinition/gofr-task`;
+const ROLE_EXTENSION = `${config.get('profiles:baseURL')}/StructureDefinition/gofr-role`;
+const ASSIGN_ROLE_EXTENSION = `${config.get('profiles:baseURL')}/StructureDefinition/gofr-assign-role`;
 
 const kcAdminClient = new KcAdminClient({
   realmName: config.get('keycloak:realm'),
@@ -60,7 +60,7 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
           if (!fhir.meta || !fhir.meta.profile || !fhir.meta.profile.includes(TASK_EXTENSION)) {
             return fresolve();
           }
-          const name = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profileBaseUrl')}/StructureDefinition/gofr-basic-name`);
+          const name = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
           if (!name) {
             logger.warn(`Name missing for task ${fhir.id}`);
             return fresolve();
@@ -69,7 +69,7 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
           if (name) {
             body.name = name.valueString;
           }
-          const attributes = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profileBaseUrl')}/StructureDefinition/task-attributes`);
+          const attributes = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/task-attributes`);
           if (attributes && attributes.extension) {
             const roleAttrs = {};
             attributes.extension.forEach((attribute) => {
@@ -113,7 +113,7 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
               fresolve();
               return;
             }
-            const name = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profileBaseUrl')}/StructureDefinition/gofr-basic-name`);
+            const name = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
             if (!name) {
               fresolve();
               return;
@@ -141,7 +141,7 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
                       return creject(err);
                     }
                     const fhir = JSON.parse(data);
-                    const compositeName = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profileBaseUrl')}/StructureDefinition/gofr-basic-name`);
+                    const compositeName = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
                     kcAdminClient.clients.findRole({ id: client.id, roleName: compositeName.valueString }).then((resp) => {
                       body.roles.push({
                         id: resp.id,
@@ -207,7 +207,7 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
           if (!fhir.meta || !fhir.meta.profile || !fhir.meta.profile.includes(ROLE_EXTENSION)) {
             return fresolve();
           }
-          const name = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profileBaseUrl')}/StructureDefinition/gofr-basic-name`);
+          const name = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
           if (!name) {
             logger.warn(`Name missing for role ${fhir.id}`);
             return fresolve();
@@ -244,7 +244,7 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
               fresolve();
               return;
             }
-            const name = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profileBaseUrl')}/StructureDefinition/gofr-basic-name`);
+            const name = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
             if (!name) {
               fresolve();
               return;
@@ -276,7 +276,7 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
                         return creject(err);
                       }
                       const fhir = JSON.parse(data);
-                      const compositeName = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profileBaseUrl')}/StructureDefinition/gofr-basic-name`);
+                      const compositeName = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
                       kcAdminClient.roles.findOneByName({ id: client.id, name: compositeName.valueString }).then((resp) => {
                         body.roles.push({
                           id: resp.id,
@@ -332,7 +332,7 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
                         return creject(err);
                       }
                       const fhir = JSON.parse(data);
-                      const compositeName = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profileBaseUrl')}/StructureDefinition/gofr-basic-name`);
+                      const compositeName = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
                       kcAdminClient.clients.findRole({ id: client.id, roleName: compositeName.valueString }).then((resp) => {
                         body.roles.push({
                           id: resp.id,
@@ -450,7 +450,7 @@ const populateRoleTasks = ({ token, user }) => new Promise(async (resolve, rejec
         return resolve({ user, role: {}, tasks });
       }
       const extension = [{
-        url: `${config.get('profileBaseUrl')}/StructureDefinition/gofr-basic-name`,
+        url: `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`,
         valueString: roleBasicName,
       }];
       tasks.forEach((task) => {

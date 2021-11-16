@@ -1,5 +1,16 @@
 <template>
   <ul id="menu">
+    <li class="parent" v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-home-page')">
+      <v-list-item
+        to="/home"
+        v-if='!$store.state.denyAccess'
+        class="newClass"
+      >
+        <v-list-item-title>
+          <v-icon>mdi-home</v-icon> {{ $t('App.menu.home.msg') }}
+        </v-list-item-title>
+      </v-list-item>
+    </li>
     <li
       class="parent"
       v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'access-facility-reconciliation-mod')"

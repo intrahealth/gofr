@@ -374,6 +374,16 @@ Usage:          #example
 * extension[attributes][0].extension[resource].valueCode = GofrTaskResourceCodeSystem#custom
 * extension[attributes][0].extension[instance].valueId = "view-config-page"
 
+Instance:       gofr-task-view-home-page
+InstanceOf:     GofrTask
+Title:          "GOFR Task To View Home Page"
+Usage:          #example
+* code = GofrResourceCodeSystem#task
+* extension[name].valueString = "view-home-page"
+* extension[attributes][0].extension[permission].valueCode = GofrTaskPermissionCodeSystem#special
+* extension[attributes][0].extension[resource].valueCode = GofrTaskResourceCodeSystem#custom
+* extension[attributes][0].extension[instance].valueId = "view-home-page"
+
 Instance:       gofr-task-view-add-organization-page
 InstanceOf:     GofrTask
 Title:          "GOFR Task To View Add Organization Page"
@@ -574,6 +584,7 @@ Usage:          #example
 * extension[attributes][0].extension[permission].valueCode = GofrTaskPermissionCodeSystem#special
 * extension[attributes][0].extension[resource].valueCode = GofrTaskResourceCodeSystem#custom
 * extension[attributes][0].extension[instance].valueId = "access-facility-reconciliation-mod"
+* extension[compositeTask][0].valueReference = Reference(Basic/gofr-task-view-home-page)
 
 Instance:       gofr-task-access-facility-registry-mod
 InstanceOf:     GofrTask
@@ -584,6 +595,7 @@ Usage:          #example
 * extension[attributes][0].extension[permission].valueCode = GofrTaskPermissionCodeSystem#special
 * extension[attributes][0].extension[resource].valueCode = GofrTaskResourceCodeSystem#custom
 * extension[attributes][0].extension[instance].valueId = "access-facility-registry-mod"
+* extension[compositeTask][0].valueReference = Reference(Basic/gofr-task-view-home-page)
 
 Instance:       gofr-task-manage-data-source
 InstanceOf:     GofrTask
@@ -819,6 +831,7 @@ Usage:          #example
 * extension[task][22].valueReference = Reference(Basic/gofr-task-view-add-facility-page)
 * extension[task][23].valueReference = Reference(Basic/gofr-task-view-add-organization-page)
 * extension[task][24].valueReference = Reference(Basic/gofr-task-view-config-page)
+* extension[task][24].valueReference = Reference(Basic/gofr-task-view-home-page)
 * extension[task][25].valueReference = Reference(Basic/gofr-task-view-search-facility-page)
 * extension[task][26].valueReference = Reference(Basic/gofr-task-view-search-jurisdiction-page)
 * extension[task][27].valueReference = Reference(Basic/gofr-task-view-search-service-page)

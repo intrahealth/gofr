@@ -8,6 +8,10 @@
         "msg": "rapprochement des installations",
         "tooltip": "rapprochement des installations"
       },
+      "home": {
+        "msg": "Accueil",
+        "tooltip": "Afficher la base de données système"
+      },
       "createPair": {
         "msg": "Créer et gérer une paire de sources de données",
         "tooltip": "Select data sources to start mathing"

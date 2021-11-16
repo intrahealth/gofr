@@ -9,6 +9,7 @@ const redis = require('redis');
 const mixin = require('./mixin');
 const logger = require('./winston');
 const fhirAxios = require('./modules/fhirAxios');
+const config = require('./config');
 
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST || '127.0.0.1',
@@ -18,7 +19,7 @@ const credentials = {
   dhis2URL: '',
   username: '',
   password: '',
-  name: ''
+  name: '',
 };
 
 const dhis = {
@@ -287,6 +288,9 @@ function processOrgUnit(metadata, hasKey) {
   async.eachSeries(metadata.organisationUnits, (org, nxtOrg) => {
     logger.info(`Processing (${++i}/${max}) ${org.id}`);
     const fhir = {
+      meta: {
+        profile: [],
+      },
       resourceType: 'Location',
       id: org.id,
       status: 'active',
@@ -319,6 +323,14 @@ function processOrgUnit(metadata, hasKey) {
     fhir.name = org.name;
     fhir.alias = [org.shortName];
     if (metadata.organisationUnits.find(x => x.parent && x.parent.id && x.parent.id == org.id)) {
+      fhir.meta.profile = config.get('profiles:jurisdiction');
+      fhir.type = {
+        coding: [{
+          system: 'urn:ietf:rfc:3986',
+          code: 'urn:ihe:iti:mcsd:2019:jurisdiction',
+          display: 'Jurisdiction',
+        }],
+      };
       fhir.physicalType = {
         coding: [{
           system: 'http://hl7.org/fhir/location-physical-type',
@@ -328,6 +340,14 @@ function processOrgUnit(metadata, hasKey) {
         text: 'Administrative Area',
       };
     } else {
+      fhir.meta.profile = config.get('profiles:facility');
+      fhir.type = {
+        coding: [{
+          system: 'urn:ietf:rfc:3986',
+          code: 'urn:ihe:iti:mcsd:2019:facility',
+          display: 'Facility',
+        }],
+      };
       fhir.physicalType = {
         coding: [{
           system: 'http://hl7.org/fhir/location-physical-type',

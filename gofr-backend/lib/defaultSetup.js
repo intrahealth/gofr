@@ -12,7 +12,8 @@ const fhirAxios = require('./modules/fhirAxios');
 
 const loadKeycloakData = () => new Promise((resolve, reject) => {
   const installed = config.get('app:installed');
-  if (installed) {
+  const idp = config.get('app:idp');
+  if (installed || idp !== 'keycloak') {
     return resolve();
   }
 
@@ -243,10 +244,15 @@ module.exports = {
       (callback) => {
         // const kcadmin = require('./modules/keycloakAdminClient');
         Promise.all([loadDefaultConfig(), loadFSHFiles()]).then(() => {
-          const kcadmin = require('./modules/keycloakAdminClient');
-          setTimeout(() => {
-            kcadmin.loadTasksToKeycloak().then(() => callback(null)).catch(err => callback(err));
-          }, 1000);
+          const idp = config.get('app:idp');
+          if (idp === 'keycloak') {
+            const kcadmin = require('./modules/keycloakAdminClient');
+            setTimeout(() => {
+              kcadmin.loadTasksToKeycloak().then(() => callback(null)).catch(err => callback(err));
+            }, 1000);
+          } else {
+            return callback(null);
+          }
         }).catch(err => callback(err));
       },
       (callback) => {

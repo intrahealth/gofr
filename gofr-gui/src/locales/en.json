@@ -8,6 +8,10 @@
         "msg": "Facility Reconciliation",
         "tooltip": "Facility Reconciliation"
       },
+      "home": {
+        "msg": "Home",
+        "tooltip": "View System Database"
+      },
       "createPair": {
         "msg": "Create and Manage Data Source Pair",
         "tooltip": "Select data sources to start mathing"

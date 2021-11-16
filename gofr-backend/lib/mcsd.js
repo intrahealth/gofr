@@ -2295,8 +2295,19 @@ module.exports = () => ({
 
   buildJurisdiction(jurisdictions, bundle) {
     jurisdictions.forEach((jurisdiction) => {
-      const resource = {};
-      resource.resourceType = 'Location';
+      const resource = {
+        meta: {
+          profile: config.get('profiles:jurisdiction'),
+        },
+        resourceType: 'Location',
+        type: {
+          coding: [{
+            system: 'urn:ietf:rfc:3986',
+            code: 'urn:ihe:iti:mcsd:2019:jurisdiction',
+            display: 'Jurisdiction',
+          }],
+        },
+      };
       resource.name = jurisdiction.name;
       resource.status = 'active';
       resource.mode = 'instance';
@@ -2330,8 +2341,19 @@ module.exports = () => ({
   },
 
   buildBuilding(building, bundle) {
-    const resource = {};
-    resource.resourceType = 'Location';
+    const resource = {
+      meta: {
+        profile: config.get('profiles:facility'),
+      },
+      resourceType: 'Location',
+      type: {
+        coding: [{
+          system: 'urn:ietf:rfc:3986',
+          code: 'urn:ihe:iti:mcsd:2019:facility',
+          display: 'Facility',
+        }],
+      },
+    };
     resource.status = 'active';
     resource.mode = 'instance';
     resource.name = building.name;

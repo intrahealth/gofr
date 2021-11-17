@@ -22,6 +22,7 @@ export default {
       ],
       "zoom": 3,
       "isFacility" : true,
+      "searchOnLoad" : true,
       "hierarchyExtension": {
         "parameter": "ihe-mcsd-hierarchy-partof"
       },

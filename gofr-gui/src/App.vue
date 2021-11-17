@@ -110,27 +110,8 @@
             <v-icon>mdi-close</v-icon>
           </v-btn>
       </v-snackbar>
-      <v-row>
-        <v-col>
-          <template v-if="Object.keys($store.state.activePair.source1).length > 0 && !$store.state.denyAccess">
-            {{ $t('App.source') }} 1: <b>{{$store.state.activePair.source1.display}}</b>, &nbsp; &nbsp; {{ $t('App.source') }} 2: <b>{{$store.state.activePair.source2.display}}</b>,
-            &nbsp; &nbsp; Recon Status: <v-icon
-              small
-              v-if="$store.state.recoStatus === 'in-progress'"
-            >mdi-lock-open-variant-outline</v-icon>
-            <v-icon
-              small
-              v-else
-            >mdi-lock-outline</v-icon> <b>{{$store.state.recoStatus}}</b>
-          </template>
-        </v-col>
-        <v-col cols="2">
-          <v-select
-            :items="locales"
-            v-model="locale"
-          ></v-select>
-        </v-col>
-      </v-row>
+      <v-divider></v-divider>
+      <br>
       <center>
         <v-alert
           :style="{width: $store.state.alert.width}"
@@ -191,18 +172,8 @@ export default {
       ],
       fixed: false,
       title: this.$t('App.title'),
-      locale: 'en',
-      locales: [
-        { text: 'English', value: 'en' },
-        { text: 'French', value: 'fr' }
-      ],
       activeDataSourcePair: {},
       tasksVerification: tasksVerification
-    }
-  },
-  watch: {
-    locale (val) {
-      this.$i18n.locale = val
     }
   },
   methods: {
@@ -221,13 +192,13 @@ export default {
         (this.$store.state.dataSources.length > 1 ||
           this.$store.state.dataSourcePairs.length > 0)
       ) {
-        this.$router.push({ name: 'ViewMap' })
+        this.$router.push({ name: 'Home' })
         // this.$router.push({ name: 'DataSourcesPair' })
         return
       }
       if (!source1DB || !source2DB) {
         // this.$router.push({ name: 'AddDataSources' })
-        this.$router.push({ name: 'ViewMap' })
+        this.$router.push({ name: 'Home' })
         return
       }
       axios.get( '/uploadAvailable/' + source1DB + '/' + source2DB ).then(results => {
@@ -235,16 +206,16 @@ export default {
         if (results.data.dataUploaded) {
           this.$store.state.recalculateScores = true
           // this.$router.push({ name: 'FacilityReconScores' })
-          this.$router.push({ name: 'ViewMap' })
+          this.$router.push({ name: 'Home' })
         } else {
           // this.$router.push({ name: 'AddDataSources' })
-          this.$router.push({ name: 'ViewMap' })
+          this.$router.push({ name: 'Home' })
         }
       })
       .catch(err => {
         console.log(err)
         // this.$router.push({ name: 'AddDataSources' })
-        this.$router.push({ name: 'ViewMap' })
+        this.$router.push({ name: 'Home' })
       })
     },
     getTotalLevels () {
@@ -449,7 +420,7 @@ export default {
   },
   created () {
     // this.$router.push({ name: 'AddDataSources' })
-    this.$router.push({ name: 'ViewMap' })
+    // this.$router.push({ name: 'Home' })
     this.$store.state.config.generalConfig = this.generalConfig
     if(this.$store.state.idp === 'keycloak') {
       this.$store.state.clientId = uuid.v4()

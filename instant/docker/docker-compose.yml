@@ -41,7 +41,7 @@ services:
       - mCSD__server__host=fhir
       - mCSD__server__port=8080
       - mCSD__server__basePath=fhir
-      - redis__host=redis
+      - redis__host=192.168.0.1
     ports:
       - "4000:4000"
     restart: always

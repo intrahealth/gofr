@@ -22,7 +22,7 @@ ENV mCSD__server__protocal=http
 ENV mCSD__server__host=fhir
 ENV mCSD__server__port=8080
 ENV mCSD__server__basePath=fhir
-
+ENV FHIR_BASE_URL=${FHIR_BASE_URL}
 ENV DOCKERIZE_VERSION v0.5.0
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \

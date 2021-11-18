@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const config = require('../config')
+const config = require('../config');
 const fhirAxios = require('./fhirAxios');
 const fhirFilter = require('./fhirFilter');
 const logger = require('../winston');

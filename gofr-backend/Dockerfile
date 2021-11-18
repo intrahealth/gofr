@@ -18,7 +18,10 @@ RUN cp /src/gofr-backend/config/default.json.example /src/gofr-backend/config/de
 # ADD . /src/
 
 ARG FHIR_BASE_URL=http://fhir:8080/fhir
-ENV FHIR_BASE_URL=${FHIR_BASE_URL}
+ENV mCSD__server__protocal=http
+ENV mCSD__server__host=fhir
+ENV mCSD__server__port=8080
+ENV mCSD__server__basePath=fhir
 
 ENV DOCKERIZE_VERSION v0.5.0
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \

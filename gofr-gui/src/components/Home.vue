@@ -242,11 +242,17 @@ export default {
       this.countFacilities()
       this.countJurisdictions()
       this.getPartitionStatus()
+    },
+    datasources() {
+      this.getPartitionStatus()
     }
   },
   computed: {
     FRDatasource() {
       return this.$store.state.config.userConfig.FRDatasource
+    },
+    datasources() {
+      return this.$store.state.dataSources
     }
   },
   methods: {
@@ -273,7 +279,9 @@ export default {
       let dtsrc = this.$store.state.dataSources.find((dtsrc) => {
         return dtsrc.name === this.$store.state.config.userConfig.FRDatasource
       })
-      console.log(dtsrc);
+      if(!dtsrc) {
+        return
+      }
       this.activePartition.sharedUsers = dtsrc.sharedUsers.length
       this.activePartition.sharedToAll = dtsrc.shareToAll.activated
       this.activePartition.limitedByLocation = dtsrc.shareToAll.limitByUserLocation

@@ -18,6 +18,9 @@
     "RESTClientUser": "gofr@keycloak.org",
     "RESTClientPassword": "gofr"
   },
+  "redis": {
+    "host": "127.0.0.1"
+  },
   "defaults": {
     "components": {
       "date-time": {

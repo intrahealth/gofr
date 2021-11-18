@@ -28,7 +28,7 @@ const user = require('./modules/user');
 const outcomes = require('../config/operationOutcomes');
 
 const redisClient = redis.createClient({
-  host: process.env.REDIS_HOST || '127.0.0.1',
+  host: config.get('redis:host'),
 });
 const store = new RedisStore({
   client: redisClient,
@@ -115,22 +115,18 @@ const isLoggedIn = (req, res, next) => {
       }
     }
     if (!req.user) {
-      res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-      res.set('Access-Control-Allow-Credentials', true);
       return res.status(401).json(outcomes.NOTLOGGEDIN);
     }
     return next();
   }
 };
-app.get('/isSessionActive', (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.set('Access-Control-Allow-Credentials', true);
-  res.status(200).send(true);
-});
 app.use(cors({
   origin: true,
   credentials: true,
 }));
+app.get('/isSessionActive', (req, res) => {
+  res.status(200).send(true);
+});
 app.use(morgan('dev'));
 app.use(cleanReqPath);
 app.use(cookieParser());

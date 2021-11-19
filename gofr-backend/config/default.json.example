@@ -49,7 +49,21 @@
     "processor": {},
     "questionnaire": {}
   },
-  "profileBaseUrl": "http://gofr.org/fhir",
+  "profiles": {
+    "baseURL": "http://gofr.org/fhir",
+    "facility": [
+      "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.FacilityLocation"
+    ],
+    "jurisdiction": [
+      "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation"
+    ],
+    "organization": [
+      "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionsOrganization"
+    ],
+    "healthcareService": [
+      "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.HealthcareService"
+    ]
+  },
   "mCSD": {
     "url": "http://localhost:8081/hapi54/fhir",
     "server": {

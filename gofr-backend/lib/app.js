@@ -28,7 +28,7 @@ const user = require('./modules/user');
 const outcomes = require('../config/operationOutcomes');
 
 const redisClient = redis.createClient({
-  host: process.env.redis__host || '127.0.0.1',
+  host: process.env.REDIS_HOST || '127.0.0.1',
 });
 const store = new RedisStore({
   client: redisClient,

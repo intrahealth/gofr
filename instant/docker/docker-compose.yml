@@ -32,6 +32,12 @@ services:
       # file:// can only deal with absolute paths, have to use classpath
     #   SPRING_CONFIG_LOCATION: 'classpath:./application.yaml'
 
+  hapi-cli:
+    container_name: hapi-cli
+    image: intrahealth/hapi-fhir-cli:latest
+    depends_on:
+      - fhir
+    command: upload-definitions -v r4 -t http://fhir:8080/fhir/DEFAULT
 
   gofr:
     container_name: gofr

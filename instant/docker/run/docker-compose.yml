@@ -37,7 +37,7 @@ services:
     image: intrahealth/hapi-fhir-cli:latest
     depends_on:
       - fhir
-    command: upload-definitions -v r4 -t http://fhir:8080/fhir/DEFAULT
+    command: /bin/sh -c "/upload-definitions.sh -p 8080 -h fhir"
 
   gofr:
     container_name: gofr

@@ -1,7 +1,14 @@
 FROM openjdk:8-alpine
 ENV APP_VERSION=5.5.2
+ENV DOCKERIZE_VERSION v0.6.1
 
-RUN apk add curl
+RUN apk add --no-cache curl
+
+RUN apk add --no-cache openssl
+
+RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
 RUN set -eux; \
     apk add --progress \
@@ -18,6 +25,8 @@ RUN unzip /tmp/hapicli.zip -d /; \
 COPY hapi-cli-entrypoint.sh /hapi-cli-entrypoint.sh
 
 COPY upload-definitions.sh /upload-definitions.sh
+
+RUN chmod +x /hapi-cli-entrypoint.sh
 
 RUN chmod +x /upload-definitions.sh
 

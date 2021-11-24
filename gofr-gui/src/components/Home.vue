@@ -257,6 +257,7 @@ export default {
   },
   methods: {
     partitionChanged() {
+      this.saveConfiguration('userConfig', 'activePartition')
       this.reload++
     },
     countFacilities() {

@@ -242,7 +242,6 @@ module.exports = {
         loadKeycloakData().then(() => callback(null)).catch(err => reject(err));
       },
       (callback) => {
-        // const kcadmin = require('./modules/keycloakAdminClient');
         Promise.all([loadDefaultConfig(), loadFSHFiles()]).then(() => {
           const idp = config.get('app:idp');
           if (idp === 'keycloak') {

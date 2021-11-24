@@ -185,7 +185,7 @@
               </v-flex>
               <v-flex>
                 <v-autocomplete
-                  @change="saveConfiguration('userConfig', 'useCSVHeader')"
+                  @change="saveConfiguration('userConfig', 'activePartition')"
                   :items="$store.state.dataSources"
                   item-text="display"
                   item-value="name"

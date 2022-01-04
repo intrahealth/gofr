@@ -142,8 +142,12 @@
       color="primary"
       :fixed="fixed"
       app
+      height="20"
     >
-
+      <v-spacer></v-spacer>
+      <label style="font-size: 10px">
+        GOFR Version {{$store.state.version}}
+      </label>
     </v-footer>
   </v-app>
 </template>

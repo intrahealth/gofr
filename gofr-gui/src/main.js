@@ -104,6 +104,7 @@ getDHIS2StoreConfig((storeConfig) => {
     let genConfig = response.data.generalConfig
     store.state.idp = response.data.otherConfig.idp
     store.state.keycloak = response.data.otherConfig.keycloak
+    store.state.version = response.data.version
     if (!genConfig) {
       genConfig = {}
     }

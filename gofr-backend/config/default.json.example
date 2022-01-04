@@ -1,7 +1,8 @@
 {
   "app": {
     "installed": false,
-    "idp": "gofr"
+    "idp": "gofr",
+    "version": "2.2.0"
   },
   "server": {
     "hostname": "0.0.0.0",

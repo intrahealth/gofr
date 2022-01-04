@@ -10,7 +10,7 @@
           dark
         >
           <v-toolbar-title>
-            This will delete the datasource {{server.name}} from the database
+            This will delete the datasource {{server.display}} from the database
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn
@@ -30,12 +30,13 @@
               hide-default-footer
               :loading="loadingPairs"
             >
-              <template
-                slot="items"
-                slot-scope="props"
-              >
-                <td>{{ props.item.source1Name }} - {{props.item.source2Name }}</td>
-                <td>{{ props.item.owner }}</td>
+              <template v-slot:item="{ item }">
+                <td>{{ item.source1Name }} - {{item.source2Name }}</td>
+                <td>
+                  <label v-if="item.owner.name">
+                    {{ item.owner.name }}
+                  </label>
+                </td>
               </template>
             </v-data-table>
           </label>

@@ -72,7 +72,7 @@
                     <br>
                     Created: <v-chip
                               class="ma-2"
-                              color="green"
+                              color="primary"
                               text-color="white"
                             >
                               {{activePartition.createdTime}}
@@ -91,14 +91,14 @@
                     </label>
                     Shared To All: <v-chip
                                     class="ma-2"
-                                    color="red"
+                                    color="primary"
                                     text-color="white"
                                   >
                                     {{activePartition.sharedToAll}}
                                   </v-chip> <br>
                     Limited by User Location: <v-chip
                                     class="ma-2"
-                                    color="primary"
+                                    color="red"
                                     text-color="white"
                                   >
                                     {{activePartition.limitedByLocation}}

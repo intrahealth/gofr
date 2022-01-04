@@ -13,9 +13,57 @@ const fhir = require('../fhir');
 const dhis = require('../dhis');
 const mcsd = require('../mcsd')();
 const hapi = require('../hapi');
-const config = require('../config');
 const outcomes = require('../../config/operationOutcomes');
 
+function destroyPartition(partitionName, partitionID) {
+  logger.info('Destroying partition ' + partitionName);
+  return new Promise((resolve, reject) => {
+    const deleteResources = ['Location', 'Organization', 'HealthcareService', 'Basic', 'StructureDefinition', 'SearchParameter'];
+    const promises = [];
+    const expungeParams = {
+      resourceType: 'Parameters',
+      parameter: [
+        {
+          name: 'expungeDeletedResources',
+          valueBoolean: true,
+        },
+        {
+          name: 'expungePreviousVersions',
+          valueBoolean: true,
+        },
+        {
+          name: 'expungeEverything',
+          valueBoolean: true,
+        },
+        {
+          name: 'count',
+        },
+      ],
+    };
+    for (const resource of deleteResources) {
+      promises.push(new Promise((resolve, reject) => {
+        fhirAxios.delete(resource, { _count: 0 }, partitionName).then(() => {
+          fhirAxios.expunge(resource, expungeParams, partitionName).then(() => {
+            resolve();
+          }).catch((err) => {
+            logger.error(err);
+            reject();
+          });
+        }).catch((err) => {
+          logger.error(err);
+          reject();
+        });
+      }));
+    }
+
+    Promise.all(promises).then(() => {
+      hapi.deletePartition({ partitionID }).then(() => resolve()).catch((err) => {
+        logger.error(err);
+        return reject();
+      });
+    }).catch(() => reject());
+  });
+}
 function getLastUpdateTime(sources) {
   return new Promise((resolve) => {
     async.eachOfSeries(sources, (server, key, nxtServer) => {
@@ -368,9 +416,15 @@ function deleteSourcePair({ pairID, userID }) {
       }
       let partitionID;
       const partIdExt = partition.resource.extension && partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partitionID');
-      const partNameExt = partition.resource.extension && partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/name');
       if (partIdExt) {
         partitionID = partIdExt.valueInteger;
+      } else {
+        return reject();
+      }
+      let partitionName;
+      const partitionNameExt = partition.resource.extension && partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/name');
+      if (partitionNameExt) {
+        partitionName = partitionNameExt.valueString;
       } else {
         return reject();
       }
@@ -382,19 +436,14 @@ function deleteSourcePair({ pairID, userID }) {
           return reject();
         });
       } else {
-        fhirAxios.delete('Basic', { _id: pair.resource.id }, 'DEFAULT').then(() => {
-          const mappingUrl = fhirAxios.__genUrl(partNameExt.valueString);
-          mcsd.cleanCache(`url_${mappingUrl}`, true);
-          hapi.deletePartition({ partitionID }).then(() => {
-            resolve();
-          }).catch((err) => {
+        const mappingUrl = fhirAxios.__genUrl(partitionName);
+        mcsd.cleanCache(`url_${mappingUrl}`, true);
+        destroyPartition(partitionName, partitionID).then(() => {
+          fhirAxios.delete('Basic', { _id: pair.resource.id }, 'DEFAULT').then(() => resolve()).catch((err) => {
             logger.error(err);
             return reject();
           });
-        }).catch((err) => {
-          logger.error(err);
-          return reject();
-        });
+        }).catch(() => reject());
       }
     });
   });
@@ -1246,7 +1295,7 @@ router.get('/getPairForSource/:datasource', (req, res) => {
           if (partition) {
             const ownerExt = partition.resource.extension && partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/owner');
             if (ownerExt) {
-              const userExt = ownerExt.find(ext => ext.url === 'userID');
+              const userExt = ownerExt.extension.find(ext => ext.url === 'userID');
               owner = userExt.valueReference.reference;
             }
           }
@@ -1271,25 +1320,54 @@ router.get('/getPairForSource/:datasource', (req, res) => {
       fhirAxios.searchAll('Basic', searchParams, 'DEFAULT').then((data) => {
         const pairsRes = data.entry.filter(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-datasource-pair'));
         const partsRes = data.entry.filter(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-partition'));
-        for (const pair of pairsRes) {
+        async.each(pairsRes, (pair, nxtPair) => {
           const src1Ext = pair.resource.extension && pair.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/source1');
           const src2Ext = pair.resource.extension && pair.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/source2');
           const partition = partsRes.find(part => pair.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition' && ext.valueReference.reference.split('/')[1] === part.resource.id));
-          let owner;
+          let partitionOwner;
           if (partition) {
             const ownerExt = partition.resource.extension && partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/owner');
             if (ownerExt) {
-              const userExt = ownerExt.find(ext => ext.url === 'userID');
-              owner = userExt.valueReference.reference;
+              const userExt = ownerExt.extension.find(ext => ext.url === 'userID');
+              partitionOwner = userExt.valueReference.reference;
             }
           }
-          pairs.push({
-            source1Name: src1Ext.valueReference.display,
-            source2Name: src2Ext.valueReference.display,
-            owner,
-          });
-        }
-        return callback(null);
+          if (partitionOwner) {
+            fhirAxios.read(partitionOwner.split('/')[0], partitionOwner.split('/')[1], '', 'DEFAULT').then((resp) => {
+              const owner = {
+                id: resp.id,
+                name: '',
+              };
+              if (resp.name) {
+                if (resp.name[0].text) {
+                  owner.name = resp.name[0].text;
+                } else {
+                  if (resp.name[0].given) {
+                    owner.name = resp.name[0].given.join(' ');
+                  }
+                  if (resp.name[0].family) {
+                    owner.name += resp.name[0].family;
+                  }
+                }
+              }
+              pairs.push({
+                source1Name: src1Ext.valueReference.display,
+                source2Name: src2Ext.valueReference.display,
+                owner,
+              });
+              return nxtPair();
+            });
+          } else {
+            pairs.push({
+              source1Name: src1Ext.valueReference.display,
+              source2Name: src2Ext.valueReference.display,
+              owner: {
+                id: partitionOwner.split('/')[1],
+              },
+            });
+            return nxtPair();
+          }
+        }, () => callback(null));
       }).catch((err) => {
         logger.error(err);
         return callback(err);
@@ -1327,12 +1405,17 @@ router.delete('/deleteDataSource/:id', (req, res) => {
     } else {
       return res.status(500).send();
     }
-    fhirAxios.delete('Basic', { _id: id }, 'DEFAULT').then(() => {
-      const partitionNameExt = partition.resource.extension && partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/name');
-      const baseUrl = fhirAxios.__genUrl(partitionNameExt.valueString);
+    let partitionName;
+    const partitionNameExt = partition.resource.extension && partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/name');
+    if (partitionNameExt) {
+      partitionName = partitionNameExt.valueString;
+    } else {
+      return res.status(500).send();
+    }
+    destroyPartition(partitionName, partitionID).then(() => {
+      const baseUrl = fhirAxios.__genUrl(partitionName);
       mcsd.cleanCache(`url_${baseUrl}`, true);
-
-      hapi.deletePartition({ partitionID }).then(() => {
+      fhirAxios.delete('Basic', { _id: id }, 'DEFAULT').then(() => {
         getPairsFromSource(id).then((pairs) => {
           async.eachSeries(pairs, (pair, nxt) => {
             deleteSourcePair((`Basic/${pair.resource.id}`)).then(() => nxt()).catch((err) => {

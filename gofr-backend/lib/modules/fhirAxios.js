@@ -214,6 +214,34 @@ const fhirAxios = {
       reject(err);
     });
   }),
+  /**
+   *
+   * @author Ally Shaban
+   * @description permanently removes deleted resources
+   * @param {string} resource resource type to expunge
+   * @param {Object} params
+   * @param {string} params.resourceType value must be Parameters
+   * @param {object[]} params.parameter expunge parameters
+   * @param {number} params.parameter[].limit maximum number of entries to delete
+   * @param {boolean} params.parameter[].expungeDeletedResources If set to true, deleted resources will be expunged (including all previous versions of the resource)
+   * @param {boolean} params.parameter[].expungePreviousVersions If set to true, non-current versions of resources will be expunged.
+   * @param {boolean} params.parameter[].expungeEverything If set to true, current versions of resources will also be expunged.
+   * @param {string} partition partition to use for the expunge operation
+   * @method expunge
+   */
+  expunge: (resource, params = {}, partition) => new Promise((resolve, reject) => {
+    if (resource === undefined) {
+      return reject(new InvalidRequestError('resource must be defined'));
+    }
+    let url = fhirAxios.__genUrl(partition);
+    url = new URI(url).segment(resource).segment('$expunge');
+    const auth = fhirAxios.__getAuth();
+    axios.post(url.toString(), params, { auth }).then((response) => {
+      resolve(response.data);
+    }).catch((err) => {
+      reject(err);
+    });
+  }),
   update: (resource, partition) => new Promise((resolve, reject) => {
     let url = fhirAxios.__genUrl(partition);
     if (resource === undefined) {

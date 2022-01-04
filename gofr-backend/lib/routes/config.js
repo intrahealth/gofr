@@ -1010,7 +1010,7 @@ router.get('/getGeneralConfig', (req, res) => {
         UIClientId: config.get('keycloak:UIClientId'),
       },
     };
-    res.status(200).json({ generalConfig: merged, otherConfig });
+    res.status(200).json({ generalConfig: merged, otherConfig, version: config.get('app:version') });
   }).catch((err) => {
     logger.error(err);
     res.status(500).json({

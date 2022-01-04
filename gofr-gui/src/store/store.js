@@ -7,6 +7,7 @@ Vue.use(Vuex)
 
 export const store = new Vuex.Store({
   state: {
+    version: "",
     baseRouterViewKey: 0,
     idp: '',
     keycloak: {},

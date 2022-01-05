@@ -696,21 +696,16 @@ app.post('/uploadCSV', (req, res) => {
         logger.info(`Uploading data for ${database} now`);
         mcsd.CSVTomCSD(files[fileName].path, fields, database, clientId, () => {
           logger.info(`Data upload for ${database} is done`);
-          const uploadReqPro = JSON.stringify({
+          uploadReqPro = JSON.stringify({
             status: 'Done',
             error: null,
             percent: 100,
           });
           redisClient.set(uploadRequestId, uploadReqPro);
         });
-      }).catch((err) => {
-        logger.error(err);
-        const uploadReqPro = JSON.stringify({
-          status: 'Error',
-          error: 'An error has occured, upload cancelled',
-          percent: null,
-        });
-        redisClient.set(uploadRequestId, uploadReqPro);
+      }).catch(() => {
+        logger.error('Error occured while creating partition');
+        return res.status(500).json({ error: 'An error has occured, upload cancelled' });
       });
     });
   });

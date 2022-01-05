@@ -89,6 +89,7 @@ function addPartition({
         },
         data: parameters,
       };
+      logger.error(JSON.stringify(options, 0, 2));
       axios(options).then(() => {
         const resource = {
           resourceType: 'Basic',
@@ -118,10 +119,12 @@ function addPartition({
           logger.info(`Partition with name ${name} added successfully`);
           return resolve(`Basic/${response.id}`);
         }).catch((err) => {
+          logger.error('Failed to add partition into data sources');
           logger.error(err);
           return reject(err);
         });
       }).catch((err) => {
+        logger.error('Failed to create partition');
         logger.error(err);
         reject(err);
       });

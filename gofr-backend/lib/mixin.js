@@ -240,12 +240,12 @@ module.exports = {
 
     function populateData(headerMapping, data, reason, invalid) {
       const row = {};
-      for (const header of headerMapping) {
+      for (const header in headerMapping) {
         if (header == 'null') {
           return nxtHeader();
         }
         if (!data.hasOwnProperty(header)) {
-          return nxtHeader();
+          continue;
         }
         row[header] = data[header];
       }

@@ -167,8 +167,7 @@ const postInitialization = () => {
 
 defaultSetups.initialize().then(() => {
   postInitialization();
-}).catch((err) => {
-  logger.error(err);
+}).catch(() => {
   logger.warn('GOFR may have issues running because of above error(s)');
   postInitialization();
 });

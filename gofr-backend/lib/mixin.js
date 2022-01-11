@@ -17,10 +17,14 @@ module.exports = {
       try {
         dirs = await fs.readdirSync(searchDir);
       } catch (error) {
-        return reject();
+        return reject(error);
       }
       const dirsPromises = [];
-      dirs.forEach((dir) => {
+      dirs.forEach(async (dir) => {
+        if (!fs.lstatSync(`${searchDir}/${dir}`).isDirectory()) {
+          filesPath.push(`${searchDir}/${dir}`);
+          return;
+        }
         dirsPromises.push(new Promise((dresolve, dreject) => {
           fs.readdir(`${searchDir}/${dir}`, (err, files) => {
             if (err) {

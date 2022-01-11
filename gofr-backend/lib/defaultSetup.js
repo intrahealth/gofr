@@ -278,9 +278,14 @@ const loadFSHFiles = () => new Promise(async (resolvePar, rejectPar) => {
 
 module.exports = {
   initialize: () => new Promise((resolve, reject) => {
+    let errorOccured = false;
     async.series([
       (callback) => {
-        loadKeycloakData().then(() => callback(null)).catch(err => reject(err));
+        loadKeycloakData().then(() => callback(null)).catch((err) => {
+          errorOccured = true;
+          logger.error(err);
+          return callback(null);
+        });
       },
       (callback) => {
         Promise.all([loadDefaultConfig(), loadFSHFiles()]).then(() => {
@@ -288,19 +293,31 @@ module.exports = {
           if (idp === 'keycloak') {
             const kcadmin = require('./modules/keycloakAdminClient');
             setTimeout(() => {
-              kcadmin.loadTasksToKeycloak().then(() => callback(null)).catch(err => callback(err));
+              kcadmin.loadTasksToKeycloak().then(() => callback(null)).catch((err) => {
+                errorOccured = true;
+                logger.error(err);
+                return callback(null);
+              });
             }, 1000);
           } else {
             return callback(null);
           }
-        }).catch(err => callback(err));
+        }).catch((err) => {
+          errorOccured = true;
+          logger.error(err);
+          return callback(null);
+        });
       },
       (callback) => {
-        addDataPartition().then(() => callback(null)).catch(err => callback(err));
+        addDataPartition().then(() => callback(null)).catch((err) => {
+          errorOccured = true;
+          logger.error(err);
+          return callback(null);
+        });
       },
-    ], (err) => {
-      if (err) {
-        return reject(err);
+    ], () => {
+      if (errorOccured) {
+        return reject();
       }
       mixin.updateConfigFile(['app', 'installed'], true, () => {
         logger.info('Done loading Default data');

@@ -60,7 +60,8 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
           if (!fhir.meta || !fhir.meta.profile || !fhir.meta.profile.includes(TASK_EXTENSION)) {
             return fresolve();
           }
-          const name = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
+          const taskExt = fhir.extension && fhir.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/gofr-ext-task');
+          const name = taskExt.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
           if (!name) {
             logger.warn(`Name missing for task ${fhir.id}`);
             return fresolve();
@@ -69,7 +70,7 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
           if (name) {
             body.name = name.valueString;
           }
-          const attributes = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/task-attributes`);
+          const attributes = taskExt.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/task-attributes`);
           if (attributes && attributes.extension) {
             const roleAttrs = {};
             attributes.extension.forEach((attribute) => {
@@ -78,7 +79,7 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
             });
             body.attributes = roleAttrs;
           }
-          const composite = fhir.extension && fhir.extension.find(ext => ext.url === 'compositeTask');
+          const composite = taskExt.extension.find(ext => ext.url === 'compositeTask');
           if (composite) {
             body.composite = true;
           }
@@ -113,12 +114,13 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
               fresolve();
               return;
             }
-            const name = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
+            const taskExt = fhir.extension && fhir.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/gofr-ext-task');
+            const name = taskExt.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
             if (!name) {
               fresolve();
               return;
             }
-            const composites = fhir.extension && fhir.extension.filter(ext => ext.url === 'compositeTask');
+            const composites = taskExt.extension.filter(ext => ext.url === 'compositeTask');
             if (composites.length === 0) {
               fresolve();
               return;
@@ -141,7 +143,8 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
                       return creject(err);
                     }
                     const fhir = JSON.parse(data);
-                    const compositeName = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
+                    const compTaskExt = fhir.extension && fhir.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/gofr-ext-task');
+                    const compositeName = compTaskExt.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
                     kcAdminClient.clients.findRole({ id: client.id, roleName: compositeName.valueString }).then((resp) => {
                       body.roles.push({
                         id: resp.id,
@@ -181,10 +184,10 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
           reject(err);
         });
       }).catch((err) => {
-        reject(rr);
+        reject(err);
       });
     });
-  }).catch((err) => reject(err));
+  }).catch(err => reject(err));
 });
 
 const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
@@ -207,7 +210,8 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
           if (!fhir.meta || !fhir.meta.profile || !fhir.meta.profile.includes(ROLE_EXTENSION)) {
             return fresolve();
           }
-          const name = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
+          const roleExt = fhir.extension && fhir.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/gofr-ext-role');
+          const name = roleExt.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
           if (!name) {
             logger.warn(`Name missing for role ${fhir.id}`);
             return fresolve();
@@ -244,13 +248,14 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
               fresolve();
               return;
             }
-            const name = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
+            const roleExt = fhir.extension && fhir.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/gofr-ext-role');
+            const name = roleExt.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
             if (!name) {
               fresolve();
               return;
             }
-            const roles = fhir.extension && fhir.extension.filter(ext => ext.url === ASSIGN_ROLE_EXTENSION);
-            const tasks = fhir.extension && fhir.extension.filter(ext => ext.url === 'task');
+            const roles = roleExt.extension.filter(ext => ext.url === ASSIGN_ROLE_EXTENSION);
+            const tasks = roleExt.extension.filter(ext => ext.url === 'task');
 
             const subroles = new Promise((sresolve, sreject) => {
               const composites = roles;
@@ -276,7 +281,8 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
                         return creject(err);
                       }
                       const fhir = JSON.parse(data);
-                      const compositeName = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
+                      const roleExt = fhir.extension && fhir.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/gofr-ext-role');
+                      const compositeName = roleExt.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
                       kcAdminClient.roles.findOneByName({ id: client.id, name: compositeName.valueString }).then((resp) => {
                         body.roles.push({
                           id: resp.id,
@@ -332,7 +338,8 @@ const loadRolesToKeycloak = () => new Promise(async (resolve, reject) => {
                         return creject(err);
                       }
                       const fhir = JSON.parse(data);
-                      const compositeName = fhir.extension && fhir.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
+                      const taskExt = fhir.extension && fhir.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/gofr-ext-task');
+                      const compositeName = taskExt.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/gofr-basic-name`);
                       kcAdminClient.clients.findRole({ id: client.id, roleName: compositeName.valueString }).then((resp) => {
                         body.roles.push({
                           id: resp.id,

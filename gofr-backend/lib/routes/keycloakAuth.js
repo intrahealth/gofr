@@ -12,6 +12,7 @@ router.post('/', (req, res) => {
   let userResource = req.body;
   if (!userResource || !userResource.id) {
     const userDetails = jwtDecode(req.headers.authorization.split(' ')[1]);
+    logger.error(userDetails);
     if (!userDetails.sub) {
       logger.error('User details are missing');
       return res.status(401).send();

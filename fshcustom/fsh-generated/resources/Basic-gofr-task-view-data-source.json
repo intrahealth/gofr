@@ -1,0 +1,51 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-task-view-data-source",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/gofr-task"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "task",
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-ext-task",
+      "extension": [
+        {
+          "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
+          "valueString": "view-data-source"
+        },
+        {
+          "extension": [
+            {
+              "url": "permission",
+              "valueCode": "special"
+            },
+            {
+              "url": "resource",
+              "valueCode": "custom"
+            },
+            {
+              "url": "instance",
+              "valueId": "view-data-source"
+            }
+          ],
+          "url": "http://gofr.org/fhir/StructureDefinition/task-attributes"
+        },
+        {
+          "url": "compositeTask",
+          "valueReference": {
+            "reference": "Basic/gofr-task-manage-data-source"
+          }
+        }
+      ]
+    }
+  ]
+}

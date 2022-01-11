@@ -1,0 +1,56 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-role-open",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/gofr-role"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "role",
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-ext-role",
+      "extension": [
+        {
+          "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
+          "valueString": "Open Role"
+        },
+        {
+          "url": "http://gofr.org/fhir/StructureDefinition/gofr-role-primary",
+          "valueBoolean": true
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-read-structure-definition"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-read-code-system"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-read-value-set"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-read-document-reference"
+          }
+        }
+      ]
+    }
+  ]
+}

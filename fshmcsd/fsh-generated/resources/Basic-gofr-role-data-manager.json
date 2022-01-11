@@ -1,0 +1,272 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-role-data-manager",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/gofr-role"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "role",
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-ext-role",
+      "extension": [
+        {
+          "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
+          "valueString": "Data Manager"
+        },
+        {
+          "url": "http://gofr.org/fhir/StructureDefinition/gofr-role-primary",
+          "valueBoolean": false
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-search-organization-page"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-break-matched-location"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-accept-flagged-location"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-match-location"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-data-source-reconciliation"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-matching-status"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-delete-source-pair"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-delete-data-source"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-source-pair"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-deactivate-source-pair"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-activate-source-pair"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-share-source-pair"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-create-source-pair"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-share-data-source"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-data-source"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-add-data-source"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-add-facility-requests"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-update-facility-requests"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-process-update-facility-request"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-process-add-facility-request"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-add-healthcare-service-page"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-add-jurisdiction-page"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-add-facility-page"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-add-organization-page"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-home-page"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-search-facility-page"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-search-jurisdiction-page"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-search-service-page"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-search-organization-page"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-write-questionnaireresponse-resource"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-read-questionnaire-resource"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-read-location-resource"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-read-organization-resource"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-read-healthcareservice-resource"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-read-document-reference"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-read-value-set"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-read-code-system"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-read-structure-definition"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-close-matching"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-open-matching"
+          }
+        }
+      ]
+    }
+  ]
+}

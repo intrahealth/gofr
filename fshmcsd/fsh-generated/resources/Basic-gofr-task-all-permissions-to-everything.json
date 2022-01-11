@@ -1,0 +1,41 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-task-all-permissions-to-everything",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/gofr-task"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "task",
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-ext-task",
+      "extension": [
+        {
+          "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
+          "valueString": "all-permissions-to-everything"
+        },
+        {
+          "extension": [
+            {
+              "url": "permission",
+              "valueCode": "*"
+            },
+            {
+              "url": "resource",
+              "valueCode": "*"
+            }
+          ],
+          "url": "http://gofr.org/fhir/StructureDefinition/task-attributes"
+        }
+      ]
+    }
+  ]
+}

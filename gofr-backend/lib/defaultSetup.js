@@ -91,37 +91,40 @@ const addDataPartition = () => new Promise((resolve, reject) => {
           profile: ['http://gofr.org/fhir/StructureDefinition/gofr-partition'],
         },
         extension: [{
-          url: 'http://gofr.org/fhir/StructureDefinition/partitionID',
-          valueInteger: 0,
-        }, {
-          url: 'http://gofr.org/fhir/StructureDefinition/name',
-          valueString: 'DEFAULT',
-        }, {
-          url: 'http://gofr.org/fhir/StructureDefinition/owner',
+          url: 'http://gofr.org/fhir/StructureDefinition/partition',
           extension: [{
-            url: 'userID',
-            valueReference: {
-              reference: 'Person/e9b41c35-7c85-46df-aeea-a4e8dbf0364e',
-            },
-          }],
-        }, {
-          url: 'http://gofr.org/fhir/StructureDefinition/shared',
-          extension: [{
-            url: 'shareToSameOrgid',
-            valueBoolean: false,
+            url: 'http://gofr.org/fhir/StructureDefinition/partitionID',
+            valueInteger: 0,
           }, {
-            url: 'http://gofr.org/fhir/StructureDefinition/shareToAll',
+            url: 'http://gofr.org/fhir/StructureDefinition/name',
+            valueString: 'DEFAULT',
+          }, {
+            url: 'http://gofr.org/fhir/StructureDefinition/owner',
             extension: [{
-              url: 'activated',
-              valueBoolean: true,
-            }, {
-              url: 'limitByUserLocation',
-              valueBoolean: false,
+              url: 'userID',
+              valueReference: {
+                reference: 'Person/e9b41c35-7c85-46df-aeea-a4e8dbf0364e',
+              },
             }],
+          }, {
+            url: 'http://gofr.org/fhir/StructureDefinition/shared',
+            extension: [{
+              url: 'shareToSameOrgid',
+              valueBoolean: false,
+            }, {
+              url: 'http://gofr.org/fhir/StructureDefinition/shareToAll',
+              extension: [{
+                url: 'activated',
+                valueBoolean: true,
+              }, {
+                url: 'limitByUserLocation',
+                valueBoolean: false,
+              }],
+            }],
+          }, {
+            url: 'http://gofr.org/fhir/StructureDefinition/createdTime',
+            valueDateTime: moment().format(),
           }],
-        }, {
-          url: 'http://gofr.org/fhir/StructureDefinition/createdTime',
-          valueDateTime: moment().format(),
         }],
       },
       request: {
@@ -136,19 +139,22 @@ const addDataPartition = () => new Promise((resolve, reject) => {
           profile: ['http://gofr.org/fhir/StructureDefinition/gofr-datasource'],
         },
         extension: [{
-          url: 'http://gofr.org/fhir/StructureDefinition/partition',
-          valueReference: {
-            reference: 'Basic/default-partition',
-          },
-        }, {
-          url: 'http://gofr.org/fhir/StructureDefinition/name',
-          valueString: 'DEFAULT',
-        }, {
-          url: 'http://gofr.org/fhir/StructureDefinition/sourceType',
-          valueString: 'upload',
-        }, {
-          url: 'http://gofr.org/fhir/StructureDefinition/source',
-          valueString: 'upload',
+          url: 'http://gofr.org/fhir/StructureDefinition/datasource',
+          extension: [{
+            url: 'http://gofr.org/fhir/StructureDefinition/partition',
+            valueReference: {
+              reference: 'Basic/default-partition',
+            },
+          }, {
+            url: 'http://gofr.org/fhir/StructureDefinition/name',
+            valueString: 'DEFAULT',
+          }, {
+            url: 'http://gofr.org/fhir/StructureDefinition/sourceType',
+            valueString: 'upload',
+          }, {
+            url: 'http://gofr.org/fhir/StructureDefinition/source',
+            valueString: 'upload',
+          }],
         }],
       },
       request: {
@@ -194,11 +200,34 @@ const loadFSHFiles = () => new Promise(async (resolvePar, rejectPar) => {
   }
   const fshDir = config.get('builtFSHFIles');
   const dirs = await fs.readdirSync(`${__dirname}/${fshDir}`);
-  async.eachSeries(dirs, (dir, nxtDir) => {
-    fs.readdir(`${__dirname}/${fshDir}/${dir}`, (err, files) => {
+  const promises = [];
+  dirs.forEach((dir) => {
+    promises.push(new Promise(async (resolve, reject) => {
+      let files = [];
+      if (dir.split('.').length >= 2 && dir.split('.')[dir.split('.').length - 1] === 'json') {
+        files.push(dir);
+        dir = null;
+      } else {
+        try {
+          files = await fs.readdirSync(`${__dirname}/${fshDir}/${dir}`);
+        } catch (error) {
+          logger.error(error);
+          return reject();
+        }
+      }
+      let errorOccured = false;
       async.eachSeries(files, (file, nxtFile) => {
-        fs.readFile(`${__dirname}/${fshDir}/${dir}/${file}`, { encoding: 'utf8', flag: 'r' }, (err, data) => {
-          if (err) throw err;
+        let fullpath;
+        if (dir) {
+          fullpath = `${__dirname}/${fshDir}/${dir}/${file}`;
+        } else {
+          fullpath = `${__dirname}/${fshDir}/${file}`;
+        }
+        fs.readFile(fullpath, { encoding: 'utf8', flag: 'r' }, (err, data) => {
+          if (err) {
+            logger.error(err);
+            errorOccured = true;
+          }
           const fhir = JSON.parse(data);
           if (fhir.resourceType === 'Bundle'
               && (fhir.type === 'transaction' || fhir.type === 'batch')) {
@@ -209,8 +238,9 @@ const loadFSHFiles = () => new Promise(async (resolvePar, rejectPar) => {
               logger.info(JSON.stringify(res.data, null, 2));
               return nxtFile();
             }).catch((err) => {
+              errorOccured = true;
               logger.error(err);
-              logger.error(`${__dirname}/${fshDir}/${dir}/${file} ${JSON.stringify(err.response.data, null, 2)}`);
+              logger.error(`fullpath ${JSON.stringify(err.response.data, null, 2)}`);
               return nxtFile();
             });
           } else {
@@ -221,17 +251,28 @@ const loadFSHFiles = () => new Promise(async (resolvePar, rejectPar) => {
               logger.info(res.headers['content-location']);
               return nxtFile();
             }).catch((err) => {
+              errorOccured = true;
               logger.error(err);
-              logger.error(`${__dirname}/${fshDir}/${dir}/${file} ${JSON.stringify(err.response.data, null, 2)}`);
+              logger.error(`fullpath ${JSON.stringify(err.response.data, null, 2)}`);
               return nxtFile();
             });
           }
         });
-      }, () => nxtDir());
-    });
-  }, () => {
+      }, () => {
+        if (errorOccured) {
+          return reject();
+        }
+        return resolve();
+      });
+    }));
+  });
+
+  Promise.all(promises).then(() => {
     logger.info('Done loading FSH files');
     resolvePar();
+  }).catch(() => {
+    logger.error('reject');
+    rejectPar(true);
   });
 });
 

@@ -1,0 +1,22 @@
+{
+  "resourceType": "CodeSystem",
+  "status": "active",
+  "content": "complete",
+  "name": "OrganizationHierarchyTypeCodeSystem",
+  "id": "gofr-organization-hiearchy-type-codesystem",
+  "title": "Organization Hierarchy Type",
+  "version": "0.1.0",
+  "url": "http://gofr.org/fhir/CodeSystem/gofr-organization-hiearchy-type-codesystem",
+  "concept": [
+    {
+      "code": "funder",
+      "display": "Funder"
+    },
+    {
+      "code": "operational",
+      "display": "Operational"
+    }
+  ],
+  "date": "2021-07-17T08:32:04.362Z",
+  "count": 2
+}

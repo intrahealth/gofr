@@ -1,0 +1,19 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "gofr-search-partition-shared-user",
+  "url": "http://gofr.org/fhir/SearchParameter/gofr-search-partition-shared-user",
+  "description": "search parameter for users shared a partition",
+  "name": "search parameter for users shared a partition",
+  "status": "active",
+  "experimental": false,
+  "code": "partitionshareduser",
+  "base": [
+    "Basic"
+  ],
+  "type": "reference",
+  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/partition').extension('http://gofr.org/fhir/StructureDefinition/shared').extension('http://gofr.org/fhir/StructureDefinition/shareduser').extension('user')",
+  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/partition']/f:extension[@url='http://gofr.org/fhir/StructureDefinition/shared']/f:extension[@url='http://gofr.org/fhir/StructureDefinition/shareduser']/f:extension[@url='user']",
+  "target": [
+    "Person"
+  ]
+}

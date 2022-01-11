@@ -1,0 +1,213 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "gofr-jurisdiction-questionnaire",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/ihris-questionnaire"
+    ]
+  },
+  "url": "http://gofr.org/fhir/Questionnaire/gofr-jurisdiction-questionnaire",
+  "title": "GOFR Jurisdiction Questionnaire",
+  "description": "iHRIS Jurisdiction initial data entry questionnaire.",
+  "name": "gofr-jurisdiction-questionnaire",
+  "status": "active",
+  "date": "2021-04-24",
+  "purpose": "Data entry page for jurisdictions.",
+  "item": [
+    {
+      "linkId": "Location",
+      "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation",
+      "text": "Basic Details | uncategorized details",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "Location.name",
+          "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.name",
+          "text": "Jurisdiction Name",
+          "type": "string",
+          "required": true,
+          "repeats": false
+        },
+        {
+          "linkId": "Location.alias",
+          "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.alias",
+          "text": "Alternative/Nick Names",
+          "type": "string",
+          "required": false,
+          "repeats": true
+        },
+        {
+          "linkId": "Location.status",
+          "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.status",
+          "text": "Status",
+          "type": "choice",
+          "answerValueSet": "http://hl7.org/fhir/ValueSet/location-status",
+          "repeats": false,
+          "required": true
+        },
+        {
+          "linkId": "Location.type[0]",
+          "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.type",
+          "text": "Facility Types",
+          "type": "choice",
+          "answerValueSet": "http://gofr.org/fhir/ValueSet/gofr-jurisdiction-type",
+          "repeats": true,
+          "required": true
+        },
+        {
+          "linkId": "Location.type[1]",
+          "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.type",
+          "text": "Facility Types",
+          "type": "choice",
+          "repeats": false,
+          "readOnly": true,
+          "required": true,
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "urn:ihe:iti:mcsd:2019:jurisdiction",
+                "system": "urn:ietf:rfc:3986"
+              },
+              "initialSelected": true
+            }
+          ]
+        },
+        {
+          "linkId": "Location.partOf#tree",
+          "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.partOf",
+          "text": "Parent",
+          "type": "reference",
+          "repeats": false,
+          "required": false
+        },
+        {
+          "linkId": "Location.managingOrganization",
+          "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.managingOrganization",
+          "text": "Managing Organization",
+          "type": "string",
+          "required": true,
+          "repeats": false,
+          "readOnly": true,
+          "answerOption": [
+            {
+              "valueString": "__REPLACE__Organization.id",
+              "initialSelected": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "Organization",
+      "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionOrganization",
+      "text": "Organization",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "Organization.name",
+          "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionOrganization#Organization.name",
+          "text": "Oranization Names",
+          "type": "string",
+          "repeats": false,
+          "required": true,
+          "readOnly": true,
+          "answerOption": [
+            {
+              "valueString": "__REPLACE__Location.name",
+              "initialSelected": true
+            }
+          ]
+        },
+        {
+          "linkId": "Organization.type",
+          "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionOrganization#Organization.type",
+          "text": "Oranization Type",
+          "type": "string",
+          "repeats": false,
+          "required": true,
+          "readOnly": true,
+          "answerOption": [
+            {
+              "valueString": "__REPLACE__Location.type",
+              "initialSelected": true
+            }
+          ]
+        },
+        {
+          "linkId": "Organization.extension[0]",
+          "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionOrganization#Organization.extension:hierarchy",
+          "text": "Managing Organization",
+          "type": "group",
+          "repeats": true,
+          "item": [
+            {
+              "linkId": "Organization.extension[0].extension[0]#tree",
+              "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionOrganization#Organization.extension:hierarchy.extension:part-of.value[x]:valueReference",
+              "text": "Organization",
+              "type": "reference",
+              "repeats": false,
+              "required": true
+            },
+            {
+              "linkId": "Organization.extension[0].extension[1]",
+              "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionOrganization#Organization.extension:hierarchy.extension:hierarchy-type.value[x]:valueCodeableConcept",
+              "text": "Type",
+              "type": "choice",
+              "answerValueSet": "http://gofr.org/fhir/ValueSet/gofr-organization-hiearchy-type-valueset",
+              "repeats": false,
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "Location.position",
+      "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.position",
+      "text": "Geo-Coordinates|Geo-coordinates for the jurisdiction",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "Location.position.longitude",
+          "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.position.longitude",
+          "text": "Longitude",
+          "type": "string",
+          "repeats": false,
+          "required": false
+        },
+        {
+          "linkId": "Location.position.latitude",
+          "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.position.latitude",
+          "text": "Latitude",
+          "type": "string",
+          "repeats": false,
+          "required": false
+        },
+        {
+          "linkId": "Location.position.altitude",
+          "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.position.altitude",
+          "text": "Altitude",
+          "type": "string",
+          "repeats": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "linkId": "Location.extension",
+      "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.extension:boundary",
+      "text": "Boundaries",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "Location.extension:boundary",
+          "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.extension:boundary.value[x]:valueAttachment",
+          "text": "Boundary",
+          "type": "attachment",
+          "required": false,
+          "repeats": false
+        }
+      ]
+    }
+  ]
+}

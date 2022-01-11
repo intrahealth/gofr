@@ -1,0 +1,22 @@
+{
+  "resourceType": "CodeSystem",
+  "status": "active",
+  "content": "complete",
+  "name": "McsdLocationTypeCodeSystem",
+  "id": "urn-ietf-rfc-398",
+  "title": "mCSD Location Type",
+  "version": "0.1.0",
+  "url": "urn:ietf:rfc:398",
+  "concept": [
+    {
+      "code": "urn:ihe:iti:mcsd:2019:facility",
+      "display": "Facility"
+    },
+    {
+      "code": "urn:ihe:iti:mcsd:2019:jurisdiction",
+      "display": "Jurisdiction"
+    }
+  ],
+  "date": "2021-09-30T10:06:04.362Z",
+  "count": 2
+}

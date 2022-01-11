@@ -89,7 +89,6 @@ function addPartition({
         },
         data: parameters,
       };
-      logger.error(JSON.stringify(options, 0, 2));
       axios(options).then(() => {
         const resource = {
           resourceType: 'Basic',
@@ -97,22 +96,25 @@ function addPartition({
             profile: ['http://gofr.org/fhir/StructureDefinition/gofr-partition'],
           },
           extension: [{
-            url: 'http://gofr.org/fhir/StructureDefinition/partitionID',
-            valueInteger: id,
-          }, {
-            url: 'http://gofr.org/fhir/StructureDefinition/name',
-            valueString: name,
-          }, {
-            url: 'http://gofr.org/fhir/StructureDefinition/owner',
+            url: 'http://gofr.org/fhir/StructureDefinition/partition',
             extension: [{
-              url: 'userID',
-              valueReference: {
-                reference: `Person/${userID}`,
-              },
+              url: 'http://gofr.org/fhir/StructureDefinition/partitionID',
+              valueInteger: id,
+            }, {
+              url: 'http://gofr.org/fhir/StructureDefinition/name',
+              valueString: name,
+            }, {
+              url: 'http://gofr.org/fhir/StructureDefinition/owner',
+              extension: [{
+                url: 'userID',
+                valueReference: {
+                  reference: `Person/${userID}`,
+                },
+              }],
+            }, {
+              url: 'http://gofr.org/fhir/StructureDefinition/createdTime',
+              valueDateTime: moment().format(),
             }],
-          }, {
-            url: 'http://gofr.org/fhir/StructureDefinition/createdTime',
-            valueDateTime: moment().format(),
           }],
         };
         fhirAxios.create(resource, 'DEFAULT').then((response) => {

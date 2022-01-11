@@ -1,0 +1,57 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-task-view-add-facility-requests",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/gofr-task"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "task",
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-ext-task",
+      "extension": [
+        {
+          "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
+          "valueString": "view-add-facility-requests"
+        },
+        {
+          "extension": [
+            {
+              "url": "permission",
+              "valueCode": "special"
+            },
+            {
+              "url": "resource",
+              "valueCode": "custom"
+            },
+            {
+              "url": "instance",
+              "valueId": "view-add-facility-requests"
+            }
+          ],
+          "url": "http://gofr.org/fhir/StructureDefinition/task-attributes"
+        },
+        {
+          "url": "compositeTask",
+          "valueReference": {
+            "reference": "Basic/gofr-task-access-facility-registry-mod"
+          }
+        },
+        {
+          "url": "compositeTask",
+          "valueReference": {
+            "reference": "Basic/gofr-task-read-gofr-page-facility-add-request"
+          }
+        }
+      ]
+    }
+  ]
+}

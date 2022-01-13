@@ -449,7 +449,7 @@
         ],
         "constraint": [
           {
-            "key": "ihris-search-identifier",
+            "key": "gofr-search-identifier",
             "severity": "error",
             "human": "The identifier must be unique and another record has this identifier",
             "expression": "'Location' | 'identifier' | iif(system.exists(), system & '|' & value, value)",
@@ -3740,7 +3740,7 @@
         "label": "Identifier",
         "constraint": [
           {
-            "key": "ihris-search-identifier",
+            "key": "gofr-search-identifier",
             "severity": "error",
             "human": "The identifier must be unique and another record has this identifier",
             "expression": "'Location' | 'identifier' | iif(system.exists(), system & '|' & value, value)",

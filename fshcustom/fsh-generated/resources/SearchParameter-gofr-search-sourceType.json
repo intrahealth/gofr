@@ -11,6 +11,6 @@
     "Basic"
   ],
   "type": "string",
-  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/sourceType')",
-  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/sourceType']"
+  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/datasource').extension('http://gofr.org/fhir/StructureDefinition/sourceType')",
+  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/datasource']/f:extension[@url='http://gofr.org/fhir/StructureDefinition/sourceType']"
 }

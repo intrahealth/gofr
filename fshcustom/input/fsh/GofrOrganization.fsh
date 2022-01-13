@@ -31,10 +31,11 @@ Description:  "If there are additional hierarchies (such as funding source),then
 * extension[part-of].valueReference only Reference(GofrMcsdOrganization or GofrMcsdFacilityOrganization)
 
 Instance:       gofr-page-mcsd-organization
-InstanceOf:     IhrisPage
+InstanceOf:     GofrPage
 Title:          "GOFR Organization Page"
 Usage:          #example
-* code = IhrisResourceCodeSystem#page
+* code = GofrResourceCodeSystem#page
+* extension[display].extension[title].valueString = "Update Organization"
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/gofr-mcsd-organization)
 * extension[display].extension[search][0].valueString = "Name|name"
 * extension[display].extension[search][1].valueString = "Type|type[0].text"
@@ -48,10 +49,10 @@ Usage:          #example
 * extension[section][0].extension[field][2].valueString = "Organization.extension:gofr-hierarchy"
 
 Instance:       GofrOrganizationQuestionnaire
-InstanceOf:     IhrisQuestionnaire
+InstanceOf:     GofrQuestionnaire
 Usage:          #definition
 * title = "GOFR Organization Questionnaire"
-* description = "iHRIS Organization initial data entry questionnaire."
+* description = "GOFR Organization initial data entry questionnaire."
 * id = "gofr-organization-questionnaire"
 * url = "http://gofr.org/fhir/Questionnaire/gofr-organization-questionnaire"
 * name = "gofr-organization-questionnaire"

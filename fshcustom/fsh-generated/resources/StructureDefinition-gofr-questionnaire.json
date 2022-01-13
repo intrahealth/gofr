@@ -1,6 +1,6 @@
 {
   "resourceType": "StructureDefinition",
-  "id": "ihris-questionnaire",
+  "id": "gofr-questionnaire",
   "extension": [
     {
       "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-category",
@@ -11,12 +11,12 @@
       "valueCode": "business"
     }
   ],
-  "url": "http://gofr.org/fhir/StructureDefinition/ihris-questionnaire",
+  "url": "http://gofr.org/fhir/StructureDefinition/gofr-questionnaire",
   "version": "0.1.0",
-  "name": "IhrisQuestionnaire",
-  "title": "iHRIS Questionnaire",
+  "name": "GofrQuestionnaire",
+  "title": "GOFR Questionnaire",
   "status": "active",
-  "description": "iHRIS Profile of the Questionnaire resource for data entry and validation.",
+  "description": "GOFR Profile of the Questionnaire resource for data entry and validation.",
   "fhirVersion": "4.0.1",
   "mapping": [
     {

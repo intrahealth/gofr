@@ -11,8 +11,8 @@
     "Basic"
   ],
   "type": "reference",
-  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/partition')",
-  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/partition']",
+  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/datasource').extension('http://gofr.org/fhir/StructureDefinition/partition')",
+  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/datasource']/f:extension[@url='http://gofr.org/fhir/StructureDefinition/partition']",
   "target": [
     "Basic"
   ]

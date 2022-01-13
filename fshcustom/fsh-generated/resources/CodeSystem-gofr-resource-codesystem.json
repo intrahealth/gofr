@@ -14,22 +14,15 @@
       "definition": "User roles that are available to be assigned to users."
     },
     {
-      "code": "task",
-      "display": "GOFR Task",
-      "definition": "Role tasks that are available to be assigned to roles"
+      "code": "page",
+      "display": "GOFR Page",
+      "definition": "Page definitions for viewing and editing resources."
     },
     {
-      "code": "partition",
-      "display": "GOFR Partitions"
-    },
-    {
-      "code": "datasource",
-      "display": "GOFR Datasources"
-    },
-    {
-      "code": "datasourcepair",
-      "display": "GOFR Datasources Pair"
+      "code": "practitioner-link",
+      "display": "GOFR Practitioner Link",
+      "definition": "Basic resource for customization that links to a Practitioner."
     }
   ],
-  "count": 5
+  "count": 3
 }

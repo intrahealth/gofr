@@ -34,7 +34,6 @@ const store = new RedisStore({
   client: redisClient,
 });
 
-require('./cronjobs');
 const mixin = require('./mixin');
 const UsersRouter = require('./routes/users');
 const DataSourcesRouter = require('./routes/dataSources');
@@ -137,6 +136,7 @@ app.use(session({
   saveUninitialized: false,
 }));
 const postInitialization = () => {
+  require('./cronjobs');
   const AuthRouter = require('./routes/auth');
   if (config.get('app:idp') === 'keycloak') {
     keycloak = require('./modules/keycloakConnect').initKeycloak(store);

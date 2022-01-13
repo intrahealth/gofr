@@ -1,8 +1,8 @@
 Instance:       GofrFacilityQuestionnaire
-InstanceOf:     IhrisQuestionnaire
+InstanceOf:     GofrQuestionnaire
 Usage:          #definition
 * title = "GOFR Facility Questionnaire"
-* description = "iHRIS Facility initial data entry questionnaire."
+* description = "GOFR Facility initial data entry questionnaire."
 * id = "gofr-facility-questionnaire"
 * url = "http://gofr.org/fhir/Questionnaire/gofr-facility-questionnaire"
 * name = "gofr-facility-questionnaire"
@@ -422,7 +422,7 @@ Usage:          #definition
 * item[3].item[1].item[8].repeats = false
 
 Instance:       GofrFacilityAddRequestQuestionnaire
-InstanceOf:     IhrisQuestionnaire
+InstanceOf:     GofrQuestionnaire
 Usage:          #definition
 * title = "GOFR Facility Add Request Questionnaire"
 * description = "GOFR Questionnaire For Request To Add Facility."

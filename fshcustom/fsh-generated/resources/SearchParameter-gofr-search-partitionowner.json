@@ -11,8 +11,8 @@
     "Basic"
   ],
   "type": "reference",
-  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/owner').extension('userID')",
-  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/owner']/f:extension[@url='userID']",
+  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/partition').extension('http://gofr.org/fhir/StructureDefinition/owner').extension('userID')",
+  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/partition']/f:extension[@url='http://gofr.org/fhir/StructureDefinition/owner']/f:extension[@url='userID']",
   "target": [
     "Person"
   ]

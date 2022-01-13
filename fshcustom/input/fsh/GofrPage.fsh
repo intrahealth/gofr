@@ -1,20 +1,21 @@
-Profile:        IhrisPage
+Profile:        GofrPage
 Parent:         Basic
-Id:             ihris-page
-Title:          "iHRIS Page"
-Description:    "iHRIS Profile of the Basic resource to manage pages."
-* code = IhrisResourceCodeSystem#page
+Id:             gofr-page
+Title:          "GOFR Page"
+Description:    "GOFR Profile of the Basic resource to manage pages."
+* code = GofrResourceCodeSystem#page
 * extension contains
-      IhrisPageDisplay named display 1..1 MS and
-      IhrisPageSection named section 0..* MS
+      GofrPageDisplay named display 1..1 MS and
+      GofrPageSection named section 0..* MS
 
-Extension:      IhrisPageDisplay
-Id:             ihris-page-display
-Title:          "iHRIS Page Display"
-Description:    "iHRIS Page Display details."
+Extension:      GofrPageDisplay
+Id:             gofr-page-display
+Title:          "GOFR Page Display"
+Description:    "GOFR Page Display details."
 * ^context.type = #element
-* ^context.expression = "IhrisPage"
+* ^context.expression = "GofrPage"
 * extension contains
+      title 1..1 MS and
       resource 1..1 MS and
       requestUpdatingResource 0..1 MS and
       search 1..* MS and
@@ -22,6 +23,10 @@ Description:    "iHRIS Page Display details."
       add 0..1 MS and
       field 0..* MS and
       link 0..* MS
+
+* extension[title].value[x] only string
+* extension[title].valueString 1..1 MS
+* extension[title].valueString ^label = "Page Title"
 
 * extension[resource].value[x] only Reference
 * extension[resource].valueReference only Reference(StructureDefinition or CodeSystem)
@@ -92,12 +97,12 @@ Description:    "iHRIS Page Display details."
 * extension[field].extension[readOnlyIfSet].valueBoolean ^label = "Read Only if the value is set"
 
 
-Extension:      IhrisPageSection
-Id:             ihris-page-section
-Title:          "iHRIS Page Section"
-Description:    "iHRIS Page Section information."
+Extension:      GofrPageSection
+Id:             gofr-page-section
+Title:          "GOFR Page Section"
+Description:    "GOFR Page Section information."
 * ^context.type = #element
-* ^context.expression = "IhrisPage"
+* ^context.expression = "GofrPage"
 * extension contains
       title 1..1 MS and
       description 1..1 MS and

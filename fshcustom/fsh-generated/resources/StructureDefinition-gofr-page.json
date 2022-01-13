@@ -1,6 +1,6 @@
 {
   "resourceType": "StructureDefinition",
-  "id": "ihris-page",
+  "id": "gofr-page",
   "extension": [
     {
       "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-category",
@@ -11,12 +11,12 @@
       "valueCode": "not-classified"
     }
   ],
-  "url": "http://gofr.org/fhir/StructureDefinition/ihris-page",
+  "url": "http://gofr.org/fhir/StructureDefinition/gofr-page",
   "version": "0.1.0",
-  "name": "IhrisPage",
-  "title": "iHRIS Page",
+  "name": "GofrPage",
+  "title": "GOFR Page",
   "status": "active",
-  "description": "iHRIS Profile of the Basic resource to manage pages.",
+  "description": "GOFR Profile of the Basic resource to manage pages.",
   "fhirVersion": "4.0.1",
   "mapping": [
     {
@@ -414,7 +414,7 @@
           {
             "code": "Extension",
             "profile": [
-              "http://gofr.org/fhir/StructureDefinition/ihris-page-display"
+              "http://gofr.org/fhir/StructureDefinition/gofr-page-display"
             ]
           }
         ],
@@ -468,7 +468,7 @@
           {
             "code": "Extension",
             "profile": [
-              "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+              "http://gofr.org/fhir/StructureDefinition/gofr-page-section"
             ]
           }
         ],
@@ -614,7 +614,7 @@
           "coding": [
             {
               "code": "page",
-              "system": "http://gofr.org/fhir/CodeSystem/ihris-resource-codesystem"
+              "system": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem"
             }
           ]
         },
@@ -820,7 +820,7 @@
           {
             "code": "Extension",
             "profile": [
-              "http://gofr.org/fhir/StructureDefinition/ihris-page-display"
+              "http://gofr.org/fhir/StructureDefinition/gofr-page-display"
             ]
           }
         ],
@@ -836,7 +836,7 @@
           {
             "code": "Extension",
             "profile": [
-              "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+              "http://gofr.org/fhir/StructureDefinition/gofr-page-section"
             ]
           }
         ],
@@ -849,7 +849,7 @@
           "coding": [
             {
               "code": "page",
-              "system": "http://gofr.org/fhir/CodeSystem/ihris-resource-codesystem"
+              "system": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem"
             }
           ]
         }

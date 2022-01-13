@@ -3,11 +3,11 @@
   "id": "gofr-facility-add-request-questionnaire",
   "meta": {
     "profile": [
-      "http://gofr.org/fhir/StructureDefinition/ihris-questionnaire"
+      "http://gofr.org/fhir/StructureDefinition/gofr-questionnaire"
     ]
   },
   "url": "http://gofr.org/fhir/Questionnaire/gofr-facility-add-request-questionnaire",
-  "title": "GOFR Facility Add Request Questionnaire",
+  "title": "Request Addition of New Facility",
   "description": "GOFR Questionnaire For Request To Add Facility.",
   "name": "gofr-facility-add-request-questionnaire",
   "status": "active",

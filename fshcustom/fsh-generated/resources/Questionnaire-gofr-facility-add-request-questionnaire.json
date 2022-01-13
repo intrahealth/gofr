@@ -3,7 +3,7 @@
   "id": "gofr-facility-add-request-questionnaire",
   "meta": {
     "profile": [
-      "http://gofr.org/fhir/StructureDefinition/ihris-questionnaire"
+      "http://gofr.org/fhir/StructureDefinition/gofr-questionnaire"
     ]
   },
   "url": "http://gofr.org/fhir/Questionnaire/gofr-facility-add-request-questionnaire",

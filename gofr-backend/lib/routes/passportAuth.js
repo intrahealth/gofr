@@ -11,7 +11,7 @@ const fhirAudit = require('../modules/fhirAudit');
 const user = require('../modules/user');
 const config = require('../config');
 
-const defaultUser = config.get('user:loggedout') || 'ihris-user-loggedout';
+const defaultUser = config.get('user:loggedout') || 'gofr-user-loggedout';
 
 passport.use(new GoogleStrategy(
   {

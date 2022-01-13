@@ -11,7 +11,7 @@ Description:  "A profile on the HealthcareService resource for mCSD."
 * comment ^label = "Comment about this service"
 * identifier 0..* MS
 * identifier ^label = "Identifier"
-* identifier ^constraint[0].key = "ihris-search-identifier"
+* identifier ^constraint[0].key = "gofr-search-identifier"
 * identifier ^constraint[0].severity = #error
 * identifier ^constraint[0].expression = "'Location' | 'identifier' | iif(system.exists(), system & '|' & value, value)"
 * identifier ^constraint[0].human = "The identifier must be unique and another record has this identifier"
@@ -104,10 +104,11 @@ Description:  "A profile on the HealthcareService resource for mCSD."
 * location ^label = "Facility Service Is Provided"
 
 Instance:       gofr-page-service
-InstanceOf:     IhrisPage
+InstanceOf:     GofrPage
 Title:          "GOFR Facility Service Page"
 Usage:          #example
-* code = IhrisResourceCodeSystem#page
+* code = GofrResourceCodeSystem#page
+* extension[display].extension[title].valueString = "Add/Update Healthcare Service"
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/IHE.mCSD.HealthcareService)
 * extension[display].extension[search][0].valueString = "Name|name"
 * extension[display].extension[search][1].valueString = "Active|active"

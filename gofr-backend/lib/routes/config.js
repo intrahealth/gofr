@@ -62,7 +62,7 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
     let vueOutput = `<gofr-questionnaire :edit=\"isEdit\" :view-page="viewPage" :constraints="constraints" url="${resource.url}" id="${resource.id}" title="${resource.title
     }" description="${resource.description}" purpose="${resource.purpose
     }"__SECTIONMENU__>` + '\n';
-
+    vueOutput += `<gofr-page-title title="${resource.title}"></gofr-page-title>`;
     const sectionMenu = [];
     const templateData = { sectionMenu: {}, hidden: {}, constraints: {} };
 
@@ -70,7 +70,7 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
       const constraintKeys = [];
       if (fieldDef && fieldDef.hasOwnProperty('constraint')) {
         for (const constraint of fieldDef.constraint) {
-          if (constraint.key && constraint.key.startsWith('ihris-')) {
+          if (constraint.key && constraint.key.startsWith('gofr-')) {
             templateData.constraints[constraint.key] = constraint;
             constraintKeys.push(constraint.key);
           }
@@ -85,7 +85,7 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
             const severity = itemCon.extension.find(ext => ext.url === 'severity').valueCode;
             const expression = itemCon.extension.find(ext => ext.url === 'expression').valueString;
             const human = itemCon.extension.find(ext => ext.url === 'human').valueString;
-            if (key.startsWith('ihris-')) {
+            if (key.startsWith('gofr-')) {
               constraint = {
                 key, severity, expression, human,
               };
@@ -329,9 +329,10 @@ router.get('/page/:page/:type?', (req, res) => {
     return res.status(403).json(outcomes.DENIED);
   }
   fhirAxios.read('Basic', page, '', 'DEFAULT').then(async (resource) => {
-    const pageDisplay = resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/ihris-page-display');
+    const pageDisplay = resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/gofr-page-display');
 
     const pageResource = pageDisplay.extension.find(ext => ext.url === 'resource').valueReference.reference;
+    const pageTitle = pageDisplay.extension.find(ext => ext.url === 'title').valueString;
     let pageUpdatingResource = pageDisplay.extension.find(ext => ext.url === 'requestUpdatingResource');
     if (pageUpdatingResource) {
       pageUpdatingResource = pageUpdatingResource.valueReference.reference;
@@ -352,7 +353,7 @@ router.get('/page/:page/:type?', (req, res) => {
       });
     } catch (err) {}
 
-    const pageSections = resource.extension.filter(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/ihris-page-section');
+    const pageSections = resource.extension.filter(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/gofr-page-section');
 
     const createTemplate = async (resource, structure) => {
       logger.silly(JSON.stringify(structure, null, 2));
@@ -556,6 +557,7 @@ router.get('/page/:page/:type?', (req, res) => {
           vueOutput += " :links='links'";
         }
         vueOutput += '><template #default=\"slotProps\">' + '\n';
+        vueOutput += `<gofr-page-title title="${pageTitle}"></gofr-page-title>`;
 
         if (structure[fhir].hasOwnProperty('fields')) {
           const fieldKeys = Object.keys(structure[fhir].fields);
@@ -658,7 +660,7 @@ router.get('/page/:page/:type?', (req, res) => {
             if (fields[field].hasOwnProperty('constraint')) {
               const constraintKeys = [];
               for (const constraint of fields[field].constraint) {
-                if (constraint.key && constraint.key.startsWith('ihris-')) {
+                if (constraint.key && constraint.key.startsWith('gofr-')) {
                   constraints[constraint.key] = constraint;
                   constraintKeys.push(constraint.key);
                 }

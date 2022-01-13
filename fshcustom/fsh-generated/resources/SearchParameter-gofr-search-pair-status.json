@@ -11,6 +11,6 @@
     "Basic"
   ],
   "type": "string",
-  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/status')",
-  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/status']"
+  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/datasourcepair').extension('http://gofr.org/fhir/StructureDefinition/status')",
+  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/datasourcepair']/f:extension[@url='http://gofr.org/fhir/StructureDefinition/status']"
 }

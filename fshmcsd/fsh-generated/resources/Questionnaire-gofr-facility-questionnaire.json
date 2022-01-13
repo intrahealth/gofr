@@ -3,12 +3,12 @@
   "id": "gofr-facility-questionnaire",
   "meta": {
     "profile": [
-      "http://gofr.org/fhir/StructureDefinition/ihris-questionnaire"
+      "http://gofr.org/fhir/StructureDefinition/gofr-questionnaire"
     ]
   },
   "url": "http://gofr.org/fhir/Questionnaire/gofr-facility-questionnaire",
-  "title": "GOFR Facility Questionnaire",
-  "description": "iHRIS Facility initial data entry questionnaire.",
+  "title": "Add Facility",
+  "description": "GOFR Facility initial data entry questionnaire.",
   "name": "gofr-facility-questionnaire",
   "status": "active",
   "date": "2021-04-24",

@@ -50,6 +50,7 @@ export default {
             },
             components: {
               'gofr-questionnaire': () => import('@/components/gofr/gofr-questionnaire'),
+              'gofr-page-title': () => import('@/components/gofr/gofr-page-title'),
               'gofr-questionnaire-section': () => import('@/components/gofr/gofr-questionnaire-section'),
               'gofr-questionnaire-group': () => import('@/components/gofr/gofr-questionnaire-group'),
               'gofr-hidden': () => import('@/components/gofr/gofr-hidden'),

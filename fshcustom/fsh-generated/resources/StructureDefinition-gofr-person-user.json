@@ -602,10 +602,7 @@
         },
         "type": [
           {
-            "code": "Reference",
-            "targetProfile": [
-              "http://hl7.org/fhir/StructureDefinition/Basic"
-            ]
+            "code": "Reference"
           }
         ],
         "constraint": [
@@ -3049,18 +3046,6 @@
           }
         ],
         "mustSupport": true
-      },
-      {
-        "id": "Person.extension:organization.value[x]",
-        "path": "Person.extension.value[x]",
-        "type": [
-          {
-            "code": "Reference",
-            "targetProfile": [
-              "http://hl7.org/fhir/StructureDefinition/Basic"
-            ]
-          }
-        ]
       },
       {
         "id": "Person.extension:password",

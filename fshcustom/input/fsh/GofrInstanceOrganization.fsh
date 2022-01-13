@@ -7,10 +7,11 @@ Description:    "Organization Profile to manage multiple organizations using sin
 * name ^label = "Name"
 
 Instance:       gofr-page-instance-organization
-InstanceOf:     IhrisPage
+InstanceOf:     GofrPage
 Title:          "GOFR Instances Organization Page"
 Usage:          #example
-* code = IhrisResourceCodeSystem#page
+* code = GofrResourceCodeSystem#page
+* extension[display].extension[title].valueString = "Organization"
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/gofr-mcsd-organization)
 * extension[display].extension[search][0].valueString = "Name|name"
 * extension[display].extension[filter][0].valueString = "Name|name:contains"

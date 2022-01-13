@@ -11,6 +11,6 @@
     "Basic"
   ],
   "type": "number",
-  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/partitionID')",
-  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/partitionID']"
+  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/partition').extension('http://gofr.org/fhir/StructureDefinition/partitionID')",
+  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/partition']/f:extension[@url='http://gofr.org/fhir/StructureDefinition/partitionID']"
 }

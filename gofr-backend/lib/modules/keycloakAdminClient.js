@@ -497,7 +497,7 @@ const populateRoleTasks = ({ token, user }) => new Promise(async (resolve, rejec
       });
       const role = {
         resourceType: 'Basic',
-        id: `ihris-role-${roleBasicName.split(' ').join('')}`,
+        id: `gofr-role-${roleBasicName.split(' ').join('')}`,
         meta: {
           profile: ROLE_EXTENSION,
         },

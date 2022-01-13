@@ -12,7 +12,6 @@ const fhirAxios = require('./modules/fhirAxios');
 const topOrgName = config.get('mCSD:fakeOrgName');
 
 function getCrontime(callback) {
-  return
   fhirAxios.read('Parameters', 'gofr-general-config', '', 'DEFAULT').then((response) => {
     const resData = response.parameter.find(param => param.name === 'config');
     const adminConfig = JSON.parse(resData.valueString);

@@ -3,21 +3,25 @@
   "id": "gofr-page-facility",
   "meta": {
     "profile": [
-      "http://gofr.org/fhir/StructureDefinition/ihris-page"
+      "http://gofr.org/fhir/StructureDefinition/gofr-page"
     ]
   },
   "code": {
     "coding": [
       {
         "code": "page",
-        "system": "http://gofr.org/fhir/CodeSystem/ihris-resource-codesystem"
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem"
       }
     ]
   },
   "extension": [
     {
-      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-display",
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-page-display",
       "extension": [
+        {
+          "url": "title",
+          "valueString": "Update Facility"
+        },
         {
           "url": "resource",
           "valueReference": {
@@ -136,7 +140,7 @@
           "valueString": "Location.physicalType"
         }
       ],
-      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-page-section"
     },
     {
       "extension": [
@@ -157,7 +161,7 @@
           "valueString": "Location.position"
         }
       ],
-      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-page-section"
     },
     {
       "extension": [
@@ -178,7 +182,7 @@
           "valueString": "Location.identifier"
         }
       ],
-      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-page-section"
     },
     {
       "extension": [
@@ -199,7 +203,7 @@
           "valueString": "Location.telecom"
         }
       ],
-      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-page-section"
     },
     {
       "extension": [
@@ -220,7 +224,7 @@
           "valueString": "Location.address"
         }
       ],
-      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-page-section"
     },
     {
       "extension": [
@@ -241,7 +245,7 @@
           "valueString": "Location.hoursOfOperation"
         }
       ],
-      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-page-section"
     },
     {
       "extension": [
@@ -341,7 +345,7 @@
           "url": "resource"
         }
       ],
-      "url": "http://gofr.org/fhir/StructureDefinition/ihris-page-section"
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-page-section"
     }
   ]
 }

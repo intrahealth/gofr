@@ -3,12 +3,12 @@
   "id": "gofr-jurisdiction-questionnaire",
   "meta": {
     "profile": [
-      "http://gofr.org/fhir/StructureDefinition/ihris-questionnaire"
+      "http://gofr.org/fhir/StructureDefinition/gofr-questionnaire"
     ]
   },
   "url": "http://gofr.org/fhir/Questionnaire/gofr-jurisdiction-questionnaire",
-  "title": "GOFR Jurisdiction Questionnaire",
-  "description": "iHRIS Jurisdiction initial data entry questionnaire.",
+  "title": "Add Jurisdiction",
+  "description": "GOFR Jurisdiction initial data entry questionnaire.",
   "name": "gofr-jurisdiction-questionnaire",
   "status": "active",
   "date": "2021-04-24",

@@ -11,8 +11,8 @@
     "Basic"
   ],
   "type": "reference",
-  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/shared').extension('http://gofr.org/fhir/StructureDefinition/shareduser').extension('user')",
-  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/shared']/f:extension[@url='http://gofr.org/fhir/StructureDefinition/shareduser']/f:extension[@url='user']",
+  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/partition').extension('http://gofr.org/fhir/StructureDefinition/shared').extension('http://gofr.org/fhir/StructureDefinition/shareduser').extension('user')",
+  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/partition']/f:extension[@url='http://gofr.org/fhir/StructureDefinition/shared']/f:extension[@url='http://gofr.org/fhir/StructureDefinition/shareduser']/f:extension[@url='user']",
   "target": [
     "Person"
   ]

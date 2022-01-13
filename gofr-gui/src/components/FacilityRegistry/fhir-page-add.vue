@@ -54,6 +54,7 @@ export default {
             },
             components: {
               "gofr-resource": () => import("@/components/gofr/gofr-resource" ),
+              "gofr-page-title": () => import('@/components/gofr/gofr-page-title'),
               "gofr-codesystem": () => import("@/components/gofr/gofr-codesystem" ),
               "gofr-section": () => import("@/components/gofr/gofr-section" ),
               "gofr-secondary": () => import("@/components/gofr/gofr-secondary" ),

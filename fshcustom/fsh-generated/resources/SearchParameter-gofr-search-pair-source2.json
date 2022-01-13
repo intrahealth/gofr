@@ -11,8 +11,8 @@
     "Basic"
   ],
   "type": "reference",
-  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/source2')",
-  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/source2']",
+  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/datasourcepair').extension('http://gofr.org/fhir/StructureDefinition/source2')",
+  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/datasourcepair']/f:extension[@url='http://gofr.org/fhir/StructureDefinition/source2']",
   "target": [
     "Basic"
   ]

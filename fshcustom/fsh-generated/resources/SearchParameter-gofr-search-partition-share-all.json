@@ -11,6 +11,6 @@
     "Basic"
   ],
   "type": "token",
-  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/shared').extension('http://gofr.org/fhir/StructureDefinition/shareToAll').extension('activated')",
-  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/shared']/f:extension[@url='http://gofr.org/fhir/StructureDefinition/shareToAll']/f:extension[@url='activated']"
+  "expression": "Basic.extension('http://gofr.org/fhir/StructureDefinition/partition').extension('http://gofr.org/fhir/StructureDefinition/shared').extension('http://gofr.org/fhir/StructureDefinition/shareToAll').extension('activated')",
+  "xpath": "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/partition']/f:extension[@url='http://gofr.org/fhir/StructureDefinition/shared']/f:extension[@url='http://gofr.org/fhir/StructureDefinition/shareToAll']/f:extension[@url='activated']"
 }

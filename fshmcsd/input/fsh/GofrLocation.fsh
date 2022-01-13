@@ -111,7 +111,7 @@ Description:  "A profile on the mCSD Location profile for mCSD Facilities."
 * status ^label = "Status"
 * identifier 0..* MS
 * identifier ^label = "Identifier"
-* identifier ^constraint[0].key = "ihris-search-identifier"
+* identifier ^constraint[0].key = "gofr-search-identifier"
 * identifier ^constraint[0].severity = #error
 * identifier ^constraint[0].expression = "'Location' | 'identifier' | iif(system.exists(), system & '|' & value, value)"
 * identifier ^constraint[0].human = "The identifier must be unique and another record has this identifier"
@@ -296,10 +296,11 @@ Title:           "Jurisdiction Type(Country/Region/District/County)"
 * #county "County" "County"
 
 Instance:       gofr-page-facilityorganization
-InstanceOf:     IhrisPage
+InstanceOf:     GofrPage
 Title:          "GOFR Organization Page"
 Usage:          #example
-* code = IhrisResourceCodeSystem#page
+* code = GofrResourceCodeSystem#page
+* extension[display].extension[title].valueString = "Update Organization"
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/IHE.mCSD.FacilityOrganization)
 * extension[display].extension[search][0].valueString = "Name|name"
 * extension[display].extension[filter][0].valueString = "Name|name:contains"
@@ -315,10 +316,11 @@ Usage:          #example
 * extension[section][0].extension[field][2].valueString = "Organization.extension:hierarchy"
 
 Instance:       gofr-page-jurisdictionorganization
-InstanceOf:     IhrisPage
+InstanceOf:     GofrPage
 Title:          "GOFR Organization Page"
 Usage:          #example
-* code = IhrisResourceCodeSystem#page
+* code = GofrResourceCodeSystem#page
+* extension[display].extension[title].valueString = "Update Organization"
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/IHE.mCSD.JurisdictionOrganization)
 * extension[display].extension[search][0].valueString = "Name|name"
 * extension[display].extension[filter][0].valueString = "Name|name:contains"
@@ -332,10 +334,11 @@ Usage:          #example
 * extension[section][0].extension[field][2].valueString = "Organization.extension:hierarchy"
 
 Instance:       gofr-page-facility
-InstanceOf:     IhrisPage
+InstanceOf:     GofrPage
 Title:          "GOFR Facility Page"
 Usage:          #example
-* code = IhrisResourceCodeSystem#page
+* code = GofrResourceCodeSystem#page
+* extension[display].extension[title].valueString = "Update Facility"
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/IHE.mCSD.FacilityLocation)
 * extension[display].extension[search][0].valueString = "Facility Name|name"
 * extension[display].extension[search][1].valueString = "Facility Type|type[0].text"
@@ -400,10 +403,11 @@ Usage:          #example
 * extension[section][6].extension[resource].extension[action][0].extension[class].valueString = "secondary"
 
 Instance:       gofr-page-facility-add-request
-InstanceOf:     IhrisPage
+InstanceOf:     GofrPage
 Title:          "GOFR Request Add Facility Page"
 Usage:          #example
-* code = IhrisResourceCodeSystem#page
+* code = GofrResourceCodeSystem#page
+* extension[display].extension[title].valueString = "Request Adding Facility"
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/gofr-facility-add-request)
 * extension[display].extension[requestUpdatingResource].valueReference = Reference(StructureDefinition/IHE.mCSD.FacilityLocation)
 * extension[display].extension[search][0].valueString = "Facility Name|name"
@@ -450,10 +454,11 @@ Usage:          #example
 * extension[section][3].extension[field][0].valueString = "Location.address"
 
 Instance:       gofr-page-facility-update-request
-InstanceOf:     IhrisPage
+InstanceOf:     GofrPage
 Title:          "GOFR Request Update Facility Page"
 Usage:          #example
-* code = IhrisResourceCodeSystem#page
+* code = GofrResourceCodeSystem#page
+* extension[display].extension[title].valueString = "Request Updating Facility"
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/gofr-facility-update-request)
 * extension[display].extension[search][0].valueString = "Facility Name|name"
 * extension[display].extension[search][1].valueString = "Facility Type|type[1].text"
@@ -514,10 +519,11 @@ Usage:          #definition
 * target[0] = #Location
 
 Instance:       gofr-page-jurisdiction
-InstanceOf:     IhrisPage
+InstanceOf:     GofrPage
 Title:          "GOFR Jurisdiction Page"
 Usage:          #example
-* code = IhrisResourceCodeSystem#page
+* code = GofrResourceCodeSystem#page
+* extension[display].extension[title].valueString = "Update Jurisdiction"
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/IHE.mCSD.JurisdictionLocation)
 * extension[display].extension[search][0].valueString = "Name|name"
 * extension[display].extension[search][1].valueString = "Type|type.coding.display"

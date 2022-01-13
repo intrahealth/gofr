@@ -17,7 +17,7 @@ const fhirutils = {
       for( let constraint of constraints ) {
         if ( constraintDetails[constraint] ) {
           let results = fhirpath.evaluate(element, constraintDetails[constraint].expression)
-          if ( constraint.startsWith('ihris-search') ) {
+          if ( constraint.startsWith('gofr-search') ) {
             let resource = results.shift()
             let query = [ "_elements=id" ]
             while ( results.length ) {

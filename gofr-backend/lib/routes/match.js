@@ -33,9 +33,10 @@ function recoStatus(pairId) {
       pairId = pairId.split('/')[1];
     }
     fhirAxios.read('Basic', pairId, '', 'DEFAULT').then((pair) => {
-      const tatus = pair && pair.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/recoStatus');
-      if (tatus) {
-        return resolve(tatus.valueString);
+      const pairDetails = pair.extension && pair.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/datasourcepair');
+      const status = pairDetails.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/recoStatus');
+      if (status) {
+        return resolve(status.valueString);
       }
       return resolve('Done');
     }).catch((err) => {
@@ -1020,15 +1021,16 @@ router.get('/markRecoUnDone/:pairId', (req, res) => {
     pairId = pairId.split('/')[1];
   }
   fhirAxios.read('Basic', pairId, '', 'DEFAULT').then((pair) => {
+    const pairDetails = pair.extension && pair.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/datasourcepair');
     let updated = false;
-    pair.extension.forEach((ext, index) => {
+    pairDetails.extension.forEach((ext, index) => {
       if (ext.url === 'http://gofr.org/fhir/StructureDefinition/recoStatus') {
-        pair.extension[index].valueString = 'in-progress';
+        pairDetails.extension[index].valueString = 'in-progress';
         updated = true;
       }
     });
     if (!updated) {
-      pair.extension.push({
+      pairDetails.extension.push({
         url: 'http://gofr.org/fhir/StructureDefinition/lastUpdated',
         valueString: 'in-progress',
       });
@@ -1064,10 +1066,11 @@ router.get('/markRecoDone/:pairId', (req, res) => {
     pairId = pairId.split('/')[1];
   }
   fhirAxios.read('Basic', pairId, '', 'DEFAULT').then((pair) => {
+    const pairDetails = pair.extension && pair.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/datasourcepair');
     let updated = false;
-    pair.extension.forEach((ext, index) => {
+    pairDetails.extension.forEach((ext, index) => {
       if (ext.url === 'http://gofr.org/fhir/StructureDefinition/recoStatus') {
-        pair.extension[index].valueString = 'Done';
+        pairDetails.extension[index].valueString = 'Done';
         updated = true;
       } else if (ext.url === 'http://gofr.org/fhir/StructureDefinition/source1') {
         source1 = ext.valueReference.display;
@@ -1076,7 +1079,7 @@ router.get('/markRecoDone/:pairId', (req, res) => {
       }
     });
     if (!updated) {
-      pair.extension.push({
+      pairDetails.extension.push({
         url: 'http://gofr.org/fhir/StructureDefinition/lastUpdated',
         valueString: 'Done',
       });

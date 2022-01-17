@@ -15,7 +15,8 @@ function getAvailableId() {
     fhirAxios.searchAll('Basic', searchParams, 'DEFAULT').then((partitions) => {
       const partitionIDs = [];
       for (const partition of partitions.entry) {
-        const idExt = partition.resource.extension && partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partitionID');
+        const partDetails = partition.resource.extension && partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
+        const idExt = partDetails.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partitionID');
         if (idExt) {
           partitionIDs.push(idExt.valueInteger);
         }
@@ -154,7 +155,8 @@ function deletePartition({ resourcePartitionID, partitionID }) {
         return resolve();
       }
       fhirAxios.read('Basic', resourcePartitionID.split('/')[1], '', 'DEFAULT').then((partition) => {
-        const partIdExt = partition.resource.extension && partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partitionID');
+        const partDetails = partition.resource.extension && partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
+        const partIdExt = partDetails.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partitionID');
         if (partIdExt) {
           partitionID = partIdExt.valueInteger;
         } else {

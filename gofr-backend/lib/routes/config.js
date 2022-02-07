@@ -53,11 +53,11 @@ const setupOrder = (fields, sectionOrder) => {
 };
 
 router.get('/questionnaire/:questionnaire', (req, res) => {
-  const allowed = req.user.hasPermissionByName('read', 'Questionnaire', req.params.questionnaire);
-  // Limited access to these don't make sense so not allowing it for now
-  if (allowed !== true) {
-    return res.status(403).json(outcomes.DENIED);
-  }
+  // const allowed = req.user.hasPermissionByName('read', 'Questionnaire', req.params.questionnaire);
+  // // Limited access to these don't make sense so not allowing it for now
+  // if (allowed !== true) {
+  //   return res.status(403).json(outcomes.DENIED);
+  // }
   fhirAxios.read('Questionnaire', req.params.questionnaire, '', 'DEFAULT').then(async (resource) => {
     let vueOutput = `<gofr-questionnaire :edit=\"isEdit\" :view-page="viewPage" :constraints="constraints" url="${resource.url}" id="${resource.id}" title="${resource.title
     }" description="${resource.description}" purpose="${resource.purpose
@@ -323,11 +323,11 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
 
 router.get('/page/:page/:type?', (req, res) => {
   const page = `gofr-page-${req.params.page}`;
-  const allowed = req.user.hasPermissionByName('read', 'Basic', page);
-  // Limited access to these don't make sense so not allowing it for now
-  if (allowed !== true) {
-    return res.status(403).json(outcomes.DENIED);
-  }
+  // const allowed = req.user.hasPermissionByName('read', 'Basic', page);
+  // // Limited access to these don't make sense so not allowing it for now
+  // if (allowed !== true) {
+  //   return res.status(403).json(outcomes.DENIED);
+  // }
   fhirAxios.read('Basic', page, '', 'DEFAULT').then(async (resource) => {
     const pageDisplay = resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/gofr-page-display');
 

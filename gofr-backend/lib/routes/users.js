@@ -13,9 +13,9 @@ router.get('/getUsers', (req, res) => {
     for (const user of usersRes.entry) {
       const email = fhirpath.evaluate(user.resource, "Person.telecom.where(system='email').value");
       const fullname = fhirpath.evaluate(user.resource, 'Person.name.text');
-      if (!email || !fullname || email.length === 0 || fullname.length === 0) {
-        continue;
-      }
+      // if (!email || !fullname || email.length === 0 || fullname.length === 0) {
+      //   continue;
+      // }
       users.push({
         id: user.resource.id,
         userName: email[0],

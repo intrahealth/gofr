@@ -143,9 +143,9 @@
     <v-dialog
       persistent
       v-model="shareDialog"
-      width="530px"
+      width="550px"
     >
-      <v-card width='530px'>
+      <v-card width='550px'>
         <v-toolbar
           color="primary"
           dark
@@ -163,6 +163,7 @@
           </v-btn>
         </v-toolbar>
         <v-card-text>
+          {{shareSource}}
           <template v-if="loadingLocationTree">
             <v-progress-linear :indeterminate="true"></v-progress-linear>
           </template>
@@ -178,7 +179,198 @@
               </p>
             </v-card-text>
           </template>
-          <v-icon small>mdi-lock</v-icon> Limiting Sharing to: <b>{{limitLocationName}}</b>
+          <v-icon small>mdi-lock</v-icon> Limiting Sharing to: <b>{{limitLocationName}}</b><br>
+          <v-card height="252" width="550">
+            <v-toolbar
+              color="secondary"
+              dark
+              height="30"
+            >
+              <v-toolbar-title>
+                Permissions
+              </v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-icon>mdi-shield-lock-outline</v-icon>
+            </v-toolbar>
+            <v-card-actions>
+              <v-row>
+                <v-col cols="5">
+                  <v-card height="90">
+                    <v-toolbar
+                      color="secondary"
+                      dark
+                      height="20"
+                    >
+                      <v-toolbar-title style="font-size:12px">
+                        Facilities
+                      </v-toolbar-title>
+                      <v-spacer></v-spacer>
+                      <v-icon small>mdi-hospital-marker</v-icon>
+                    </v-toolbar>
+                    <v-card-actions>
+                      <v-layout column>
+                        <v-flex>
+                          <v-checkbox
+                            v-model="permissions"
+                            color="red darken-3"
+                            value="read_facility"
+                            height="0"
+                            hide-details
+                          >
+                            <template v-slot:label>
+                              <span style="font-size: 12px">View</span>
+                            </template>
+                          </v-checkbox>
+                        </v-flex>
+                        <v-checkbox
+                          v-model="permissions"
+                          color="red darken-3"
+                          value="write_facility"
+                          height="14"
+                          hide-details
+                        >
+                          <template v-slot:label>
+                            <span style="font-size: 12px">Add/Update</span>
+                          </template>
+                        </v-checkbox>
+                      </v-layout>
+                    </v-card-actions>
+                  </v-card>
+                </v-col>
+                <v-spacer></v-spacer>
+                <v-col cols="5">
+                  <v-card>
+                    <v-toolbar
+                      color="secondary"
+                      dark
+                      height="20"
+                    >
+                      <v-toolbar-title style="font-size:12px">
+                        Jurisdictions
+                      </v-toolbar-title>
+                      <v-spacer></v-spacer>
+                      <v-icon small>mdi-home-group</v-icon>
+                    </v-toolbar>
+                    <v-card-actions>
+                      <v-layout column>
+                        <v-flex>
+                          <v-checkbox
+                            v-model="permissions"
+                            color="red darken-3"
+                            value="read_jurisdiction"
+                            height="0"
+                            hide-details
+                          >
+                            <template v-slot:label>
+                              <span style="font-size: 12px">View</span>
+                            </template>
+                          </v-checkbox>
+                        </v-flex>
+                        <v-checkbox
+                          v-model="permissions"
+                          color="red darken-3"
+                          value="write_jurisdiction"
+                          height="14"
+                          hide-details
+                        >
+                          <template v-slot:label>
+                            <span style="font-size: 12px">Add/Update</span>
+                          </template>
+                        </v-checkbox>
+                      </v-layout>
+                    </v-card-actions>
+                  </v-card>
+                </v-col>
+                <v-col cols="5">
+                  <v-card>
+                    <v-toolbar
+                      color="secondary"
+                      dark
+                      height="20"
+                    >
+                      <v-toolbar-title style="font-size:12px">
+                        Organizations
+                      </v-toolbar-title>
+                      <v-spacer></v-spacer>
+                      <v-icon small>mdi-hospital-marker</v-icon>
+                    </v-toolbar>
+                    <v-card-actions>
+                      <v-layout column>
+                        <v-flex>
+                          <v-checkbox
+                            v-model="permissions"
+                            color="red darken-3"
+                            value="read_organization"
+                            height="0"
+                            hide-details
+                          >
+                            <template v-slot:label>
+                              <span style="font-size: 12px">View</span>
+                            </template>
+                          </v-checkbox>
+                        </v-flex>
+                        <v-checkbox
+                          v-model="permissions"
+                          color="red darken-3"
+                          value="write_organization"
+                          height="14"
+                          hide-details
+                        >
+                          <template v-slot:label>
+                            <span style="font-size: 12px">View</span>
+                          </template>
+                        </v-checkbox>
+                      </v-layout>
+                    </v-card-actions>
+                  </v-card>
+                </v-col>
+                <v-spacer></v-spacer>
+                <v-col cols="5">
+                  <v-card>
+                    <v-toolbar
+                      color="secondary"
+                      dark
+                      height="20"
+                    >
+                      <v-toolbar-title style="font-size:12px">
+                        Healthcare Services
+                      </v-toolbar-title>
+                      <v-spacer></v-spacer>
+                      <v-icon small>mdi-room-service</v-icon>
+                    </v-toolbar>
+                    <v-card-actions>
+                      <v-layout column>
+                        <v-flex>
+                          <v-checkbox
+                            v-model="permissions"
+                            color="red darken-3"
+                            value="read_service"
+                            height="0"
+                            hide-details
+                          >
+                            <template v-slot:label>
+                              <span style="font-size: 12px">View</span>
+                            </template>
+                          </v-checkbox>
+                        </v-flex>
+                        <v-checkbox
+                          v-model="permissions"
+                          color="red darken-3"
+                          value="write_service"
+                          height="14"
+                          hide-details
+                        >
+                          <template v-slot:label>
+                            <span style="font-size: 12px">Add/Update</span>
+                          </template>
+                        </v-checkbox>
+                      </v-layout>
+                    </v-card-actions>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-card-actions>
+          </v-card>
           <v-text-field
             v-model="searchUsers"
             append-icon="mdi-magnify"
@@ -223,7 +415,7 @@
           <v-spacer></v-spacer>
           <v-btn
             color="primary"
-            :disabled='loadingLocationTree'
+            :disabled='loadingLocationTree || permissions.length === 0 || sharedUsers.length === 0'
             @click.native="share('', 'saveShare')"
           >
             <v-icon left>mdi-share</v-icon>Share
@@ -470,6 +662,7 @@
                   color="success"
                   @click="exportCSV"
                   rounded
+                  small
                   v-if="uploadedSources.length > 0"
                   v-on="on"
                 >
@@ -479,6 +672,7 @@
                   color="success"
                   @click="exportCSV"
                   rounded
+                  small
                   disabled
                   v-else
                   v-on="on"
@@ -493,6 +687,7 @@
               color="error"
               @click="validateDelete"
               rounded
+              small
               v-if="uploadedSources.length > 0"
             >
               <v-icon left>mdi-delete</v-icon>Delete
@@ -501,10 +696,29 @@
               color="error"
               @click="validateDelete"
               rounded
+              small
               disabled
               v-else
             >
               <v-icon left>mdi-delete</v-icon>Delete
+            </v-btn>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="success"
+              rounded
+              small
+              @click="share('showDialog')"
+            >
+              <v-icon left>mdi-share-variant-outline</v-icon> Share
+            </v-btn>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="success"
+              rounded
+              small
+              @click="viewshare(item)"
+            >
+              <v-icon left>mdi-monitor-share</v-icon> View Sharing
             </v-btn>
           </v-card-actions>
           <v-card-text>
@@ -539,9 +753,6 @@
                   <td>{{item.display}}</td>
                   <td>{{item.owner}}</td>
                   <td>
-                    {{item.sharedUsers | mergeUsers}}
-                  </td>
-                  <td>
                     {{item.createdTime}}
                   </td>
                   <td v-if='item.userID === $store.state.auth.userID'>
@@ -551,6 +762,14 @@
                       @click="share(item, 'showDialog')"
                     >
                       <v-icon>mdi-share-variant-outline</v-icon> Share
+                    </v-btn>
+                    |
+                    <v-btn
+                      color="success"
+                      text
+                      @click="viewshare(item)"
+                    >
+                      <v-icon>mdi-monitor-share</v-icon> View Sharing
                     </v-btn>
                   </td>
                 </tr>
@@ -587,6 +806,7 @@ export default {
   mixins: [generalMixin],
   data () {
     return {
+      permissions: [],
       syncType: '',
       mode: '',
       loadingPairs: false,
@@ -631,8 +851,8 @@ export default {
           value: 'name'
         },
         { text: 'Owner', value: 'owner', sortable: false },
-        { text: 'Shared To', value: 'shareStatus' },
-        { text: 'Created Time', value: 'createdTime' }
+        { text: 'Created Time', value: 'createdTime' },
+        { text: 'Action', value: 'action' }
       ],
       dataSources: [
         { text: 'Upload CSV', value: 'upload' },
@@ -767,6 +987,15 @@ export default {
         console.log(error.config)
       })
     },
+    viewshare(source) {
+      this.$router.push({
+        name: 'AdvanceDatasourceDetails',
+        params: {
+          sourceid: source.id,
+          partitionid: source.name
+        }
+      })
+    },
     share (source, action) {
       if (action === 'showDialog') {
         this.limitLocationId = ''
@@ -789,11 +1018,8 @@ export default {
         }
         let formData = new FormData()
         formData.append('shareSource', this.shareSource.id)
-        formData.append('users', JSON.stringify(this.sharedUsers))
-        formData.append('userID', this.$store.state.auth.userID)
-        formData.append('role', this.$store.state.auth.role)
-        formData.append('orgId', this.$store.state.dhis.user.orgId)
-        formData.append('limitLocationId', this.limitLocationId)
+        formData.append('users', this.user.id)
+        formData.append('permissions', JSON.stringify(this.permissions))
         this.$store.state.loadingServers = true
         this.shareDialog = false
         axios.post('/datasource/shareSource', formData, {

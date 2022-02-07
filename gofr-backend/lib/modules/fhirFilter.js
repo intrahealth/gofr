@@ -99,7 +99,7 @@ const fhirFilter = {
   filterInline: (resource, fields, ignoreDefaults) => {
     runFilter(resource, fields, ignoreDefaults);
   },
-  filterBundle: (permission, bundle, user) => {
+  filterBundle: (permission, bundle, user, partition) => {
     // if full access to the resource is allowed then cache and reuse it
     const typeCache = {};
     for (const entry of bundle.entry) {
@@ -108,7 +108,7 @@ const fhirFilter = {
       if (typeCache.hasOwnProperty(resource.resourceType)) {
         fullAccess = typeCache[resource.resourceType];
       } else {
-        fullAccess = user.hasPermissionByName(permission, resource.resourceType);
+        fullAccess = user.hasPermissionByName(permission, resource.resourceType, '', partition);
         if (fullAccess === true) {
           typeCache[resource.resourceType] === true;
         } else {
@@ -119,7 +119,7 @@ const fhirFilter = {
       if (fullAccess) {
         continue;
       } else {
-        const fieldList = user.hasPermissionByObject(permission, resource);
+        const fieldList = user.hasPermissionByObject(permission, resource, '', partition);
         if (fieldList === true) {
           continue;
         } else if (!fieldList) {

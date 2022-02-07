@@ -190,6 +190,8 @@ const user = {
     }
   }),
   addPermission: (permissions, permission, resource, id, constraint, field) => {
+    // only below resources can be assigned global permissions i.e can be defined without being associated to any partition and user will have access to these resources on all partitions
+    const globalResources = ['CodeSystem', 'ValueSet', 'DocumentReference', 'StructureDefinition', 'custom', 'navigation'];
     if (!user.tasksLoaded) {
       logger.error("Can't load permissions directly unless the task lists have been loaded for validation.  call user.loadTaskList() first.");
       return false;
@@ -212,48 +214,68 @@ const user = {
       logger.warn(`Can't add delete permission on a specific id or by including a field: ${id} - ${field}`);
       return false;
     }
-    if (!permissions.hasOwnProperty(permission)) {
-      permissions[permission] = {};
+    let privilege;
+    if (globalResources.includes(resource) || (resource === '*' && permission === '*')) {
+      privilege = permissions;
+      if (resource === '*' && permission === '*') {
+        privilege.special = {
+          '*': true,
+        };
+        return true;
+      }
+    } else {
+      const defaultPartPerm = permissions.partitions.findIndex(part => part.name === 'DEFAULT');
+      if (defaultPartPerm !== -1) {
+        privilege = permissions.partitions[defaultPartPerm];
+      } else {
+        permissions.partitions.push({
+          name: 'DEFAULT',
+        });
+        privilege = permissions.partitions[0];
+      }
+    }
+    if (!privilege.hasOwnProperty(permission)) {
+      privilege[permission] = {};
     }
     if (!field && !id && !constraint) {
-      permissions[permission][resource] = true;
-    } else if (permissions[permission][resource] !== true) {
-      if (!permissions[permission].hasOwnProperty(resource)) {
-        permissions[permission][resource] = {};
+      privilege[permission][resource] = true;
+    } else if (privilege[permission][resource] !== true) {
+      if (!privilege[permission].hasOwnProperty(resource)) {
+        privilege[permission][resource] = {};
       }
       if (id) {
-        if (!permissions[permission][resource].hasOwnProperty('id')) {
-          permissions[permission][resource].id = {};
+        if (!privilege[permission][resource].hasOwnProperty('id')) {
+          privilege[permission][resource].id = {};
         }
         if (field) {
-          if (!permissions[permission][resource].id.hasOwnProperty(id)) {
-            permissions[permission][resource].id[id] = { };
+          if (!privilege[permission][resource].id.hasOwnProperty(id)) {
+            privilege[permission][resource].id[id] = { };
           }
-          if (isObject(permissions[permission][resource].id[id])) {
-            permissions[permission][resource].id[id][field] = true;
+          if (isObject(privilege[permission][resource].id[id])) {
+            privilege[permission][resource].id[id][field] = true;
           }
         } else {
-          permissions[permission][resource].id[id] = true;
+          privilege[permission][resource].id[id] = true;
         }
       } else if (constraint) {
-        if (!permissions[permission][resource].hasOwnProperty('constraint')) {
-          permissions[permission][resource].constraint = {};
+        if (!privilege[permission][resource].hasOwnProperty('constraint')) {
+          privilege[permission][resource].constraint = {};
         }
         if (field) {
-          if (!permissions[permission][resource].constraint.hasOwnProperty(constraint)) {
-            permissions[permission][resource].constraint[constraint] = {};
+          if (!privilege[permission][resource].constraint.hasOwnProperty(constraint)) {
+            privilege[permission][resource].constraint[constraint] = {};
           }
-          if (isObject(permissions[permission][resource].constraint[constraint])) {
-            permissions[permission][resource].constraint[constraint][field] = true;
+          if (isObject(privilege[permission][resource].constraint[constraint])) {
+            privilege[permission][resource].constraint[constraint][field] = true;
           }
         } else {
-          permissions[permission][resource].constraint[constraint] = true;
+          privilege[permission][resource].constraint[constraint] = true;
         }
       } else {
-        if (!permissions[permission][resource].hasOwnProperty('*')) {
-          permissions[permission][resource]['*'] = {};
+        if (!privilege[permission][resource].hasOwnProperty('*')) {
+          privilege[permission][resource]['*'] = {};
         }
-        permissions[permission][resource]['*'][field] = true;
+        privilege[permission][resource]['*'][field] = true;
       }
     }
 
@@ -265,6 +287,7 @@ class User {
   constructor(resource) {
     this.resource = resource;
     this.permissions = {};
+    this.permissions.partitions = [];
   }
 }
 
@@ -294,8 +317,15 @@ User.prototype.addPermission = function (permission, resource, id, constraint, f
 /**
  * Gets a specific permission from the permissions object without any additional checking
  */
-User.prototype.__hasPermissionByName = function (permission, resource) {
+User.prototype.__hasPermissionByName = function (permission, resource, partition) {
   try {
+    if (partition) {
+      const partitionIndex = this.permissions.partitions && this.permissions.partitions.findIndex(part => part.name === partition);
+      if (partitionIndex === -1) {
+        return false;
+      }
+      return this.permissions.partitions[partitionIndex][permission][resource];
+    }
     return this.permissions[permission][resource];
   } catch (err) {
     return false;
@@ -311,17 +341,16 @@ User.prototype.__hasPermissionByName = function (permission, resource) {
  * "constraint": { "CONSTRAINT" : true | [field list] }
  * }
  */
-User.prototype.hasPermissionByName = function (permission, resource, id) {
+User.prototype.hasPermissionByName = function (permission, resource, id, partition) {
   const perms = ['*'];
   if (permission !== '*') { perms.push(permission); }
   const resources = ['*'];
   if (resource !== '*') { resources.push(resource); }
 
   let results = {};
-
   for (const perm of perms) {
     for (const res of resources) {
-      const allowed = this.__hasPermissionByName(perm, res);
+      const allowed = this.__hasPermissionByName(perm, res, partition);
       if (allowed === true) {
         return true;
       } if (allowed !== false && allowed !== undefined) {
@@ -365,10 +394,10 @@ User.prototype.getFilter = function (resource) {
  * on a FHIR resource object.
  * @return boolean | [ field list ]
  */
-User.prototype.hasPermissionByObject = function (permission, resource) {
+User.prototype.hasPermissionByObject = function (permission, resource, partition) {
   // First get the base permissions by name then see what constraints
   // apply. Don't get by ID as we need to determine if that was how it matched.
-  const permissions = this.hasPermissionByName(permission, resource.resourceType);
+  const permissions = this.hasPermissionByName(permission, resource.resourceType, partition);
   if (permissions === true) {
     return true;
   }

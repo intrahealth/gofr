@@ -48,7 +48,7 @@
         {
           "linkId": "Location.type[0]",
           "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.type",
-          "text": "Facility Types",
+          "text": "Jurisdiction Type",
           "type": "choice",
           "answerValueSet": "http://gofr.org/fhir/ValueSet/gofr-jurisdiction-type",
           "repeats": true,
@@ -57,7 +57,7 @@
         {
           "linkId": "Location.type[1]",
           "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.type",
-          "text": "Facility Types",
+          "text": "Jurisdiction Type",
           "type": "choice",
           "repeats": false,
           "readOnly": true,

@@ -462,7 +462,7 @@ Usage:          #definition
 
 * item[0].item[3].linkId = "Location.type[0]"
 * item[0].item[3].definition = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.type"
-* item[0].item[3].text = "Facility Types"
+* item[0].item[3].text = "Jurisdiction Type"
 * item[0].item[3].type = #choice
 * item[0].item[3].answerValueSet = "http://gofr.org/fhir/ValueSet/gofr-jurisdiction-type"
 * item[0].item[3].repeats = true
@@ -470,7 +470,7 @@ Usage:          #definition
 
 * item[0].item[4].linkId = "Location.type[1]"
 * item[0].item[4].definition = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation#Location.type"
-* item[0].item[4].text = "Facility Types"
+* item[0].item[4].text = "Jurisdiction Type"
 * item[0].item[4].type = #choice
 * item[0].item[4].repeats = false
 * item[0].item[4].readOnly = true

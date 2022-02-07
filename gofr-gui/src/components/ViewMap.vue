@@ -1,10 +1,10 @@
 <template>
 <v-container grid-list-xs>
   <FhirMap
-      :accessToken="accessToken"
-      :fhirServerUrl="fhirServerUrl"
-      :options="options"
-    />
+    :accessToken="accessToken"
+    :fhirServerUrl="fhirServerUrl"
+    :options="options"
+  />
 </v-container>
 </template>
 

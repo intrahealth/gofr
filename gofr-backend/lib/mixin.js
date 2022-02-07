@@ -144,7 +144,7 @@ module.exports = {
       name: parentId,
       children: [],
     };
-    if (sourceEntry) {
+    if (sourceEntry && sourceEntry.resource.identifier) {
       for (const identifier of sourceEntry.resource.identifier) {
         if (identifier.value === parentId) {
           continue;

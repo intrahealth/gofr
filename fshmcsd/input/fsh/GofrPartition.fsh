@@ -17,6 +17,9 @@ Description:    "GOFR Profile of the Basic resource to manage hapi partitions."
 * extension[partition].extension[owner].extension[dhis2OrgId].valueString MS
 * extension[partition].extension[shared].extension[shareduser].extension[user].valueReference.reference MS
 * extension[partition].extension[shared].extension[shareduser].extension[locationLimit].valueReference.reference MS
+* extension[partition].extension[shared].extension[shareduser].extension[userpermission].extension[resource].valueCode MS
+* extension[partition].extension[shared].extension[shareduser].extension[userpermission].extension[permission].valueCode MS
+* extension[partition].extension[shared].extension[shareduser].extension[userpermission].extension[constraint].valueString MS
 * extension[partition].extension[shared].extension[shareToSameOrgid].valueBoolean MS
 * extension[partition].extension[shared].extension[shareToAll] ^label = "Share to all"
 * extension[partition].extension[shared].extension[shareToAll].extension[activated].valueBoolean MS
@@ -49,6 +52,9 @@ Title:          "GOFR partition extension"
 * extension[owner].extension[dhis2OrgId].valueString MS
 * extension[shared].extension[shareduser].extension[user].valueReference.reference MS
 * extension[shared].extension[shareduser].extension[locationLimit].valueReference.reference MS
+* extension[shared].extension[shareduser].extension[userpermission].extension[resource].valueCode MS
+* extension[shared].extension[shareduser].extension[userpermission].extension[permission].valueCode MS
+* extension[shared].extension[shareduser].extension[userpermission].extension[constraint].valueString MS
 * extension[shared].extension[shareToSameOrgid].valueBoolean MS
 * extension[shared].extension[shareToAll] ^label = "Share to all"
 * extension[shared].extension[shareToAll].extension[activated].valueBoolean MS
@@ -93,6 +99,15 @@ Description:    "GOFR Partition Shared Users"
 * extension[shareduser].extension[locationLimit].valueReference only Reference(Location)
 * extension[shareduser].extension[locationLimit].valueReference 1..1 MS
 * extension[shareduser].extension[locationLimit].valueReference ^label = "Limit Location"
+* extension[shareduser].extension[userpermission].extension[resource].value[x] only code
+* extension[shareduser].extension[userpermission].extension[resource].valueCode from GofrTaskResourceValueSet (required)
+* extension[shareduser].extension[userpermission].extension[resource] ^label = "Resource"
+* extension[shareduser].extension[userpermission].extension[permission].value[x] only code
+* extension[shareduser].extension[userpermission].extension[permission].valueCode from GofrTaskResourceValueSet (required)
+* extension[shareduser].extension[userpermission].extension[permission] ^label = "Permission"
+* extension[shareduser].extension[userpermission].extension[constraint].value[x] only string
+* extension[shareduser].extension[userpermission].extension[constraint].valueString 0..1 MS
+* extension[shareduser].extension[userpermission].extension[constraint] ^label = "Constraint"
 * extension[activeUsers].value[x] only Reference
 * extension[activeUsers].valueReference only Reference(Person)
 * extension[activeUsers].valueReference 1..1 MS
@@ -116,7 +131,8 @@ Description:    "GOFR Partition Shared Users"
 * ^context.expression = "GofrPartition"
 * extension contains
       user 1..1 MS and
-      locationLimit 0..* MS
+      locationLimit 0..* MS and
+      UserPermission named userpermission 1..* MS
 * extension[user].value[x] only Reference
 * extension[user].valueReference only Reference(Person)
 * extension[user].valueReference 1..1 MS
@@ -125,6 +141,15 @@ Description:    "GOFR Partition Shared Users"
 * extension[locationLimit].valueReference only Reference(Location)
 * extension[locationLimit].valueReference 1..1 MS
 * extension[locationLimit].valueReference ^label = "Limit Location"
+* extension[userpermission].extension[resource].value[x] only code
+* extension[userpermission].extension[resource].valueCode from GofrTaskResourceValueSet (required)
+* extension[userpermission].extension[resource] ^label = "Resource"
+* extension[userpermission].extension[permission].value[x] only code
+* extension[userpermission].extension[permission].valueCode from GofrTaskPermissionValueSet (required)
+* extension[userpermission].extension[permission] ^label = "Permission"
+* extension[userpermission].extension[constraint].value[x] only string
+* extension[userpermission].extension[constraint].valueString 0..1 MS
+* extension[userpermission].extension[constraint] ^label = "Constraint"
 
 Extension:      ShareToAll
 Id:             shared-toall
@@ -141,6 +166,26 @@ Description:    "GOFR Partition Shared to All"
 * extension[limitByUserLocation].value[x] only boolean
 * extension[limitByUserLocation].valueBoolean 1..1 MS
 * extension[limitByUserLocation].valueBoolean ^label = "Limit by user location"
+
+Extension:      UserPermission
+Id:             userpermission
+Title:          "GOFR Share Permission"
+Description:    "GOFR Share Permission"
+* ^context.type = #element
+* ^context.expression = "GofrPartition"
+* extension contains
+      resource 1..1 MS and
+      permission 1..* MS and
+      constraint 0..1 MS
+* extension[resource].value[x] only code
+* extension[resource].valueCode from GofrTaskResourceValueSet (extensible)
+* extension[resource].valueCode ^label = "Resource"
+* extension[permission].value[x] only code
+* extension[permission].valueCode from GofrTaskPermissionValueSet (required)
+* extension[permission].valueCode ^label = "Permission"
+* extension[constraint].value[x] only string
+* extension[constraint].valueString 0..1 MS
+* extension[constraint].valueString ^label = "Constraint"
 
 Instance:       gofr-search-partitionowner
 InstanceOf:     SearchParameter

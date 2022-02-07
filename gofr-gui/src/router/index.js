@@ -11,6 +11,7 @@ import RolesManagement from '@/components/RolesManagement.vue'
 import ChangePassword from '@/components/ChangePassword.vue'
 import AddDataSources from '@/components/DataSources/AddDataSources'
 import ViewDataSources from '@/components/DataSources/ViewDataSources'
+import AdvanceDatasourceDetails from '@/components/DataSources/AdvanceDatasourceDetails'
 import DataSourcesPair from '@/components/DataSourcesPair/FacilityReconDataSourcePair'
 import FacilityReconView from '@/components/FacilityReconView'
 import FacilityReconScores from '@/components/FacilityReconScores'
@@ -96,6 +97,33 @@ let router = new Router({
     name: 'ViewDataSources',
     component: ViewDataSources,
     beforeEnter: (to, from, next) => {
+      let hasTask = Vue.$tasksVerification.hasPermissionByName('special', 'custom', 'view-data-source')
+      if (hasTask) {
+        return next()
+      }
+      next({
+        name: 'GofrOutcome',
+        params: {
+          issues: [{
+            diagnostics: 'Access Denied'
+          }]
+        }
+      })
+    }
+  }, {
+    path: '/AdvanceDatasourceDetails/:sourceid/:partitionid',
+    name: 'AdvanceDatasourceDetails',
+    component: AdvanceDatasourceDetails,
+    props: (route) => ({
+      sourceid: route.params.sourceid,
+      partitionid: route.params.partitionid
+    }),
+    beforeEnter: (to, from, next) => {
+      if(!to.params.sourceid || !to.params.partitionid || store.state.dataSources.length === 0) {
+        return next({
+          name: 'Home'
+        })
+      }
       let hasTask = Vue.$tasksVerification.hasPermissionByName('special', 'custom', 'view-data-source')
       if (hasTask) {
         return next()

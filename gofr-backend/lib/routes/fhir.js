@@ -22,9 +22,9 @@ router.get('/:partition/:resource/:id?', (req, res, next) => {
   }
   let allowed = false;
   if (req.params.id) {
-    allowed = req.user.hasPermissionByName('read', req.params.resource, req.params.id);
+    allowed = req.user.hasPermissionByName('read', req.params.resource, req.params.id, req.params.partition);
   } else {
-    allowed = req.user.hasPermissionByName('read', req.params.resource);
+    allowed = req.user.hasPermissionByName('read', req.params.resource, '', req.params.partition);
   }
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
@@ -36,7 +36,7 @@ router.get('/:partition/:resource/:id?', (req, res, next) => {
       }
       // Check permissions against the specific resource and return list
       // of allowed fields
-      const fieldList = req.user.hasPermissionByObject('read', resource);
+      const fieldList = req.user.hasPermissionByObject('read', resource, req.params.partition);
       if (fieldList === true) {
         return res.status(200).json(resource);
       } if (!fieldList) {
@@ -67,7 +67,7 @@ router.get('/:partition/:resource/:id?', (req, res, next) => {
     fhirAxios.search(req.params.resource, req.query, req.params.partition).then((resource) => {
       // Need to do deeper checking due to possibility of includes
       if (resource && resource.entry && resource.entry.length > 0) {
-        fhirFilter.filterBundle('read', resource, req.user);
+        fhirFilter.filterBundle('read', resource, req.user, req.params.partition);
       }
       return res.status(200).json(resource);
 
@@ -89,7 +89,7 @@ router.get('/:partition/:resource/:id?', (req, res, next) => {
 });
 
 router.post('/:partition/:resource', (req, res) => {
-  const allowed = req.user.hasPermissionByObject('write', req.body);
+  const allowed = req.user.hasPermissionByObject('write', req.body, req.params.partition);
 
   let resource;
   if (allowed === true) {
@@ -192,7 +192,7 @@ router.patch('/:partition/CodeSystem/:id/:code', (req, res) => {
 
 router.put('/:partition/:resource/:id', (req, res) => {
   const update = req.body;
-  const allowed = req.user.hasPermissionByObject('write', update);
+  const allowed = req.user.hasPermissionByObject('write', update, req.params.partition);
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
@@ -240,7 +240,7 @@ router.get('/:partition/ValueSet/:id/\\$expand', (req, res) => {
 });
 
 router.get('/:partition/CodeSystem/\\$lookup', (req, res) => {
-  const allowed = req.user.hasPermissionByName('read', 'CodeSystem');
+  const allowed = req.user.hasPermissionByName('read', 'CodeSystem', '', req.params.partition);
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
@@ -261,7 +261,7 @@ router.get('/:partition/CodeSystem/\\$lookup', (req, res) => {
 });
 
 router.get('/:partition/DocumentReference/:id/\\$html', (req, res) => {
-  const allowed = req.user.hasPermissionByName('read', 'DocumentReference', req.params.id);
+  const allowed = req.user.hasPermissionByName('read', 'DocumentReference', req.params.id, req.params.partition);
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
@@ -318,7 +318,7 @@ router.get('/:partition/\\$short-name', (req, res) => {
       logger.debug('invalid', req.query);
       return res.status(403).json(outcomes.DENIED);
     }
-    allowed = req.user.hasPermissionByName('read', refData[0]);
+    allowed = req.user.hasPermissionByName('read', refData[0], '', req.params.partition);
 
     // Any read access will give short names
     if (allowed === false) {

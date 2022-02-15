@@ -73,7 +73,7 @@ After adding a remote source, users must run the synchronization so that the dat
 
 This is done in the view data sources feature.
 
-View data sources -> remote sources -> select the data source and click force full sync.
+View data sources -> remote sources -> select the data source and click on 'Force full sync'.
 
 #### Blank Source
 
@@ -81,7 +81,7 @@ Blank data sources can also be added. A blank data source can manually be popula
 
 **To add a blank source:**
 
-Select Blank Source> Add the name of the source -> Click Add
+Select Blank Source -> Add the name of the source -> Click Add
 
 ![Alt text](../img/add_blank_source.JPG 'GOFR view Blank Source')
 

@@ -1,4 +1,4 @@
-# Getting Started with Docker
+# Quickstart using Docker
 
 Docker is a fast way to get up and running with testing and trying out GOFR.
 
@@ -12,12 +12,12 @@ git clone https://github.com/intrahealth/gofr.git
 
 * Docker Compose scripts are located in /instant/docker
 ```sh
-cd instant/docker
+cd instant/docker/run
 ```
 
 Launch GOFR.
 ```sh
-docker compose up
+docker-compose up
 ```
 
 

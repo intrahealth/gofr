@@ -54,9 +54,7 @@ markdown_extensions:
   - footnotes
   - md_in_html
   - attr_list
-
-  # - codehilite:
-  #     guess_lang: false
+  # - codehilite
   - toc:
       toc_depth: 2
       permalink: true
@@ -66,7 +64,7 @@ plugins:
   - search
   - git-revision-date-localized
   - mkdocs-video
-  #- mknotebooks
+  - mknotebooks
   # - pdf-export:
   #     combined: true
 

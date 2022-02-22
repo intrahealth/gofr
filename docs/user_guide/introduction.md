@@ -30,7 +30,7 @@ Click the link to 'Back to Login' and log in normally.
 
 Once you successfully log in to the system, the dashboard appears:
 
-![Alt text](../img/dashboard.JPG 'GOFR Dashboard Page')
+![Alt text](../img/gofr2.png 'GOFR Dashboard Page')
 
 !!! important "Active partition - A partition selected under 'Active Partition' becomes the active partition for the entire system e.g.when searching for a facilities/jurisdictions/organizations, the system will search facilities in the active partition."
 

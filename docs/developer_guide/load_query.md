@@ -15,12 +15,3 @@ To know what partition you are on, see the list on the top left, which allows sw
 There are summary statistics that show usage and other aspects of the current partition.
 
 ![Alt text](../img/summarystats.png 'Summary Stats')
-
-
-## Load Data
-
-WIP
-
-## Query Data
-
-WIP

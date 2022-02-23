@@ -3,6 +3,7 @@ dhis2App/static
 facility-recon-gui/dist/static
 facility-recon-backend/lib/dbArchives/*
 **/facility-recon-backend/node_modules/
+
 # ansible
 *.retry
 .vagrant
@@ -27,3 +28,6 @@ _templates
 # tests
 tests/node_modules
 tests/screenshot*
+
+# notebooks
+.ipynb_checkpoints

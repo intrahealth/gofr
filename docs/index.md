@@ -17,7 +17,7 @@ GOFR is a GUI on top of the popular and open source HAPI FHIR Server that makes 
 * An API and backend engine that use [FHIR](https://www.hl7.org/fhir/location.html) Location resources based on the [mCSD](http://wiki.ihe.net/index.php/Mobile_Care_Services_Discovery_(mCSD)) profile.
 * Modular system to extend algorithms for matching.
 
-Many new features in addition to the above are planned for completion in 2021.
+Many new features in addition to the above are planned for completion in 2022.
 
 ## Contributing and community
 

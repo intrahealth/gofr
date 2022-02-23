@@ -1,4 +1,4 @@
-# Working with FHIR
+## Introduction to FHIR
 
 The HL7® FHIR® (Fast Healthcare Interoperability Resources) standard defines how healthcare information can be exchanged between different systems. The FHIR standard defines data structures, termed 'resources' -- like Patient, Diagnostic Result, and Care Plan -- and how these resources can be exchanged using common Web protocols. 
 
@@ -11,19 +11,18 @@ Some great resources for learning are:
 * The [HAPI FHIR Test Server](http://hapi.fhir.org/) The test server has a great web interface so you don't need to dig into a terminal to issues commmands. This is a great way to understand the REST API and the diverse types of resources.
 * SmileCDR's [Intro to FHIR](https://www.youtube.com/watch?v=YbQcJj1GqH0&t=2175s). This is a video that explains the why and how of FHIR.
 
-## Core FHIR Resources
+## Core FHIR Resources in mCSD
 
 The below graphic shows the relevant FHIR resources for GOFR. 
 
 ![Alt text](../img/coreonly.png "FHIR resources")
 
-The core FHIR resources provide a robust framework for linking patients with when, where, how, and why they receive care. For example, Healthcare Services resources possess `providedBy` and `location` references for the respective Organizations and Locations. A HealthcareService resource or Location can be queried using existing search methods to identify the services provided. 
-
-Another example of FHIR's maturity is that Practitioner and PractitionerRole are separate resources. As noted in the [FHIR R4 specification](https://www.hl7.org/fhir/practitionerrole.html#bnc):
-
->"Practitioner performs different roles within the same or even different organizations. Depending on jurisdiction and custom, it may be necessary to maintain a specific Practitioner Resource for each such role or have a single Practitioner with multiple roles. The role can be limited to a specific period, after which authorization for this role ends."
-
 Locations are the physical places where care occurs. Organizations are managing entities of HealthcareServices, Locations, PractitionerRoles, and of other resources.
+
+The core FHIR resources provide a robust framework for linking patients with when, where, how, and why they receive care. For example, Healthcare Services resources possess `providedBy` and `location` references for the respective Organizations and Locations. A HealthcareService resource or Location can be queried using existing search methods to identify the services provided. OrganizationAffiliation is not depicted but can also be used in mCSD to describe a non-hierarchical relationship.
+
+Practitioner and PractitionerRole are separate resources. As noted in the [FHIR R4 specification](https://www.hl7.org/fhir/practitionerrole.html#bnc):
+>"Practitioner performs different roles within the same or even different organizations. Depending on jurisdiction and custom, it may be necessary to maintain a specific Practitioner Resource for each such role or have a single Practitioner with multiple roles. The role can be limited to a specific period, after which authorization for this role ends."
 
 ## Simple FHIR JSON Example
 

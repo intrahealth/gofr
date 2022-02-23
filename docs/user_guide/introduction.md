@@ -2,8 +2,8 @@
 
 !!! important "What is GOFR?"
 GOFR is acronym for the Global Open Facility Registry.
-GOFR is a shared repository for facility information. The information in the repository can vary and may include:
 
+GOFR is a shared repository for facility information. The information in the repository can vary and may include:
 - Facilities
 - Jurisdictions such as districts, regions, county, country , with the highest in the hierarchy being a country and the lowest being a facility.
 - Services offered by facilities. This may include services such as malaria testing, HIV care, clinical information like vaccination
@@ -30,7 +30,7 @@ Click the link to 'Back to Login' and log in normally.
 
 Once you successfully log in to the system, the dashboard appears:
 
-![Alt text](../img/dashboard.JPG 'GOFR Dashboard Page')
+![Alt text](../img/gofr2.png 'GOFR Dashboard Page')
 
 !!! important "Active partition - A partition selected under 'Active Partition' becomes the active partition for the entire system e.g.when searching for a facilities/jurisdictions/organizations, the system will search facilities in the active partition."
 

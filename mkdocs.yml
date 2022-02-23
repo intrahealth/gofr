@@ -34,9 +34,6 @@ theme:
 
 nav:
   - Home: index.md
-  - Getting started:
-    - getting_started/getting_started.md
-    - getting_started/load_query.md
   - User Guide:
     - user_guide/introduction.md
     - user_guide/facility_reconciliation.md
@@ -44,6 +41,8 @@ nav:
     - user_guide/usersandsharing.md
     - user_guide/configure_system.md
   - Developer Guide:
+    - developer_guide/getting_started.md
+    - developer_guide/load_query.md
     - developer_guide/working_with_fhir.md
     - developer_guide/mcsd.md
     - developer_guide/forms.md

@@ -69,11 +69,11 @@
       "display": "metadata"
     },
     {
-      "code": "Custom",
+      "code": "custom",
       "display": "Custom"
     },
     {
-      "code": "Navigation",
+      "code": "navigation",
       "display": "Navigation"
     }
   ],

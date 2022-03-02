@@ -145,8 +145,8 @@ Title:          "Code system for task permissions."
 * #Organization         "Organization"
 * #HealthcareService    "HealthcareService"
 * #Person               "Person"
-* #Custom               "Custom"
-* #Navigation           "Navigation"
+* #custom               "Custom"
+* #navigation           "Navigation"
 
 ValueSet:       GofrTaskResourceValueSet
 Id:             gofr-task-resource

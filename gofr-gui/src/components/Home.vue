@@ -24,7 +24,7 @@
             </v-card>
           </v-flex>
           <v-spacer></v-spacer>
-          <v-flex xs4>
+          <v-flex xs5>
             <ActivePartitionStats 
               :partition="$store.state.config.userConfig.FRDatasource" 
               title="Active Partition Stats"
@@ -32,7 +32,7 @@
             />
           </v-flex>
           <v-spacer></v-spacer>
-          <v-flex xs2>
+          <!-- <v-flex xs2>
             <v-card>
               <v-card-title primary-title>
                 <v-toolbar color="#952175" dark height="40" style="font-size: 14px">
@@ -47,7 +47,7 @@
               </v-card-text>
             </v-card>
           </v-flex>
-          <v-spacer></v-spacer>
+          <v-spacer></v-spacer> -->
           <v-flex xs2>
             <v-card>
               <v-card-title primary-title>
@@ -57,6 +57,7 @@
               </v-card-title>
               <v-card-text>
                 <label v-if="Object.keys($store.state.activePair.source1).length > 0">
+                  Name: <b>{{$store.state.activePair.display}}</b> <br>
                   Source 1: <b>{{$store.state.activePair.source1.display}}</b> <br>
                   Source 2: <b>{{$store.state.activePair.source2.display}}</b> <br>
                   Status: <b>{{$store.state.recoStatus}}</b> <v-icon
@@ -78,31 +79,13 @@
       <v-flex>
         <v-layout row wrap>
           <v-spacer></v-spacer>
-          <v-flex xs9>
-            <v-tabs
-              background-color="deep-purple accent-4"
-              centered
-              dark
-              icons-and-text
-              fixed-tabs
-            >
-              <v-tabs-slider></v-tabs-slider>
-              <v-tab key="map">
-                Map Visualization
-                <v-icon>mdi-map-marker</v-icon>
-              </v-tab>
-
-              <v-tab key="tables">
-                Tabular Visualization
-                <v-icon>mdi-table-search</v-icon>
-              </v-tab>
-              <v-tab-item key="map">
-                <viewMap
-                  :key="reload"
-                />
-              </v-tab-item>
-              <v-tab-item key="tables">
-                <v-layout row wrap>
+          <v-flex xs6>
+            <viewMap
+              :key="reload"
+            />
+          </v-flex>
+          <v-flex xs6>
+            <v-layout column wrap>
                 <v-spacer></v-spacer>
                 <v-flex xs5>
                   <fhirPageSearch
@@ -119,10 +102,35 @@
                 </v-flex>
                 <v-spacer></v-spacer>
               </v-layout>
+          </v-flex>
+          <!-- <v-flex xs12>
+            <v-tabs
+              background-color="deep-purple accent-4"
+              centered
+              dark
+              icons-and-text
+              fixed-tabs
+              height="57px"
+            >
+              <v-tabs-slider></v-tabs-slider>
+              <v-tab key="map">
+                Map Visualization
+                <v-icon>mdi-map-marker</v-icon>
+              </v-tab>
+
+              <v-tab key="tables">
+                Tabular Visualization
+                <v-icon>mdi-table-search</v-icon>
+              </v-tab>
+              <v-tab-item key="map">
+                
+              </v-tab-item>
+              <v-tab-item key="tables">
+                
               </v-tab-item>
             </v-tabs>
           </v-flex>
-          <v-spacer></v-spacer>
+          <v-spacer></v-spacer> -->
         </v-layout>
       </v-flex>
     </v-layout>

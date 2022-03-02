@@ -58,15 +58,15 @@ export const scoresMixin = {
           this.$store.state.errorColor = 'error'
           this.$store.state.dialogError = true
           this.clearProgress('scoreResults')
-          this.$store.state.scoreSavingProgressData.savingMatches = true
-          this.checkScoreSavingStatus()
+          // this.$store.state.scoreSavingProgressData.savingMatches = true
+          // this.checkScoreSavingStatus()
           return
         } else if ((scoreProgress.data.status === null && scoreProgress.data.percent === null && scoreProgress.data.error === null && this.$store.state.scoreResults.length > 0)) {
           this.$store.state.scoresProgressData.scoreDialog = false
           this.$store.state.scoresProgressData.scoreProgressTitle = 'Waiting for progress status'
           this.clearProgress('scoreResults')
-          this.$store.state.scoreSavingProgressData.savingMatches = true
-          this.checkScoreSavingStatus()
+          // this.$store.state.scoreSavingProgressData.savingMatches = true
+          // this.checkScoreSavingStatus()
           return
         }
         this.$store.state.scoresProgressData.scoreProgressTitle = scoreProgress.data.status
@@ -79,8 +79,8 @@ export const scoresMixin = {
         }
         if (scoreProgress.data.status === 'Done' && this.$store.state.scoreResults.length === 0) {
           this.clearProgress('scoreResults')
-          this.$store.state.scoreSavingProgressData.savingMatches = true
-          this.checkScoreSavingStatus()
+          // this.$store.state.scoreSavingProgressData.savingMatches = true
+          // this.checkScoreSavingStatus()
           this.loadingSource1Unmatched = false
           this.loadingSource2Unmatched = false
           let scoresData = scoreProgress.data.responseData
@@ -217,9 +217,9 @@ export const scoresMixin = {
       if (!getPotential) {
         getPotential = false
       }
-      let source1 = this.getSource1()
-      let source2 = this.getSource2()
-      let sourcesOwner = this.getDatasourceOwner()
+      let partition1 = this.$store.state.activePair.source1.name
+      let partition2 = this.$store.state.activePair.source2.name
+      let mappingPartition = this.$store.state.activePair.name
       this.$store.state.source1UnMatched = []
       this.$store.state.source2UnMatched = []
       this.$store.state.matchedContent = []
@@ -233,7 +233,7 @@ export const scoresMixin = {
       this.$store.state.totalAllIgnore = 0
       this.$store.state.source2TotalRecords = 0
       this.$store.state.scoreResults = []
-      if (!source1 || !source2) {
+      if (!partition1 || !partition2 || !mappingPartition) {
         return
       }
       this.loadingSource1Unmatched = true
@@ -260,14 +260,12 @@ export const scoresMixin = {
           value: k + 1
         })
       }
-      let userID = this.$store.state.activePair.userID
-      let source1Owner = sourcesOwner.source1Owner
-      let source2Owner = sourcesOwner.source2Owner
       let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
       let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
       let parentConstraint = JSON.stringify(this.$store.state.config.generalConfig.reconciliation.parentConstraint)
-      let path = `source1=${source1}&source2=${source2}&source1Owner=${source1Owner}&source2Owner=${source2Owner}&source1LimitOrgId=${source1LimitOrgId}&source2LimitOrgId=${source2LimitOrgId}&totalSource1Levels=${totalSource1Levels}&totalSource2Levels=${totalSource2Levels}`
-      path += `&recoLevel=${recoLevel}&clientId=${clientId}&userID=${userID}&parentConstraint=` + parentConstraint + '&getPotential=' + getPotential
+      let path = `partition1=${partition1}&partition2=${partition2}&mappingPartition=${mappingPartition}&source1LimitOrgId=${source1LimitOrgId}`
+      path += `&source2LimitOrgId=${source2LimitOrgId}&totalSource1Levels=${totalSource1Levels}&totalSource2Levels=${totalSource2Levels}`
+      path += `&recoLevel=${recoLevel}&clientId=${clientId}&parentConstraint=${parentConstraint}&getPotential=${getPotential}`
       axios.get('/match/reconcile/?' + path).then(() => {
         this.checkScoreProgress()
       })

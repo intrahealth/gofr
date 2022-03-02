@@ -209,7 +209,7 @@
             dark
           >
             <v-toolbar-title>
-              Sharing <template v-if="sharePair.hasOwnProperty('source1')">{{sharePair.source1.display}} - {{sharePair.source2.display}}</template>
+              Sharing Pair {{sharePair.display}}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -221,6 +221,7 @@
             </v-btn>
           </v-toolbar>
           <v-card-text>
+            <permissions @grantedPermissions="receivedPermissions"></permissions>
             <v-text-field
               v-model="searchUsers"
               append-icon="mdi-magnify"
@@ -312,6 +313,15 @@
               </v-toolbar>
             </v-card-title>
             <v-card-text style="float: center">
+              <v-row>
+                <v-text-field
+                  v-model="pairName"
+                  label="Pair Name*"
+                  @blur="ensureNameUnique"
+                  @input="ensureNameUnique"
+                  :error-messages="pairNameErrors"
+                ></v-text-field>
+              </v-row>
               <v-row>
                 <v-col>
                   <v-data-table
@@ -437,7 +447,7 @@
                   v-slot:item="{ item }"
                 >
                   <tr>
-                    <td>{{item.source1.display}} - {{item.source2.display}}</td>
+                    <td>{{item.display}}</td>
                     <td>{{item.user.name}}</td>
                     <v-radio-group
                       v-model='activeDataSourcePair'
@@ -460,6 +470,14 @@
                         @click="share(item, 'showDialog')"
                       >
                         <v-icon>mdi-share-variant-outline</v-icon>Share
+                      </v-btn>
+                      |
+                      <v-btn
+                        color="success"
+                        text
+                        @click="viewshare(item)"
+                      >
+                        <v-icon>mdi-monitor-share</v-icon> Detailed View
                       </v-btn>
                     </td>
                   </tr>
@@ -496,6 +514,7 @@ import axios from 'axios'
 import { eventBus } from '@/main'
 import { generalMixin } from '@/mixins/generalMixin'
 import { dataSourcePairMixin } from './dataSourcePairMixin'
+import permissions from '../DataSources/Permissions.vue'
 export default {
   mixins: [generalMixin, dataSourcePairMixin],
   data () {
@@ -507,8 +526,12 @@ export default {
       alertMsg: '',
       pairLimitWarn: false,
       shareDialog: false,
+      permissions: [],
       mapSourcePairLevels: false,
       pairLevelsMapping: {},
+      pairNameErrors: [],
+      invalidCharacters: ['"', '/', '\\', '.'],
+      pairName: '',
       sharePair: {},
       source1: {},
       source2: {},
@@ -568,6 +591,9 @@ export default {
     }
   },
   methods: {
+    receivedPermissions(perms) {
+      this.permissions = perms
+    },
     confirmDeletePair () {
       this.confirmPairDeleteDialog = true
     },
@@ -589,6 +615,35 @@ export default {
         console.log(JSON.stringify(err))
       })
     },
+    ensureNameUnique () {
+      this.pairNameErrors = []
+      if (this.pairName === '') {
+        return this.pairNameErrors.push('Upload name is required')
+      }
+      if (this.pairName.length > 35) {
+        return this.pairNameErrors.push('Name must not exceed 35 characters')
+      }
+      for (let invalidChar of this.invalidCharacters) {
+        if (this.pairName.indexOf(invalidChar) !== -1) {
+          return this.pairNameErrors.push('Name is invalid')
+        }
+      }
+      for (let dtSrc of this.$store.state.dataSources) {
+        if (dtSrc.display.toLowerCase() === this.pairName.toLowerCase()) {
+          this.pairNameErrors.push('This Name Exists')
+          return false
+        }
+      }
+    },
+    viewshare(source) {
+      this.$router.push({
+        name: 'AdvanceDatasourceDetails',
+        params: {
+          sourceid: source.id,
+          partitionid: source.name
+        }
+      })
+    },
     reset () {
       this.source1 = {}
       this.source2 = {}
@@ -608,6 +663,14 @@ export default {
       })
     },
     checkLevels () {
+      if(!this.pairName) {
+        this.pairNameErrors.push('Upload name is required')
+        this.$store.state.errorColor = 'error'
+        this.$store.state.errorTitle = 'No pair name'
+        this.$store.state.errorDescription = 'Please provide the name of the pair'
+        this.$store.state.dialogError = true
+        return
+      }
       this.pairLevelsMapping = {}
       let sourcesLimitOrgId = JSON.stringify({
         source1LimitOrgId: this.getLimitOrgIdOnDataSource(this.source1),
@@ -633,7 +696,7 @@ export default {
             this.$store.state.errorDescription = 'Make sure source1 has the same or less levels as source2'
             this.$store.state.dialogError = true
           } else {
-            this.createDatasourcePair(this.source1, this.source2)
+            this.createDatasourcePair(this.source1, this.source2, this.pairName)
           }
         })
     },
@@ -686,6 +749,7 @@ export default {
         let formData = new FormData()
         formData.append('sharePair', this.sharePair.id)
         formData.append('users', JSON.stringify(this.sharedUsers))
+        formData.append('permissions', JSON.stringify(this.permissions))
         formData.append('userID', this.$store.state.auth.userID)
         formData.append('orgId', this.$store.state.dhis.user.orgId)
         this.$store.state.loadingServers = true
@@ -759,6 +823,9 @@ export default {
       }
       return true
     }
+  },
+  components: {
+    'permissions': permissions
   },
   created () {
     if (!this.canCreatePair) {

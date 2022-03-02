@@ -102,7 +102,7 @@ module.exports = function () {
                   const parentIdentifier = URI(fhirAxios.__genUrl(source2DB))
                     .segment('Location')
                     .segment(parent.id)
-                    .toString()
+                    .toString();
                   this.matchStatus(mcsdMapped, parentIdentifier, (mapped) => {
                     if (mapped) {
                       source2MappedParentIds[entry.resource.id].push(mapped.resource.id);

@@ -828,7 +828,7 @@ export default {
       let formData = new FormData()
       formData.append('host', this.$store.state.dhis.host)
       formData.append('sourceType', 'DHIS2')
-      formData.append('source', 'syncServer')
+      formData.append('source', 'remoteServer')
       formData.append(
         'shareToAll',
         this.$store.state.config.generalConfig.externalAuth.shareOrgUnits
@@ -914,7 +914,7 @@ export default {
     }
 
     for (let sources of this.$store.state.dataSources) {
-      if (sources.source === 'syncServer') {
+      if (sources.source === 'remoteServer') {
         if (sources.autoSync) {
           this.datasetsAutosyncState[sources.id] = true
         } else {
@@ -950,7 +950,7 @@ export default {
     remoteDatasets () {
       let servers = []
       for (let sources of this.$store.state.dataSources) {
-        if (sources.source === 'syncServer') {
+        if (sources.source === 'remoteServer') {
           servers.push(sources)
         }
       }

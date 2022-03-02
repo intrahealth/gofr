@@ -163,7 +163,6 @@
           </v-btn>
         </v-toolbar>
         <v-card-text>
-          {{shareSource}}
           <template v-if="loadingLocationTree">
             <v-progress-linear :indeterminate="true"></v-progress-linear>
           </template>
@@ -180,197 +179,7 @@
             </v-card-text>
           </template>
           <v-icon small>mdi-lock</v-icon> Limiting Sharing to: <b>{{limitLocationName}}</b><br>
-          <v-card height="252" width="550">
-            <v-toolbar
-              color="secondary"
-              dark
-              height="30"
-            >
-              <v-toolbar-title>
-                Permissions
-              </v-toolbar-title>
-              <v-spacer></v-spacer>
-              <v-icon>mdi-shield-lock-outline</v-icon>
-            </v-toolbar>
-            <v-card-actions>
-              <v-row>
-                <v-col cols="5">
-                  <v-card height="90">
-                    <v-toolbar
-                      color="secondary"
-                      dark
-                      height="20"
-                    >
-                      <v-toolbar-title style="font-size:12px">
-                        Facilities
-                      </v-toolbar-title>
-                      <v-spacer></v-spacer>
-                      <v-icon small>mdi-hospital-marker</v-icon>
-                    </v-toolbar>
-                    <v-card-actions>
-                      <v-layout column>
-                        <v-flex>
-                          <v-checkbox
-                            v-model="permissions"
-                            color="red darken-3"
-                            value="read_facility"
-                            height="0"
-                            hide-details
-                          >
-                            <template v-slot:label>
-                              <span style="font-size: 12px">View</span>
-                            </template>
-                          </v-checkbox>
-                        </v-flex>
-                        <v-checkbox
-                          v-model="permissions"
-                          color="red darken-3"
-                          value="write_facility"
-                          height="14"
-                          hide-details
-                        >
-                          <template v-slot:label>
-                            <span style="font-size: 12px">Add/Update</span>
-                          </template>
-                        </v-checkbox>
-                      </v-layout>
-                    </v-card-actions>
-                  </v-card>
-                </v-col>
-                <v-spacer></v-spacer>
-                <v-col cols="5">
-                  <v-card>
-                    <v-toolbar
-                      color="secondary"
-                      dark
-                      height="20"
-                    >
-                      <v-toolbar-title style="font-size:12px">
-                        Jurisdictions
-                      </v-toolbar-title>
-                      <v-spacer></v-spacer>
-                      <v-icon small>mdi-home-group</v-icon>
-                    </v-toolbar>
-                    <v-card-actions>
-                      <v-layout column>
-                        <v-flex>
-                          <v-checkbox
-                            v-model="permissions"
-                            color="red darken-3"
-                            value="read_jurisdiction"
-                            height="0"
-                            hide-details
-                          >
-                            <template v-slot:label>
-                              <span style="font-size: 12px">View</span>
-                            </template>
-                          </v-checkbox>
-                        </v-flex>
-                        <v-checkbox
-                          v-model="permissions"
-                          color="red darken-3"
-                          value="write_jurisdiction"
-                          height="14"
-                          hide-details
-                        >
-                          <template v-slot:label>
-                            <span style="font-size: 12px">Add/Update</span>
-                          </template>
-                        </v-checkbox>
-                      </v-layout>
-                    </v-card-actions>
-                  </v-card>
-                </v-col>
-                <v-col cols="5">
-                  <v-card>
-                    <v-toolbar
-                      color="secondary"
-                      dark
-                      height="20"
-                    >
-                      <v-toolbar-title style="font-size:12px">
-                        Organizations
-                      </v-toolbar-title>
-                      <v-spacer></v-spacer>
-                      <v-icon small>mdi-hospital-marker</v-icon>
-                    </v-toolbar>
-                    <v-card-actions>
-                      <v-layout column>
-                        <v-flex>
-                          <v-checkbox
-                            v-model="permissions"
-                            color="red darken-3"
-                            value="read_organization"
-                            height="0"
-                            hide-details
-                          >
-                            <template v-slot:label>
-                              <span style="font-size: 12px">View</span>
-                            </template>
-                          </v-checkbox>
-                        </v-flex>
-                        <v-checkbox
-                          v-model="permissions"
-                          color="red darken-3"
-                          value="write_organization"
-                          height="14"
-                          hide-details
-                        >
-                          <template v-slot:label>
-                            <span style="font-size: 12px">View</span>
-                          </template>
-                        </v-checkbox>
-                      </v-layout>
-                    </v-card-actions>
-                  </v-card>
-                </v-col>
-                <v-spacer></v-spacer>
-                <v-col cols="5">
-                  <v-card>
-                    <v-toolbar
-                      color="secondary"
-                      dark
-                      height="20"
-                    >
-                      <v-toolbar-title style="font-size:12px">
-                        Healthcare Services
-                      </v-toolbar-title>
-                      <v-spacer></v-spacer>
-                      <v-icon small>mdi-room-service</v-icon>
-                    </v-toolbar>
-                    <v-card-actions>
-                      <v-layout column>
-                        <v-flex>
-                          <v-checkbox
-                            v-model="permissions"
-                            color="red darken-3"
-                            value="read_service"
-                            height="0"
-                            hide-details
-                          >
-                            <template v-slot:label>
-                              <span style="font-size: 12px">View</span>
-                            </template>
-                          </v-checkbox>
-                        </v-flex>
-                        <v-checkbox
-                          v-model="permissions"
-                          color="red darken-3"
-                          value="write_service"
-                          height="14"
-                          hide-details
-                        >
-                          <template v-slot:label>
-                            <span style="font-size: 12px">Add/Update</span>
-                          </template>
-                        </v-checkbox>
-                      </v-layout>
-                    </v-card-actions>
-                  </v-card>
-                </v-col>
-              </v-row>
-            </v-card-actions>
-          </v-card>
+          <permissions @grantedPermissions="receivedPermissions"></permissions>
           <v-text-field
             v-model="searchUsers"
             append-icon="mdi-magnify"
@@ -594,7 +403,7 @@
           </v-card-actions>
           <v-card-text>
             <v-data-table
-              :headers="syncServersHeader"
+              :headers="remoteServersHeader"
               :items="remoteServers"
               dark
               class="elevation-1"
@@ -718,7 +527,7 @@
               small
               @click="viewshare(item)"
             >
-              <v-icon left>mdi-monitor-share</v-icon> View Sharing
+              <v-icon left>mdi-monitor-share</v-icon> Detailed View
             </v-btn>
           </v-card-actions>
           <v-card-text>
@@ -769,7 +578,7 @@
                       text
                       @click="viewshare(item)"
                     >
-                      <v-icon>mdi-monitor-share</v-icon> View Sharing
+                      <v-icon>mdi-monitor-share</v-icon> Detailed View
                     </v-btn>
                   </td>
                 </tr>
@@ -800,6 +609,7 @@
 import RemoteSync from './RemoteSync'
 import { generalMixin } from '../../mixins/generalMixin'
 import { eventBus } from '../../main'
+import permissions from '../DataSources/Permissions.vue'
 import axios from 'axios'
 import LiquorTree from 'liquor-tree'
 export default {
@@ -831,7 +641,7 @@ export default {
       locationTree: [],
       loadingLocationTree: false,
       searchUsers: '',
-      syncServersHeader: [
+      remoteServersHeader: [
         { sortable: false },
         { text: 'Source Name', value: 'name' },
         { text: 'Base URL', value: 'host' },
@@ -899,6 +709,9 @@ export default {
     }
   },
   methods: {
+    receivedPermissions(perms) {
+      this.permissions = perms
+    },
     sourceSelected (selection) {
       this.addDataSource = true
       if (selection === 'upload') {
@@ -1018,8 +831,12 @@ export default {
         }
         let formData = new FormData()
         formData.append('shareSource', this.shareSource.id)
-        formData.append('users', this.user.id)
+        formData.append('users', JSON.stringify(this.sharedUsers))
         formData.append('permissions', JSON.stringify(this.permissions))
+        formData.append('userID', this.$store.state.auth.userID)
+        formData.append('role', this.$store.state.auth.role)
+        formData.append('orgId', this.$store.state.dhis.user.orgId)
+        formData.append('limitLocationId', this.limitLocationId)
         this.$store.state.loadingServers = true
         this.shareDialog = false
         axios.post('/datasource/shareSource', formData, {
@@ -1121,7 +938,7 @@ export default {
     remoteServers () {
       let servers = []
       for (let sources of this.$store.state.dataSources) {
-        if (sources.source === 'syncServer') {
+        if (sources.source === 'remoteServer') {
           servers.push(sources)
         }
       }
@@ -1139,7 +956,8 @@ export default {
   },
   components: {
     'appRemoteSync': RemoteSync,
-    'liquor-tree': LiquorTree
+    'liquor-tree': LiquorTree,
+    'permissions': permissions
   },
   created () {
     this.getUsers()

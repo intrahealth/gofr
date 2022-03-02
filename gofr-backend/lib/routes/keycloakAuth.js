@@ -40,6 +40,7 @@ router.post('/', (req, res) => {
     }
   }
   fhirAxios.search('Person', { _id: userResource.id }, 'DEFAULT').then((usersRes) => {
+    logger.error(req.headers.authorization.split(' ')[1]);
     if (!usersRes.entry || (usersRes.entry && usersRes.entry.length >= 0)) {
       fhirAxios.update(userResource, 'DEFAULT').then((resp) => {
         kcadmin.populateRoleTasks({
@@ -77,7 +78,6 @@ router.post('/', (req, res) => {
                 }
               });
               userObj = obj;
-              logger.error(JSON.stringify(userObj, 0, 2));
               res.status(200).json(userObj);
             }).catch(() => {
               userObj = obj;

@@ -15,6 +15,7 @@ const geodist = require('geodist');
 const redis = require('redis');
 const moment = require('moment');
 const lodash = require('lodash');
+const jsonmerger = require('json-merger');
 const mixin = require('./mixin');
 const config = require('./config');
 const logger = require('./winston');
@@ -1731,9 +1732,7 @@ module.exports = () => ({
         fhir.type = 'batch';
         fhir.resourceType = 'Bundle';
         const entry = [];
-        const resource = {};
-        resource.resourceType = 'Location';
-        resource.name = res.source1mCSD.entry[0].resource.name; // take source 2 name
+        const resource = jsonmerger.mergeObjects([res.source2mCSD.entry[0].resource, res.source1mCSD.entry[0].resource]);
         resource.alias = res.source2mCSD.entry[0].resource.name; // take source1 name
         resource.id = mixin.getMappingId(source1Id);
         resource.identifier = [];
@@ -1751,7 +1750,6 @@ module.exports = () => ({
           system: source1System,
           value: source1URL,
         });
-
         if (res.source1mCSD.entry[0].resource.hasOwnProperty('partOf')) {
           if (res.source1mCSD.entry[0].resource.partOf.reference.split('/')[1] === src1FakeOrgId) {
             resource.partOf = {
@@ -1766,22 +1764,6 @@ module.exports = () => ({
             };
           }
         }
-        let typeCode;
-        let typeName;
-        if (recoLevel == totalLevels) {
-          typeCode = 'bu';
-          typeName = 'building';
-        } else {
-          typeCode = 'jdn';
-          typeName = 'Jurisdiction';
-        }
-        resource.physicalType = {
-          coding: [{
-            code: typeCode,
-            display: typeName,
-            system: 'http://hl7.org/fhir/location-physical-type',
-          }],
-        };
         if (!resource.meta) {
           resource.meta = {};
         }
@@ -1794,12 +1776,6 @@ module.exports = () => ({
             code: matchCommentsCode,
             display: matchComments,
           });
-        }
-        if (!resource.meta) {
-          resource.meta = {};
-        }
-        if (!resource.meta.tag) {
-          resource.meta.tag = [];
         }
         if (type == 'flag') {
           if (flagComment) {

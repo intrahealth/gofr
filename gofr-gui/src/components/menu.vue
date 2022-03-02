@@ -13,185 +13,6 @@
     </li>
     <li
       class="parent"
-      v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'access-facility-reconciliation-mod')"
-    ><a href="#">
-        <v-icon>mdi-spellcheck</v-icon> {{$t('App.menu.facilityRecon.msg')}}
-      </a>
-      <ul class="child">
-        <li
-          class="parent"
-          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'manage-data-source')"
-        >
-          <a
-            href="#"
-            style="margin-left: 15px"
-          >
-            <v-icon
-              color="black"
-              left
-            >mdi-sync</v-icon>{{ $t('App.menu.dataSourcesParent.msg')}} <v-icon
-              color="black"
-              small
-              class="menuArrow"
-            >mdi-play</v-icon>
-          </a>
-          <ul class="child">
-            <v-list class="lastMenu"
-              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'add-data-source')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/AddDataSources"
-                    v-on="on"
-                  >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-cloud-upload</v-icon>
-                      {{ $t('App.menu.addDataSources.msg')}}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.addDataSources.tooltip')}}</span>
-              </v-tooltip>
-            </v-list>
-            <v-list class="lastMenu"
-              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-data-source')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/ViewDataSources"
-                    v-on="on"
-                  >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.viewDataSources.msg')}}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.viewDataSources.tooltip')}}</span>
-              </v-tooltip>
-            </v-list>
-          </ul>
-        </li>
-        <v-list
-          :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length===0,lastMenu: true }"
-          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')"
-        >
-          <v-tooltip right>
-            <template v-slot:activator="{ on }">
-              <v-list-item
-                v-on="on"
-                to="/view"
-                color="white"
-                :disabled="Object.keys($store.state.activePair.source1).length===0"
-              >
-                <v-list-item-title class="menuText">
-                  <v-icon
-                    left
-                    color="black"
-                  >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.view.msg')}}
-                </v-list-item-title>
-              </v-list-item>
-            </template>
-            <span>{{ $t('App.menu.view.tooltip') }}</span>
-          </v-tooltip>
-        </v-list>
-        <li
-          class="parent"
-          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'manage-reconciliations')"
-        >
-          <a
-            href="#"
-            style="margin-left: 15px"
-          >
-            <v-icon
-              left
-              color="black"
-            >mdi-compare-horizontal</v-icon>{{ $t('App.menu.reconcile.msg')}} <v-icon
-              color="black"
-              small
-              class="menuArrow"
-            >mdi-play</v-icon>
-          </a>
-          <ul class="child">
-            <v-list
-              :class="{ disabledMenu: $store.state.dataSources.length <= 1 || $store.state.dataSourcePairs.length <= 0,lastMenu: true }"
-              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-source-pair')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/dataSourcesPair"
-                    v-on="on"
-                    :disabled="$store.state.dataSources.length <= 1 && $store.state.dataSourcePairs.length === 0"
-                  >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-numeric-2-box-multiple-outline</v-icon>{{ $t('App.menu.createPair.msg')}}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.createPair.tooltip')}}</span>
-              </v-tooltip>
-            </v-list>
-            <v-list
-              :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length === 0,lastMenu: true }"
-              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/scores"
-                    v-on="on"
-                    :disabled='Object.keys($store.state.activePair.source1).length === 0'
-                  >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-book-search</v-icon>{{ $t('App.menu.reconcile.msg') }}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.reconcile.tooltip') }}</span>
-              </v-tooltip>
-            </v-list>
-            <v-list
-              :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length===0,lastMenu: true }"
-              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-matching-status')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/recoStatus"
-                    v-on="on"
-                    :disabled='Object.keys($store.state.activePair.source1).length === 0'
-                  >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-view-dashboard</v-icon> {{ $t('App.menu.recoStatus.msg') }}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.recoStatus.tooltip') }}</span>
-              </v-tooltip>
-            </v-list>
-          </ul>
-        </li>
-      </ul>
-    </li>
-    <li
-      class="parent"
       v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'access-facility-registry-mod')"
     >
       <a href="#">
@@ -427,26 +248,6 @@
             <span>{{ $t('App.menu.addService.tooltip')}}</span>
           </v-tooltip>
         </v-list>
-        <v-list
-          class="lastMenu"
-        >
-          <v-tooltip right>
-            <template v-slot:activator="{ on }">
-              <v-list-item
-                to="/ViewMap"
-                v-on="on"
-              >
-                <v-list-item-title class="menuText">
-                  <v-icon
-                    left
-                    color="black"
-                  >mdi-google-maps</v-icon>{{ $t('App.menu.viewMap.msg')}}
-                </v-list-item-title>
-              </v-list-item>
-            </template>
-            <span>{{ $t('App.menu.viewMap.tooltip')}}</span>
-          </v-tooltip>
-        </v-list>
         <li
           class="parent"
           v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'make-facilityregistry-requests')"
@@ -509,6 +310,205 @@
           </ul>
         </li>
       </ul>
+    </li>
+    <li
+      class="parent"
+      v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'access-facility-reconciliation-mod')"
+    ><a href="#">
+        <v-icon>mdi-spellcheck</v-icon> {{$t('App.menu.facilityRecon.msg')}}
+      </a>
+      <ul class="child">
+        <li
+          class="parent"
+          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'manage-data-source')"
+        >
+          <a
+            href="#"
+            style="margin-left: 15px"
+          >
+            <v-icon
+              color="black"
+              left
+            >mdi-sync</v-icon>{{ $t('App.menu.dataSourcesParent.msg')}} <v-icon
+              color="black"
+              small
+              class="menuArrow"
+            >mdi-play</v-icon>
+          </a>
+          <ul class="child">
+            <v-list class="lastMenu"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'add-data-source')"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/AddDataSources"
+                    v-on="on"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-cloud-upload</v-icon>
+                      {{ $t('App.menu.addDataSources.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
+                <span>{{ $t('App.menu.addDataSources.tooltip')}}</span>
+              </v-tooltip>
+            </v-list>
+            <v-list class="lastMenu"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-data-source')"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/ViewDataSources"
+                    v-on="on"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.viewDataSources.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
+                <span>{{ $t('App.menu.viewDataSources.tooltip')}}</span>
+              </v-tooltip>
+            </v-list>
+          </ul>
+        </li>
+        <v-list
+          :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length===0,lastMenu: true }"
+          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')"
+        >
+          <v-tooltip right>
+            <template v-slot:activator="{ on }">
+              <v-list-item
+                v-on="on"
+                to="/view"
+                color="white"
+                :disabled="Object.keys($store.state.activePair.source1).length===0"
+              >
+                <v-list-item-title class="menuText">
+                  <v-icon
+                    left
+                    color="black"
+                  >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.view.msg')}}
+                </v-list-item-title>
+              </v-list-item>
+            </template>
+            <span>{{ $t('App.menu.view.tooltip') }}</span>
+          </v-tooltip>
+        </v-list>
+        <li
+          class="parent"
+          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'manage-reconciliations')"
+        >
+          <a
+            href="#"
+            style="margin-left: 15px"
+          >
+            <v-icon
+              left
+              color="black"
+            >mdi-compare-horizontal</v-icon>{{ $t('App.menu.reconcile.msg')}} <v-icon
+              color="black"
+              small
+              class="menuArrow"
+            >mdi-play</v-icon>
+          </a>
+          <ul class="child">
+            <v-list
+              :class="{ disabledMenu: $store.state.dataSources.length <= 1 || $store.state.dataSourcePairs.length <= 0,lastMenu: true }"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-source-pair')"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/dataSourcesPair"
+                    v-on="on"
+                    :disabled="$store.state.dataSources.length <= 1 && $store.state.dataSourcePairs.length === 0"
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-numeric-2-box-multiple-outline</v-icon>{{ $t('App.menu.createPair.msg')}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
+                <span>{{ $t('App.menu.createPair.tooltip')}}</span>
+              </v-tooltip>
+            </v-list>
+            <v-list
+              :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length === 0,lastMenu: true }"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/scores"
+                    v-on="on"
+                    :disabled='Object.keys($store.state.activePair.source1).length === 0'
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-book-search</v-icon>{{ $t('App.menu.reconcile.msg') }}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
+                <span>{{ $t('App.menu.reconcile.tooltip') }}</span>
+              </v-tooltip>
+            </v-list>
+            <v-list
+              :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length===0,lastMenu: true }"
+              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-matching-status')"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                  <v-list-item
+                    to="/recoStatus"
+                    v-on="on"
+                    :disabled='Object.keys($store.state.activePair.source1).length === 0'
+                  >
+                    <v-list-item-title class="menuText">
+                      <v-icon
+                        left
+                        color="black"
+                      >mdi-view-dashboard</v-icon> {{ $t('App.menu.recoStatus.msg') }}
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
+                <span>{{ $t('App.menu.recoStatus.tooltip') }}</span>
+              </v-tooltip>
+            </v-list>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li
+      class="parent"
+    >
+      <v-tooltip right>
+        <template v-slot:activator="{ on }">
+          <v-list-item
+            to="/ViewMap"
+            v-on="on"
+          >
+            <v-list-item-title class="menuText" style="color: white">
+              <v-icon
+                left
+                color="white"
+              >mdi-google-maps</v-icon>{{ $t('App.menu.viewMap.msg')}}
+            </v-list-item-title>
+          </v-list-item>
+        </template>
+        <span>{{ $t('App.menu.viewMap.tooltip')}}</span>
+      </v-tooltip>
     </li>
     <li class="parent" v-if="$store.state.idp === 'keycloak'">
       <a :href="keycloak_account" target="_blank">

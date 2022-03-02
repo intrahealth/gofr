@@ -133,7 +133,7 @@
         "tooltip": "Add Service offered by health facilities"
       },
       "viewMap": {
-        "msg": "View Map",
+        "msg": "Map",
         "tooltip": "View Map"
       },
       "services": {

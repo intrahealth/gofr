@@ -1298,8 +1298,6 @@ export default {
     },
     getBuildingPotentialMatches (id) {
       this.potentialMatches = []
-      let source1 = this.getSource1()
-      let source2 = this.getSource2()
       let recoLevel = this.$store.state.recoLevel
       let totalSource1Levels = this.$store.state.totalSource1Levels
       let totalSource2Levels = this.$store.state.totalSource2Levels
@@ -1315,21 +1313,18 @@ export default {
         this.clientId = this.$store.state.clientId + lastChar
       }
 
-      let sourcesOwner = this.getDatasourceOwner()
       let userID = this.$store.state.activePair.userID
-      let source1Owner = sourcesOwner.source1Owner
-      let source2Owner = sourcesOwner.source2Owner
       let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
       let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
       let parentConstraint = JSON.stringify(
         this.$store.state.config.generalConfig.reconciliation.parentConstraint
       )
-      let path = `id=${id}&source1=${source1}&source2=${source2}&source1Owner=${source1Owner}&source2Owner=${source2Owner}&source1LimitOrgId=${source1LimitOrgId}&source2LimitOrgId=${source2LimitOrgId}&totalSource1Levels=${totalSource1Levels}&totalSource2Levels=${totalSource2Levels}`
-      path +=
-        `&recoLevel=${recoLevel}&clientId=${this.clientId}&userID=${userID}&parentConstraint=` +
-        parentConstraint +
-        '&getPotential=' +
-        true
+      let partition1 = this.$store.state.activePair.source1.name
+      let partition2 = this.$store.state.activePair.source2.name
+      let mappingPartition = this.$store.state.activePair.name
+      let path = `id=${id}&partition1=${partition1}&partition2=${partition2}&mappingPartition=${mappingPartition}`
+      path += `&source1LimitOrgId=${source1LimitOrgId}&source2LimitOrgId=${source2LimitOrgId}&totalSource1Levels=${totalSource1Levels}&totalSource2Levels=${totalSource2Levels}`
+      path += `&recoLevel=${recoLevel}&clientId=${this.clientId}&userID=${userID}&parentConstraint=${parentConstraint}&getPotential=${true}`
       this.$store.state.dynamicProgress = true
       this.$store.state.progressTitle = 'Getting potential matches from server'
       axios
@@ -1343,8 +1338,7 @@ export default {
               const exactMatches = matches.exactMatch
               if (Object.keys(exactMatches).length > 0) {
                 this.$store.state.dialogError = true
-                this.$store.state.errorDescription =
-                  'This location is already mapped, please recalculate scores to get changes'
+                this.$store.state.errorDescription = 'This location is already mapped, please recalculate scores to get changes'
                 this.$store.state.errorTitle = 'Info'
                 this.$store.state.errorColor = 'error'
                 return
@@ -1511,18 +1505,18 @@ export default {
       this.flagCommentDialog = false
       this.$store.state.progressTitle = 'Saving match'
       this.$store.state.dynamicProgress = true
-      let sourcesOwner = this.getDatasourceOwner()
+      let partition1 = this.$store.state.activePair.source1.name
+      let partition2 = this.$store.state.activePair.source2.name
+      let mappingPartition = this.$store.state.activePair.name
       let formData = new FormData()
       formData.append('source1Id', this.selectedSource1Id)
       formData.append('source2Id', this.source2Id)
-      formData.append('source1Owner', sourcesOwner.source1Owner)
-      formData.append('source2Owner', sourcesOwner.source2Owner)
       formData.append('flagComment', this.flagComment)
-      formData.append('source1DB', this.getSource1())
-      formData.append('source2DB', this.getSource2())
+      formData.append('partition1', partition1)
+      formData.append('partition2', partition2)
+      formData.append('mappingPartition', mappingPartition)
       formData.append('recoLevel', this.$store.state.recoLevel)
       formData.append('totalLevels', this.$store.state.totalSource1Levels)
-      formData.append('userID', this.$store.state.activePair.userID)
       formData.append('pairId', this.$store.state.activePair.id)
       axios
         .post('/match/performMatch/' + this.matchType, formData, {
@@ -1596,9 +1590,9 @@ export default {
       let formData = new FormData()
       formData.append('source1Id', source1Id)
       formData.append('pairId', this.$store.state.activePair.id)
-      let userID = this.$store.state.activePair.userID
+      let mappingPartition = this.$store.state.activePair.name
       axios
-        .post('/match/acceptFlag/' + this.getSource1() + '/' + this.getSource2() + '/' + userID, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        .post('/match/acceptFlag/' + mappingPartition, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
         .then(() => {
           this.$store.state.dynamicProgress = false
           // Add from a list of Source 1 Matched and remove from list of Flagged
@@ -1635,12 +1629,16 @@ export default {
       this.$store.state.progressTitle = 'Breaking match'
       this.$store.state.dynamicProgress = true
       let formData = new FormData()
-      let userID = this.$store.state.activePair.userID
-      let sourcesOwner = this.getDatasourceOwner()
+      let partition1 = this.$store.state.activePair.source1.name
+      let partition2 = this.$store.state.activePair.source2.name
+      let mappingPartition = this.$store.state.activePair.name
+      formData.append('partition1', partition1)
+      formData.append('partition2', partition2)
+      formData.append('mappingPartition', mappingPartition)
       formData.append('source1Id', source1Id)
       formData.append('pairId', this.$store.state.activePair.id)
       axios
-        .post('/match/breakMatch/' + this.getSource1() + '/' + this.getSource2() + '/' + sourcesOwner.source1Owner + '/' + sourcesOwner.source2Owner + '/' + userID, formData, {
+        .post('/match/breakMatch', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -1728,13 +1726,12 @@ export default {
       this.$store.state.progressTitle = 'Breaking no match'
       this.$store.state.dynamicProgress = true
       let formData = new FormData()
+      let mappingPartition = this.$store.state.activePair.name
+      formData.append('mappingPartition', mappingPartition)
       formData.append('source1Id', source1Id)
-      formData.append('recoLevel', this.$store.state.recoLevel)
-      formData.append('totalLevels', this.$store.state.totalSource1Levels)
       formData.append('pairId', this.$store.state.activePair.id)
-      let userID = this.$store.state.activePair.userID
       axios
-        .post('/match/breakNoMatch/' + type + '/' + this.getSource1() + '/' + this.getSource2() + '/' + userID, formData, {
+        .post('/match/breakNoMatch/' + type, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -1782,18 +1779,20 @@ export default {
     noMatch (type) {
       this.$store.state.progressTitle = 'Saving as no match'
       this.$store.state.dynamicProgress = true
-      let userID = this.$store.state.activePair.userID
-      let sourcesOwner = this.getDatasourceOwner()
-      let source1Owner = sourcesOwner.source1Owner
-      let source2Owner = sourcesOwner.source2Owner
+      let partition1 = this.$store.state.activePair.source1.name
+      let partition2 = this.$store.state.activePair.source2.name
+      let mappingPartition = this.$store.state.activePair.name
       let formData = new FormData()
+      formData.append('partition1', partition1)
+      formData.append('partition2', partition2)
+      formData.append('mappingPartition', mappingPartition)
       formData.append('source1Id', this.selectedSource1Id)
       formData.append('recoLevel', this.$store.state.recoLevel)
       formData.append('totalLevels', this.$store.state.totalSource1Levels)
       formData.append('pairId', this.$store.state.activePair.id)
 
       axios
-        .post(`/match/noMatch/${type}/${this.getSource1()}/${this.getSource2()}/${source1Owner}/${source2Owner}/${userID}`, formData, {
+        .post(`/match/noMatch/${type}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }

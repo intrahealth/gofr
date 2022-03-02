@@ -333,6 +333,8 @@ export default {
             this.$store.state.activePair.source2.display = activeSource.source2.display
             this.$store.state.activePair.source2.userID = activeSource.source2.user.id
             this.$store.state.activePair.id = activeSource.id
+            this.$store.state.activePair.name = activeSource.name
+            this.$store.state.activePair.display = activeSource.display
             this.$store.state.activePair.shared = activeSource.sharedUsers
             this.$store.state.activePair.activeUsers = activeSource.activeUsers
             this.$store.state.activePair.userID = activeSource.user.id

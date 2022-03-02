@@ -129,7 +129,7 @@
         "tooltip": "Ajouter le service offert par les établissements de santé"
       },
       "viewMap": {
-        "msg": "voir la carte",
+        "msg": "carte",
         "tooltip": "voir la carte"
       },
       "services": {

@@ -22,8 +22,24 @@
       </v-row>
     </v-alert>
     <v-row>
-      <v-col cols="12">
+      <v-col cols="7">
         <ActivePartitionStats :partition="partitionid" title="Datasource Statistics"></ActivePartitionStats>
+      </v-col>
+      <v-col cols="5">
+        <v-card>
+          <v-card-title primary-title>
+            <v-toolbar color="#385F73" dark height="40" style="font-size: 14px">
+              Datasources Contributing To This Data Source
+            </v-toolbar>
+          </v-card-title>
+          <v-card-text>
+            <v-row>
+              <v-col cols="6" v-for="(generatedFrom, index) in sourceAdvanceDetails.generatedFrom" :key="generatedFrom.name">
+                {{++index}}. {{generatedFrom.name}}
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
       </v-col>
     </v-row>
     <v-row>
@@ -43,7 +59,7 @@
           <v-card-text>
             <v-data-table
               :headers="advDetailsHeader"
-              :items="sourceAdvanceDetails"
+              :items="sourceAdvanceDetails.sharedUsers"
               class="elevation-1"
             >
               <template v-slot:item="{ item }">
@@ -207,7 +223,7 @@
                         hide-details
                       >
                         <template v-slot:label>
-                          <span style="font-size: 15px">View</span>
+                          <span style="font-size: 15px">Add/Update</span>
                         </template>
                       </v-checkbox>
                     </v-layout>
@@ -365,8 +381,8 @@ export default {
     this.$store.state.progressTitle = 'Getting Datasource Details'
     axios.get(`/datasource/getSourceDetails/${this.dataSource.partitionID}`).then((response) => {
       this.sourceAdvanceDetails = response.data
-      if(this.sourceAdvanceDetails.length > 0) {
-        this.user = this.sourceAdvanceDetails[0]
+      if(this.sourceAdvanceDetails.sharedUsers.length > 0) {
+        this.user = this.sourceAdvanceDetails.sharedUsers[0]
         this.showPermissions(this.user)
       }
       this.$store.state.dynamicProgress = false

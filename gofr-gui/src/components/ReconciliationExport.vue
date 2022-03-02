@@ -113,23 +113,18 @@ export default {
       this.unmatchedSource2DownloadData = ''
     },
     matchedLocations (type) {
-      let userID = this.$store.state.activePair.userID
-      let source1 = this.getSource1()
-      let source2 = this.getSource2()
-      let sourcesOwner = this.getDatasourceOwner()
-      let source1Owner = sourcesOwner.source1Owner
-      let source2Owner = sourcesOwner.source2Owner
+      let partition1 = this.$store.state.activePair.source1.name
+      let partition2 = this.$store.state.activePair.source2.name
+      let mappingPartition = this.$store.state.activePair.name
       let levelMapping1 = JSON.stringify(this.$store.state.levelMapping.source1)
       let levelMapping2 = JSON.stringify(this.$store.state.levelMapping.source2)
       let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
       let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
       let params = {
-        source1,
-        source2,
-        source1Owner,
-        source2Owner,
+        partition1,
+        partition2,
+        mappingPartition,
         type,
-        userID,
         source1LimitOrgId,
         source2LimitOrgId,
         levelMapping1,
@@ -138,23 +133,18 @@ export default {
       return axios.get('/match/matchedLocations', { params })
     },
     unMatchedLocations (type) {
-      let userID = this.$store.state.activePair.userID
-      let sourcesOwner = this.getDatasourceOwner()
-      let source1Owner = sourcesOwner.source1Owner
-      let source2Owner = sourcesOwner.source2Owner
+      let partition1 = this.$store.state.activePair.source1.name
+      let partition2 = this.$store.state.activePair.source2.name
+      let mappingPartition = this.$store.state.activePair.name
       let levelMapping1 = this.$store.state.levelMapping.source1
       let levelMapping2 = this.$store.state.levelMapping.source2
       let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
       let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
-      let source1 = this.getSource1()
-      let source2 = this.getSource2()
       let params = {
-        source1,
-        source2,
-        source1Owner,
-        source2Owner,
+        partition1,
+        partition2,
+        mappingPartition,
         type,
-        userID,
         source1LimitOrgId,
         source2LimitOrgId,
         levelMapping1,

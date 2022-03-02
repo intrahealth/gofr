@@ -36,6 +36,7 @@ Title:          "Data source extension"
       host 0..1 MS and
       sourceType 0..1 MS and
       source 0..1 MS and
+      generatedFrom 0..* MS and
       username 0..1 MS and
       password 0..1 MS and
       levelMapping 1..1 MS and

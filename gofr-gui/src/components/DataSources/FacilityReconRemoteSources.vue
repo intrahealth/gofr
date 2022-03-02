@@ -159,7 +159,7 @@ export default {
         this.datasetLimitWarn = false
         this.$store.state.dynamicProgress = false
         if (this.canAddDataset) {
-          this.addDataSource('syncServer', '')
+          this.addDataSource('remoteServer', '')
         } else {
           this.datasetLimitWarn = true
         }

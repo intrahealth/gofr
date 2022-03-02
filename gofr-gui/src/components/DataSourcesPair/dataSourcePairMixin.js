@@ -4,7 +4,7 @@ import {
 import axios from 'axios'
 export const dataSourcePairMixin = {
   methods: {
-    createDatasourcePair (source1, source2) {
+    createDatasourcePair (source1, source2, pairName) {
       if (Object.keys(source1).length === 0 || Object.keys(source2).length === 0) {
         this.$store.state.dialogError = true
         this.$store.state.errorTitle = 'Info'
@@ -36,6 +36,7 @@ export const dataSourcePairMixin = {
       let formData = new FormData()
       formData.append('source1', JSON.stringify(source1))
       formData.append('source2', JSON.stringify(source2))
+      formData.append('name', pairName)
       formData.append('userID', this.$store.state.auth.userID)
       formData.append('orgId', this.$store.state.dhis.user.orgId)
       formData.append('singlePair', singlePair)
@@ -67,7 +68,7 @@ export const dataSourcePairMixin = {
     },
     activateSharedPair (pairID) {
       this.$store.state.dynamicProgress = true
-      this.$store.state.progressTitle = 'Activating Shared Data Source Pair'
+      this.$store.state.progressTitle = 'Activating Data Source Pair'
       let formData = new FormData()
       formData.append('pairID', pairID)
       formData.append('userID', this.$store.state.auth.userID)
@@ -88,16 +89,27 @@ export const dataSourcePairMixin = {
       })
     },
     activatePair () {
-      if (this.activeDataSourcePair.userID !== this.$store.state.auth.userID) {
+      if (this.activeDataSourcePair.user.id !== this.$store.state.auth.userID) {
         this.activateSharedPair(this.activeDataSourcePair.id)
       } else {
-        this.source1 = this.$store.state.dataSources.find((dataSource) => {
-          return dataSource.id === this.activeDataSourcePair.source1.id
+        this.$store.state.dynamicProgress = true
+        this.$store.state.progressTitle = 'Activating Data Source Pair'
+        let formData = new FormData()
+        formData.append('id', this.activeDataSourcePair.id)
+        formData.append('userID', this.$store.state.auth.userID)
+        axios.post('/datasource/activatePair', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }).then(() => {
+          eventBus.$emit('getDataSourcePair')
+          this.$store.state.dynamicProgress = false
+        }).catch((error) => {
+          this.alertError = true
+          this.alertMsg = 'Something went wrong while activating data source pair'
+          this.$store.state.dynamicProgress = false
+          console.log(error.response.data)
         })
-        this.source2 = this.$store.state.dataSources.find((dataSource) => {
-          return dataSource.id === this.activeDataSourcePair.source2.id
-        })
-        this.createDatasourcePair(this.source1, this.source2)
       }
     }
   }

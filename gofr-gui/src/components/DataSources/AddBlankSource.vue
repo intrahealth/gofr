@@ -136,6 +136,7 @@ export default {
         this.datasetLimitWarn = false
         this.$store.state.dynamicProgress = false
         if (this.canAddDataset) {
+          this.sourceType = 'blank'
           this.addDataSource('blank', '')
         } else {
           this.datasetLimitWarn = true

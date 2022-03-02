@@ -61,7 +61,7 @@ export const dataSourcesMixin = {
             name: this.name,
             host: this.host,
             sourceType: this.sourceType,
-            source: 'syncServer',
+            source: 'remoteServer',
             username: this.username,
             password: response.data.password
           })

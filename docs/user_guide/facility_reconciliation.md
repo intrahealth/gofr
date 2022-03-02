@@ -85,7 +85,7 @@ Select Blank Source -> Add the name of the source -> Click Add
 
 ![Alt text](../img/add_blank_source.JPG 'GOFR view Blank Source')
 
-### View Data Source
+![type:video](https://www.youtube.com/embed/5MQYF1V1Ou0)
 
 Once uploaded, you can view all the uploaded sources in the View tab.
 

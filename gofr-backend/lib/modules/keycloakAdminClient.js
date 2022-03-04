@@ -501,7 +501,10 @@ const populateRoleTasks = ({ token, user }) => new Promise(async (resolve, rejec
         meta: {
           profile: ROLE_EXTENSION,
         },
-        extension,
+        extension: [{
+          url: 'http://gofr.org/fhir/StructureDefinition/gofr-ext-role',
+          extension,
+        }],
       };
       if (!user.extension) {
         user.extension = [];

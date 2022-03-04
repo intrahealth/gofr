@@ -1,8 +1,10 @@
 const crypto = require('crypto');
+const deepmerge = require('deepmerge');
 const config = require('../config');
 const fhirAxios = require('./fhirAxios');
 const fhirFilter = require('./fhirFilter');
 const logger = require('../winston');
+const dataSources = require('./dataSources');
 
 const ROLE_EXTENSION = 'http://gofr.org/fhir/StructureDefinition/gofr-assign-role';
 const TASK_EXTENSION = 'http://gofr.org/fhir/StructureDefinition/gofr-task';
@@ -114,7 +116,8 @@ const user = {
     findRoleResource.then(async () => {
       await resolveTasks(roleResource);
       await user.loadTaskList();
-      const tasks = roleResource.extension.filter(ext => ext.url === TASK_EXTENSION);
+      const roleDetails = roleResource.extension && roleResource.extension.find(rl => rl.url === 'http://gofr.org/fhir/StructureDefinition/gofr-ext-role');
+      const tasks = roleDetails.extension.filter(ext => ext.url === TASK_EXTENSION);
       for (const task of tasks) {
         let permission;
         let resource;
@@ -149,7 +152,7 @@ const user = {
         user.addPermission(permissions, permission, resource, id, constraint, field);
       }
 
-      const roles = roleResource.extension.filter(ext => ext.url === ROLE_EXTENSION);
+      const roles = roleDetails.extension.filter(ext => ext.url === ROLE_EXTENSION);
       for (const role of roles) {
         await user.addRole({ permissions, roleRef: role.valueReference.reference });
       }
@@ -160,18 +163,23 @@ const user = {
       return new Promise((resolve, reject) => {
         if (Array.isArray(role.extension)) {
           const promises = [];
-          role.extension.forEach((extension, index) => {
+          const detIndex = role.extension.findIndex(rl => rl.url === 'http://gofr.org/fhir/StructureDefinition/gofr-ext-role');
+          role.extension[detIndex].extension.forEach((extension, index) => {
             promises.push(new Promise((resolve, reject) => {
               if (extension.url !== 'task' || !extension.valueReference) {
                 return resolve();
               }
               const id = extension.valueReference.reference.split('/')[1];
               fhirAxios.read('Basic', id, '', 'DEFAULT').then((task) => {
-                const taskExt = task.extension && task.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/task-attributes`);
+                const taskDetails = task.extension && task.extension.find(tsk => tsk.url === 'http://gofr.org/fhir/StructureDefinition/gofr-ext-task');
+                if (!taskDetails) {
+                  return resolve();
+                }
+                const taskExt = taskDetails.extension.find(ext => ext.url === `${config.get('profiles:baseURL')}/StructureDefinition/task-attributes`);
                 if (taskExt) {
-                  role.extension[index] = {};
-                  role.extension[index].url = TASK_EXTENSION;
-                  role.extension[index].extension = taskExt.extension;
+                  role.extension[detIndex].extension[index] = {};
+                  role.extension[detIndex].extension[index].url = TASK_EXTENSION;
+                  role.extension[detIndex].extension[index].extension = taskExt.extension;
                 }
                 resolve();
               }).catch((err) => {
@@ -307,6 +315,33 @@ User.prototype.updatePermissions = async function (roleResources) {
         logger.error('Unable to load permissions', role, err);
       }
     }
+    await dataSources.getSources({ isAdmin: false, userID: this.resource.id }).then((sources) => {
+      sources.forEach((source) => {
+        const shareDetails = source.sharedUsers && source.sharedUsers.find(share => share.id === this.resource.id);
+        const partIndex = this.permissions.partitions.findIndex(part => part.name === source.name);
+        let partPerm = {};
+        if (source.userID === this.resource.id) {
+          partPerm = {
+            name: source.name,
+            '*': {
+              '*': true,
+            },
+          };
+        } else if (shareDetails && shareDetails.permissions) {
+          partPerm = {
+            name: source.name,
+            ...shareDetails.permissions,
+          };
+        }
+        if (partIndex === -1) {
+          this.permissions.partitions.push(partPerm);
+        } else {
+          deepmerge(this.permissions.partitions[partIndex], partPerm);
+        }
+      });
+    }).catch(() => {
+      logger.error('An error occured while populating partition based permissions');
+    });
   }
 };
 

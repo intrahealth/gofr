@@ -177,8 +177,8 @@
         "tooltip": "Ajouter un nouveau jeu de données que vous souhaitez réconcilier"
       },
       "view": {
-        "msg": "Vue",
-        "tooltip": "Explorer le contenu des sources de données"
+        "msg": "Paire de vue côte à côte",
+        "tooltip": "Explorer le contenu des paires de sources de données"
       },
       "recoParent": {
         "msg": "Réconcilier"

@@ -6,8 +6,10 @@
       app
       clipped-left
       clipped-right
+      height="50"
     >
       <v-toolbar-title v-text="title"></v-toolbar-title>
+      <img src="./assets/GOFR_RGB_high-res.png" width="70" />
       <v-spacer></v-spacer>
       <v-toolbar-items v-if="($keycloak && $keycloak.authenticated) || $store.state.auth.userID || $store.state.config.generalConfig.authDisabled">
         <v-btn

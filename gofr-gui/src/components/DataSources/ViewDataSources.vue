@@ -862,10 +862,8 @@ export default {
       }
     },
     getLocationTree () {
-      let userID = this.shareSource.userID
       this.loadingLocationTree = true
-      let source = this.toTitleCase(this.shareSource.name)
-      axios.get('/getTree/' + source + '/' + userID).then((hierarchy) => {
+      axios.get('/getTree/' + this.shareSource.name).then((hierarchy) => {
         if (hierarchy.data) {
           this.locationTree = [{
             text: 'Select location to limit sharing',

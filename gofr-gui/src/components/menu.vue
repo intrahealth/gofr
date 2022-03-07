@@ -1,15 +1,73 @@
 <template>
   <ul id="menu">
-    <li class="parent" v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-home-page')">
-      <v-list-item
-        to="/home"
+    <li 
+      class="parent" 
+      v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-home-page')"
+    >
+      <a
+        @click="navigate('/home')"
         v-if='!$store.state.denyAccess'
-        class="newClass"
       >
-        <v-list-item-title>
-          <v-icon>mdi-home</v-icon> {{ $t('App.menu.home.msg') }}
-        </v-list-item-title>
-      </v-list-item>
+        <v-icon>mdi-home</v-icon> {{ $t('App.menu.home.msg') }}
+      </a>
+    </li>
+    <li
+      class="parent"
+      v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'manage-data-source')"
+    >
+      <a
+        href="#"
+      >
+        <v-icon>mdi-sync</v-icon>{{ $t('App.menu.dataSourcesParent.msg')}}
+      </a>
+      <ul class="child">
+        <v-list class="lastMenu"
+          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'add-data-source')"
+        >
+          <v-tooltip right>
+            <template v-slot:activator="{ on }" class="menuText">
+              <a
+                @click="navigate('/AddDataSources')"
+                v-on="on"
+              >
+                <label class="menuText">
+                  <v-icon
+                    left
+                    color="black"
+                  >
+                    mdi-cloud-upload
+                  </v-icon>
+                  {{ $t('App.menu.addDataSources.msg')}}
+                </label>
+              </a>
+            </template>
+            <span>{{ $t('App.menu.addDataSources.tooltip')}}</span>
+          </v-tooltip>
+        </v-list>
+        <v-list class="lastMenu"
+          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-data-source')"
+        >
+          <v-tooltip right>
+            <template v-slot:activator="{ on }">
+              <a
+                @click="navigate('/ViewDataSources')"
+                v-on="on"
+              >
+                <label class="menuText">
+                  <v-icon
+                    left
+                    color="black"
+                  >
+                    mdi-format-list-bulleted-square
+                  </v-icon>
+                  {{ $t('App.menu.viewDataSources.msg')}}
+                </label>
+              </a>
+            </template>
+            <span>{{ $t('App.menu.viewDataSources.tooltip')}}</span>
+          </v-tooltip>
+        </v-list>
+      </ul>
     </li>
     <li
       class="parent"
@@ -42,17 +100,20 @@
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/Resource/Search/facility"
+                  <a
+                    @click="navigate('/Resource/Search/facility')"
                     v-on="on"
                   >
-                    <v-list-item-title class="menuText">
+                    <label class="menuText">
                       <v-icon
                         left
                         color="black"
-                      >mdi-magnify</v-icon>{{ $t('App.menu.searchFacility.msg')}}
-                    </v-list-item-title>
-                  </v-list-item>
+                      >
+                        mdi-magnify
+                      </v-icon>
+                      {{ $t('App.menu.searchFacility.msg')}}
+                    </label>
+                  </a>
                 </template>
                 <span>{{ $t('App.menu.searchFacility.tooltip')}}</span>
               </v-tooltip>
@@ -63,17 +124,20 @@
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/Resource/Search/jurisdiction"
+                  <a
+                    @click="navigate('/Resource/Search/jurisdiction')"
                     v-on="on"
                   >
-                    <v-list-item-title class="menuText">
+                    <label class="menuText">
                       <v-icon
                         left
                         color="black"
-                      >mdi-magnify</v-icon>{{ $t('App.menu.searchJurisdiction.msg')}}
-                    </v-list-item-title>
-                  </v-list-item>
+                      >
+                        mdi-magnify
+                      </v-icon>
+                      {{ $t('App.menu.searchJurisdiction.msg')}}
+                    </label>
+                  </a>
                 </template>
                 <span>{{ $t('App.menu.searchJurisdiction.tooltip')}}</span>
               </v-tooltip>
@@ -84,17 +148,20 @@
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/Resource/Search/mcsd-organization"
+                  <a
+                    @click="navigate('/Resource/Search/mcsd-organization')"
                     v-on="on"
                   >
-                    <v-list-item-title class="menuText">
+                    <label class="menuText">
                       <v-icon
                         left
                         color="black"
-                      >mdi-magnify</v-icon>{{ $t('App.menu.searchOrganization.msg')}}
-                    </v-list-item-title>
-                  </v-list-item>
+                      >
+                        mdi-magnify
+                      </v-icon>
+                      {{ $t('App.menu.searchOrganization.msg')}}
+                    </label>
+                  </a>
                 </template>
                 <span>{{ $t('App.menu.searchOrganization.tooltip')}}</span>
               </v-tooltip>
@@ -105,17 +172,20 @@
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/Resource/Search/service"
+                  <a
+                    @click="navigate('/Resource/Search/service')"
                     v-on="on"
                   >
-                    <v-list-item-title class="menuText">
+                    <label class="menuText">
                       <v-icon
                         left
                         color="black"
-                      >mdi-magnify</v-icon>{{ $t('App.menu.searchService.msg') }}
-                    </v-list-item-title>
-                  </v-list-item>
+                      >
+                        mdi-magnify
+                      </v-icon>
+                      {{ $t('App.menu.searchService.msg')}}
+                    </label>
+                  </a>
                 </template>
                 <span>{{ $t('App.menu.searchService.tooltip')}}</span>
               </v-tooltip>
@@ -126,17 +196,20 @@
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/Resource/Search/facility-add-request/process-add-request"
+                  <a
+                    @click="navigate('/Resource/Search/facility-add-request/process-add-request')"
                     v-on="on"
                   >
-                    <v-list-item-title class="menuText">
+                    <label class="menuText">
                       <v-icon
                         left
                         color="black"
-                      >mdi-magnify</v-icon>{{ $t('App.menu.searchFacilityAddRequest.msg') }}
-                    </v-list-item-title>
-                  </v-list-item>
+                      >
+                        mdi-magnify
+                      </v-icon>
+                      {{ $t('App.menu.searchFacilityAddRequest.msg')}}
+                    </label>
+                  </a>
                 </template>
                 <span>{{ $t('App.menu.searchFacilityAddRequest.tooltip')}}</span>
               </v-tooltip>
@@ -147,17 +220,20 @@
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/Resource/Search/facility-update-request/process-update-request"
+                  <a
+                    @click="navigate('/Resource/Search/facility-update-request/process-update-request')"
                     v-on="on"
                   >
-                    <v-list-item-title class="menuText">
+                    <label class="menuText">
                       <v-icon
                         left
                         color="black"
-                      >mdi-magnify</v-icon>{{ $t('App.menu.searchFacilityUpdateRequest.msg') }}
-                    </v-list-item-title>
-                  </v-list-item>
+                      >
+                        mdi-magnify
+                      </v-icon>
+                      {{ $t('App.menu.searchFacilityUpdateRequest.msg')}}
+                    </label>
+                  </a>
                 </template>
                 <span>{{ $t('App.menu.searchFacilityUpdateRequest.tooltip')}}</span>
               </v-tooltip>
@@ -170,17 +246,20 @@
         >
           <v-tooltip right>
             <template v-slot:activator="{ on }">
-              <v-list-item
-                to="/questionnaire/gofr-jurisdiction-questionnaire/jurisdiction"
+              <a
+                @click="navigate('/questionnaire/gofr-jurisdiction-questionnaire/jurisdiction')"
                 v-on="on"
               >
-                <v-list-item-title class="menuText">
+                <label class="menuText">
                   <v-icon
                     left
                     color="black"
-                  >mdi-home-city</v-icon>{{ $t('App.menu.addJurisdiction.msg')}}
-                </v-list-item-title>
-              </v-list-item>
+                  >
+                    mdi-home-city
+                  </v-icon>
+                  {{ $t('App.menu.addJurisdiction.msg')}}
+                </label>
+              </a>
             </template>
             <span>{{ $t('App.menu.addJurisdiction.tooltip')}}</span>
           </v-tooltip>
@@ -191,17 +270,20 @@
         >
           <v-tooltip right>
             <template v-slot:activator="{ on }">
-              <v-list-item
-                to="/questionnaire/gofr-facility-questionnaire/facility"
+              <a
+                @click="navigate('/questionnaire/gofr-facility-questionnaire/facility')"
                 v-on="on"
               >
-                <v-list-item-title class="menuText">
+                <label class="menuText">
                   <v-icon
                     left
                     color="black"
-                  >mdi-hospital-building</v-icon>{{ $t('App.menu.addFacility.msg')}}
-                </v-list-item-title>
-              </v-list-item>
+                  >
+                    mdi-hospital-building
+                  </v-icon>
+                  {{ $t('App.menu.addFacility.msg')}}
+                </label>
+              </a>
             </template>
             <span>{{ $t('App.menu.addFacility.tooltip')}}</span>
           </v-tooltip>
@@ -212,17 +294,20 @@
         >
           <v-tooltip right>
             <template v-slot:activator="{ on }">
-              <v-list-item
-                to="/questionnaire/gofr-organization-questionnaire/mcsd-organization"
+              <a
+                @click="navigate('/questionnaire/gofr-organization-questionnaire/mcsd-organization')"
                 v-on="on"
               >
-                <v-list-item-title class="menuText">
+                <label class="menuText">
                   <v-icon
                     left
                     color="black"
-                  >mdi-home-city</v-icon>{{ $t('App.menu.addOrganization.msg')}}
-                </v-list-item-title>
-              </v-list-item>
+                  >
+                    mdi-home-city
+                  </v-icon>
+                  {{ $t('App.menu.addOrganization.msg')}}
+                </label>
+              </a>
             </template>
             <span>{{ $t('App.menu.addOrganization.tooltip')}}</span>
           </v-tooltip>
@@ -233,17 +318,20 @@
         >
           <v-tooltip right>
             <template v-slot:activator="{ on }">
-              <v-list-item
-                to="/Resource/Add/service"
+              <a
+                @click="navigate('/Resource/Add/service')"
                 v-on="on"
               >
-                <v-list-item-title class="menuText">
+                <label class="menuText">
                   <v-icon
                     left
                     color="black"
-                  >mdi-room-service</v-icon>{{ $t('App.menu.addService.msg')}}
-                </v-list-item-title>
-              </v-list-item>
+                  >
+                    mdi-room-service
+                  </v-icon>
+                  {{ $t('App.menu.addService.msg')}}
+                </label>
+              </a>
             </template>
             <span>{{ $t('App.menu.addService.tooltip')}}</span>
           </v-tooltip>
@@ -271,17 +359,20 @@
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/questionnaire/gofr-facility-add-request-questionnaire/facility-add-request"
+                  <a
+                    @click="navigate('/questionnaire/gofr-facility-add-request-questionnaire/facility-add-request')"
                     v-on="on"
                   >
-                    <v-list-item-title class="menuText">
+                    <label class="menuText">
                       <v-icon
                         left
                         color="black"
-                      >mdi-call-made</v-icon>{{ $t('App.menu.requestNewFacility.msg')}}
-                    </v-list-item-title>
-                  </v-list-item>
+                      >
+                        mdi-call-made
+                      </v-icon>
+                      {{ $t('App.menu.requestNewFacility.msg')}}
+                    </label>
+                  </a>
                 </template>
                 <span>{{ $t('App.menu.requestNewFacility.tooltip')}}</span>
               </v-tooltip>
@@ -292,17 +383,20 @@
             >
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/Resource/Search/facility?searchAction=send-update-request"
+                  <a
+                    @click="navigate('/Resource/Search/facility?searchAction=send-update-request')"
                     v-on="on"
                   >
-                    <v-list-item-title class="menuText">
+                    <label class="menuText">
                       <v-icon
                         left
                         color="black"
-                      >mdi-call-made</v-icon>{{ $t('App.menu.requestUpdateFacility.msg')}}
-                    </v-list-item-title>
-                  </v-list-item>
+                      >
+                        mdi-call-made
+                      </v-icon>
+                      {{ $t('App.menu.requestUpdateFacility.msg')}}
+                    </label>
+                  </a>
                 </template>
                 <span>{{ $t('App.menu.requestUpdateFacility.tooltip')}}</span>
               </v-tooltip>
@@ -318,176 +412,106 @@
         <v-icon>mdi-spellcheck</v-icon> {{$t('App.menu.facilityRecon.msg')}}
       </a>
       <ul class="child">
-        <li
-          class="parent"
-          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'manage-data-source')"
+        <v-list
+          :class="{ disabledMenu: $store.state.dataSources.length <= 1 || $store.state.dataSourcePairs.length <= 0,lastMenu: true }"
+          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-source-pair')"
         >
-          <a
-            href="#"
-            style="margin-left: 15px"
-          >
-            <v-icon
-              color="black"
-              left
-            >mdi-sync</v-icon>{{ $t('App.menu.dataSourcesParent.msg')}} <v-icon
-              color="black"
-              small
-              class="menuArrow"
-            >mdi-play</v-icon>
-          </a>
-          <ul class="child">
-            <v-list class="lastMenu"
-              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'add-data-source')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/AddDataSources"
-                    v-on="on"
+          <v-tooltip right>
+            <template v-slot:activator="{ on }">
+              <a
+                @click="navigate('/dataSourcesPair')"
+                v-on="on"
+                :disabled="$store.state.dataSources.length <= 1 && $store.state.dataSourcePairs.length === 0"
+              >
+                <label class="menuText">
+                  <v-icon
+                    left
+                    color="black"
                   >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-cloud-upload</v-icon>
-                      {{ $t('App.menu.addDataSources.msg')}}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.addDataSources.tooltip')}}</span>
-              </v-tooltip>
-            </v-list>
-            <v-list class="lastMenu"
-              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-data-source')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/ViewDataSources"
-                    v-on="on"
+                    mdi-numeric-2-box-multiple-outline
+                  </v-icon>
+                  {{ $t('App.menu.createPair.msg')}}
+                </label>
+              </a>
+            </template>
+            <span>{{ $t('App.menu.createPair.tooltip')}}</span>
+          </v-tooltip>
+        </v-list>
+        <v-list
+          :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length === 0,lastMenu: true }"
+          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')"
+        >
+          <v-tooltip right>
+            <template v-slot:activator="{ on }">
+              <a
+                @click="navigate('/scores')"
+                v-on="on"
+                :disabled='Object.keys($store.state.activePair.source1).length === 0'
+              >
+                <label class="menuText">
+                  <v-icon
+                    left
+                    color="black"
                   >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.viewDataSources.msg')}}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.viewDataSources.tooltip')}}</span>
-              </v-tooltip>
-            </v-list>
-          </ul>
-        </li>
+                    mdi-book-search
+                  </v-icon>
+                  {{ $t('App.menu.reconcile.msg')}}
+                </label>
+              </a>
+            </template>
+            <span>{{ $t('App.menu.reconcile.tooltip') }}</span>
+          </v-tooltip>
+        </v-list>
+        <v-list
+          :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length===0,lastMenu: true }"
+          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-matching-status')"
+        >
+          <v-tooltip right>
+            <template v-slot:activator="{ on }">
+              <a
+                @click="navigate('/recoStatus')"
+                v-on="on"
+                :disabled='Object.keys($store.state.activePair.source1).length === 0'
+              >
+                <label class="menuText">
+                  <v-icon
+                    left
+                    color="black"
+                  >
+                    mdi-view-dashboard
+                  </v-icon>
+                  {{ $t('App.menu.recoStatus.msg')}}
+                </label>
+              </a>
+            </template>
+            <span>{{ $t('App.menu.recoStatus.tooltip') }}</span>
+          </v-tooltip>
+        </v-list>
         <v-list
           :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length===0,lastMenu: true }"
           v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')"
         >
           <v-tooltip right>
             <template v-slot:activator="{ on }">
-              <v-list-item
+              <a
+                @click="navigate('/view')"
                 v-on="on"
-                to="/view"
-                color="white"
                 :disabled="Object.keys($store.state.activePair.source1).length===0"
               >
-                <v-list-item-title class="menuText">
+                <label class="menuText">
                   <v-icon
                     left
                     color="black"
-                  >mdi-format-list-bulleted-square</v-icon>{{ $t('App.menu.view.msg')}}
-                </v-list-item-title>
-              </v-list-item>
+                  >
+                    mdi-format-list-bulleted-square
+                  </v-icon>
+                  {{ $t('App.menu.view.msg')}}
+                </label>
+              </a>
             </template>
             <span>{{ $t('App.menu.view.tooltip') }}</span>
           </v-tooltip>
         </v-list>
-        <li
-          class="parent"
-          v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'manage-reconciliations')"
-        >
-          <a
-            href="#"
-            style="margin-left: 15px"
-          >
-            <v-icon
-              left
-              color="black"
-            >mdi-compare-horizontal</v-icon>{{ $t('App.menu.reconcile.msg')}} <v-icon
-              color="black"
-              small
-              class="menuArrow"
-            >mdi-play</v-icon>
-          </a>
-          <ul class="child">
-            <v-list
-              :class="{ disabledMenu: $store.state.dataSources.length <= 1 || $store.state.dataSourcePairs.length <= 0,lastMenu: true }"
-              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-source-pair')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/dataSourcesPair"
-                    v-on="on"
-                    :disabled="$store.state.dataSources.length <= 1 && $store.state.dataSourcePairs.length === 0"
-                  >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-numeric-2-box-multiple-outline</v-icon>{{ $t('App.menu.createPair.msg')}}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.createPair.tooltip')}}</span>
-              </v-tooltip>
-            </v-list>
-            <v-list
-              :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length === 0,lastMenu: true }"
-              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/scores"
-                    v-on="on"
-                    :disabled='Object.keys($store.state.activePair.source1).length === 0'
-                  >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-book-search</v-icon>{{ $t('App.menu.reconcile.msg') }}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.reconcile.tooltip') }}</span>
-              </v-tooltip>
-            </v-list>
-            <v-list
-              :class="{ disabledMenu: Object.keys($store.state.activePair.source1).length===0,lastMenu: true }"
-              v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-matching-status')"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-list-item
-                    to="/recoStatus"
-                    v-on="on"
-                    :disabled='Object.keys($store.state.activePair.source1).length === 0'
-                  >
-                    <v-list-item-title class="menuText">
-                      <v-icon
-                        left
-                        color="black"
-                      >mdi-view-dashboard</v-icon> {{ $t('App.menu.recoStatus.msg') }}
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-                <span>{{ $t('App.menu.recoStatus.tooltip') }}</span>
-              </v-tooltip>
-            </v-list>
-          </ul>
-        </li>
       </ul>
     </li>
     <li
@@ -495,17 +519,12 @@
     >
       <v-tooltip right>
         <template v-slot:activator="{ on }">
-          <v-list-item
-            to="/ViewMap"
+          <a
+            @click="navigate('/ViewMap')"
             v-on="on"
           >
-            <v-list-item-title class="menuText" style="color: white">
-              <v-icon
-                left
-                color="white"
-              >mdi-google-maps</v-icon>{{ $t('App.menu.viewMap.msg')}}
-            </v-list-item-title>
-          </v-list-item>
+            <v-icon>mdi-google-maps</v-icon> {{ $t('App.menu.viewMap.msg') }}
+          </a>
         </template>
         <span>{{ $t('App.menu.viewMap.tooltip')}}</span>
       </v-tooltip>
@@ -523,18 +542,21 @@
         <v-list class="lastMenu">
           <v-tooltip right>
             <template v-slot:activator="{ on }">
-              <v-list-item
-                to="/addUser"
+              <a
+                @click="navigate('/addUser')"
                 v-on="on"
                 v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'add-user')"
               >
-                <v-list-item-title class="menuText">
+                <label class="menuText">
                   <v-icon
                     left
                     color="black"
-                  >mdi-account-outline</v-icon>{{ $t('App.menu.addUser.msg')}}
-                </v-list-item-title>
-              </v-list-item>
+                  >
+                    mdi-account-outline
+                  </v-icon>
+                  {{ $t('App.menu.addUser.msg')}}
+                </label>
+              </a>
             </template>
             <span>{{ $t('App.menu.addUser.tooltip')}}</span>
           </v-tooltip>
@@ -542,18 +564,21 @@
         <v-list class="lastMenu">
           <v-tooltip right>
             <template v-slot:activator="{ on }">
-              <v-list-item
-                to="/usersList"
+              <a
+                @click="navigate('/usersList')"
                 v-on="on"
                 v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-user')"
               >
-                <v-list-item-title class="menuText">
+                <label class="menuText">
                   <v-icon
                     left
                     color="black"
-                  >mdi-account-outline</v-icon>{{ $t('App.menu.usersList.msg')}}
-                </v-list-item-title>
-              </v-list-item>
+                  >
+                    mdi-account-outline
+                  </v-icon>
+                  {{ $t('App.menu.usersList.msg')}}
+                </label>
+              </a>
             </template>
             <span>{{ $t('App.menu.usersList.tooltip')}}</span>
           </v-tooltip>
@@ -561,55 +586,59 @@
         <v-list class="lastMenu">
           <v-tooltip right>
             <template v-slot:activator="{ on }">
-              <v-list-item
-                to="/rolesManagement"
+              <a
+                @click="navigate('/rolesManagement')"
                 v-on="on"
                 v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'add-user')"
               >
-                <v-list-item-title class="menuText">
+                <label class="menuText">
                   <v-icon
                     left
                     color="black"
-                  >mdi-account-outline</v-icon>{{ $t('App.menu.rolesManagement.msg')}}
-                </v-list-item-title>
-              </v-list-item>
+                  >
+                    mdi-account-outline
+                  </v-icon>
+                  {{ $t('App.menu.rolesManagement.msg')}}
+                </label>
+              </a>
             </template>
             <span>{{ $t('App.menu.rolesManagement.tooltip')}}</span>
           </v-tooltip>
         </v-list>
         <v-list class="lastMenu">
-          <v-list-item to="/changePassword">
-            <v-list-item-title class="menuText">
+          <a
+            @click="navigate('/changePassword')"
+            v-on="on"
+            v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'add-user')"
+          >
+            <label class="menuText">
               <v-icon
                 left
                 color="black"
-              >mdi-account-outline</v-icon>{{ $t('App.menu.changePassword.msg')}}
-            </v-list-item-title>
-          </v-list-item>
+              >
+                mdi-account-outline
+              </v-icon>
+              {{ $t('App.menu.changePassword.msg')}}
+            </label>
+          </a>
         </v-list>
       </ul>
     </li>
     <li class="parent" v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-config-page')">
-      <v-list-item
-        to="/configure"
+      <a
+        @click="navigate('/configure')"
         v-if='!$store.state.denyAccess'
-        class="newClass"
       >
-        <v-list-item-title>
-          <v-icon>mdi-cog</v-icon> {{ $t('App.menu.configure.msg') }}
-        </v-list-item-title>
-      </v-list-item>
+        <v-icon>mdi-cog</v-icon> {{ $t('App.menu.configure.msg') }}
+      </a>
     </li>
     <li class="parent">
-      <v-list-item
-        to="/logout"
+      <a
+        @click="navigate('/logout')"
         v-if='!$store.state.denyAccess && !$store.state.config.generalConfig.authDisabled && $store.state.auth.userObj'
-        class="newClass"
       >
-        <v-list-item-title>
-          <v-icon>mdi-logout</v-icon> {{ $t('App.menu.logout.msg') }}
-        </v-list-item-title>
-      </v-list-item>
+        <v-icon>mdi-logout</v-icon> {{ $t('App.menu.logout.msg') }}
+      </a>
     </li>
   </ul>
 </template>
@@ -619,6 +648,11 @@ export default {
     keycloak_account() {
       return this.$store.state.keycloak.baseURL + '/realms/' + this.$store.state.keycloak.realm + '/account'
     }
+  },
+  methods: {
+    navigate(route) {
+      this.$router.push({path: route})
+    }
   }
 }
 </script>
@@ -627,9 +661,9 @@ export default {
   display: block;
   position: relative;
   float: left;
-  line-height: 63px;
+  line-height: 50px;
   border-right: #ccc 1px solid;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .newClass {
@@ -656,7 +690,7 @@ export default {
 
 .child li {
   background-color: white;
-  line-height: 63px;
+  line-height: 50px;
   border-bottom: #ccc 1px solid;
   border-right: #ccc 1px solid;
   width: 100%;
@@ -701,10 +735,12 @@ li:hover {
   background-color: white !important;
   border-right: #ccc 1px solid;
   border-bottom: #ccc 1px solid;
+  width: 320px;
 }
 
 .menuText {
   color: black;
+  cursor: pointer;
 }
 
 .menuArrow {

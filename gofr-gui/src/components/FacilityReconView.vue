@@ -201,15 +201,6 @@
               <v-progress-linear :indeterminate="true"></v-progress-linear>
             </template>
             <template v-else>
-              <!-- <v-card-title>
-                <v-text-field
-                  v-model="searchSource1"
-                  append-icon="search"
-                  label="Search"
-                  single-line
-                  hide-details
-                ></v-text-field>
-              </v-card-title> -->
               <v-card-text>
                 <v-data-table
                   :headers="source1GridHeader"
@@ -221,29 +212,10 @@
                   hide-default-footer
                   class="elevation-1"
                 >
-                  <template
-                    slot="items"
-                    slot-scope="props"
-                  >
-                    <td
-                      v-for='(header, key) in source1GridHeader'
-                      style="white-space:nowrap;overflow: hidden;"
-                      :key="header.value + 1"
-                    >
-                      <template v-if="key === 0 && isDataset1Owner">
-                        <v-icon
-                          @click="edit(props.item, 'source1')"
-                          style="cursor: pointer"
-                        >edit</v-icon>
-                      </template>
-                      <template v-else>
-                        {{props.item[header.value]}}
-                      </template>
-                    </td>
-                  </template>
                 </v-data-table>
               </v-card-text>
               <div class="text-xs-center pt-2">
+                {{source1Pagination}} - {{source1Count}}
                 <v-pagination
                   v-model="source1Pagination.page"
                   :length="source1Pages"
@@ -261,15 +233,6 @@
               <v-progress-linear :indeterminate="true"></v-progress-linear>
             </template>
             <template v-else>
-              <!-- <v-card-title>
-                <v-text-field
-                  v-model="searchSource2"
-                  append-icon="search"
-                  label="Search"
-                  single-line
-                  hide-details
-                ></v-text-field>
-              </v-card-title> -->
               <v-card-text>
                 <v-data-table
                   :headers="source2GridHeader"
@@ -281,26 +244,6 @@
                   hide-default-footer
                   class="elevation-1"
                 >
-                  <template
-                    slot="items"
-                    slot-scope="props"
-                  >
-                    <td
-                      v-for='(header, key) in source2GridHeader'
-                      style="white-space:nowrap;overflow: hidden;"
-                      :key="header.value + 2"
-                    >
-                      <template v-if="key === 0 && isDataset2Owner">
-                        <v-icon
-                          @click="edit(props.item, 'source2')"
-                          style="cursor: pointer"
-                        >edit</v-icon>
-                      </template>
-                      <template v-else>
-                        {{props.item[header.value]}}
-                      </template>
-                    </td>
-                  </template>
                 </v-data-table>
               </v-card-text>
               <div class="text-xs-center pt-2">
@@ -389,8 +332,8 @@ export default {
       searchSource2: '',
       filterSource1: { text: '', level: '' },
       filterSource2: { text: '', level: '' },
-      source2Pagination: { rowsPerPage: 20 },
-      source1Pagination: { rowsPerPage: 20 },
+      source2Pagination: { rowsPerPage: 10, totalItems: null },
+      source1Pagination: { rowsPerPage: 10, totalItems: null },
       loadingSource1: false,
       loadingSource2: false,
       totalSource1Records: 0,
@@ -467,10 +410,10 @@ export default {
         id = ''
       }
       this.loadingSource1Grid = true
-      let source1Owner = this.getDatasourceOwner().source1Owner
       let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
       let userID = this.$store.state.activePair.userID
-      let path = `/hierarchy?source=${this.source1}&start=${this.source1Start}&count=${this.source1Count}&id=${id}&userID=${userID}&sourceOwner=${source1Owner}&sourceLimitOrgId=${source1LimitOrgId}`
+      let partition = this.$store.state.activePair.source1.name
+      let path = `/hierarchy?partition=${partition}&start=${this.source1Start}&count=${this.source1Count}&id=${id}&userID=${userID}&sourceLimitOrgId=${source1LimitOrgId}`
       axios.get(path).then((hierarchy) => {
         this.loadingSource1Grid = false
         if (hierarchy.data) {
@@ -521,10 +464,10 @@ export default {
       }
       this.loadingSource2 = true
       this.loadingSource2Grid = true
-      let source2Owner = this.getDatasourceOwner().source2Owner
       let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
       let userID = this.$store.state.activePair.userID
-      let path = `/hierarchy?source=${this.source2}&start=${this.source2Start}&count=${this.source2Count}&id=${id}&userID=${userID}&sourceOwner=${source2Owner}&sourceLimitOrgId=${source2LimitOrgId}`
+      let partition = this.$store.state.activePair.source2.name
+      let path = `/hierarchy?partition=${partition}&start=${this.source2Start}&count=${this.source2Count}&id=${id}&userID=${userID}&sourceLimitOrgId=${source2LimitOrgId}`
       axios.get(path).then((hierarchy) => {
         this.loadingSource2Grid = false
         if (hierarchy.data) {
@@ -571,19 +514,19 @@ export default {
       if (!this.source1 || !this.source2) {
         return
       }
-      let source2Owner = this.getDatasourceOwner().source2Owner
+      let partition1 = this.$store.state.activePair.source1.name
+      let partition2 = this.$store.state.activePair.source2.name
       let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
       this.loadingSource2Tree = true
-      axios.get('/getTree/' + this.source2 + '/' + source2Owner + '/' + source2LimitOrgId).then((hierarchy) => {
+      axios.get('/getTree/' + partition2 + '/' + source2LimitOrgId).then((hierarchy) => {
         this.loadingSource2Tree = false
         if (hierarchy.data) {
           this.source2Tree = hierarchy.data
         }
       })
-      let source1Owner = this.getDatasourceOwner().source1Owner
       let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
       this.loadingSource1Tree = true
-      axios.get('/getTree/' + this.source1 + '/' + source1Owner + '/' + source1LimitOrgId).then((hierarchy) => {
+      axios.get('/getTree/' + partition1 + '/' + source1LimitOrgId).then((hierarchy) => {
         this.loadingSource1Tree = false
         if (hierarchy.data) {
           this.source1Tree = hierarchy.data

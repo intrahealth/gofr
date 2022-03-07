@@ -311,8 +311,7 @@ app.post('/fhirSync', (req, res) => {
 
 app.get('/hierarchy', (req, res) => {
   const {
-    source,
-    sourceOwner,
+    partition,
     start,
     count,
   } = req.query;
@@ -321,24 +320,23 @@ app.get('/hierarchy', (req, res) => {
     id,
   } = req.query;
   if (!sourceLimitOrgId) {
-    sourceLimitOrgId = mixin.getTopOrgId(mixin.toTitleCase(source + sourceOwner), 'Location');
+    sourceLimitOrgId = mixin.getTopOrgId(partition, 'Location');
   }
   if (!id) {
     id = sourceLimitOrgId;
   }
-  if (!source) {
+  if (!partition) {
     logger.error({
-      error: 'Missing Source',
+      error: 'Missing partition',
     });
     res.status(400).json({
-      error: 'Missing Source',
+      error: 'Missing partition',
     });
   } else {
-    logger.info(`Fetching Locations For ${source}`);
-    const db = mixin.toTitleCase(source + sourceOwner);
+    logger.info(`Fetching Locations For ${partition}`);
     const locationReceived = new Promise((resolve, reject) => {
       mcsd.getLocationChildren({
-        database: db,
+        database: partition,
         parent: sourceLimitOrgId,
       }, (mcsdData) => {
         mcsd.getBuildingsFromData(mcsdData, (buildings) => {
@@ -346,15 +344,15 @@ app.get('/hierarchy', (req, res) => {
             buildings,
             mcsdData,
           });
-          logger.info(`Done Fetching ${source} Locations`);
+          logger.info(`Done Fetching ${partition} Locations`);
         });
       });
     });
 
     locationReceived.then((data) => {
-      logger.info(`Creating ${source} Grid`);
+      logger.info(`Creating ${partition} Grid`);
       mcsd.createGrid(id, sourceLimitOrgId, data.buildings, data.mcsdData, start, count, (grid, total) => {
-        logger.info(`Done Creating ${source} Grid`);
+        logger.info(`Done Creating ${partition} Grid`);
         res.status(200).json({
           grid,
           total,
@@ -401,36 +399,34 @@ app.get('/getImmediateChildren/:source/:sourceOwner/:parentID?', (req, res) => {
   });
 });
 
-app.get('/getTree/:source/:sourceOwner/:sourceLimitOrgId?', (req, res) => {
+app.get('/getTree/:partition/:sourceLimitOrgId?', (req, res) => {
   logger.info('Received a request to get location tree');
-  if (!req.params.source) {
+  if (!req.params.partition) {
     logger.error({
-      error: 'Missing Data Source',
+      error: 'Missing data partition',
     });
     res.status(400).json({
-      error: 'Missing Data Source',
+      error: 'Missing data partition',
     });
   } else {
     const {
-      source,
-      sourceOwner,
+      partition,
     } = req.params;
     let {
       sourceLimitOrgId,
     } = req.params;
-    const db = mixin.toTitleCase(source + sourceOwner);
-    const topOrgId = mixin.getTopOrgId(db, 'Location');
+    const topOrgId = mixin.getTopOrgId(partition, 'Location');
     if (!sourceLimitOrgId) {
       sourceLimitOrgId = topOrgId;
     }
-    logger.info(`Fetching Locations For ${source}`);
+    logger.info(`Fetching Locations For ${partition}`);
     async.parallel({
       locationChildren(callback) {
         mcsd.getLocationChildren({
-          database: db,
+          database: partition,
           parent: sourceLimitOrgId,
         }, (mcsdData) => {
-          logger.info(`Done Fetching Locations For ${source}`);
+          logger.info(`Done Fetching Locations For ${partition}`);
           return callback(false, mcsdData);
         });
       },
@@ -438,10 +434,10 @@ app.get('/getTree/:source/:sourceOwner/:sourceLimitOrgId?', (req, res) => {
         if (sourceLimitOrgId === topOrgId) {
           return callback(false, false);
         }
-        mcsd.getLocationByID(db, sourceLimitOrgId, false, details => callback(false, details));
+        mcsd.getLocationByID(partition, sourceLimitOrgId, false, details => callback(false, details));
       },
     }, (error, response) => {
-      logger.info(`Creating ${source} Tree`);
+      logger.info(`Creating ${partition} Tree`);
       mcsd.createTree(response.locationChildren, sourceLimitOrgId, false, (tree) => {
         if (sourceLimitOrgId !== topOrgId) {
           tree = {
@@ -450,7 +446,7 @@ app.get('/getTree/:source/:sourceOwner/:sourceLimitOrgId?', (req, res) => {
             children: tree,
           };
         }
-        logger.info(`Done Creating Tree for ${source}`);
+        logger.info(`Done Creating Tree for ${partition}`);
         res.status(200).json(tree);
       });
     });

@@ -1,33 +1,42 @@
 # Managing users
-!!! important "What is the Facility Reconciliation?"
-From the Admin Console, you have a wide range of actions you can perform to manage users.
-Searching for a user
+
+## Adminstrator Panel
+
+!!! important "How do you manage users in gofr?"
+In order to manage  user access in gofr, you need to access the Keycloak Administration Console.
+
+![Alt text](../img/gofr_key_cloak.JPG 'GOFR Key CLoak Admin Console')
+
+ From the Admin Console, you have a wide range of actions you can perform to manage users.
+![Alt text](../img/gofr_manage_users.JPG 'GOFR Manage Users')
+
+## Searching for a user
+
 Search for a user to view detailed information about the user, such as the user’s groups and roles.
-Prerequisite
-• You are in the realm where the user exists.
+
 Procedure
 
 1. Click Users in the main menu. This Users page is displayed.
 2. Type the full name, last name, first name, or email address of the user you want to search for in the search box. The search returns all users who match your criteria.
-3. Alternatively, you can click View all users to list every user in the system.
-This action searches only the local Keycloak database and not the federated database, such as LDAP. The backends for federated databases do not have a pagination mechanism that enables searching for users.
-a. To search users from a federated backend, the user list must be synced into the Keycloak database. Adjust the search criteria to sync the backend users to the Keycloak database.
-b. Alternatively, click the User Federation in the left menu.
-i. To apply changes to a selected user, click Sync changed users on the page with your federation provider.
-ii. To apply changes to all users in the database, click Sync all users on the page with your federation provider.
-Additional resources
-• For more information on user federation, see User Federation.
-Creating a user
+
+## View All Users
+
+To view all the users in gofr,click View all users to list every user in the system.
+
+## Creating a user
+
 You create users in the realm where you intend to have applications needed by those users. Avoid creating users in the master realm, which is only intended for creating other realms.
+
 Prerequisite
 • You are in a realm other than the master realm.
 Procedure
+
 1. Click Users in the menu.
 2. Click Add User.
 3. Enter the details for the new user.
 4. Click Save. After saving the details, the Management page for the new user is displayed.
  Username is the only required field.
- 
+
 Deleting a user
 You can delete a user, who no longer needs access to applications. If a user is deleted, the user profile and data is also deleted.
 Procedure

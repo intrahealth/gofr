@@ -41,6 +41,7 @@ nav:
       - user_guide/facility_registry.md
       - user_guide/usersandsharing.md
       - user_guide/configure_system.md
+      - user_guide/user_management.md
   - Developer Guide:
       - developer_guide/getting_started.md
       - developer_guide/load_query.md

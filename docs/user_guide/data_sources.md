@@ -12,7 +12,7 @@ The following table displays the various fields required for each source to be a
 
 ![Alt text](../img/data_sources.JPG 'GOFR Data Sources')
 
-#### Upload CSV
+### Upload CSV
 
 The CSV file should have columns names in the first row of the file. Empty lines should be removed. The CSV file should be encoded as Unicode (utf-8) as that is what is used internally in the backend. If some entities are encoded in another format then matches that appear to be the same may not match as expected.
 
@@ -50,7 +50,7 @@ On uploading, the following warning appears:
 
 Click Proceed to continue uploading or click cancel, to discard.
 
-#### Remote Data Source
+### Remote Data Source
 
 GOFR supports remote sources of data. Any DHIS2 or FHIR server can be used as a source if the user has credentials to access it.
 
@@ -70,7 +70,7 @@ This is done in the view data sources feature.
 
 View data sources -> remote sources -> select the data source and click on 'Force full sync'.
 
-#### Blank Source
+### Blank Source
 
 Blank data sources can also be added. A blank data source can manually be populated with data by activating it on the dashboard and use the facility registry functionality to populate its contents
 
@@ -91,5 +91,3 @@ Once uploaded, you can view all the uploaded sources in the View tab.
 #### Sync Update
 
 CSV entries can be edited. Any edits do not modify the original data source but the edits will be exported after reconciliation.
-
-

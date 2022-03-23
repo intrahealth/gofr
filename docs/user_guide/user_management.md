@@ -1,17 +1,25 @@
-# Managing users
+# User Management
 
-# Users
+!!!important "User management is the module which enables the effective management of users by assigning the neceaasry roles and tasks to be carried out "
 
-There are two classes of users, admin and data managers.
+# Overview
+
+## User Roles
+
+There are three types of user roles in gofr. They are:
+
+* Admin role
+* Data manager role
+* Open role
+
 The initial server configuration includes an administrator role.
 This account and password should be immediately changed after installation. See the Developer Guide for more information.
 
-## Roles
-
-Admin accounts can add users, configure the system, and all tasks of data managers.
-Data manager accounts can manage data only. They can share data sources and do other matching tasks.
+Accounts assigned the admin role can add users, configure the system, and  undertake all the tasks of data managers.
+Data manager accounts are limited to only managing data. They can share data sources and do other matching tasks.
 Custom accounts with specific roles may be created in the future.
-Please let the community know if you have use cases for custom account roles.
+
+PS: Please let the community know if you have use cases for custom account roles.
 
 ## Self-registration
 

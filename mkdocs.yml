@@ -39,7 +39,6 @@ nav:
       - user_guide/data_sources.md
       - user_guide/facility_reconciliation.md
       - user_guide/facility_registry.md
-      - user_guide/usersandsharing.md
       - user_guide/configure_system.md
       - user_guide/user_management.md
   - Developer Guide:
@@ -66,6 +65,7 @@ plugins:
   - git-revision-date-localized
   - mkdocs-video
   - mknotebooks
+  - mkdocstrings
   # - pdf-export:
   #     combined: true
 

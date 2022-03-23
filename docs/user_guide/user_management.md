@@ -1,6 +1,6 @@
 # User Management
 
- User management is the module which enables the effective management of users by assigning the neceaasry roles and tasks to be carried out.
+ User management is the module which enables the effective management of users by assigning the necessary roles and tasks to be carried out.
 
 ## Overview
 
@@ -29,11 +29,6 @@ Custom accounts with specific roles may be created in the future.
 
 PS: Please let the community know if you have use cases for custom account roles.
 
-## Self-registration
-
-Administrators may configure the system to allow for anyone to self-register. This is under the Configure System tab. This option is off by default.
-
-
 ## Searching for a user
 
 Search for a user to view detailed information about the user, such as the user’s groups and roles.
@@ -49,26 +44,29 @@ To view all the users in gofr,click View all users to list every user in the sys
 
 ## Creating a user
 
-You create users in the realm where you intend to have applications needed by those users. Avoid creating users in the master realm, which is only intended for creating other realms.
-
-Prerequisite
-• You are in a realm other than the master realm.
-Procedure
+To create a new user ->
 
 1. Click Users in the menu.
 2. Click Add User.
 3. Enter the details for the new user.
 4. Click Save. After saving the details, the Management page for the new user is displayed.
- Username is the only required field.
 
-Deleting a user
-You can delete a user, who no longer needs access to applications. If a user is deleted, the user profile and data is also deleted.
-Procedure
+_Username is the only required field_
+
+## Deleting a user
+
+You can delete a user, who no longer needs access to gofr. If a user is deleted, the user profile and data is also deleted.
+
+To delete a user ->
 
 1. Click Users in the menu. The Users page is displayed.
 2. Click View all users to find a user to delete.
- Alternatively, you can use the search bar to find a user.
-3. Click Delete next to the user you want to remove and confirm deletion.
+
+![Alt text](../img/gofr_delete_user.JPG 'GOFR Key CLoak Delete User')
+
+~~ Alternatively, you can use the search bar to find a user.~~
+
+3. Click the 'Delete' :delete: icon next to the user you want to remove and confirm deletion.
 Enabling account deletion by users
 End users and applications can delete their accounts in the Account Console if you enable this capability in the Admin Console. Once you enable this capability, you can give that capability to specific users.
 Enabling the Delete Account Capability
@@ -640,3 +638,7 @@ In terms of user management, administrators are able to manage only the attribut
 The same recommendation applies for those accessing the User REST API to query user information.
 In regards to Keycloak internal user attributes such as LDAP_ID, LDAP_ENTRY_DN, or KERBEROS_PRINCIPAL, if you want to be able to access those attributes you should have them as attributes in your user profile configuration. The recommendation is to mark these attributes as viewable only to administrators so that you can look at them when managing the user attributes through the administration console or querying users via User API.
 In regards to theming, if you already have customizations to the legacy templates (those hardcoded with user root attributes) your custom templates won’t be used when rendering user-facing forms but the new templates that render these forms dynamically. Ideally, you should avoid having any customizations to templates and try to stick with the behavior provided by these new templates to dynamically render forms for you. If they are still not enough to address your requirements, you can either customize them or provide us with any feedback so that we discuss whether it makes sense to enhance the new templates.
+
+## Self-registration
+
+Administrators may configure the system to allow for anyone to self-register. This is under the Configure System tab. This option is off by default.

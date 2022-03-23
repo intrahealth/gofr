@@ -1,10 +1,18 @@
 # User Management
 
-!!!important "User management is the module which enables the effective management of users by assigning the neceaasry roles and tasks to be carried out "
+ User management is the module which enables the effective management of users by assigning the neceaasry roles and tasks to be carried out.
 
-# Overview
+## Overview
 
-## User Roles
+!!! important "How do you manage users in gofr?"
+In order to manage  user access in gofr, you need to access the **Keycloak Administration Console**.
+
+![Alt text](../img/gofr_key_cloak.JPG 'GOFR Key CLoak Admin Console')
+
+ From the Admin Console, you have a wide range of actions you can perform to manage users.
+![Alt text](../img/gofr_manage_users.JPG 'GOFR Manage Users')
+
+## Managing User Roles
 
 There are three types of user roles in gofr. They are:
 
@@ -25,15 +33,6 @@ PS: Please let the community know if you have use cases for custom account roles
 
 Administrators may configure the system to allow for anyone to self-register. This is under the Configure System tab. This option is off by default.
 
-## Adminstrator Panel
-
-!!! important "How do you manage users in gofr?"
-In order to manage  user access in gofr, you need to access the Keycloak Administration Console.
-
-![Alt text](../img/gofr_key_cloak.JPG 'GOFR Key CLoak Admin Console')
-
- From the Admin Console, you have a wide range of actions you can perform to manage users.
-![Alt text](../img/gofr_manage_users.JPG 'GOFR Manage Users')
 
 ## Searching for a user
 

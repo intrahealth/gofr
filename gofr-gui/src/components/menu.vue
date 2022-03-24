@@ -18,7 +18,7 @@
       <a
         href="#"
       >
-        <v-icon>mdi-sync</v-icon>{{ $t('App.menu.dataSourcesParent.msg')}}
+        <v-icon>mdi-sync</v-icon>{{ $t('App.menu.dataSourcesParent.msg') }}
       </a>
       <ul class="child">
         <v-list class="lastMenu"

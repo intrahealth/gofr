@@ -9,6 +9,7 @@ import axios from 'axios'
 import VueAxios from 'vue-axios'
 import VueCookies from 'vue-cookies'
 import VueSession from 'vue-session'
+import VueJwtDecode from 'vue-jwt-decode'
 import * as Keycloak from 'keycloak-js';
 import 'whatwg-fetch'
 import fhirpath from "fhirpath"
@@ -89,6 +90,89 @@ function addDHIS2StoreConfig (config) {
   let dhis2URL = location.href.split('api').shift()
   axios.post(dhis2URL + 'api/dataStore/GOFR/config', config)
 }
+
+function authenticatePublicUser(genConfig) {
+  return new Promise((resolve) => {
+    if (VueCookies.get("public_access") == 'false') {
+      return resolve(false)
+    }
+    Vue.$keycloak.init({checkLoginIframe: false}).then( () => {
+      //if already authenticated then skip
+      if(Vue.$keycloak.token) {
+        return resolve(false)
+      }
+      const url = store.state.keycloak.baseURL + '/realms/' + store.state.keycloak.realm + '/protocol/openid-connect/token'
+      let data = `client_id=${store.state.keycloak.UIClientId}&grant_type=password&username=public@gofr.org&password=public`
+      axios.post(url, data).then((resp) => {
+        let userinfo = VueJwtDecode.decode(resp.data.access_token)
+        let token = resp.data.access_token
+        let refreshToken = resp.data.refresh_token
+        Vue.$keycloak.init({onLoad: 'login-required', checkLoginIframe: false, token, refreshToken}).then( () => {
+          axios.interceptors.request.use((config) => {
+            config.headers['Authorization'] = `Bearer ${resp.data.access_token}`
+            return config
+          }, (error) => {
+            return Promise.reject(error)
+          })
+          let user = {
+            resourceType: 'Person',
+            id: userinfo.sub,
+            meta: {
+              profile: ['http://gofr.org/fhir/StructureDefinition/gofr-person-user']
+            },
+            name: [{
+              use: 'official',
+              text: "Public User"
+            }],
+            active: true,
+            telecom: [{
+              system: 'email',
+              value: 'public@gofr.org'
+            }]
+          }
+          axios({
+            method: 'POST',
+            url: '/auth',
+            data: user
+          }).then((response) => {
+            VueCookies.set('userObj', JSON.stringify(response.data), 'infinity')
+            store.state.auth.userObj = response.data
+            store.state.auth.userID = userinfo.sub
+            store.state.auth.username = 'public@gofr.org'
+            store.state.public_access = true
+            renderApp(genConfig)
+            resolve(true)
+          }).catch((err) => {
+            console.error(err)
+          })
+        })
+      }).catch((err) => {
+        console.error(err);
+      })
+    })
+  })
+}
+
+function renderApp(genConfig) {
+  new Vue({
+    router,
+    store,
+    i18n,
+    vuetify,
+    data () {
+      return {
+        config: genConfig
+      }
+    },
+    render: function (createElement) {
+      return createElement(App, {
+        props: {
+          generalConfig: this.config
+        }
+      })
+    }
+  }).$mount('#app')
+}
 /* eslint-disable no-new */
 getDHIS2StoreConfig((storeConfig) => {
   if (storeConfig && storeConfig.BACKEND_SERVER) {
@@ -100,7 +184,7 @@ getDHIS2StoreConfig((storeConfig) => {
   }
   // get general config of App and pass it to the App component as props
   let defaultGenerConfig = JSON.stringify(store.state.config.generalConfig)
-  axios.get('/config/getGeneralConfig?defaultGenerConfig=' + defaultGenerConfig).then(response => {
+  axios.get('/config/getGeneralConfig?defaultGenerConfig=' + defaultGenerConfig).then(async (response) => {
     let genConfig = response.data.generalConfig
     store.state.idp = response.data.otherConfig.idp
     store.state.keycloak = response.data.otherConfig.keycloak
@@ -108,7 +192,6 @@ getDHIS2StoreConfig((storeConfig) => {
     if (!genConfig) {
       genConfig = {}
     }
-
     if(!response.data.generalConfig.authDisabled && store.state.idp === 'keycloak') {
       let initOptions = {
         realm: response.data.otherConfig.keycloak.realm,
@@ -116,7 +199,6 @@ getDHIS2StoreConfig((storeConfig) => {
         url: response.data.otherConfig.keycloak.baseURL,
         onLoad: 'login-required'
       }
-
       let keycloak = Keycloak(initOptions);
       const Plugin = {
         install(Vue) {
@@ -135,73 +217,61 @@ getDHIS2StoreConfig((storeConfig) => {
         })
       }
       Vue.use(Plugin)
-      keycloak.init({onLoad: initOptions.onLoad}).then( auth => {
-        if (!auth) {
-          window.location.reload();
-        } else {
-          axios.interceptors.request.use((config) => {
-            config.headers['Authorization'] = `Bearer ${keycloak.token}`
-            return config
-          }, (error) => {
-            return Promise.reject(error)
-          })
-          keycloak.loadUserInfo().then((userinfo) => {
-            let user = {
-              resourceType: 'Person',
-              id: userinfo.sub,
-              meta: {
-                profile: ['http://gofr.org/fhir/StructureDefinition/gofr-person-user']
-              },
-              name: [{
-                use: 'official',
-                text: userinfo.name
-              }],
-              active: true
+      let authenticated = await authenticatePublicUser(genConfig)
+      if(!authenticated) {
+        VueCookies.set("public_access", true)
+        if(!keycloak.token) {
+          await keycloak.init({onLoad: initOptions.onLoad}).then( auth => {
+            if (!auth) {
+              window.location.reload();
             }
-            if(userinfo.email) {
-              user.telecom = [{
-                system: 'email',
-                value: userinfo.email
-              }]
-            }
-            axios({
-              method: 'POST',
-              url: '/auth',
-              data: user
-            }).then((response) => {
-              VueCookies.set('userObj', JSON.stringify(response.data), 'infinity')
-              store.state.auth.userObj = response.data
-              store.state.auth.userID = userinfo.sub
-              store.state.auth.username = userinfo.preferred_username
-              new Vue({
-                router,
-                store,
-                i18n,
-                vuetify,
-                data () {
-                  return {
-                    config: genConfig
-                  }
-                },
-                render: function (createElement) {
-                  return createElement(App, {
-                    props: {
-                      generalConfig: this.config
-                    }
-                  })
-                }
-              }).$mount('#app')
-            }).catch((err) => {
-              console.error(err)
-            })
-          })
-          setInterval(() =>{
-            keycloak.updateToken(70)
-          }, 60000)
+           }).catch(() => {
+            alert("Keycloak access failed")
+          });
         }
-      }).catch(() => {
-        alert("Keycloak access failed")
-      });
+        axios.interceptors.request.use((config) => {
+          config.headers['Authorization'] = `Bearer ${keycloak.token}`
+          return config
+        }, (error) => {
+          return Promise.reject(error)
+        })
+        keycloak.loadUserInfo().then((userinfo) => {
+          let user = {
+            resourceType: 'Person',
+            id: userinfo.sub,
+            meta: {
+              profile: ['http://gofr.org/fhir/StructureDefinition/gofr-person-user']
+            },
+            name: [{
+              use: 'official',
+              text: userinfo.name
+            }],
+            active: true
+          }
+          if(userinfo.email) {
+            user.telecom = [{
+              system: 'email',
+              value: userinfo.email
+            }]
+          }
+          axios({
+            method: 'POST',
+            url: '/auth',
+            data: user
+          }).then((response) => {
+            VueCookies.set('userObj', JSON.stringify(response.data), 'infinity')
+            store.state.auth.userObj = response.data
+            store.state.auth.userID = userinfo.sub
+            store.state.auth.username = userinfo.preferred_username
+            renderApp(genConfig)
+          }).catch((err) => {
+            console.error(err)
+          })
+        })
+        setInterval(() =>{
+          keycloak.updateToken(70)
+        }, 60000)
+      }
     } else {
       axios({
         method: 'GET',
@@ -218,24 +288,7 @@ getDHIS2StoreConfig((storeConfig) => {
           store.state.auth.userID = authResp.data.userObj.resource.id
         }
         Vue.prototype.$keycloak = null
-        new Vue({
-          router,
-          store,
-          i18n,
-          vuetify,
-          data () {
-            return {
-              config: genConfig
-            }
-          },
-          render: function (createElement) {
-            return createElement(App, {
-              props: {
-                generalConfig: this.config
-              }
-            })
-          }
-        }).$mount('#app')
+        renderApp(genConfig)
       })
     }
   })

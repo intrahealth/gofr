@@ -1010,6 +1010,7 @@ router.get('/getGeneralConfig', (req, res) => {
         baseURL: config.get('keycloak:baseURL'),
         realm: config.get('keycloak:realm'),
         UIClientId: config.get('keycloak:UIClientId'),
+        clientSecret: config.get('keycloak:clientSecret'),
       },
     };
     res.status(200).json({ generalConfig: merged, otherConfig, version: config.get('app:version') });

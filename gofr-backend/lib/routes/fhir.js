@@ -219,7 +219,7 @@ router.put('/:partition/:resource/:id', (req, res) => {
 });
 
 router.get('/:partition/ValueSet/:id/\\$expand', (req, res) => {
-  const allowed = req.user.hasPermissionByName('read', 'ValueSet', req.params.id);
+  const allowed = req.user.hasPermissionByName('read', 'ValueSet', req.params.id, req.params.partition);
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }

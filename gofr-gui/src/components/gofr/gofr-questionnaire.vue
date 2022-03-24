@@ -18,7 +18,7 @@
 
       <v-navigation-drawer
         app
-        left
+        right
         permanent
         clipped
         class="primary darken-1 white--text"

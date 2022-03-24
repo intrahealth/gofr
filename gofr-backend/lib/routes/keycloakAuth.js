@@ -46,7 +46,9 @@ router.post('/', (req, res) => {
           token: req.headers.authorization.split(' ')[1],
           user: resp,
         }).then((popResp) => {
-          user.createUserInstance(resp, popResp.role).then(obj => res.status(200).json(obj)).catch(() => {
+          user.createUserInstance(resp, popResp.role).then((obj) => {
+            res.status(200).json(obj);
+          }).catch(() => {
             res.status(500).json();
           });
         }).catch((err) => {

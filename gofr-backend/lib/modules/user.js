@@ -286,7 +286,6 @@ const user = {
         privilege[permission][resource]['*'][field] = true;
       }
     }
-
     return true;
   },
 };
@@ -314,6 +313,54 @@ User.prototype.updatePermissions = async function (roleResources) {
       } catch (err) {
         logger.error('Unable to load permissions', role, err);
       }
+    }
+    let is_public_user;
+    if (this.resource && this.resource.telecom) {
+      is_public_user = this.resource.telecom.find(tel => tel.value === 'public@gofr.org');
+    }
+    if (is_public_user) {
+      await fhirAxios.read('Parameters', 'gofr-general-config', '', 'DEFAULT').then((response) => {
+        const resData = response.parameter.find(param => param.name === 'config');
+        if (resData.valueString) {
+          const config = JSON.parse(resData.valueString);
+          if (config.public_access && config.public_access.enabled && config.public_access.partition) {
+            const partAcc = {
+              name: config.public_access.partition,
+              read: {
+                metadata: true,
+                Location: true,
+                HealthcareService: true,
+              },
+            };
+            if (config.public_access.partition === 'DEFAULT') {
+              partAcc.read.StructureDefinition = true;
+              partAcc.read.DocumentReference = {
+                constraint: {
+                  "category.exists(coding.exists(code = 'open'))": true,
+                },
+              };
+              partAcc.read.ValueSet = true;
+              partAcc.read.CodeSystem = true;
+            }
+            this.permissions.partitions.push(partAcc);
+            if (config.public_access.partition !== 'DEFAULT') {
+              this.permissions.partitions.push({
+                name: 'DEFAULT',
+                read: {
+                  StructureDefinition: true,
+                  DocumentReference: {
+                    constraint: {
+                      "category.exists(coding.exists(code = 'open'))": true,
+                    },
+                  },
+                  ValueSet: true,
+                  CodeSystem: true,
+                },
+              });
+            }
+          }
+        }
+      });
     }
     await dataSources.getSources({ isAdmin: false, userID: this.resource.id }).then((sources) => {
       sources.forEach((source) => {

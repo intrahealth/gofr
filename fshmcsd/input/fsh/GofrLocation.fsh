@@ -342,7 +342,7 @@ Usage:          #example
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/IHE.mCSD.FacilityLocation)
 * extension[display].extension[search][0].valueString = "Facility Name|name"
 * extension[display].extension[search][1].valueString = "Facility Type|type[0].text"
-* extension[display].extension[search][2].valueString = "Parent|partOf.reference"
+* extension[display].extension[search][2].valueString = "Location|partOf.reference"
 * extension[display].extension[search][3].valueString = "Status|status"
 * extension[display].extension[search][4].valueString = "Longitute|position.longitude"
 * extension[display].extension[search][5].valueString = "Latitude|position.latitude"

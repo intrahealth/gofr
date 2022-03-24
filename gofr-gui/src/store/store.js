@@ -11,6 +11,7 @@ export const store = new Vuex.Store({
     baseRouterViewKey: 0,
     idp: '',
     keycloak: {},
+    public_access: false,
     alert: {
       width: '800px',
       show: false,
@@ -37,6 +38,10 @@ export const store = new Vuex.Store({
         FRDatasource: ''
       },
       generalConfig: {
+        public_access: {
+          enabled: false,
+          partition: ""
+        },
         reconciliation: {
           parentConstraint: {
             enabled: true,

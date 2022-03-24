@@ -446,6 +446,32 @@
                 </v-card>
               </v-flex>
               <v-divider></v-divider>
+              <v-flex>
+                <v-card>
+                  <v-card-title primary-title>
+                    Public Access
+                  </v-card-title>
+                  <v-card-text>
+                    <v-switch
+                      @change="saveConfiguration('generalConfig', 'enablePublicAccess')"
+                      color="primary"
+                      label="Enable public access"
+                      v-model="$store.state.config.generalConfig.public_access.enabled"
+                    >
+                    </v-switch>
+                    <v-autocomplete
+                      v-if="$store.state.config.generalConfig.public_access.enabled"
+                      @change="saveConfiguration('generalConfig', 'publicPartition')"
+                      :items="$store.state.dataSources"
+                      item-text="display"
+                      item-value="name"
+                      v-model="$store.state.config.generalConfig.public_access.partition"
+                      label="Public Datasource"
+                    ></v-autocomplete>
+                  </v-card-text>
+                </v-card>
+              </v-flex>
+              <v-divider></v-divider>
               <v-flex xs1>
                 <v-card>
                   <v-card-title primary-title>

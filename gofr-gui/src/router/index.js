@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Home from '@/components/Home.vue'
 import Login from '@/components/Login.vue'
 import Logout from '@/components/Logout.vue'
+import LogoutPublic from '@/components/Logout-public.vue'
 import Signup from '@/components/Signup.vue'
 import Configure from '@/components/Configure.vue'
 import UsersList from '@/components/UsersList.vue'
@@ -48,6 +49,10 @@ let router = new Router({
     path: '/logout',
     name: 'Logout',
     component: Logout
+  }, {
+    path: '/logout-public',
+    name: 'LogoutPublic',
+    component: LogoutPublic
   }, {
     path: '/Signup',
     name: 'Signup',

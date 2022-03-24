@@ -1,31 +1,7 @@
 <template>
   <v-app>
-    <v-app-bar
-      color="primary"
-      dark
-      app
-      clipped-left
-      clipped-right
-      height="50"
-    >
-      <v-toolbar-title v-text="title"></v-toolbar-title>
-      <img src="./assets/GOFR_RGB_high-res.png" width="70" />
-      <v-spacer></v-spacer>
-      <v-toolbar-items v-if="($keycloak && $keycloak.authenticated) || $store.state.auth.userID || $store.state.config.generalConfig.authDisabled">
-        <v-btn
-          flat
-          :href="dhisLink"
-          v-if='dhisLink'
-        >
-          <img src="./assets/dhis2.png" />
-        </v-btn>
-        <appMenu></appMenu>
-      </v-toolbar-items>
-      <v-spacer></v-spacer>
-      <v-toolbar-items>
-
-      </v-toolbar-items>
-    </v-app-bar>
+    <appToolbar></appToolbar>
+    <appSideMenu></appSideMenu>
     <v-main>
       <v-dialog
         v-model="$store.state.dynamicProgress"
@@ -155,7 +131,8 @@
 </template>
 <script>
 import axios from 'axios'
-import Menu from '@/components/menu'
+import AppToolbar from '@/components/appToolbar'
+import SideMenu from '@/components/side-menu'
 import { scoresMixin } from './mixins/scoresMixin'
 import { generalMixin } from './mixins/generalMixin'
 import { dataSourcePairMixin } from './components/DataSourcesPair/dataSourcePairMixin'
@@ -170,14 +147,7 @@ export default {
   props: ['generalConfig'],
   data () {
     return {
-      items: [
-        { title: 'Click Me' },
-        { title: 'Click Me' },
-        { title: 'Click Me' },
-        { title: 'Click Me 2' }
-      ],
       fixed: false,
-      title: this.$t('App.title'),
       activeDataSourcePair: {},
       tasksVerification: tasksVerification
     }
@@ -188,6 +158,14 @@ export default {
       this.$store.state.dialogError = false
     },
     renderInitialPage () {
+      if(!this.$store.state.config.userConfig.FRDatasource) {
+        if(this.$store.state.auth.username === "public@gofr.org") {
+          this.$store.state.config.userConfig.FRDatasource = this.$store.state.config.generalConfig.public_access.partition
+        } else if(this.$store.state.dataSources.length > 0) {
+          this.$store.state.config.userConfig.FRDatasource = this.$store.state.dataSources[0].name
+        }
+      }
+      console.error(JSON.stringify(this.$store.state.config.userConfig, 0, 2));
       // this.$store.state.initializingApp = false
       // this.$router.push({ name: 'ViewMap' })
       // return
@@ -297,6 +275,7 @@ export default {
         .catch(err => {
           this.$store.state.loadingServers = false
           console.log(err)
+          this.getDataSourcePair()
         })
     },
     getUserConfig () {
@@ -414,17 +393,9 @@ export default {
       }
     }
   },
-  computed: {
-    dhisLink () {
-      if (this.$store.state.dhis.user.orgId) {
-        return window.location.protocol + '//' + window.location.hostname
-      } else {
-        return false
-      }
-    }
-  },
   components: {
-    'appMenu': Menu
+    'appToolbar': AppToolbar,
+    'appSideMenu': SideMenu
   },
   created () {
     // this.$router.push({ name: 'AddDataSources' })

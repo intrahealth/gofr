@@ -20,7 +20,7 @@ Description:  "A profile on the mCSD Organization for mCSD Jurisdictions"
 Profile:      MCSDJurisdictionLocation
 Parent:       MCSDLocation
 Id:           IHE.mCSD.JurisdictionLocation
-Title:        "mCSD Location for Jurisdictions"
+Title:        "Jurisdictions"
 Description:  "A profile on the mCSD Location for mCSD Jurisdictions"
 
 * ^url = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation"
@@ -91,7 +91,7 @@ Description:  "A profile on the mCSD Organization profile for mCSD Facilities."
 Profile:      MCSDFacilityLocation
 Parent:       MCSDLocation
 Id:           IHE.mCSD.FacilityLocation
-Title:        "mCSD Location for Facilities"
+Title:        "Facilities"
 Description:  "A profile on the mCSD Location profile for mCSD Facilities."
 
 * ^url = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.FacilityLocation"
@@ -338,7 +338,7 @@ InstanceOf:     GofrPage
 Title:          "GOFR Facility Page"
 Usage:          #example
 * code = GofrResourceCodeSystem#page
-* extension[display].extension[title].valueString = "Update Facility"
+* extension[display].extension[title].valueString = "Create Change Request"
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/IHE.mCSD.FacilityLocation)
 * extension[display].extension[search][0].valueString = "Facility Name|name"
 * extension[display].extension[search][1].valueString = "Facility Type|type[0].text"

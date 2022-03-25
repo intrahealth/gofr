@@ -14,7 +14,7 @@
   "url": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation",
   "version": "0.1.0",
   "name": "MCSDJurisdictionLocation",
-  "title": "mCSD Location for Jurisdictions",
+  "title": "Jurisdictions",
   "status": "active",
   "description": "A profile on the mCSD Location for mCSD Jurisdictions",
   "fhirVersion": "4.0.1",

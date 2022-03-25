@@ -1,0 +1,52 @@
+{
+  "resourceType": "Person",
+  "id": "26e19ebd-65e5-4181-84b6-589bcf3bc44b",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/gofr-person-user"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-owning-organization",
+      "valueReference": {
+        "reference": "Organization/54cdcbe3-87e0-421f-b657-8313fce5f418"
+      }
+    },
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-password",
+      "extension": [
+        {
+          "url": "hash",
+          "valueString": "6906687939864f1462d52839f52c8800b9ead0aa67d050649a9eed1d9c9ffbe5d815b4d286ee2c2786d1f9781ba72df087b9a2057e8a96c4fc30e870a5cc587b"
+        },
+        {
+          "url": "salt",
+          "valueString": "be664906fbbe50918d8cadb5ebd22093"
+        }
+      ]
+    },
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-assign-role",
+      "valueReference": {
+        "reference": "Basic/gofr-role-public"
+      }
+    }
+  ],
+  "name": [
+    {
+      "text": "GOFR Public User"
+    }
+  ],
+  "telecom": [
+    {
+      "system": "email",
+      "value": "public@gofr.org"
+    },
+    {
+      "system": "phone",
+      "value": ""
+    }
+  ],
+  "active": true
+}

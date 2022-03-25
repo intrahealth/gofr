@@ -75,3 +75,18 @@ Usage:          #example
 * extension[password].extension[salt].valueString = "be664906fbbe50918d8cadb5ebd22093"
 * extension[password].extension[hash].valueString = "727c00bcb3d604db9b807155240b97347951e5e89e4c69b823279287694501fcaa683d883f5854a05c2c50c5b31413c6bb4a5949876a42b5c5bd74247e5777fc"
 * extension[role][0].valueReference = Reference(Basic/gofr-role-admin)
+
+Instance:       26e19ebd-65e5-4181-84b6-589bcf3bc44b
+InstanceOf:     GofrPersonUser
+Title:          "GOFR Public User"
+Usage:          #example
+* name.text = "GOFR Public User"
+* telecom[0].system = #email
+* telecom[0].value = "public@gofr.org"
+* telecom[1].system = #phone
+* telecom[1].value = ""
+* active = true
+* extension[organization].valueReference = Reference(Organization/54cdcbe3-87e0-421f-b657-8313fce5f418)
+* extension[password].extension[salt].valueString = "be664906fbbe50918d8cadb5ebd22093"
+* extension[password].extension[hash].valueString = "6906687939864f1462d52839f52c8800b9ead0aa67d050649a9eed1d9c9ffbe5d815b4d286ee2c2786d1f9781ba72df087b9a2057e8a96c4fc30e870a5cc587b"
+* extension[role][0].valueReference = Reference(Basic/gofr-role-public)

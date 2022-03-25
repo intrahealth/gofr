@@ -329,35 +329,28 @@ User.prototype.updatePermissions = async function (roleResources) {
               read: {
                 metadata: true,
                 Location: true,
+                Organization: true,
                 HealthcareService: true,
               },
+              write: {
+                Location: {
+                  constraint: {
+                    "meta.profile contains 'http://gofr.org/fhir/StructureDefinition/gofr-facility-update-request' or meta.profile contains 'http://gofr.org/fhir/StructureDefinition/gofr-facility-add-request'": true,
+                  },
+                },
+              },
             };
-            if (config.public_access.partition === 'DEFAULT') {
-              partAcc.read.StructureDefinition = true;
-              partAcc.read.DocumentReference = {
+            this.permissions.partitions.push(partAcc);
+            this.permissions.read = {
+              StructureDefinition: true,
+              DocumentReference: {
                 constraint: {
                   "category.exists(coding.exists(code = 'open'))": true,
                 },
-              };
-              partAcc.read.ValueSet = true;
-              partAcc.read.CodeSystem = true;
-            }
-            this.permissions.partitions.push(partAcc);
-            if (config.public_access.partition !== 'DEFAULT') {
-              this.permissions.partitions.push({
-                name: 'DEFAULT',
-                read: {
-                  StructureDefinition: true,
-                  DocumentReference: {
-                    constraint: {
-                      "category.exists(coding.exists(code = 'open'))": true,
-                    },
-                  },
-                  ValueSet: true,
-                  CodeSystem: true,
-                },
-              });
-            }
+              },
+              ValueSet: true,
+              CodeSystem: true,
+            };
           }
         }
       });

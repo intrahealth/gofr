@@ -1,6 +1,6 @@
 {
   "resourceType": "Basic",
-  "id": "gofr-task-view-source-pair",
+  "id": "gofr-task-get-source-pair",
   "meta": {
     "profile": [
       "http://gofr.org/fhir/StructureDefinition/gofr-task"
@@ -20,7 +20,7 @@
       "extension": [
         {
           "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
-          "valueString": "view-source-pair"
+          "valueString": "get-source-pair"
         },
         {
           "extension": [
@@ -34,22 +34,10 @@
             },
             {
               "url": "instance",
-              "valueId": "view-source-pair"
+              "valueId": "get-source-pair"
             }
           ],
           "url": "http://gofr.org/fhir/StructureDefinition/task-attributes"
-        },
-        {
-          "url": "compositeTask",
-          "valueReference": {
-            "reference": "Basic/gofr-task-manage-reconciliations"
-          }
-        },
-        {
-          "url": "compositeTask",
-          "valueReference": {
-            "reference": "Basic/gofr-task-get-source-pair"
-          }
         }
       ]
     }

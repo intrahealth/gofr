@@ -1,0 +1,62 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-role-public",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/gofr-role"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "role",
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-ext-role",
+      "extension": [
+        {
+          "url": "http://gofr.org/fhir/StructureDefinition/gofr-basic-name",
+          "valueString": "Public"
+        },
+        {
+          "url": "http://gofr.org/fhir/StructureDefinition/gofr-role-primary",
+          "valueBoolean": true
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-get-data-source"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-get-source-pair"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-home-page"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-request-add-facility-page"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-request-update-facility-page"
+          }
+        }
+      ]
+    }
+  ]
+}

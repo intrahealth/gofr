@@ -160,6 +160,7 @@ export const store = new Vuex.Store({
     cols: { header: 4, content: 8 },
     searchAction: "",
     requestResourceUpdateData: {
+      requestAction: '',
       requestType: '',
       requestUpdatingResource: ''
     },

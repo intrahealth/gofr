@@ -93,10 +93,10 @@ function addDHIS2StoreConfig (config) {
 
 function authenticatePublicUser(genConfig) {
   return new Promise((resolve) => {
-    if (VueCookies.get("public_access") == 'false') {
+    if (VueCookies.get("public_access") == 'false' || genConfig.public_access.enabled === false) {
       return resolve(false)
     }
-    Vue.$keycloak.init({checkLoginIframe: false}).then( () => {
+    Vue.$keycloak.init({onLoad: 'check-sso', checkLoginIframe: false}).then( () => {
       //if already authenticated then skip
       if(Vue.$keycloak.token) {
         return resolve(false)

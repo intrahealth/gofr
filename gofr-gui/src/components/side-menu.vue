@@ -529,13 +529,21 @@ export default {
         }
       }
 
+      if(this.$store.state.auth.username === 'public@gofr.org') {
+        nav.menu.home.url = '/HomePublic'
+      }
       if(this.$store.state.idp === 'keycloak') {
         nav.menu.account = {
           text: this.$t('App.menu.account.msg'),
           order: 6,
           icon: 'mdi-account-outline',
           url: this.keycloak_account,
-          external: true
+          external: true,
+          access: {
+            permission: 'special',
+            resource: 'custom',
+            id: 'manage-account'
+          },
         }
       } else {
         nav.menu.account = {

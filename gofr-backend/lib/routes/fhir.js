@@ -219,7 +219,7 @@ router.put('/:partition/:resource/:id', (req, res) => {
 });
 
 router.get('/:partition/ValueSet/:id/\\$expand', (req, res) => {
-  const allowed = req.user.hasPermissionByName('read', 'ValueSet', req.params.id, req.params.partition);
+  const allowed = req.user.hasPermissionByName('read', 'ValueSet', req.params.id);
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
@@ -240,7 +240,7 @@ router.get('/:partition/ValueSet/:id/\\$expand', (req, res) => {
 });
 
 router.get('/:partition/CodeSystem/\\$lookup', (req, res) => {
-  const allowed = req.user.hasPermissionByName('read', 'CodeSystem', '', req.params.partition);
+  const allowed = req.user.hasPermissionByName('read', 'CodeSystem');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }

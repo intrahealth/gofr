@@ -695,7 +695,7 @@ router.post('/editSource', (req, res) => {
 });
 
 router.get('/getSource/:userID/:orgId?', (req, res) => {
-  const allowed = req.user.hasPermissionByName('special', 'custom', 'view-data-source');
+  const allowed = req.user.hasPermissionByName('special', 'custom', 'get-data-source');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
@@ -1486,7 +1486,7 @@ router.post('/resetDataSourcePair/:userID', (req, res) => {
 });
 
 router.get('/getSourcePair/:userID/:dhis2OrgId?', (req, res) => {
-  const allowed = req.user.hasPermissionByName('special', 'custom', 'view-source-pair');
+  const allowed = req.user.hasPermissionByName('special', 'custom', 'get-source-pair');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }

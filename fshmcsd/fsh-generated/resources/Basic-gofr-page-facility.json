@@ -38,7 +38,7 @@
         },
         {
           "url": "search",
-          "valueString": "Parent|partOf.reference"
+          "valueString": "Location|partOf.reference"
         },
         {
           "url": "search",

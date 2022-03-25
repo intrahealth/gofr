@@ -4,7 +4,6 @@
       ref="form"
       v-model="valid"
     >
-
       <slot :source="source"></slot>
       <v-overlay :value="overlay">
         <v-progress-circular

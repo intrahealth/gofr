@@ -37,6 +37,7 @@ nav:
   - User Guide:
       - user_guide/introduction.md
       - user_guide/data_sources.md
+      - user_guide/partitions.md
       - user_guide/facility_reconciliation.md
       - user_guide/facility_registry.md
       - user_guide/configure_system.md

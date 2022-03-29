@@ -5,7 +5,7 @@
 ## Overview
 
 !!! important "How do you manage users in gofr?"
-In order to manage  user access in gofr, you need to access the **Keycloak Administration Console**.
+In order to manage  user access in gofr, you need to access the **Keycloak Administration Console**. This should only be accessed by the system's Administrator.
 
 ![Alt text](../img/gofr_key_cloak.JPG 'GOFR Key CLoak Admin Console')
 
@@ -67,59 +67,10 @@ To delete a user ->
 ~~ Alternatively, you can use the search bar to find a user.~~
 
 3. Click the 'Delete' :delete: icon next to the user you want to remove and confirm deletion.
-Enabling account deletion by users
-End users and applications can delete their accounts in the Account Console if you enable this capability in the Admin Console. Once you enable this capability, you can give that capability to specific users.
-Enabling the Delete Account Capability
-You enable this capability on the Required Actions tab.
-Procedure
-1. Click Authentication in the menu.
-2. Click the Required Actions tab.
-3. Select Enabled on the Delete Account row.
-Delete account on required actions tab
 
-Giving a user the delete-account role
-You can give specific users a role that allows account deletion.
-Procedure
+## Credential management
 
-1. Click Users in the menu.
-2. Select a user.
-3. Click the Role Mappings tab.
-4. From the Client Roles list, select account.
-5. Under Available Roles, select delete-account.
-6. Click Add selected.
-Delete-account role
-
-Deleting your account
-Once you have the delete-account role, you can delete your own account.
-
-1. Log into the Account Console.
-2. At the bottom of the Personal Info page, click Delete Account.
-Delete account page
-
-3. Enter your credentials and confirm the deletion.
-Delete confirmation
-
- This action is irreversible. All your data in Keycloak will be removed.
-Configuring user attributes
-User attributes provide a customized experience for each user. You can create a personalized identity for each user in the console by configuring user attributes.
-Users
-
-Prerequisite
-• You are in the realm where the user exists.
-Procedure
-
-1. Click Users in the menu.
-2. Select a user to manage.
-3. Click the Attributes tab.
-4. Enter the attribute name in the Key field.
-5. Enter the attribute value in the Value field.
-6. Click Add.
-7. Click Save.
- Some read-only attributes are not supposed to be updated by the administrators. This includes attributes that are read-only by design like for example LDAP_ID, which is filled automatically by the LDAP provider. Some other attributes should be read-only for typical user administrators due to security reasons. See the details in the Mitigating security threats chapter.
-User credentials
-You can manage credentials of a user in the Credentials tab.
-Credential management
-
+You can manage credentials of a user in this tab
 This tab includes the following fields:
 Position
 The arrow buttons in the Position column allow you to shift the priority of the credential for the user. The topmost credential has the highest priority. The priority determines which credential is displayed first after a user logs in.

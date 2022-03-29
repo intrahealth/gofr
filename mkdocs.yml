@@ -48,6 +48,7 @@ nav:
       - developer_guide/mcsd.md
       - developer_guide/forms.md
       - developer_guide/server_administration.md
+      - developer_guide/key_cloak.md
 
 markdown_extensions:
   - pymdownx.emoji:

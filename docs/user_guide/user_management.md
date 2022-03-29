@@ -145,7 +145,7 @@ Alternatively, you can send an email to the user that requests the user reset th
 
 ## Required actions
 
-You can set the actions that a user must perform at the **first login**. These actions are required after the user provides credentials. After the first login, these actions are no longer required. You add required actions on the Details tab of that user.
+You can set the actions that a user must perform at the **first login**. These actions are required after the user provides credentials. After the first login, these actions are no longer required. You add required actions on the **Details** tab of that user.
 
 The following are examples of required action types:
 
@@ -154,15 +154,22 @@ The following are examples of required action types:
 The **user must change their password**, once they log in.
 
 ### Configure OTP
-The user must configure a one-time password generator on their mobile device using either the Free OTP or Google Authenticator application.
-Verify Email
-The user must verify their email account. An email will be sent to the user with a validation link that they must click. Once this workflow is successfully completed, the user will be allowed to log in.
-Update Profile
+
+The **user must configure a one-time password generator** on their **mobile device** using either the Free OTP or Google Authenticator application.
+
+### Verify Email
+
+The **user must verify their email account**. An email will be sent to the user with a **validation link** that they must click. Once this workflow is successfully completed, the user will be allowed to log in.
+
+### Update Profile
+
 The user must update profile information, such as name, address, email, and phone number.
-Setting required actions for one user
-Edit this sectionReport an issue
+
+### Setting required actions for one user
+
 You can set the actions that are required for any user.
-Procedure
+To set actions required for a user ->
+
 1. Click Users in the menu.
 2. Select a user from the list.
 3. Navigate to the Required User Actions list.
@@ -170,24 +177,28 @@ Procedure
 4. Select all the actions you want to add to the account.
 5. Click the X next to the action name to remove it.
 6. Click Save after you select which actions to add.
-Setting required actions for all users
-Edit this sectionReport an issue
-You can specify what actions are required before the first login of all new users. The requirements apply to a user created by the Add User button on the Users page or the Register link on the login page.
-Procedure
-1. Click Authentication in the menu.
-2. Click the Required Actions tab.
-3. Click the checkbox in the Default Action column for one or more required actions. When a new user logs in for the first time, the selected actions must be executed.
-Enabling terms and conditions as a required action
-Edit this sectionReport an issue
-You can enable a required action that new users must accept the terms and conditions before logging in to Keycloak for the first time.
-Procedure
+
+
+### Setting required actions for all new users
+
+You can specify what **actions** are **required before the first login of all new users**. The requirements apply to a user created by the **Add User** button on the **Users** page or the **Register** link on the **login page**.
+
+To set a **required action** for **all new users**->
+
+1. Click **Authentication** in the menu.
+2. Click the **Required Actions** tab.
+3. Click the **checkbox** in the **Default Action** column for one or more required actions. _When a new user logs in for the first time, the selected actions must be executed._
+
+### Enabling terms and conditions as a required action
+
+You can enable a required action that new users must accept the **terms and conditions** before logging in to Keycloak for the first time. To enable ->
+
 1. Click Authentication in the menu.
 2. Click the Required Actions tab.
 3. Enable the Terms and Conditions action.
 4. Edit the terms.ftl file in the base login theme.
-Additional resources
-• For more information on extending and creating themes, see the Server Developer Guide.
-User impersonation
+
+### User impersonation
 An administrator with the appropriate permissions can impersonate a user. For example, if a user experiences a bug in an application, an administrator can impersonate the user to investigate or duplicate the issue.
 Any user with the impersonation role in the realm can impersonate a user.
 Image:keycloak-images/user-details.png[]

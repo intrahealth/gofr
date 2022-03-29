@@ -90,7 +90,6 @@ router.get('/:partition/:resource/:id?', (req, res, next) => {
 
 router.post('/:partition/:resource', (req, res) => {
   const allowed = req.user.hasPermissionByObject('write', req.body, req.params.partition);
-
   let resource;
   if (allowed === true) {
     resource = req.body;

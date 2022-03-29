@@ -7,7 +7,6 @@
 <script>
 import Vue from 'vue'
 import axios from 'axios'
-let requestAction
 
 export default {
   name: "fhir-page-search",
@@ -17,7 +16,6 @@ export default {
     }
   },
   created: function() {
-    requestAction = this.requestAction
     this.getTemplate()
   },
   methods: {
@@ -45,7 +43,7 @@ export default {
                 fields: data.data.fields,
                 addLink: data.data.addLink,
                 terms: {},
-                requestAction: requestAction,
+                requestAction: this.$route.params.requestAction,
                 searchAction: this.$route.query.searchAction
               }
             },
@@ -69,9 +67,6 @@ export default {
         this.$forceUpdate()
       })
     }
-  },
-  beforeDestroy() {
-    requestAction = ""
   },
   beforeCreate: function() {
     Vue.component('gofr-template', { template: '<div>Loading...</div>' } )

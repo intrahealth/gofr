@@ -28,7 +28,7 @@
       <v-list-item-title class="white--text">Navigator</v-list-item-title>
     </v-list-item>
 
-    <v-divider dark class="white--text"></v-divider>
+    <v-divider color="white"></v-divider>
     <v-list
       nav
       dark

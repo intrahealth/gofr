@@ -5,6 +5,7 @@ import {store} from './store/store'
 import i18n from './i18n'
 import vuetify from './plugins/vuetify';
 import vuelidate from 'vuelidate'
+import { uuid } from 'vue-uuid'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import VueCookies from 'vue-cookies'
@@ -91,14 +92,40 @@ function addDHIS2StoreConfig (config) {
   axios.post(dhis2URL + 'api/dataStore/GOFR/config', config)
 }
 
-function authenticatePublicUser(genConfig) {
+function gofrAuthenticatePublicUser() {
   return new Promise((resolve) => {
-    if (VueCookies.get("public_access") == 'false' || genConfig.public_access.enabled === false) {
+    axios
+    .post('/auth/login/', {username: 'public@gofr.org', password: 'public'})
+    .then(authResp => {
+      store.state.auth.username = 'public@gofr.org'
+      store.state.auth.userObj = authResp.data.userObj
+      store.state.auth.userID = authResp.data.userObj.resource.id
+      if (authResp.data.userObj) {
+        store.state.public_access = true
+        store.state.clientId = uuid.v4()
+        store.state.initializingApp = true
+        store.state.denyAccess = false
+        resolve()
+      } else {
+        store.state.public_access = false
+        resolve()
+      }
+    }).catch(() => {
+      store.state.public_access = false
+      resolve()
+    })
+  })
+}
+
+function kcAuthenticatePublicUser(genConfig) {
+  return new Promise((resolve) => {
+    if (genConfig.public_access.enabled === false) {
       return resolve(false)
     }
     Vue.$keycloak.init({onLoad: 'check-sso', checkLoginIframe: false}).then( () => {
       //if already authenticated then skip
-      if(Vue.$keycloak.token) {
+      if(Vue.$keycloak.token || VueCookies.get('loggedout-public') == 'true') {
+        VueCookies.set('loggedout-public', false)
         return resolve(false)
       }
       const url = store.state.keycloak.baseURL + '/realms/' + store.state.keycloak.realm + '/protocol/openid-connect/token'
@@ -108,6 +135,7 @@ function authenticatePublicUser(genConfig) {
         let token = resp.data.access_token
         let refreshToken = resp.data.refresh_token
         Vue.$keycloak.init({onLoad: 'login-required', checkLoginIframe: false, token, refreshToken}).then( () => {
+          store.state.public_access = true
           axios.interceptors.request.use((config) => {
             config.headers['Authorization'] = `Bearer ${resp.data.access_token}`
             return config
@@ -139,7 +167,6 @@ function authenticatePublicUser(genConfig) {
             store.state.auth.userObj = response.data
             store.state.auth.userID = userinfo.sub
             store.state.auth.username = 'public@gofr.org'
-            store.state.public_access = true
             renderApp(genConfig)
             resolve(true)
           }).catch((err) => {
@@ -217,9 +244,8 @@ getDHIS2StoreConfig((storeConfig) => {
         })
       }
       Vue.use(Plugin)
-      let authenticated = await authenticatePublicUser(genConfig)
+      let authenticated = await kcAuthenticatePublicUser(genConfig)
       if(!authenticated) {
-        VueCookies.set("public_access", true)
         if(!keycloak.token) {
           await keycloak.init({onLoad: initOptions.onLoad}).then( auth => {
             if (!auth) {
@@ -236,6 +262,11 @@ getDHIS2StoreConfig((storeConfig) => {
           return Promise.reject(error)
         })
         keycloak.loadUserInfo().then((userinfo) => {
+          if(userinfo.preferred_username === 'public@gofr.org') {
+            store.state.public_access = true
+          } else {
+            store.state.public_access = false
+          }
           let user = {
             resourceType: 'Person',
             id: userinfo.sub,
@@ -276,7 +307,7 @@ getDHIS2StoreConfig((storeConfig) => {
       axios({
         method: 'GET',
         url: '/auth'
-      }).then((authResp) => {
+      }).then(async(authResp) => {
         if(authResp.data.userObj && authResp.data.userObj.resource) {
           let telecom = authResp.data.userObj.resource.telecom.find((telecom) => {
             return telecom.system === 'email'
@@ -284,8 +315,16 @@ getDHIS2StoreConfig((storeConfig) => {
           if(telecom) {
             store.state.auth.username = telecom.value
           }
+          if(store.state.auth.username === 'public@gofr.org') {
+            store.state.public_access = true
+          } else {
+            store.state.public_access = false
+          }
           store.state.auth.userObj = authResp.data.userObj
           store.state.auth.userID = authResp.data.userObj.resource.id
+          VueCookies.set('userObj', JSON.stringify(authResp.data.userObj), 'infinity')
+        } else if (genConfig.public_access.enabled === true) {
+          await gofrAuthenticatePublicUser()
         }
         Vue.prototype.$keycloak = null
         renderApp(genConfig)

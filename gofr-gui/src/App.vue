@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <appToolbar></appToolbar>
-    <appSideMenu></appSideMenu>
+    <appSideMenu v-if="$store.state.auth.userID"></appSideMenu>
     <v-main>
       <v-dialog
         v-model="$store.state.dynamicProgress"

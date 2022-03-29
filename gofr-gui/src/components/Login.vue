@@ -125,6 +125,7 @@ export default {
           this.$store.state.auth.userObj = authResp.data.userObj
           this.$store.state.auth.userID = authResp.data.userObj.resource.id
           if (authResp.data.userObj) {
+            this.$store.state.public_access = false
             this.$store.state.clientId = uuid.v4()
             this.$store.state.initializingApp = true
             this.$store.state.denyAccess = false

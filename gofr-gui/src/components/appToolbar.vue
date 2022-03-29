@@ -9,8 +9,10 @@
   >
     
     <img src="../assets/GOFR_RGB_high-res.png" width="220" />
-    <v-spacer></v-spacer>
-    {{$store.state.auth.username}} <v-icon>mdi-account</v-icon>
+    <template v-if="$store.state.auth.userID">
+      <v-spacer></v-spacer>
+      {{$store.state.auth.username}} <v-icon>mdi-account</v-icon>
+    </template>
     <v-spacer></v-spacer>
     <v-toolbar-items>
       <template v-if="($keycloak && $keycloak.authenticated) || $store.state.auth.userID || $store.state.config.generalConfig.authDisabled">
@@ -37,12 +39,14 @@
           color="green"
         ></v-radio>
       </v-radio-group>
-      <v-btn color="white" light to="/logout" small v-if="!$store.state.public_access">
-        <v-icon>mdi-logout</v-icon>Logout
-      </v-btn>
-      <v-btn color="white" light to="/logout-public" small v-else>
-        <v-icon>mdi-login</v-icon>Login
-      </v-btn>
+      <template v-if="$store.state.auth.userID">
+        <v-btn color="white" light to="/logout" small v-if="!$store.state.public_access">
+          <v-icon>mdi-logout</v-icon>Logout
+        </v-btn>
+        <v-btn color="white" light to="/logout-public" small v-else>
+          <v-icon>mdi-login</v-icon>Login
+        </v-btn>
+      </template>
     </v-toolbar-items>
   </v-app-bar>
 </template>

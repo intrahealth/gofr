@@ -338,6 +338,11 @@ User.prototype.updatePermissions = async function (roleResources) {
                     "meta.profile contains 'http://gofr.org/fhir/StructureDefinition/gofr-facility-update-request' or meta.profile contains 'http://gofr.org/fhir/StructureDefinition/gofr-facility-add-request'": true,
                   },
                 },
+                QuestionnaireResponse: {
+                  constraint: {
+                    "questionnaire='http://gofr.org/fhir/Questionnaire/gofr-facility-add-request-questionnaire'": true,
+                  },
+                },
               },
             };
             this.permissions.partitions.push(partAcc);
@@ -472,7 +477,7 @@ User.prototype.getFilter = function (resource) {
 User.prototype.hasPermissionByObject = function (permission, resource, partition) {
   // First get the base permissions by name then see what constraints
   // apply. Don't get by ID as we need to determine if that was how it matched.
-  const permissions = this.hasPermissionByName(permission, resource.resourceType, partition);
+  const permissions = this.hasPermissionByName(permission, resource.resourceType, '', partition);
   if (permissions === true) {
     return true;
   }

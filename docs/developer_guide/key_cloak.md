@@ -19,3 +19,30 @@ You can also delegate authentication to third party identity providers like Face
 The initial server configuration includes an administrator account assigned the  **administrator** role in keycloak by default.
 
 This account and password should be immediately changed after installation.
+
+!!! important Install keycloak only if you want to use it as an identity provider. Follow instructions in here <https://www.keycloak.org/docs/latest/getting_started/index.html#installing-the-server> to install keycloak.
+
+
+ Modify keycloak base URL to keycloak/auth by changing web-context in standalone/configuration/standalone.xml to keycloak/auth. 
+ 
+ This will make keycloak accessible via <http://localhost:8080/keycloak/auth>
+
+ Copy GOFR keycloak theme to keycloak
+
+     cp -r gofr/resources/keycloak/themes/gofr keycloak/themes/
+
+ Load GOFR keycloak realm
+
+  Before loading the realm, make sure that Keycloak is running, if not running, please use below command to start it
+
+     bin/standalone.sh
+  
+  To load the realm, first login to keycloak by running below command
+
+     ./kcadm.sh config credentials --server <http://localhost:8080/keycloak/auth> --realm master --user admin --password admin
+  
+  where **username** and **password** refers to an admin account that has access to the master realm
+
+  Now load the GOFR keycloak realm with below command
+
+     ./kcadm.sh create realms -f gofr/resources/keycloak/realm.json_

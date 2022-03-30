@@ -170,8 +170,6 @@ export default {
         this.$store.commit('setMessage', { type: 'error', text: 'There were errors on the form.' })
         return
       }
-      console.log("SAVE",this.fhir)
-      console.error(JSON.stringify(this.fhir,0,2));
       axios({
         url: "/fhir/" + this.$store.state.config.userConfig.FRDatasource + "/QuestionnaireResponse?"+querystring.stringify(this.$route.query),
         method: "POST",

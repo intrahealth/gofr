@@ -12,11 +12,50 @@ import VueCookies from 'vue-cookies'
 import VueSession from 'vue-session'
 import VueJwtDecode from 'vue-jwt-decode'
 import * as Keycloak from 'keycloak-js';
+let ProgressBar = require('progressbar.js');
 import 'whatwg-fetch'
 import fhirpath from "fhirpath"
 import fhirutils from "./plugins/fhirutils"
 import { tasksVerification } from '@/modules/tasksVerification'
 import guiConfig from '../config/config.json'
+
+const div = document.createElement("div");
+div.setAttribute('id', 'container')
+document.body.appendChild(div);
+
+
+var bar = new ProgressBar.Line('#container', {
+  strokeWidth: 1,
+  easing: 'easeInOut',
+  duration: 1400,
+  color: 'black',
+  trailColor: '#eee',
+  trailWidth: 1,
+  svgStyle: {width: '100%', height: '100%'},
+  from: {color: '#FFEA82'},
+  to: {color: '#ED6A5A'},
+  step: (state, bar) => {
+    bar.path.setAttribute('stroke', state.color);
+    bar.setText("Loading...");
+  }
+});
+
+let progress = 0.0
+let progressType = 'increment'
+const loading = setInterval(() => {
+  if(progress >= 1) {
+    progressType = 'decrement'
+  } else if (progress <= 0) {
+    progressType = 'increment'
+  }
+  if(progressType === 'increment') {
+    progress = (parseFloat(progress) + 0.1).toFixed(1)
+  } else {
+    progress = (parseFloat(progress) - 0.1).toFixed(1)
+  }
+  bar.animate(progress);
+  console.log(progress);
+}, 1100);
 
 Object.defineProperty(Vue.prototype, '$fhirpath', {
   value: fhirpath
@@ -136,6 +175,9 @@ function kcAuthenticatePublicUser(genConfig) {
         let refreshToken = resp.data.refresh_token
         Vue.$keycloak.init({onLoad: 'login-required', checkLoginIframe: false, token, refreshToken}).then( () => {
           store.state.public_access = true
+          setInterval(() =>{
+            Vue.$keycloak.updateToken(70)
+          }, 60000)
           axios.interceptors.request.use((config) => {
             config.headers['Authorization'] = `Bearer ${resp.data.access_token}`
             return config
@@ -181,6 +223,7 @@ function kcAuthenticatePublicUser(genConfig) {
 }
 
 function renderApp(genConfig) {
+  clearInterval(loading)
   new Vue({
     router,
     store,

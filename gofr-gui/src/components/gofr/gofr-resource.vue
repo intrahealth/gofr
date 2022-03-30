@@ -301,7 +301,8 @@ export default {
         },
         data: {
           resource: this.source.data,
-          requestStatus: newStatus
+          requestStatus: newStatus,
+          requestUpdatingResource: this.$store.state.requestResourceUpdateData.requestUpdatingResource
         }
       }
       this.overlay = true

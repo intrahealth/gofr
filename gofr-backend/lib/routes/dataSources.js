@@ -911,6 +911,7 @@ router.get('/countLevels', (req, res) => {
               }
               return callback(false, levelMapping);
             }
+            return callback(false, {});
           });
         },
         levelMapping2(callback) {
@@ -941,6 +942,7 @@ router.get('/countLevels', (req, res) => {
               }
               return callback(false, levelMapping);
             }
+            return callback(false, {});
           });
         },
       }, (err, mappings) => callback(false, mappings));

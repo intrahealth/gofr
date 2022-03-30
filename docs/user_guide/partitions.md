@@ -41,7 +41,7 @@ Once a different active partition is chosen, the information displayed automatic
 
 ## Public Partition
 
-The public partition refers to the partition which is shared/viewed to the public. This partition is tied to a user with limited viewing only rights.
+The public partition refers to the partition which is shared to/viewed by the public. This partition is tied to a user with limited viewing only rights.
 
 ## Partition Sharing
 
@@ -55,6 +55,3 @@ A partition owner(the creator of the partition) can share it with one or all oth
 * Update Jurisdictions
 * Update Health Care services
 * Update Organizations
-
-
-

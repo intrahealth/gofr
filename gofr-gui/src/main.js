@@ -25,15 +25,15 @@ document.body.appendChild(div);
 
 
 var bar = new ProgressBar.Line('#container', {
-  strokeWidth: 1,
+  strokeWidth: 2,
   easing: 'easeInOut',
-  duration: 1400,
+  duration: 1000,
   color: 'black',
   trailColor: '#eee',
   trailWidth: 1,
   svgStyle: {width: '100%', height: '100%'},
-  from: {color: '#FFEA82'},
-  to: {color: '#ED6A5A'},
+  from: {color: '#569fd3'},
+  to: {color: '#d06f1a'},
   step: (state, bar) => {
     bar.path.setAttribute('stroke', state.color);
     bar.setText("Loading...");

@@ -1,17 +1,17 @@
 # Facility Reconciliation
 
 !!! important "What is the Facility Reconciliation?"
-Facility Reconciliation reconciles data sources, which usually involves choosing a pair of sources to work with and then running the automatic or manual matching tool.
+Facility Reconciliation reconciles **data sources**, which usually involves choosing a pair of sources to work with and then running the **automatic** or **manual matching** tool.
 
-## Reconcile
+ **Reconcile**
 
-Reconciling data sources involves choosing a pair of sources to work with and then running the automatic or manual matching GOFR. Any kind of match can be undone.
+Reconciling data sources involves choosing a pair of sources to work with and then running the **automatic reconcile** or **manual matching** in GOFR. Any kind of match can be undone.
 
-### Create and Manage Data Source Pair
+## **Create and Manage Data Source Pair**
 
-To match/reconcile two data sources, you first need to create a data source pair. The source on the left (source 1) is the leader – the source of truth. The source on the right is the follower, the source that is meant to be cleaned.
+To match/reconcile two data sources, you first need to create a **data source pair**. The source on the left (source 1) is the **leader** – the source of truth. The source on the right is the **follower**, the source that is meant to be cleaned.
 
-To create a data source pair, On the Reconcile tab -> Select Create and Manage Data Source Pair page.
+To create a data source pair, On the **Reconcile** tab -> Select **Create and Manage Data Source Pair** page.
 
 ![Alt text](../img/create_data_source_pair.JPG 'GOFR Reconcile')
 
@@ -19,9 +19,10 @@ On the pair tab select one source on the left and one on the right.
 
 In the pairing process it is possible to share the pair with another user who may join in helping to match, for example where they are familiar with a specific area.
 
-### Automatic Reconcile
+## **Automatic Reconcile**
 
 When the reconciliation process starts it uses automatic matching. Matching proceeds like this:
+
 
  <p>  The first level matches the highest administrative area names (termed region in GOFR) using the <a href="https://en.wikipedia.org/wiki/Levenshtein_distance"> Levenshtein distance.</a> </p>
 
@@ -47,7 +48,9 @@ During the matching process at any level, it is possible to ask GOFR to match un
 
 One common use for this is after manual matching of any entities, to rerun the matching process and incorporate the results. This can also be used when an entity is is freed for matching after having been previously flagged.
 
-### Manual Matching
+## **Manual Matching**
+
+In GOFR, there is the option of manual matching of facilities where the user manually matches facilities
 
 <p>  Manual matching brings up a dialog box to choose options. If latitude and longitude coordinates were provided in the data sources, it additionally scores matches based on the <a href="https://en.wikipedia.org/wiki/Haversine_formula"> haversine formula </a>for shortest path across a sphere (geodesic distance) between the points </p>
 

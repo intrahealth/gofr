@@ -20,10 +20,10 @@ There are various ways of creating partitions in GOFR. They include:
 
 3. **Using a  Blank Source**- A partition can be created by addins a blank data source which is thereafter manually populated with data by activating it on the dashboard and use the facility registry functionality to populate its contents.
 
-4. **Merging two data sources** - Using the Facility Reconciliation tool, once two data sources are merged, a new partition is created in GOFR, thereby allowing for manipulation / analysis of the partition as a new partition.
+4. **Merging two data sources** - Using the Facility Reconciliation tool, once two data sources are merged, a new partition is created in GOFR (*data source pair*), thereby allowing for manipulation / analysis of the partition as a new partition.
 
 
-## Features of partitions
+## Key points to note about partitions
 
 ### **User specific** 
 
@@ -43,11 +43,19 @@ The creator gives the rights to view, add/update the facilities, organizations, 
 
 Permissions can also be revoked. The user can at any time revoke a specific permission/all permissions to any user they may have given the rights to at will.
 
+### **Deleting a partition**
+
+A partition can only be deleted by the creator. A user cannot delete a partition shared to them by another user. A deleted partition is deleted for all users and it is no longer available in the system
+
+!!! important " Deleting a partition will not delete the data pairs created using that partition. "
+
 ## Active Partition
 
-The active partition in GOFR is the partition which is in active use for a particular user in the system. This means that the visualizations,stats, the lists of facilities, organizations and services etc. displayed are those of the active partition for a particular user.
+The **active partition** in GOFR is the partition which is in active use for a particular user in the system. This means that the visualizations,stats, the lists of facilities, organizations and services etc. displayed are those of the active partition for a particular user.
 
-Once a different active partition is chosen, the information displayed automatically changes to the data contained in the chosen partition. A user cna change the active partitition by selecting a partition from the list of partitions he/she has access to in the system.
+Once a different active partition is chosen, the information displayed automatically changes to the data contained in the chosen partition.
+
+ A user can change the active partitition by selecting a partition from the list of partitions he/she has access to in the system.
 
 ## Public Partition
 
@@ -57,7 +65,7 @@ The public partition is activated by the system administator under the 'Configur
 
 ## Partition Sharing
 
-A partition owner(the creator of the partition) can share it with one or all other users, and assign specific permissions i.e
+A partition owner(the creator of the partition) can share it with one or all other users, and assign specific permissions i.e.
 
 * View Facilities
 * View Jurisdictions
@@ -67,3 +75,7 @@ A partition owner(the creator of the partition) can share it with one or all oth
 * Update Jurisdictions
 * Update Health Care services
 * Update Organizations
+
+To share a partition, 
+
+Once a partition is shared to another user, that user can be able to access the partition subject to the permissions shared. The user can also be able to carry out reconciliation on the shared partition.

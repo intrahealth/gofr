@@ -6,13 +6,13 @@
 
 ## 2. Install tomcat
 
- sudo apt install tomcat9
+    sudo apt install tomcat9
 
-### 3.  Install postgres (version 9.3 or above)
+## 3.  Install postgres (version 9.3 or above)
 
-### 4. Install HAPI FHIR
+## 4. Install HAPI FHIR
 
-#### a) Create Database
+### a) Create Database
 
     sudo -u postgres psql
     create database hapi;
@@ -20,7 +20,7 @@
     grant all privileges on database hapi to hapi;
     \q
 
-#### b) Install maven to compile hapi
+### b) Install maven to compile hapi
 
     sudo apt install maven
     git clone <https://github.com/hapifhir/hapi-fhir-jpaserver-starter.git>
@@ -70,19 +70,19 @@
      sudo chown tomcat:tomcat /var/lib/tomcat9/target
      sudo cp target/hapi.war /var/lib/tomcat9/webapps
 
-#### c) Load Basic Definitions
+### c) Load Basic Definitions
 
  Download and install hapi-fhir-cli:  <a href="https://hapifhir.io/hapi-fhir/docs/tools/hapi_fhir_cli.html"> here</a> </p>
 
  Load definitions with below commands ./hapi-fhir-cli upload-definitions -v r4 -t <a href="http://localhost:8080/hapi/fhir"> here </a> </p>
 
-### 5. Keycloak Installation
+## 5. Keycloak Installation
 
  !!! Important "Install keycloak only if you want to use it as an identity provider."
 
  Follow instructions  <a href="https://www.keycloak.org/docs/latest/getting_started/index.html#installing-the-server"> here</a> </p>
 
-### 6. Keycloak Configuration
+## 6. Keycloak Configuration
 
  Modify keycloak base URL to keycloak/auth by changing web-context in standalone/configuration/standalone.xml to keycloak/auth.
 
@@ -108,25 +108,25 @@
 
      ./kcadm.sh create realms -f gofr/resources/keycloak/realm.json_
 
-### 7. Clone GOFR github repository
+## 7. Clone GOFR github repository
 
     git clone <https://github.com/intrahealth/gofr.git>
 
-### 8. Install dependencies
+## 8. Install dependencies
 
     cd gofr/gofr-backend
     npm install
 
-### .9 Running GOFR in production mode
+## 9 Running GOFR in production mode
 
     cd gofr/gofr-backend/lib
     node app.js
 
-### 10. Accessing GOFR
+## 10. Accessing GOFR
 
     <http://localhost:4000>
 
-### 11. Running GOFR in Development Mode
+## 11. Running GOFR in Development Mode
 
  a) Install UI dependencies
 
@@ -142,9 +142,9 @@
     cd gofr/gofr-backend/lib
     node app.js
 
-### 12. Configuration Parameters
+## 12. Configuration Parameters
 
-**a) app.installed** 
+**a) app.installed**
 
 Used to control when to load default data needed for GOFR to run, GOFR will set it to true when all data are loaded successfully.
 

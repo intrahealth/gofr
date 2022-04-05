@@ -20,7 +20,7 @@ The initial server configuration includes an administrator account assigned the 
 
 This account and password should be immediately changed after installation.
 
-!!! important Install keycloak only if you want to use it as an identity provider. Follow instructions in here <https://www.keycloak.org/docs/latest/getting_started/index.html#installing-the-server> to install keycloak.
+!!! important " Install keycloak only if you want to use it as an identity provider. Follow instructions here <https://www.keycloak.org/docs/latest/getting_started/index.html#installing-the-server> to install keycloak." 
 
 
  Modify keycloak base URL to keycloak/auth by changing web-context in standalone/configuration/standalone.xml to keycloak/auth. 

@@ -14,7 +14,7 @@ To know what partition you are on, see the list on the top left, which allows sw
 
 There are various ways of creating partitions in GOFR. They include:
 
-1. **Uploading a CSV**- Uploading a CSV with relevant facility data into GOFR creates a partition
+1. **Uploading a CSV**- Uploading a CSV with relevant facility data into GOFR creates a partition with the data contained in the CSV
 
 2. **Using a Remote Source** -If a user has credentials to access a DHIS2 or FHIR server, they can use it as a remote data source to populate data into GOFR, thereby creating a new partition
 
@@ -41,17 +41,19 @@ The creator gives the rights to view, add/update the facilities, organizations, 
 
 ####Revoking rights
 
-Permissions can also be revoked. The user can revoke a specific permission/all permissions to any user they may have given the rights to
+Permissions can also be revoked. The user can at any time revoke a specific permission/all permissions to any user they may have given the rights to at will.
 
 ## Active Partition
 
 The active partition in GOFR is the partition which is in active use for a particular user in the system. This means that the visualizations,stats, the lists of facilities, organizations and services etc. displayed are those of the active partition for a particular user.
 
-Once a different active partition is chosen, the information displayed automatically changes to the data contained in the chosen partition
+Once a different active partition is chosen, the information displayed automatically changes to the data contained in the chosen partition. A user cna change the active partitition by selecting a partition from the list of partitions he/she has access to in the system.
 
 ## Public Partition
 
 The public partition refers to the partition which is shared to/viewed by the public. This partition is tied to a user with limited viewing only rights.
+
+The public partition is activated by the system administator under the 'Configure system' tab.
 
 ## Partition Sharing
 

@@ -17,7 +17,9 @@ Also, **GOFR** is an **open-source system** which is is easy to install and can 
 
 ## Log In
 
-In order to access gofr, type the gofr url (web address) into the address bar of any browser A sample login screen is shown in the figure below.
+In order to access gofr, type the gofr url (web address) into the address bar of any browser.
+
+A sample login screen is shown in the figure below.
 
 ![Alt text](../img/gofrlogin.JPG 'GOFR Login Page')
 

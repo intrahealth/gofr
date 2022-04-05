@@ -6,6 +6,10 @@ A partition in GOFR refers to a data set that is stored separately from other so
 
 Since GOFR allows the use of multiple data sources, partitioning ensures the integrity of each data set, while also allowing the merging of different datasets to create new data sets i.e new partitions
 
+Data in gofr is loaded into a partition. Users may have access to one or many partitions, some of which they may own or be able to share. Admins may view all partitions.
+
+To know what partition you are on, see the list on the top left, which allows switching partitions.
+
 ## How are partitions created in GOFR?
 
 There are various ways of creating partitions in GOFR. They include:
@@ -31,7 +35,13 @@ Once a partition is created, the creator (owner)can share it to other users who 
 
 ### **Permissions**
 
+####Issuing rights
+
 The creator gives the rights to view, add/update the facilities, organizations, health services and jurisdictions at the point of sharing it with other users. A user can only share a partition which they own.
+
+####Revoking rights
+
+Permissions can also be revoked. The user can revoke a specific permission/all permissions to any user they may have given the rights to
 
 ## Active Partition
 

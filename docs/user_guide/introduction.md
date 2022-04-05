@@ -23,7 +23,7 @@ A sample login screen is shown in the figure below.
 
 ![Alt text](../img/gofrlogin.JPG 'GOFR Login Page')
 
-The email address and the user password are required to login to the system. On clicking the Login button, the details entered are validated and one is allowed access if the details are correct. Otherwise, access is denied.
+The **email address** and the user **password** are required to login to the system. On clicking the Login button, the details entered are validated and one is allowed access if the details are correct. Otherwise, access is denied.
 
 ## Reset Password
 

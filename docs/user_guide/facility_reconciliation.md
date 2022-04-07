@@ -1,3 +1,4 @@
+
 # Facility Reconciliation
 
 !!! important "What is the Facility Reconciliation?"
@@ -22,7 +23,6 @@ In the pairing process it is possible to share the pair with another user who ma
 ## **Automatic Reconcile**
 
 When the reconciliation process starts it uses automatic matching. Matching proceeds like this:
-
 
  <p>  The first level matches the highest administrative area names (termed region in GOFR) using the <a href="https://en.wikipedia.org/wiki/Levenshtein_distance"> Levenshtein distance.</a> </p>
 

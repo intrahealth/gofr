@@ -321,6 +321,7 @@ const fhirQuestionnaire = {
             }
             const question = questionnaireRef[item.linkId];
             const simple = ['date', 'string', 'dateTime', 'text', 'attachment'];
+            console.error(JSON.stringify(question, 0, 2));
             const data = { linkId: item.linkId, definition: item.definition, q: question.type };
             if (item.definition.includes('extension')) {
               logger.silly('EXT', question, item);

@@ -256,6 +256,10 @@ let router = new Router({
       })
     }
   }, {
+    path: "/resourceFilter/:questionnaire/:page",
+    name: 'questionnaire',
+    component: () => import("../components/resourceFilter.vue")
+  }, {
     path: "/questionnaire/:questionnaire/:page",
     name: 'questionnaire',
     component: () => import("../components/FacilityRegistry/fhir-page-questionnaire.vue")

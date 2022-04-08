@@ -329,6 +329,7 @@ router.get('/page/:page/:type?', (req, res) => {
   //   return res.status(403).json(outcomes.DENIED);
   // }
   fhirAxios.read('Basic', page, '', 'DEFAULT').then(async (resource) => {
+    console.error(JSON.stringify(resource, 0, 2));
     const pageDisplay = resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/gofr-page-display');
 
     const pageResource = pageDisplay.extension.find(ext => ext.url === 'resource').valueReference.reference;

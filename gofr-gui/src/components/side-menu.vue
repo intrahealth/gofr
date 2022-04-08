@@ -179,6 +179,7 @@ export default {
         let entry = {
           id: menu_id,
           text: this.nav.menu[menu_id].text,
+          tooltip: this.nav.menu[menu_id].tooltip,
           icon: this.nav.menu[menu_id].icon,
           order: this.nav.menu[menu_id].order
         }
@@ -201,6 +202,7 @@ export default {
             let sub = {
               id: sub_id,
               text: this.nav.menu[menu_id].menu[sub_id].text,
+              tooltip: this.nav.menu[menu_id].menu[sub_id].tooltip,
               icon: this.nav.menu[menu_id].menu[sub_id].icon,
               order: this.nav.menu[menu_id].menu[sub_id].order
             }
@@ -223,6 +225,7 @@ export default {
                 let sub_sub = {
                   id: sub_sub_id,
                   text: this.nav.menu[menu_id].menu[sub_id].menu[sub_sub_id].text,
+                  tooltip: this.nav.menu[menu_id].menu[sub_id].menu[sub_sub_id].tooltip,
                   icon: this.nav.menu[menu_id].menu[sub_id].menu[sub_sub_id].icon,
                   url: this.nav.menu[menu_id].menu[sub_id].menu[sub_sub_id].url,
                   order: this.nav.menu[menu_id].menu[sub_id].menu[sub_sub_id].order,
@@ -257,6 +260,7 @@ export default {
         menu: {
           home: {
             text: this.$t('App.menu.home.msg'),
+            tooltip: this.$t('App.menu.home.tooltip'),
             order: 1,
             icon: 'mdi-home',
             url: '/home',
@@ -269,6 +273,7 @@ export default {
           datasources: {
             order: 2,
             text: this.$t('App.menu.dataSourcesParent.msg'),
+            tooltip: this.$t('App.menu.dataSourcesParent.tooltip'),
             icon: 'mdi-sync',
             access: {
               permission: 'special',
@@ -278,6 +283,7 @@ export default {
             menu: {
               adddatasource: {
                 text: this.$t('App.menu.addDataSources.msg'),
+                tooltip: this.$t('App.menu.addDataSources.tooltip'),
                 icon: 'mdi-cloud-upload',
                 url: '/AddDataSources',
                 access: {
@@ -288,6 +294,7 @@ export default {
               },
               viewdatasource: {
                 text: this.$t('App.menu.viewDataSources.msg'),
+                tooltip: this.$t('App.menu.viewDataSources.tooltip'),
                 icon: 'mdi-format-list-bulleted-square',
                 url: '/ViewDataSources',
                 access: {
@@ -301,6 +308,7 @@ export default {
           facilityregistry: {
             order: 3,
             text: this.$t('App.menu.facilityRegistry.msg'),
+            tooltip: this.$t('App.menu.facilityRegistry.tooltip'),
             icon: 'mdi-map-marker',
             access: {
               permission: 'special',
@@ -310,6 +318,7 @@ export default {
             menu: {
               searchfr: {
                 text: this.$t('App.menu.search.msg'),
+                tooltip: this.$t('App.menu.search.tooltip'),
                 icon: 'mdi-magnify',
                 access: {
                   permission: 'special',
@@ -319,6 +328,7 @@ export default {
                 menu: {
                   searchfacility: {
                     text: this.$t('App.menu.searchFacility.msg'),
+                    tooltip: this.$t('App.menu.searchFacility.tooltip'),
                     icon: 'mdi-magnify',
                     url: '/Resource/Search/facility',
                     access: {
@@ -329,6 +339,7 @@ export default {
                   },
                   searchjurisdiction: {
                     text: this.$t('App.menu.searchJurisdiction.msg'),
+                    tooltip: this.$t('App.menu.searchJurisdiction.tooltip'),
                     icon: 'mdi-magnify',
                     url: '/Resource/Search/jurisdiction',
                     access: {
@@ -339,6 +350,7 @@ export default {
                   },
                   searchorganization: {
                     text: this.$t('App.menu.searchOrganization.msg'),
+                    tooltip: this.$t('App.menu.searchOrganization.tooltip'),
                     icon: 'mdi-magnify',
                     url: '/Resource/Search/mcsd-organization',
                     access: {
@@ -349,6 +361,7 @@ export default {
                   },
                   searchservice: {
                     text: this.$t('App.menu.searchService.msg'),
+                    tooltip: this.$t('App.menu.searchService.tooltip'),
                     icon: 'mdi-magnify',
                     url: '/Resource/Search/service',
                     access: {
@@ -359,6 +372,7 @@ export default {
                   },
                   searchfacilityaddreq: {
                     text: this.$t('App.menu.searchFacilityAddRequest.msg'),
+                    tooltip: this.$t('App.menu.searchFacilityAddRequest.tooltip'),
                     icon: 'mdi-magnify',
                     url: '/Resource/Search/facility-add-request/process-add-request',
                     access: {
@@ -369,6 +383,7 @@ export default {
                   },
                   searchfacilityupdatereq: {
                     text: this.$t('App.menu.searchFacilityUpdateRequest.msg'),
+                    tooltip: this.$t('App.menu.searchFacilityUpdateRequest.tooltip'),
                     icon: 'mdi-magnify',
                     url: '/Resource/Search/facility-update-request/process-update-request',
                     access: {
@@ -381,6 +396,7 @@ export default {
               },
               viewaddjurisdiction: {
                 text: this.$t('App.menu.addJurisdiction.msg'),
+                tooltip: this.$t('App.menu.addJurisdiction.tooltip'),
                 icon: 'mdi-home-city',
                 url: '/questionnaire/gofr-jurisdiction-questionnaire/jurisdiction',
                 access: {
@@ -391,6 +407,7 @@ export default {
               },
               viewaddfacility: {
                 text: this.$t('App.menu.addFacility.msg'),
+                tooltip: this.$t('App.menu.addFacility.tooltip'),
                 icon: 'mdi-hospital-building',
                 url: '/questionnaire/gofr-facility-questionnaire/facility',
                 access: {
@@ -401,6 +418,7 @@ export default {
               },
               viewaddorganization: {
                 text: this.$t('App.menu.addOrganization.msg'),
+                tooltip: this.$t('App.menu.addOrganization.tooltip'),
                 icon: 'mdi-home-city',
                 url: '/questionnaire/gofr-organization-questionnaire/mcsd-organization',
                 access: {
@@ -411,6 +429,7 @@ export default {
               },
               viewaddservice: {
                 text: this.$t('App.menu.addService.msg'),
+                tooltip: this.$t('App.menu.addService.tooltip'),
                 icon: 'mdi-room-service',
                 url: '/Resource/Add/service',
                 access: {
@@ -421,6 +440,7 @@ export default {
               },
               requests: {
                 text: this.$t('App.menu.facilityRequests.msg'),
+                tooltip: this.$t('App.menu.facilityRequests.tooltip'),
                 icon: 'mdi-call-made',
                 access: {
                   permission: 'special',
@@ -430,6 +450,7 @@ export default {
                 menu: {
                   reqnewfacility: {
                     text: this.$t('App.menu.requestNewFacility.msg'),
+                    tooltip: this.$t('App.menu.requestNewFacility.tooltip'),
                     icon: 'mdi-call-made',
                     url: '/questionnaire/gofr-facility-add-request-questionnaire/facility-add-request',
                     access: {
@@ -440,6 +461,7 @@ export default {
                   },
                   requpdatefacility: {
                     text: this.$t('App.menu.requestUpdateFacility.msg'),
+                    tooltip: this.$t('App.menu.requestUpdateFacility.tooltip'),
                     icon: 'mdi-call-made',
                     url: '/Resource/Search/facility?searchAction=send-update-request',
                     access: {
@@ -455,6 +477,7 @@ export default {
           facilityrecon: {
             order: 4,
             text: this.$t('App.menu.facilityRecon.msg'),
+            tooltip: this.$t('App.menu.facilityRecon.tooltip'),
             icon: 'mdi-spellcheck',
             access: {
               permission: 'special',
@@ -464,6 +487,7 @@ export default {
             menu: {
               createpair: {
                 text: this.$t('App.menu.createPair.msg'),
+                tooltip: this.$t('App.menu.createPair.tooltip'),
                 icon: 'mdi-numeric-2-box-multiple-outline',
                 url: '/dataSourcesPair',
                 access: {
@@ -474,6 +498,7 @@ export default {
               },
               reconcile: {
                 text: this.$t('App.menu.reconcile.msg'),
+                tooltip: this.$t('App.menu.reconcile.tooltip'),
                 icon: 'mdi-book-search',
                 url: '/scores',
                 access: {
@@ -484,6 +509,7 @@ export default {
               },
               recostatus: {
                 text: this.$t('App.menu.recoStatus.msg'),
+                tooltip: this.$t('App.menu.recoStatus.tooltip'),
                 icon: 'mdi-view-dashboard',
                 url: '/recoStatus',
                 access: {
@@ -494,6 +520,7 @@ export default {
               },
               recoview: {
                 text: this.$t('App.menu.view.msg'),
+                tooltip: this.$t('App.menu.view.tooltip'),
                 icon: 'mdi-format-list-bulleted-square',
                 url: '/view',
                 access: {
@@ -506,6 +533,7 @@ export default {
           },
           viewmap: {
             text: this.$t('App.menu.viewMap.msg'),
+            tooltip: this.$t('App.menu.viewMap.tooltip'),
             order: 5,
             icon: 'mdi-google-maps',
             url: '/ViewMap',
@@ -517,6 +545,7 @@ export default {
           },
           configure: {
             text: this.$t('App.menu.configure.msg'),
+            tooltip: this.$t('App.menu.configure.tooltip'),
             order: 7,
             icon: 'mdi-cog',
             url: '/configure',
@@ -535,6 +564,7 @@ export default {
       if(this.$store.state.idp === 'keycloak') {
         nav.menu.account = {
           text: this.$t('App.menu.account.msg'),
+          tooltip: this.$t('App.menu.account.tooltip'),
           order: 6,
           icon: 'mdi-account-outline',
           url: this.keycloak_account,
@@ -548,6 +578,7 @@ export default {
       } else {
         nav.menu.account = {
           text: this.$t('App.menu.account.msg'),
+          tooltip: this.$t('App.menu.account.tooltip'),
           order: 6,
           icon: 'mdi-account-outline',
           access: {
@@ -558,6 +589,7 @@ export default {
           menu: {
             adduser: {
               text: this.$t('App.menu.addUser.msg'),
+              tooltip: this.$t('App.menu.addUser.tooltip'),
               icon: 'mdi-account-outline',
               url: '/addUser',
               access: {
@@ -568,6 +600,7 @@ export default {
             },
             viewuser: {
               text: this.$t('App.menu.usersList.msg'),
+              tooltip: this.$t('App.menu.usersList.tooltip'),
               icon: 'mdi-account-outline',
               url: '/usersList',
               access: {
@@ -578,6 +611,7 @@ export default {
             },
             rolesmanagement: {
               text: this.$t('App.menu.rolesManagement.msg'),
+              tooltip: this.$t('App.menu.rolesManagement.tooltip'),
               icon: 'mdi-account-outline',
               url: '/rolesManagement',
               access: {

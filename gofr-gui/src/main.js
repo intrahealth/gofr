@@ -20,11 +20,11 @@ import { tasksVerification } from '@/modules/tasksVerification'
 import guiConfig from '../config/config.json'
 
 const div = document.createElement("div");
-div.setAttribute('id', 'container')
+div.setAttribute('id', 'progressBarContainer')
 document.body.appendChild(div);
 
 
-var bar = new ProgressBar.Line('#container', {
+var bar = new ProgressBar.Line('#progressBarContainer', {
   strokeWidth: 2,
   easing: 'easeInOut',
   duration: 1000,
@@ -54,7 +54,6 @@ const loading = setInterval(() => {
     progress = (parseFloat(progress) - 0.1).toFixed(1)
   }
   bar.animate(progress);
-  console.log(progress);
 }, 1100);
 
 Object.defineProperty(Vue.prototype, '$fhirpath', {
@@ -224,6 +223,7 @@ function kcAuthenticatePublicUser(genConfig) {
 
 function renderApp(genConfig) {
   clearInterval(loading)
+  document.getElementById("progressBarContainer").remove()
   new Vue({
     router,
     store,

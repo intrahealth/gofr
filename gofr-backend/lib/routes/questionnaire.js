@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const config = require('../config');
 
-const fhirAxios = require('../modules/fhirAxios')
+const fhirAxios = require('../modules/fhirAxios');
 const fhirQuestionnaire = require('../modules/fhirQuestionnaire');
 const fhirModules = require('../modules/fhirModules');
 const outcomes = require('../../config/operationOutcomes');
@@ -73,6 +73,9 @@ router.post('/:partition/QuestionnaireResponse', (req, res, next) => {
     });
   } else {
     fhirQuestionnaire.processQuestionnaire(req.body, req.params.partition).then((bundle) => {
+      console.error(JSON.stringify(req.body, 0, 2));
+      console.error(JSON.stringify(bundle, 0, 2));
+      return res.status(500).send();
       fhirAxios.create(bundle, req.params.partition).then((results) => {
         if (results.entry && results.entry.length > 0 && results.entry[0].response.location) {
           req.body.subject = { reference: results.entry[0].response.location };

@@ -157,7 +157,6 @@ export default {
         status: "completed",
         item: []
       }
-      //console.log(this)
       try {
         await processChildren( this.fhir.item, this.$children )
       } catch( err ) {
@@ -174,7 +173,7 @@ export default {
         url: "/fhir/" + this.$store.state.config.userConfig.FRDatasource + "/QuestionnaireResponse?"+querystring.stringify(this.$route.query),
         method: "POST",
         data: this.fhir
-      } ).then((response) => {
+      }).then((response) => {
         this.overlay = false
         this.loading = false
         this.$store.state.alert.show = true
@@ -182,7 +181,7 @@ export default {
         this.$store.state.alert.msg = 'Saved successfully!'
         this.$store.state.alert.type = 'success'
         this.$router.push({ name:"ResourceView", params: {page: this.viewPage, id: response.data.subject.reference.split('/')[1] } })
-      } ).catch(err => {
+      }).catch(err => {
         this.overlay = false
         this.loading = false
         console.log(err)

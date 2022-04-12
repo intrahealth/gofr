@@ -1,9 +1,8 @@
 # Facility Registry
 
 !!! important "What is the Facility Registry?"
-The **Facility Registry** is **repository** of facilities and healthcare services information in a particular jurisdiction(e.g.country, district etc.)
 
-The Facility Registry Module is a central repository of information on all the facilities in a particular jurisdiction e.g.(country)
+The **Facility Registry Module** is a **central repository** of **information on all the facilities** and **healthcare services information** in a particular **jurisdiction** e.g.(country,region etc.)
 
 The various features on this module include:
 

@@ -14,9 +14,19 @@ Once a new data source is uploaded to the system, using a CSV or a remote source
 
 ![Alt text](../img/configure_system.JPG "GOFR System Configurations")
 
+**Active Datasource for Facility Registry**
+
+Users can select the datasource which will be active in the 'Facility Registry' module. By default, this data source is the same as the active data source for the user.
 
 ## Admin Configurations
 
 ![Alt text](../img/configure_system_2.JPG "GOFR System Configurations")
 
-Under admin configurations, 
+The administrator configurations are done by the system admin of gofr and affect all users in the system.
+
+### Matching configuration
+
+
+### Dataset configuration
+
+### Email configuration

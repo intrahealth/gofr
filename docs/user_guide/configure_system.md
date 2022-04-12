@@ -4,10 +4,19 @@
 
 Under Configure System, we have user configurations as well as admin configurations in gofr.
 
-## User Configurations
+## User Configuration
+
+**User Defined Headers**
+
+This constraint is used to define which headers should be used, on uploading of a new data source
+
+Once a new data source is uploaded to the system, using a CSV or a remote source, the user can select to use the headers used in the source, or to use the system default headers.
 
 ![Alt text](../img/configure_system.JPG "GOFR System Configurations")
+
 
 ## Admin Configurations
 
 ![Alt text](../img/configure_system_2.JPG "GOFR System Configurations")
+
+Under admin configurations, 

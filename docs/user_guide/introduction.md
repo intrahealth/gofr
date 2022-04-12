@@ -1,21 +1,29 @@
 # Introduction
 
 !!! important "What is GOFR?"
-GOFR is acronym for the Global Open Facility Registry.
+**GOFR** is acronym for the **Global Open Facility Registry**.
 
-GOFR is a shared repository for facility information. The information in the repository can vary and may include:
-- Facilities
-- Jurisdictions such as districts, regions, county, country , with the highest in the hierarchy being a country and the lowest being a facility.
-- Services offered by facilities. This may include services such as malaria testing, HIV care, clinical information like vaccination
-- Organizations that manage facilities
+GOFR is a **shared repository** for facility information. The information in the repository can vary and may include:
+
+**- Facilities**
+
+**- Jurisdictions** such as districts, regions, county, country , with the highest in the hierarchy being a country and the lowest being a facility.
+
+**- Services** offered by facilities. This may include services such as malaria testing, HIV care, clinical information like vaccination
+
+**- Organizations** that manage facilities
+
+Also, **GOFR** is an **open-source system** which is is easy to install and can be easily configured to meet user needs through the administration console.
 
 ## Log In
 
-In order to access gofr, type the gofr url (web address) into the address bar of any browser A sample login screen is shown in the figure below.
+In order to access gofr, type the gofr url (web address) into the address bar of any browser.
+
+A sample login screen is shown in the figure below.
 
 ![Alt text](../img/gofrlogin.JPG 'GOFR Login Page')
 
-The email address and the user password are required to login to the system. On clicking the Login button, the details entered are validated and one is allowed access if the details are correct. Otherwise, access is denied.
+The **email address** and the user **password** are required to login to the system. On clicking the Login button, the details entered are validated and one is allowed access if the details are correct. Otherwise, access is denied.
 
 ## Reset Password
 

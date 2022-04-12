@@ -2,6 +2,11 @@
 
 # Introduction
 
+The Global Open Facility Registry (GOFR) lets health data administrators analyze, de-duplicate, and curate lists of facilities. It’s helped health officials develop registries of all unique health facilities in a country by reconciling data sets maintained by multiple sources.
+
+Basic data such as name, location, and other attributes of health facilities are key to understanding health care delivery and facilitating a functioning health information system. However, many government organizations have multiple facility lists
+in various parts of the health system with conflicting or incomplete information. GOFR helps to reduce data redundancy, improve access to data, and allow anyone to align facility information across multiple software systems.
+
 !!! important "Welcome!"
     These are the docs for the next iteration of GOFR, which is based on the original codebase of the [Facility Reconciliation Tool](https://github.com/openhie/facility-recon).
 

@@ -1,0 +1,75 @@
+{
+  "resourceType": "Basic",
+  "id": "gofr-page-facility-public-filter",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/gofr-page"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "page",
+        "system": "http://gofr.org/fhir/CodeSystem/gofr-resource-codesystem"
+      }
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-page-display",
+      "extension": [
+        {
+          "url": "title",
+          "valueString": "Exclude From Public View Facility With Below Details"
+        },
+        {
+          "url": "resource",
+          "valueReference": {
+            "reference": "StructureDefinition/PublicFilterFacilityLocation"
+          }
+        },
+        {
+          "url": "search",
+          "valueString": "Status|status"
+        },
+        {
+          "url": "partition",
+          "valueString": "DEFAULT"
+        }
+      ]
+    },
+    {
+      "extension": [
+        {
+          "url": "title",
+          "valueString": "Exclude Facilities Of"
+        },
+        {
+          "url": "description",
+          "valueString": "Exclude Facilities Of"
+        },
+        {
+          "url": "name",
+          "valueString": "Location"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.status"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.identifier"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.type"
+        },
+        {
+          "url": "field",
+          "valueString": "Location.partOf"
+        }
+      ],
+      "url": "http://gofr.org/fhir/StructureDefinition/gofr-page-section"
+    }
+  ]
+}

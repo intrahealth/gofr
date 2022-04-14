@@ -468,7 +468,7 @@
                       v-model="$store.state.config.generalConfig.public_access.partition"
                       label="Public Datasource"
                     ></v-autocomplete>
-                    <v-btn color="primary" @click="$router.push('/resourceFilter/gofr-facility-public-filter-questionnaire/facility')">Filter Access</v-btn>
+                    <v-btn color="primary" @click="$router.push('/Resource/view/facility-public-filter/facility-public-filter')">Filter Access</v-btn>
                   </v-card-text>
                 </v-card>
               </v-flex>

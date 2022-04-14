@@ -408,6 +408,27 @@
     "realmRoles" : [ "Admin", "default-roles-gofr" ],
     "notBefore" : 0,
     "groups" : [ ]
+  }, {
+    "id" : "26e19ebd-65e5-4181-84b6-589bcf3bc44b",
+    "createdTimestamp" : 1646914033258,
+    "username" : "public@gofr.org",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "Publlic",
+    "lastName" : "User",
+    "credentials" : [ {
+      "id" : "2a8768be-aebd-4b67-9aaa-278ce8c1579b",
+      "type" : "password",
+      "createdDate" : 1646914067591,
+      "secretData" : "{\"value\":\"bs8t1o8sBjESOhZFmR6IuAjQRXmVkICUz4XE78hmCa4rn2zCaiVYkDH6C/XomlG0c5rXIt9F3PLhFGqfreeFTQ==\",\"salt\":\"0cXxth4xJZLbrWZLwjTSRg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "Public", "default-roles-gofr" ],
+    "notBefore" : 0,
+    "groups" : [ ]
   } ],
   "scopeMappings" : [ {
     "clientScope" : "offline_access",

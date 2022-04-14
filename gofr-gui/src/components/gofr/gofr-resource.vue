@@ -103,7 +103,7 @@
 import axios from 'axios'
 export default {
   name: "gofr-resource",
-  props: ["title","field","fhirId","page","profile","section-menu","edit","links","constraints" ],
+  props: ["title","field","fhirId","page","profile","section-menu","edit","links","constraints", "partition" ],
   data: function() {
     return {
       fhir: {},
@@ -121,7 +121,11 @@ export default {
   created: function() {
     if ( this.fhirId ) {
       this.loading = true
-      axios.get( "/fhir/" + this.$store.state.config.userConfig.FRDatasource + "/" + this.field+"/"+this.fhirId ).then(response => {
+      let partition = this.$store.state.config.userConfig.FRDatasource
+      if(this.partition) {
+        partition = this.partition
+      }
+      axios.get( "/fhir/" + partition + "/" + this.field+"/"+this.fhirId ).then(response => {
         let data = response.data
         this.orig = data
         this.source = { data: data, path: this.field }
@@ -458,7 +462,11 @@ export default {
         this.$store.commit('setMessage', { type: 'error', text: 'There were errors on the form.' })
         return
       }
-      let url = "/fhir/" + this.$store.state.config.userConfig.FRDatasource + "/" + this.field
+      let partition = this.$store.state.config.userConfig.FRDatasource
+      if(this.partition) {
+        partition = this.partition
+      }
+      let url = "/fhir/" + partition + "/" + this.field
       let opts = {
         method: "POST",
         url,

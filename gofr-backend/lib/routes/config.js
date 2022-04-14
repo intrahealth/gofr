@@ -329,11 +329,14 @@ router.get('/page/:page/:type?', (req, res) => {
   //   return res.status(403).json(outcomes.DENIED);
   // }
   fhirAxios.read('Basic', page, '', 'DEFAULT').then(async (resource) => {
-    console.error(JSON.stringify(resource, 0, 2));
     const pageDisplay = resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/gofr-page-display');
 
     const pageResource = pageDisplay.extension.find(ext => ext.url === 'resource').valueReference.reference;
     const pageTitle = pageDisplay.extension.find(ext => ext.url === 'title').valueString;
+    let pagePartition = '';
+    if (pageDisplay.extension.find(ext => ext.url === 'partition')) {
+      pagePartition = pageDisplay.extension.find(ext => ext.url === 'partition').valueString;
+    }
     let pageUpdatingResource = pageDisplay.extension.find(ext => ext.url === 'requestUpdatingResource');
     if (pageUpdatingResource) {
       pageUpdatingResource = pageUpdatingResource.valueReference.reference;
@@ -547,7 +550,7 @@ router.get('/page/:page/:type?', (req, res) => {
           resourceElement = 'gofr-codesystem';
         }
 
-        vueOutput = `<${resourceElement} :fhirId="fhirId" :edit="isEdit" v-on:set-edit="setEdit($event)" profile="${resource.url}" :key="$route.params.page+($route.params.id || '')" page="${req.params.page}" field="${fhir}" title="${sections[fhir].title}" :constraints="constraints"`;
+        vueOutput = `<${resourceElement} partition="${pagePartition}" :fhirId="fhirId" :edit="isEdit" v-on:set-edit="setEdit($event)" profile="${resource.url}" :key="$route.params.page+($route.params.id || '')" page="${req.params.page}" field="${fhir}" title="${sections[fhir].title}" :constraints="constraints"`;
         if (sectionKeys.length > 1) {
           sectionMenu = sectionKeys.map(name => ({
             name, title: sections[name].title, desc: sections[name].description, secondary: !!sections[name].resource,

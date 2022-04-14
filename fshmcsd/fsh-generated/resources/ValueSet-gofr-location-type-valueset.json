@@ -13,7 +13,14 @@
         "system": "urn:ietf:rfc:398"
       },
       {
-        "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+        "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "_ServiceDeliveryLocationRoleType"
+          }
+        ]
       }
     ]
   }

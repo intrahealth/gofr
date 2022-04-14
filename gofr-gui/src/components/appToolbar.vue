@@ -11,7 +11,9 @@
     <img src="../assets/GOFR_RGB_high-res.png" width="220" />
     <template v-if="$store.state.auth.userID">
       <v-spacer></v-spacer>
-      {{$store.state.auth.username}} <v-icon>mdi-account</v-icon>
+      <label style="color: #569fd3">
+        {{$store.state.auth.username}} <v-icon>mdi-account</v-icon>
+      </label>
     </template>
     <v-spacer></v-spacer>
     <v-toolbar-items>
@@ -31,12 +33,12 @@
         <v-radio
           label="EN"
           value="en"
-          color="green"
+          color="#78496a"
         ></v-radio>
         <v-radio
           label="FR"
           value="fr"
-          color="green"
+          color="#78496a"
         ></v-radio>
       </v-radio-group>
       <template v-if="$store.state.auth.userID">

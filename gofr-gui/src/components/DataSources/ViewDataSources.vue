@@ -321,7 +321,7 @@
     >
       <v-spacer></v-spacer>
       <v-flex>
-        <v-card color="cyan lighten-5">
+        <v-card>
           <v-card-title primary-title>
             <v-toolbar
               color="white"
@@ -510,24 +510,6 @@
               v-else
             >
               <v-icon left>mdi-delete</v-icon>Delete
-            </v-btn>
-            <v-spacer></v-spacer>
-            <v-btn
-              color="success"
-              rounded
-              small
-              @click="share('showDialog')"
-            >
-              <v-icon left>mdi-share-variant-outline</v-icon> Share
-            </v-btn>
-            <v-spacer></v-spacer>
-            <v-btn
-              color="success"
-              rounded
-              small
-              @click="viewshare(item)"
-            >
-              <v-icon left>mdi-monitor-share</v-icon> Detailed View
             </v-btn>
           </v-card-actions>
           <v-card-text>

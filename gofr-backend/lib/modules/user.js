@@ -3,6 +3,7 @@ const deepmerge = require('deepmerge');
 const config = require('../config');
 const fhirAxios = require('./fhirAxios');
 const fhirFilter = require('./fhirFilter');
+const { Resource2FHIRPATH } = require('./resource2fhirpath');
 const logger = require('../winston');
 const dataSources = require('./dataSources');
 
@@ -319,6 +320,15 @@ User.prototype.updatePermissions = async function (roleResources) {
       is_public_user = this.resource.telecom.find(tel => tel.value === 'public@gofr.org');
     }
     if (is_public_user) {
+      const filterResource = await fhirAxios.read('Location', 'facility-public-filter', '', 'DEFAULT');
+      let extraConstraints = [];
+      if (filterResource) {
+        const convert2fhirpath = new Resource2FHIRPATH({
+          resource: filterResource,
+          returnBoolean: true,
+        });
+        extraConstraints = convert2fhirpath.convert();
+      }
       await fhirAxios.read('Parameters', 'gofr-general-config', '', 'DEFAULT').then((response) => {
         const resData = response.parameter.find(param => param.name === 'config');
         if (resData.valueString) {
@@ -345,6 +355,20 @@ User.prototype.updatePermissions = async function (roleResources) {
                 },
               },
             };
+            if (extraConstraints.length > 0) {
+              for (const constr of extraConstraints) {
+                if (!isObject(partAcc.read.Location)) {
+                  partAcc.read.Location = {
+                    constraint: {},
+                  };
+                }
+                if (!partAcc.read.Location.constraint) {
+                  partAcc.read.Location.constraint = {};
+                }
+                partAcc.read.Location.constraint[`${constr}=${false}`] = true;
+              }
+            }
+            logger.error(JSON.stringify(partAcc, 0, 2));
             this.permissions.partitions.push(partAcc);
             this.permissions.read = {
               StructureDefinition: true,

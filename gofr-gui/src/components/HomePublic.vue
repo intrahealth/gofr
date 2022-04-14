@@ -22,7 +22,8 @@
           <v-flex xs3>
             <v-btn
               v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-request-add-facility-page')"
-              color="success" 
+              color="#5f6062"
+              dark
               rounded 
               small
               to="/questionnaire/gofr-facility-add-request-questionnaire/facility-add-request"
@@ -33,7 +34,8 @@
           <v-flex xs3>
             <v-btn
               v-if="$tasksVerification.hasPermissionByName('special', 'custom', 'view-request-update-facility-page')"
-              color="success" 
+              color="#5f6062"
+              dark
               rounded 
               small
               to="/Resource/Search/facility?searchAction=send-update-request"

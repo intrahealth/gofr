@@ -235,7 +235,7 @@ Title:            "Location Type ValueSet"
 * ^date = "2021-09-30T10:06:04.362Z"
 * ^version = "0.1.0"
 * include codes from system McsdLocationTypeCodeSystem
-* include codes from system http://terminology.hl7.org/CodeSystem/v3-RoleCode
+* codes from system http://terminology.hl7.org/CodeSystem/v3-RoleCode where concept is-a #_ServiceDeliveryLocationRoleType
 
 ValueSet:         OrganizationHierarchyTypeValueSet
 Id:               gofr-organization-hiearchy-type-valueset

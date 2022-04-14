@@ -368,7 +368,6 @@ User.prototype.updatePermissions = async function (roleResources) {
                 partAcc.read.Location.constraint[`${constr}=${false}`] = true;
               }
             }
-            logger.error(JSON.stringify(partAcc, 0, 2));
             this.permissions.partitions.push(partAcc);
             this.permissions.read = {
               StructureDefinition: true,

@@ -58,7 +58,7 @@
         },
         {
           "url": "filter",
-          "valueString": "Type|type|http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+          "valueString": "Type|type|http://gofr.org/fhir/ValueSet/gofr-location-type-valueset"
         },
         {
           "url": "filter",

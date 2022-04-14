@@ -347,7 +347,7 @@ Usage:          #example
 * extension[display].extension[search][4].valueString = "Longitute|position.longitude"
 * extension[display].extension[search][5].valueString = "Latitude|position.latitude"
 * extension[display].extension[filter][0].valueString = "Name|name:contains"
-* extension[display].extension[filter][1].valueString = "Type|type|http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+* extension[display].extension[filter][1].valueString = "Type|type|http://gofr.org/fhir/ValueSet/gofr-location-type-valueset"
 * extension[display].extension[filter][2].valueString = "Physical Type|physicalType|http://hl7.org/fhir/ValueSet/location-physical-type"
 * extension[display].extension[field][0].extension[path].valueString = "position.longitude"
 * extension[display].extension[field][1].extension[path].valueString = "position.latitude"

@@ -16,6 +16,7 @@ Description:    "GOFR Page Display details."
 * ^context.expression = "GofrPage"
 * extension contains
       title 1..1 MS and
+      partition 0..1 MS and
       resource 1..1 MS and
       requestUpdatingResource 0..1 MS and
       search 1..* MS and
@@ -27,6 +28,10 @@ Description:    "GOFR Page Display details."
 * extension[title].value[x] only string
 * extension[title].valueString 1..1 MS
 * extension[title].valueString ^label = "Page Title"
+
+* extension[partition].value[x] only string
+* extension[partition].valueString 1..1 MS
+* extension[partition].valueString ^label = "Partition to save data"
 
 * extension[resource].value[x] only Reference
 * extension[resource].valueReference only Reference(StructureDefinition or CodeSystem)

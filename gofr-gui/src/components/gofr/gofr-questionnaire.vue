@@ -18,7 +18,7 @@
 
       <v-navigation-drawer
         app
-        left
+        right
         permanent
         clipped
         class="primary darken-1 white--text"
@@ -157,7 +157,6 @@ export default {
         status: "completed",
         item: []
       }
-      //console.log(this)
       try {
         await processChildren( this.fhir.item, this.$children )
       } catch( err ) {
@@ -170,13 +169,11 @@ export default {
         this.$store.commit('setMessage', { type: 'error', text: 'There were errors on the form.' })
         return
       }
-      console.log("SAVE",this.fhir)
-      console.error(JSON.stringify(this.fhir,0,2));
       axios({
         url: "/fhir/" + this.$store.state.config.userConfig.FRDatasource + "/QuestionnaireResponse?"+querystring.stringify(this.$route.query),
         method: "POST",
         data: this.fhir
-      } ).then((response) => {
+      }).then((response) => {
         this.overlay = false
         this.loading = false
         this.$store.state.alert.show = true
@@ -184,7 +181,7 @@ export default {
         this.$store.state.alert.msg = 'Saved successfully!'
         this.$store.state.alert.type = 'success'
         this.$router.push({ name:"ResourceView", params: {page: this.viewPage, id: response.data.subject.reference.split('/')[1] } })
-      } ).catch(err => {
+      }).catch(err => {
         this.overlay = false
         this.loading = false
         console.log(err)

@@ -1,21 +1,29 @@
 # Introduction
 
 !!! important "What is GOFR?"
-GOFR is acronym for the Global Open Facility Registry.
+**GOFR** is acronym for the **Global Open Facility Registry**.
 
-GOFR is a shared repository for facility information. The information in the repository can vary and may include:
-- Facilities
-- Jurisdictions such as districts, regions, county, country , with the highest in the hierarchy being a country and the lowest being a facility.
-- Services offered by facilities. This may include services such as malaria testing, HIV care, clinical information like vaccination
-- Organizations that manage facilities
+GOFR is a **shared repository** for facility information. The information in the repository can vary and may include:
+
+**- Facilities**
+
+**- Jurisdictions** such as districts, regions, county, country , with the highest in the hierarchy being a country and the lowest being a facility.
+
+**- Services** offered by facilities. This may include services such as malaria testing, HIV care, clinical information like vaccination
+
+**- Organizations** that manage facilities
+
+Also, **GOFR** is an **open-source system** which is is easy to install and can be easily configured to meet user needs through the administration console.
 
 ## Log In
 
-In order to access gofr, type the gofr url (web address) into the address bar of any browser A sample login screen is shown in the figure below.
+In order to access gofr, type the gofr url (web address) into the address bar of any browser.
+
+A sample login screen is shown in the figure below.
 
 ![Alt text](../img/gofrlogin.JPG 'GOFR Login Page')
 
-The email address and the user password are required to login to the system. On clicking the Login button, the details entered are validated and one is allowed access if the details are correct. Otherwise, access is denied.
+The **email address** and the user **password** are required to login to the system. On clicking the Login button, the details entered are validated and one is allowed access if the details are correct. Otherwise, access is denied.
 
 ## Reset Password
 
@@ -33,6 +41,20 @@ Once you successfully log in to the system, the dashboard appears:
 ![Alt text](../img/gofr2.png 'GOFR Dashboard Page')
 
 !!! important "Active partition - A partition selected under 'Active Partition' becomes the active partition for the entire system e.g.when searching for a facilities/jurisdictions/organizations, the system will search facilities in the active partition."
+
+### Data Partitions
+
+Data is loaded into a partition. Users may have access to one or many partitions, some of which they may own or be able to share. Admins may view all partitions. 
+
+To know what partition you are on, see the list on the top left, which allows switching partitions.
+
+![Alt text](../img/partition.png 'Partitions')
+
+### Summary Statistics
+
+There are summary statistics that show usage and other aspects of the current partition.
+
+![Alt text](../img/summarystats.png 'Summary Stats')
 
 ### Active Reconciliation Pair
 

@@ -1,9 +1,7 @@
 const express = require('express');
 const jwtDecode = require('jwt-decode');
-const deepmerge = require('deepmerge');
 const user = require('../modules/user');
 const kcadmin = require('../modules/keycloakAdminClient');
-const dataSources = require('../modules/dataSources');
 
 const router = express.Router();
 
@@ -46,7 +44,9 @@ router.post('/', (req, res) => {
           token: req.headers.authorization.split(' ')[1],
           user: resp,
         }).then((popResp) => {
-          user.createUserInstance(resp, popResp.role).then(obj => res.status(200).json(obj)).catch(() => {
+          user.createUserInstance(resp, popResp.role).then((obj) => {
+            res.status(200).json(obj);
+          }).catch(() => {
             res.status(500).json();
           });
         }).catch((err) => {

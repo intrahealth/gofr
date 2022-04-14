@@ -1,88 +1,90 @@
 <template>
-  <v-container grid-list-xs>
-    <v-card>
-      <v-card-title primary-title>
-        <v-toolbar color="#385F73" dark height="40" style="font-size: 14px">
-          {{title}}
-        </v-toolbar>
-      </v-card-title>
-      <v-card-text>
-        <v-layout row wrap>
-          <v-spacer></v-spacer>
-          <v-flex xs6>
-            <label v-if="loading.facilitiesCount">
-              <v-progress-linear
-                color="deep-purple accent-4"
-                indeterminate
-                rounded
-                height="6"
-              ></v-progress-linear>
-            </label>
-            <label v-else>
-              Total Facilities: <v-chip
-                                class="ma-2"
-                                color="red"
-                                text-color="white"
-                              >
-                                {{totalFacilities}}
-                              </v-chip><br>
-            </label>
-            <label v-if="loading.jurisdictionsCount">
-              <v-progress-linear
-                color="deep-purple accent-4"
-                indeterminate
-                rounded
-                height="6"
-              ></v-progress-linear>
-            </label>
-            <label v-else>
-              Total Jurisdictions: <v-chip
-                                    class="ma-2"
-                                    color="green"
-                                    text-color="white"
-                                  >
-                                    {{totalJurisdictions}}
-                                  </v-chip>
-            </label>
-            <br>
-            Created: <v-chip
-                      class="ma-2"
-                      color="primary"
-                      text-color="white"
-                    >
-                      {{activePartition.createdTime}}
-                    </v-chip>
-          </v-flex>
-          <v-spacer></v-spacer>
-          <v-flex xs5>
-            <label v-if="!activePartition.sharedToAll">
-              Shared Users: <v-chip
-                            class="ma-2"
-                            color="green"
-                            text-color="white"
-                          >
-                            {{activePartition.sharedUsers}}
-                          </v-chip> <br>
-                    </label>
-                    Shared To All: <v-chip
-                                    class="ma-2"
-                                    color="primary"
-                                    text-color="white"
-                                  >
-                                    {{activePartition.sharedToAll}}
-                                  </v-chip> <br>
-                    Limited by User Location: <v-chip
-                                    class="ma-2"
-                                    color="red"
-                                    text-color="white"
-                                  >
-                                    {{activePartition.limitedByLocation}}
-                                  </v-chip>
-                  </v-flex>
-                </v-layout>
-              </v-card-text>
-            </v-card>
-  </v-container>
+  <v-card>
+    <v-card-title primary-title>
+      <v-toolbar color="#78496a" dark height="40" style="font-size: 14px">
+        {{title}}
+      </v-toolbar>
+    </v-card-title>
+    <v-card-text>
+      <v-layout row wrap>
+        <v-spacer></v-spacer>
+        <v-flex xs6>
+          <label v-if="loading.facilitiesCount">
+            <v-progress-linear
+              color="deep-purple accent-4"
+              indeterminate
+              rounded
+              height="6"
+            ></v-progress-linear>
+          </label>
+          <label v-else>
+            Total Facilities: <v-chip
+                              class="ma-2"
+                              color="#5f6062"
+                              text-color="white"
+                            >
+                              {{totalFacilities}}
+                            </v-chip><br>
+          </label>
+          <label v-if="loading.jurisdictionsCount">
+            <v-progress-linear
+              color="deep-purple accent-4"
+              indeterminate
+              rounded
+              height="6"
+            ></v-progress-linear>
+          </label>
+          <label v-else>
+            Total Jurisdictions: <v-chip
+                                  class="ma-2"
+                                  color="#5f6062"
+                                  text-color="white"
+                                >
+                                  {{totalJurisdictions}}
+                                </v-chip>
+          </label>
+          <br>
+          Created: <v-chip
+                    class="ma-2"
+                    color="#5f6062"
+                    text-color="white"
+                  >
+                    {{activePartition.createdTime}}
+                  </v-chip>
+        </v-flex>
+        <v-divider color="#78496a" vertical></v-divider>
+        <v-spacer></v-spacer>
+        <v-flex xs5>
+          <label v-if="!activePartition.sharedToAll">
+            Shared Users: 
+            <v-chip
+              class="ma-2"
+              color="#8a8d35"
+              text-color="white"
+            >
+              {{activePartition.sharedUsers}}
+            </v-chip> <br>
+          </label>
+          Shared To All: 
+          <v-chip
+            class="ma-2"
+            color="#5f6062"
+            text-color="white"
+          >
+            {{activePartition.sharedToAll}}
+          </v-chip> <br>
+          Limited by User Location: 
+          <v-chip
+            class="ma-2"
+            color="#5f6062"
+            text-color="white"
+          >
+            {{activePartition.limitedByLocation}}
+          </v-chip>
+        </v-flex>
+      </v-layout>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script>

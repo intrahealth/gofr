@@ -4,12 +4,13 @@
   </v-container>
 </template>
 <script>
-import VueCookies from 'vue-cookies'
 import axios from 'axios'
 export default {
   mounted () {
     this.$store.state.auth.userID = ''
     if(this.$store.state.idp === 'keycloak') {
+      this.$store.state.auth.username = ''
+      this.$store.state.auth.userObj = {}
       let redirect = window.location.href.split('#')[0]
       this.$keycloak.logout({ redirectUri : redirect })
     } else {
@@ -19,11 +20,15 @@ export default {
       }).catch((err) => {
         console.error(err);
       })
-      this.$router.push('login')
+      this.$store.state.auth.username = ''
+      this.$store.state.auth.userObj = {}
+      if(this.$store.state.config.generalConfig.public_access.enabled) {
+        this.$router.push('HomePublic')
+        window.location.reload();
+      } else {
+        this.$router.push('login')
+      }
     }
-    this.$store.state.auth.username = ''
-    this.$store.state.auth.userObj = {}
-    VueCookies.remove('userObj')
   }
 }
 </script>

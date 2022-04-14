@@ -1,0 +1,29 @@
+{
+  "resourceType": "CodeSystem",
+  "status": "active",
+  "content": "complete",
+  "name": "LocationTypeCodeSystem",
+  "id": "location-type-codesystem",
+  "title": "Hali ya ndoa",
+  "version": "0.2.0",
+  "url": "http://gofr.org/fhir/CodeSystem/location-type-codesystem",
+  "concept": [
+    {
+      "code": "healthcenter",
+      "display": "Health Center",
+      "definition": "Health Center"
+    },
+    {
+      "code": "hospital",
+      "display": "Hospital",
+      "definition": "Hospital"
+    },
+    {
+      "code": "dispensary",
+      "display": "Dispensary",
+      "definition": "Dispensary"
+    }
+  ],
+  "date": "2022-02-26T18:39:04.362Z",
+  "count": 3
+}

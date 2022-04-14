@@ -1,0 +1,17 @@
+{
+  "resourceType": "ValueSet",
+  "status": "active",
+  "name": "LocationTypeValueSet",
+  "id": "location-type-valueset",
+  "title": "ITSF Hali ya ndoa",
+  "version": "0.1.0",
+  "url": "http://gofr.org/fhir/ValueSet/location-type-valueset",
+  "date": "2022-01-29T09:05:04.362Z",
+  "compose": {
+    "include": [
+      {
+        "system": "http://gofr.org/fhir/CodeSystem/location-type-codesystem"
+      }
+    ]
+  }
+}

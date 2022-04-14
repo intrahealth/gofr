@@ -1,8 +1,10 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '@/components/Home.vue'
+import HomePublic from '@/components/HomePublic.vue'
 import Login from '@/components/Login.vue'
 import Logout from '@/components/Logout.vue'
+import LogoutPublic from '@/components/Logout-public.vue'
 import Signup from '@/components/Signup.vue'
 import Configure from '@/components/Configure.vue'
 import UsersList from '@/components/UsersList.vue'
@@ -29,6 +31,10 @@ let router = new Router({
     name: 'Home',
     component: Home
   }, {
+    path: '/HomePublic',
+    name: 'HomePublic',
+    component: HomePublic
+  }, {
     path: '/UsersList',
     name: 'UsersList',
     component: UsersList
@@ -48,6 +54,10 @@ let router = new Router({
     path: '/logout',
     name: 'Logout',
     component: Logout
+  }, {
+    path: '/logout-public',
+    name: 'LogoutPublic',
+    component: LogoutPublic
   }, {
     path: '/Signup',
     name: 'Signup',

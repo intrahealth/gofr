@@ -695,7 +695,7 @@ router.post('/editSource', (req, res) => {
 });
 
 router.get('/getSource/:userID/:orgId?', (req, res) => {
-  const allowed = req.user.hasPermissionByName('special', 'custom', 'view-data-source');
+  const allowed = req.user.hasPermissionByName('special', 'custom', 'get-data-source');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
@@ -911,6 +911,7 @@ router.get('/countLevels', (req, res) => {
               }
               return callback(false, levelMapping);
             }
+            return callback(false, {});
           });
         },
         levelMapping2(callback) {
@@ -941,6 +942,7 @@ router.get('/countLevels', (req, res) => {
               }
               return callback(false, levelMapping);
             }
+            return callback(false, {});
           });
         },
       }, (err, mappings) => callback(false, mappings));
@@ -1486,7 +1488,7 @@ router.post('/resetDataSourcePair/:userID', (req, res) => {
 });
 
 router.get('/getSourcePair/:userID/:dhis2OrgId?', (req, res) => {
-  const allowed = req.user.hasPermissionByName('special', 'custom', 'view-source-pair');
+  const allowed = req.user.hasPermissionByName('special', 'custom', 'get-source-pair');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }

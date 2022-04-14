@@ -11,7 +11,7 @@
           style="max-width: 500px;"
         >
           <v-toolbar
-            color="deep-purple accent-4"
+            color="#569fd3"
             cards
             dark
             text
@@ -96,7 +96,7 @@
               @click="performExtraCheck"
               :disabled="$v.$invalid"
               class="white--text"
-              color="deep-purple accent-4"
+              color="#569fd3"
               depressed
             >
               Add

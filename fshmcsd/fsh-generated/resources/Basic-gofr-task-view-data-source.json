@@ -44,6 +44,12 @@
           "valueReference": {
             "reference": "Basic/gofr-task-manage-data-source"
           }
+        },
+        {
+          "url": "compositeTask",
+          "valueReference": {
+            "reference": "Basic/gofr-task-get-data-source"
+          }
         }
       ]
     }

@@ -20,7 +20,7 @@
       "extension": [
         {
           "url": "title",
-          "valueString": "Update Facility"
+          "valueString": "Create Change Request"
         },
         {
           "url": "resource",
@@ -38,7 +38,7 @@
         },
         {
           "url": "search",
-          "valueString": "Parent|partOf.reference"
+          "valueString": "Location|partOf.reference"
         },
         {
           "url": "search",
@@ -58,7 +58,7 @@
         },
         {
           "url": "filter",
-          "valueString": "Type|type|http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+          "valueString": "Type|type|http://gofr.org/fhir/ValueSet/gofr-location-type-valueset"
         },
         {
           "url": "filter",

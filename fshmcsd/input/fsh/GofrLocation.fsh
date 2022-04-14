@@ -20,7 +20,7 @@ Description:  "A profile on the mCSD Organization for mCSD Jurisdictions"
 Profile:      MCSDJurisdictionLocation
 Parent:       MCSDLocation
 Id:           IHE.mCSD.JurisdictionLocation
-Title:        "mCSD Location for Jurisdictions"
+Title:        "Jurisdictions"
 Description:  "A profile on the mCSD Location for mCSD Jurisdictions"
 
 * ^url = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.JurisdictionLocation"
@@ -91,7 +91,7 @@ Description:  "A profile on the mCSD Organization profile for mCSD Facilities."
 Profile:      MCSDFacilityLocation
 Parent:       MCSDLocation
 Id:           IHE.mCSD.FacilityLocation
-Title:        "mCSD Location for Facilities"
+Title:        "Facilities"
 Description:  "A profile on the mCSD Location profile for mCSD Facilities."
 
 * ^url = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.FacilityLocation"
@@ -235,7 +235,7 @@ Title:            "Location Type ValueSet"
 * ^date = "2021-09-30T10:06:04.362Z"
 * ^version = "0.1.0"
 * include codes from system McsdLocationTypeCodeSystem
-* include codes from system http://terminology.hl7.org/CodeSystem/v3-RoleCode
+* codes from system http://terminology.hl7.org/CodeSystem/v3-RoleCode where concept is-a #_ServiceDeliveryLocationRoleType
 
 ValueSet:         OrganizationHierarchyTypeValueSet
 Id:               gofr-organization-hiearchy-type-valueset
@@ -338,16 +338,16 @@ InstanceOf:     GofrPage
 Title:          "GOFR Facility Page"
 Usage:          #example
 * code = GofrResourceCodeSystem#page
-* extension[display].extension[title].valueString = "Update Facility"
+* extension[display].extension[title].valueString = "Create Change Request"
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/IHE.mCSD.FacilityLocation)
 * extension[display].extension[search][0].valueString = "Facility Name|name"
 * extension[display].extension[search][1].valueString = "Facility Type|type[0].text"
-* extension[display].extension[search][2].valueString = "Parent|partOf.reference"
+* extension[display].extension[search][2].valueString = "Location|partOf.reference"
 * extension[display].extension[search][3].valueString = "Status|status"
 * extension[display].extension[search][4].valueString = "Longitute|position.longitude"
 * extension[display].extension[search][5].valueString = "Latitude|position.latitude"
 * extension[display].extension[filter][0].valueString = "Name|name:contains"
-* extension[display].extension[filter][1].valueString = "Type|type|http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+* extension[display].extension[filter][1].valueString = "Type|type|http://gofr.org/fhir/ValueSet/gofr-location-type-valueset"
 * extension[display].extension[filter][2].valueString = "Physical Type|physicalType|http://hl7.org/fhir/ValueSet/location-physical-type"
 * extension[display].extension[field][0].extension[path].valueString = "position.longitude"
 * extension[display].extension[field][1].extension[path].valueString = "position.latitude"

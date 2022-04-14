@@ -178,6 +178,19 @@ Usage:          #example
 * extension[role].extension[task][0].valueReference = Reference(Basic/gofr-task-all-permissions-to-everything)
 * extension[role].extension[role][0].valueReference = Reference(Basic/gofr-role-open)
 
+Instance:       gofr-role-public
+InstanceOf:     GofrRole
+Title:          "GOFR Public Role"
+Usage:          #example
+* code = GofrResourceCodeSystem#role
+* extension[role].extension[name].valueString = "Public"
+* extension[role].extension[primary].valueBoolean = true
+* extension[role].extension[task][0].valueReference = Reference(Basic/gofr-task-get-data-source)
+* extension[role].extension[task][1].valueReference = Reference(Basic/gofr-task-get-source-pair)
+* extension[role].extension[task][2].valueReference = Reference(Basic/gofr-task-view-home-page)
+* extension[role].extension[task][3].valueReference = Reference(Basic/gofr-task-view-request-add-facility-page)
+* extension[role].extension[task][4].valueReference = Reference(Basic/gofr-task-view-request-update-facility-page)
+
 Instance:       gofr-task-all-permissions-to-everything
 InstanceOf:     GofrTask
 Title:          "GOFR Task With All Permissions To Everything"
@@ -658,6 +671,16 @@ Usage:          #example
 * extension[task].extension[attributes][0].extension[instance].valueId = "add-data-source"
 * extension[task].extension[compositeTask][0].valueReference = Reference(Basic/gofr-task-manage-data-source)
 
+Instance:       gofr-task-get-data-source
+InstanceOf:     GofrTask
+Title:          "GOFR Task To Get Data Source"
+Usage:          #example
+* code = GofrResourceCodeSystem#task
+* extension[task].extension[name].valueString = "get-data-source"
+* extension[task].extension[attributes][0].extension[permission].valueCode = GofrTaskPermissionCodeSystem#special
+* extension[task].extension[attributes][0].extension[resource].valueCode = GofrTaskResourceCodeSystem#custom
+* extension[task].extension[attributes][0].extension[instance].valueId = "get-data-source"
+
 Instance:       gofr-task-view-data-source
 InstanceOf:     GofrTask
 Title:          "GOFR Task To View Data Source"
@@ -668,6 +691,7 @@ Usage:          #example
 * extension[task].extension[attributes][0].extension[resource].valueCode = GofrTaskResourceCodeSystem#custom
 * extension[task].extension[attributes][0].extension[instance].valueId = "view-data-source"
 * extension[task].extension[compositeTask][0].valueReference = Reference(Basic/gofr-task-manage-data-source)
+* extension[task].extension[compositeTask][1].valueReference = Reference(Basic/gofr-task-get-data-source)
 
 Instance:       gofr-task-share-data-source
 InstanceOf:     GofrTask
@@ -724,6 +748,16 @@ Usage:          #example
 * extension[task].extension[attributes][0].extension[instance].valueId = "deactivate-source-pair"
 * extension[task].extension[compositeTask][0].valueReference = Reference(Basic/gofr-task-view-source-pair)
 
+Instance:       gofr-task-get-source-pair
+InstanceOf:     GofrTask
+Title:          "GOFR Task To Get Data Source Pair"
+Usage:          #example
+* code = GofrResourceCodeSystem#task
+* extension[task].extension[name].valueString = "get-source-pair"
+* extension[task].extension[attributes][0].extension[permission].valueCode = GofrTaskPermissionCodeSystem#special
+* extension[task].extension[attributes][0].extension[resource].valueCode = GofrTaskResourceCodeSystem#custom
+* extension[task].extension[attributes][0].extension[instance].valueId = "get-source-pair"
+
 Instance:       gofr-task-view-source-pair
 InstanceOf:     GofrTask
 Title:          "GOFR Task To View Data Source Pair"
@@ -734,6 +768,7 @@ Usage:          #example
 * extension[task].extension[attributes][0].extension[resource].valueCode = GofrTaskResourceCodeSystem#custom
 * extension[task].extension[attributes][0].extension[instance].valueId = "view-source-pair"
 * extension[task].extension[compositeTask][0].valueReference = Reference(Basic/gofr-task-manage-reconciliations)
+* extension[task].extension[compositeTask][1].valueReference = Reference(Basic/gofr-task-get-source-pair)
 
 Instance:       gofr-task-delete-data-source
 InstanceOf:     GofrTask

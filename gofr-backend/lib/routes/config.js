@@ -333,6 +333,10 @@ router.get('/page/:page/:type?', (req, res) => {
 
     const pageResource = pageDisplay.extension.find(ext => ext.url === 'resource').valueReference.reference;
     const pageTitle = pageDisplay.extension.find(ext => ext.url === 'title').valueString;
+    let pagePartition = '';
+    if (pageDisplay.extension.find(ext => ext.url === 'partition')) {
+      pagePartition = pageDisplay.extension.find(ext => ext.url === 'partition').valueString;
+    }
     let pageUpdatingResource = pageDisplay.extension.find(ext => ext.url === 'requestUpdatingResource');
     if (pageUpdatingResource) {
       pageUpdatingResource = pageUpdatingResource.valueReference.reference;
@@ -546,7 +550,7 @@ router.get('/page/:page/:type?', (req, res) => {
           resourceElement = 'gofr-codesystem';
         }
 
-        vueOutput = `<${resourceElement} :fhirId="fhirId" :edit="isEdit" v-on:set-edit="setEdit($event)" profile="${resource.url}" :key="$route.params.page+($route.params.id || '')" page="${req.params.page}" field="${fhir}" title="${sections[fhir].title}" :constraints="constraints"`;
+        vueOutput = `<${resourceElement} partition="${pagePartition}" :fhirId="fhirId" :edit="isEdit" v-on:set-edit="setEdit($event)" profile="${resource.url}" :key="$route.params.page+($route.params.id || '')" page="${req.params.page}" field="${fhir}" title="${sections[fhir].title}" :constraints="constraints"`;
         if (sectionKeys.length > 1) {
           sectionMenu = sectionKeys.map(name => ({
             name, title: sections[name].title, desc: sections[name].description, secondary: !!sections[name].resource,
@@ -1010,6 +1014,7 @@ router.get('/getGeneralConfig', (req, res) => {
         baseURL: config.get('keycloak:baseURL'),
         realm: config.get('keycloak:realm'),
         UIClientId: config.get('keycloak:UIClientId'),
+        clientSecret: config.get('keycloak:clientSecret'),
       },
     };
     res.status(200).json({ generalConfig: merged, otherConfig, version: config.get('app:version') });

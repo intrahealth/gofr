@@ -3,6 +3,7 @@ const deepmerge = require('deepmerge');
 const config = require('../config');
 const fhirAxios = require('./fhirAxios');
 const fhirFilter = require('./fhirFilter');
+const { Resource2FHIRPATH } = require('./resource2fhirpath');
 const logger = require('../winston');
 const dataSources = require('./dataSources');
 
@@ -286,7 +287,6 @@ const user = {
         privilege[permission][resource]['*'][field] = true;
       }
     }
-
     return true;
   },
 };
@@ -314,6 +314,74 @@ User.prototype.updatePermissions = async function (roleResources) {
       } catch (err) {
         logger.error('Unable to load permissions', role, err);
       }
+    }
+    let is_public_user;
+    if (this.resource && this.resource.telecom) {
+      is_public_user = this.resource.telecom.find(tel => tel.value === 'public@gofr.org');
+    }
+    if (is_public_user) {
+      const filterResource = await fhirAxios.read('Location', 'facility-public-filter', '', 'DEFAULT');
+      let extraConstraints = [];
+      if (filterResource) {
+        const convert2fhirpath = new Resource2FHIRPATH({
+          resource: filterResource,
+          returnBoolean: true,
+        });
+        extraConstraints = convert2fhirpath.convert();
+      }
+      await fhirAxios.read('Parameters', 'gofr-general-config', '', 'DEFAULT').then((response) => {
+        const resData = response.parameter.find(param => param.name === 'config');
+        if (resData.valueString) {
+          const config = JSON.parse(resData.valueString);
+          if (config.public_access && config.public_access.enabled && config.public_access.partition) {
+            const partAcc = {
+              name: config.public_access.partition,
+              read: {
+                metadata: true,
+                Location: true,
+                Organization: true,
+                HealthcareService: true,
+              },
+              write: {
+                Location: {
+                  constraint: {
+                    "meta.profile contains 'http://gofr.org/fhir/StructureDefinition/gofr-facility-update-request' or meta.profile contains 'http://gofr.org/fhir/StructureDefinition/gofr-facility-add-request'": true,
+                  },
+                },
+                QuestionnaireResponse: {
+                  constraint: {
+                    "questionnaire='http://gofr.org/fhir/Questionnaire/gofr-facility-add-request-questionnaire'": true,
+                  },
+                },
+              },
+            };
+            if (extraConstraints.length > 0) {
+              for (const constr of extraConstraints) {
+                if (!isObject(partAcc.read.Location)) {
+                  partAcc.read.Location = {
+                    constraint: {},
+                  };
+                }
+                if (!partAcc.read.Location.constraint) {
+                  partAcc.read.Location.constraint = {};
+                }
+                partAcc.read.Location.constraint[`${constr}=${false}`] = true;
+              }
+            }
+            this.permissions.partitions.push(partAcc);
+            this.permissions.read = {
+              StructureDefinition: true,
+              DocumentReference: {
+                constraint: {
+                  "category.exists(coding.exists(code = 'open'))": true,
+                },
+              },
+              ValueSet: true,
+              CodeSystem: true,
+            };
+          }
+        }
+      });
     }
     await dataSources.getSources({ isAdmin: false, userID: this.resource.id }).then((sources) => {
       sources.forEach((source) => {
@@ -432,7 +500,7 @@ User.prototype.getFilter = function (resource) {
 User.prototype.hasPermissionByObject = function (permission, resource, partition) {
   // First get the base permissions by name then see what constraints
   // apply. Don't get by ID as we need to determine if that was how it matched.
-  const permissions = this.hasPermissionByName(permission, resource.resourceType, partition);
+  const permissions = this.hasPermissionByName(permission, resource.resourceType, '', partition);
   if (permissions === true) {
     return true;
   }

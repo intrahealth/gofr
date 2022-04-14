@@ -1,0 +1,9 @@
+{
+  "resourceType": "Location",
+  "id": "facility-public-filter",
+  "meta": {
+    "profile": [
+      "http://ihe.net/fhir/StructureDefinition/PublicFilterFacilityLocation"
+    ]
+  }
+}

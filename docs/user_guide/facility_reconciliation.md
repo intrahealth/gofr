@@ -1,111 +1,18 @@
+
 # Facility Reconciliation
 
 !!! important "What is the Facility Reconciliation?"
-Facility Reconciliation reconciles data sources, which usually involves choosing a pair of sources to work with and then running the automatic or manual matching tool.
+Facility Reconciliation reconciles **data sources**, which usually involves choosing a pair of sources to work with and then running the **automatic** or **manual matching** tool.
 
-There are various features in this module. They include:
+ **Reconcile**
 
-## Data sources
+Reconciling data sources involves choosing a pair of sources to work with and then running the **automatic reconcile** or **manual matching** in GOFR. Any kind of match can be undone.
 
-### Add Data Sources
+## **Create and Manage Data Source Pair**
 
-GOFR supports various data sources including:
+To match/reconcile two data sources, you first need to create a **data source pair**. The source on the left (source 1) is the **leader** – the source of truth. The source on the right is the **follower**, the source that is meant to be cleaned.
 
-- CSV as a file source,
-- Remote connections to DHIS2 and FHIR servers.
-- Blank Sources
-
-The following table displays the various fields required for each source to be added:
-
-![Alt text](../img/data_sources.JPG 'GOFR Data Sources')
-
-#### Upload CSV
-
-The CSV file should have columns names in the first row of the file. Empty lines should be removed. The CSV file should be encoded as Unicode (utf-8) as that is what is used internally in the backend. If some entities are encoded in another format then matches that appear to be the same may not match as expected.
-
-Latitude and longitude are optional columns. If they are included they will be used to facilitate manual matching but they are not used or required for automatic matching.
-
-<!-- ![type:video](../video/Upload_CSV_gofr.mp4) -->
-
-**To upload a CSV:**
-
-Select Data Sources -> Add Data Sources -> Select Upload CSV -> Select a file and enter the file name -> Continue
-
-![Alt text](../img/upload_csv.JPG 'GOFR upload CSV')
-
-The next step entails mapping the headers on the CSV file uploaded against the headers in the GOFR system:
-
-**Match Headers**
-
-Select the matching headers -> Click upload
-
-![Alt text](../img/map_csv_header.JPG 'GOFR upload CSV')
-
-The user may choose any levels in their hierarchy to include but they must be ordered with the top most level first.
-
-Click on the + button to add more levels and map them to the appropriate levels in the app -> Upload
-
-Ensure that all the column levels selected have data for all the facilities. The file will not be uploaded in case of missing data.
-
-It is also possible to select no levels to match on a flat list with no hierarchy. To do so, don’t select levels.
-
-On uploading, the following warning appears:
-
-![Alt text](../img/upload_csv_warning.JPG 'GOFR upload CSV')
-
-Click Proceed to continue uploading or click cancel, to discard.
-
-#### Remote Data Source
-
-GOFR supports remote sources of data. Any DHIS2 or FHIR server can be used as a source if the user has credentials to access it.
-
-Extensive compatibility testing has not been performed but DHIS2 versions >=2.22 should be supported. Please contact the maintainers if there is an issue.
-
-FHIR is supported for STU3 and R4 support is anticipated.
-
-**To add a remote data source:**
-
-Select Remote Source -> Fill in the source type -> Source name -> Base url -> Username -> Password -> Click Add
-
-![Alt text](../img/upload_remote_source.JPG 'GOFR upload Remote Source')
-
-After adding a remote source, users must run the synchronization so that the data can be pulled.
-
-This is done in the view data sources feature.
-
-View data sources -> remote sources -> select the data source and click on 'Force full sync'.
-
-#### Blank Source
-
-Blank data sources can also be added. A blank data source can manually be populated with data by activating it on the dashboard and use the facility registry functionality to populate its contents
-
-**To add a blank source:**
-
-Select Blank Source -> Add the name of the source -> Click Add
-
-![Alt text](../img/add_blank_source.JPG 'GOFR view Blank Source')
-
-### View Data Source
-
-Once uploaded, you can view all the uploaded sources in the View tab.
-
-![Alt text](../img/view_sources.JPG 'GOFR view Data Source')
-
-#### Force full Sync
-
-#### Sync Update
-
-CSV entries can be edited. Any edits do not modify the original data source but the edits will be exported after reconciliation.
-
-## Reconcile
-
-Reconciling data sources involves choosing a pair of sources to work with and then running the automatic or manual matching GOFR. Any kind of match can be undone.
-
-### Create and Manage Data Source Pair
-
-To match/reconcile two data sources, you first need to create a data source pair. The source on the left (source 1) is the leader – the source of truth. The source on the right is the follower, the source that is meant to be cleaned.
-
-To create a data source pair, On the Reconcile tab -> Select Create and Manage Data Source Pair page.
+To create a data source pair, On the **Reconcile** tab -> Select **Create and Manage Data Source Pair** page.
 
 ![Alt text](../img/create_data_source_pair.JPG 'GOFR Reconcile')
 
@@ -113,7 +20,7 @@ On the pair tab select one source on the left and one on the right.
 
 In the pairing process it is possible to share the pair with another user who may join in helping to match, for example where they are familiar with a specific area.
 
-### Automatic Reconcile
+## **Automatic Reconcile**
 
 When the reconciliation process starts it uses automatic matching. Matching proceeds like this:
 
@@ -141,7 +48,9 @@ During the matching process at any level, it is possible to ask GOFR to match un
 
 One common use for this is after manual matching of any entities, to rerun the matching process and incorporate the results. This can also be used when an entity is is freed for matching after having been previously flagged.
 
-### Manual Matching
+## **Manual Matching**
+
+In GOFR, there is the option of manual matching of facilities where the user manually matches facilities
 
 <p>  Manual matching brings up a dialog box to choose options. If latitude and longitude coordinates were provided in the data sources, it additionally scores matches based on the <a href="https://en.wikipedia.org/wiki/Haversine_formula"> haversine formula </a>for shortest path across a sphere (geodesic distance) between the points </p>
 

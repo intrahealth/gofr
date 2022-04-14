@@ -110,6 +110,11 @@ export default {
     },
     FRDatasource() {
       this.reload++
+    },
+    reload() {
+      this.countFacilities()
+      this.countJurisdictions()
+      this.countServices()
     }
   },
   computed: {
@@ -126,6 +131,9 @@ export default {
       this.reload++
     },
     countFacilities() {
+      if(!this.FRDatasource) {
+        return
+      }
       this.loading.facilitiesCount = true
       let url = "/fhir/" + this.FRDatasource + "/Location?type=urn:ihe:iti:mcsd:2019:facility&_count=0&_total=accurate"
       axios.get(url).then((response) => {
@@ -134,6 +142,9 @@ export default {
       })
     },
     countJurisdictions() {
+      if(!this.FRDatasource) {
+        return
+      }
       let url = "/fhir/" + this.FRDatasource + "/Location?type=urn:ihe:iti:mcsd:2019:jurisdiction&_count=0&_total=accurate"
       this.loading.jurisdictionsCount = true
       axios.get(url).then((response) => {
@@ -142,6 +153,9 @@ export default {
       })
     },
     countServices() {
+      if(!this.FRDatasource) {
+        return
+      }
       let url = "/fhir/" + this.FRDatasource + "/HealthcareService?_count=0&_total=accurate"
       this.loading.servicesCount = true
       axios.get(url).then((response) => {

@@ -338,7 +338,7 @@ InstanceOf:     GofrPage
 Title:          "GOFR Facility Page"
 Usage:          #example
 * code = GofrResourceCodeSystem#page
-* extension[display].extension[title].valueString = "Create Change Request"
+* extension[display].extension[title].valueString = "Facility Details"
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/IHE.mCSD.FacilityLocation)
 * extension[display].extension[search][0].valueString = "Facility Name|name"
 * extension[display].extension[search][1].valueString = "Facility Type|type[0].text"
@@ -407,7 +407,7 @@ InstanceOf:     GofrPage
 Title:          "GOFR Request Add Facility Page"
 Usage:          #example
 * code = GofrResourceCodeSystem#page
-* extension[display].extension[title].valueString = "Request Adding Facility"
+* extension[display].extension[title].valueString = "Create Change Request"
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/gofr-facility-add-request)
 * extension[display].extension[requestUpdatingResource].valueReference = Reference(StructureDefinition/IHE.mCSD.FacilityLocation)
 * extension[display].extension[search][0].valueString = "Facility Name|name"

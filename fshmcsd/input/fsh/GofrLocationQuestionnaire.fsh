@@ -292,6 +292,21 @@ Usage:          #definition
 * item[5].item[0].item[3].required = false
 * item[5].item[0].item[3].repeats = false
 
+// * item[6].linkId = "HealthcareService"
+// * item[6].definition = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.HealthcareService"
+// * item[6].text = "Services Offered"
+// * item[6].type = #group
+
+// * item[6].item[0].linkId = "HealthcareService.location"
+// * item[6].item[0].definition = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.HealthcareService#HealthcareService.location"
+// * item[6].item[0].text = "HealthcareService"
+// * item[6].item[0].type = #string
+// * item[6].item[0].required = true
+// * item[6].item[0].repeats = false
+// * item[6].item[0].readOnly = true
+// * item[6].item[0].answerOption.valueString = "__REPLACE__Location"
+// * item[6].item[0].answerOption.initialSelected = true
+
 * item[6].linkId = "Organization"
 * item[6].definition = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.FacilityOrganization"
 * item[6].text = "Organization"

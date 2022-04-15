@@ -186,7 +186,6 @@ export default {
         params = { "partof:missing": true }
       }
       params._count = 200
-      params._profile = this.targetProfile
       let url = "/fhir/"+this.$store.state.config.userConfig.FRDatasource+"/"+this.resource+"?"+querystring.stringify( params )
       this.items = []
       this.addItems( url, this.items )
@@ -213,7 +212,7 @@ export default {
         let data = response.data
         if ( data.entry && data.entry.length > 0 ) {
           for( let entry of data.entry ) {
-            let locked = this.allAllowed ? false : !entry.resource.meta.profile.includes( this.targetProfile )
+            let locked = this.allAllowed ? false : !entry.resource.meta.profile || !entry.resource.meta.profile.includes( this.targetProfile )
             let item = {
               id: entry.resource.resourceType+"/"+entry.resource.id,
               name: entry.resource.name,

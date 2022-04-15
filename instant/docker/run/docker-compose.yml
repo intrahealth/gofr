@@ -18,7 +18,7 @@ services:
       - redis
     environment:
       - hapi.fhir.partitioning.enabled=true
-      - hapi.fhir.partitioning.allow_references_across_partitions=false
+      - hapi.fhir.partitioning.allow_references_across_partitions=true
       - hapi.fhir.partitioning.partitioning_include_in_search_hashes=false
       - hapi.fhir.enable_index_missing_fields=true
       - hapi.fhir.auto_create_placeholder_reference_targets=true

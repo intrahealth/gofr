@@ -50,7 +50,8 @@ export default {
             components: {
               "gofr-search": () => import("@/components/gofr/gofr-search" ),
               "gofr-search-code": () => import("@/components/gofr/gofr-search-code" ),
-              "gofr-search-term": () => import("@/components/gofr/gofr-search-term" )
+              "gofr-search-string-term": () => import("@/components/gofr/gofr-search-string-term" ),
+              "gofr-search-reference-term": () => import("@/components/gofr/gofr-search-reference-term" )
             },
             template: data.template,
             methods: {

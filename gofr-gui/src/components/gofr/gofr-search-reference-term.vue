@@ -1,88 +1,72 @@
 <template>
-  <gofr-element :edit="edit" :loading="loading">
-    <template #form>
-      <v-menu
-        v-if="displayType == 'tree'"
-        ref="menu"
-        v-model="menu"
-        :close-on-content-click="false"
-        transition="scale-transition"
-        offset-y
-        min-width="290px"
-        max-height="500px"
-        >
-        <template v-slot:activator="{ on }">
-          <v-text-field
-            v-model="displayValue"
-            :label="display"
-            readonly
-            v-on="on"
-            outlined
-            hide-details="auto"
-            :rules="rules"
-            :error-messages="errors"
-            :loading="loading"
-            dense>
-            <template #label>{{display}} <span v-if="required" class="red--text font-weight-bold">*</span></template>
-          </v-text-field>
-        </template>
-        <v-card v-if="!((disabled) || (preset && $route.name === 'ResourceAdd'))">
-          <v-treeview
-            :active.sync="active"
-            :items="items"
-            :load-children="fetchChildren"
-            :open.sync="open"
-            item-disabled="locked"
-            activatable
-            :multiple-active="false"
-            selection-type="independent"
-            :loading="loading"
-            ></v-treeview>
-        </v-card>
-      </v-menu>
-      <v-autocomplete
-        v-else
-        v-model="select"
-        :loading="loading"
-        :items="items"
-        :search-input.sync="search"
-        cache-items
-        flat
-        hide-no-data
-        hide-details
+  <v-menu
+    v-if="displayType == 'tree'"
+    ref="menu"
+    v-model="menu"
+    :close-on-content-click="false"
+    transition="scale-transition"
+    offset-y
+    min-width="290px"
+    max-height="500px"
+    >
+    <template v-slot:activator="{ on }">
+      <v-text-field
+        v-model="displayValue"
         :label="display"
+        v-on="on"
         outlined
+        hide-details="auto"
+        :loading="loading"
+        @click:clear="clearSearch()"
         dense
-        placeholder="Start typing for selection"
-        :rules="rules"
-        :disabled="(disabled) || (preset && $route.name === 'resource_add')"
-        :error-messages="errors"
-        @change="errors = []"
+        shaped 
+        clearable
       >
-        <template #label>{{display}} <span v-if="required" class="red--text font-weight-bold">*</span></template>
-      </v-autocomplete>
+        <template #label>{{display}}</template>
+      </v-text-field>
     </template>
-    <template #header>
-      {{display}}
-    </template>
-    <template #value>
-      {{displayValue}}
-    </template>
-  </gofr-element>
+    <v-card>
+      <v-treeview
+        :active.sync="active"
+        :items="items"
+        :load-children="fetchChildren"
+        :open.sync="open"
+        item-disabled="locked"
+        activatable
+        :multiple-active="false"
+        selection-type="independent"
+        :loading="loading"
+      ></v-treeview>
+    </v-card>
+  </v-menu>
+  <v-autocomplete
+    v-else
+    v-model="select"
+    :loading="loading"
+    :items="items"
+    :search-input.sync="search"
+    cache-items
+    flat
+    hide-no-data
+    hide-details
+    :label="display"
+    outlined
+    dense
+    placeholder="Start typing for selection"
+    @click:clear="clearSearch()"
+  >
+    <template #label>{{display}}</template>
+  </v-autocomplete>
 </template>
 
 <script>
 import axios from 'axios'
-import GofrElement from "../gofr/gofr-element.vue"
 
 const querystring = require('querystring')
 const fhirurl = "http://hl7.org/fhir/StructureDefinition/"
 export default {
   name: "fhir-reference",
-  props: ["field","label","targetProfile","targetResource","min","slotProps","edit","readOnlyIfSet", "displayType", "initialValue", "overrideValue"],
-  components: {
-    GofrElement
-  },
+  props: ["field","label","expression","targetProfile","targetResource","slotProps","edit","readOnlyIfSet", "displayType", "initialValue", "overrideValue"],
   data: function() {
     return {
       source: { path: "", data: {} },
@@ -129,7 +113,7 @@ export default {
     },
     select: function(val) {
       this.value.reference = val
-      this.getDisplay()
+      this.updateSearch()
     },
     active: function() {
       if ( this.active.length ) {
@@ -143,6 +127,12 @@ export default {
     }
   },
   methods: {
+    updateSearch: function() {
+      this.$emit('termChange', this.expression, this.value.reference)
+    },
+    clearSearch: function() {
+      this.$emit('termChange', this.expression, [])
+    },
     setupData: function() {
       if ( this.targetProfile && this.targetResource ) {
         if ( this.targetProfile.replace( fhirurl, "" ) === this.targetResource ) {
@@ -275,18 +265,19 @@ export default {
         }
       } )
     },
-    getDisplay: function() {
-      if ( (!this.edit || this.preset) && this.value && this.value.reference ) {
-        this.loading = true
-        this.$fhirutils.resourceLookup( this.value.reference ).then( display => {
-          this.displayValue = display
-          if ( this.displayType !== "tree" ) {
-            this.items.push( {text: display, value: this.value.reference} )
-          }
-          this.loading = false
-        } )
-      }
-    }
+    // getDisplay: function() {
+    //   if ( (!this.edit || this.preset) && this.value && this.value.reference ) {
+    //     this.loading = true
+    //     this.$fhirutils.resourceLookup( this.value.reference ).then( display => {
+    //       console.log(display);
+    //       this.displayValue = display
+    //       if ( this.displayType !== "tree" ) {
+    //         this.items.push( {text: display, value: this.value.reference} )
+    //       }
+    //       this.loading = false
+    //     } )
+    //   }
+    // }
   },
   computed: {
     index: function() {
@@ -297,16 +288,6 @@ export default {
       if ( this.slotProps && this.slotProps.input) return this.slotProps.input.label
       else return this.label
     },
-    required: function() {
-      return (this.index || 0) < this.min
-    },
-    rules: function() {
-      if ( this.required ) {
-        return [ v => !!v || this.display+" is required" ]
-      } else {
-        return []
-      }
-    }
   }
 
 }

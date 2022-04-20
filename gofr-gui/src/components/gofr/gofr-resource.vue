@@ -50,7 +50,7 @@
                 <v-icon left>mdi-cancel</v-icon> Reject
               </v-btn>
             </template>
-            <v-btn small v-else dark class="secondary" @click="$router.go(0)">
+            <v-btn small v-else dark class="secondary" @click="$emit('set-edit', !edit)">
               <v-icon light>mdi-pencil-off</v-icon>
               <span>Cancel</span>
             </v-btn>
@@ -486,7 +486,7 @@ export default {
         this.overlay = false
         this.loading = false
         if ( this.fhirId ) {
-          this.$router.go(0)
+          this.$emit('set-edit', false)
         } else {
           this.$router.push({ name:"ResourceView", params: {page: this.page, id: data.id } })
         }

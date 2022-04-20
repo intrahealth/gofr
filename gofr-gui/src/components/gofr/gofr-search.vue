@@ -158,6 +158,9 @@ export default {
             for (let field of this.fields) {
               let fieldDisplay = this.$fhirpath.evaluate( entry.resource, field[1] );
               result[field[1]] = await this.$fhirutils.lookup( fieldDisplay[0], field[2] )
+              if(fieldDisplay.length > 1) {
+                result[field[1]] += ' ...'
+              }
             }
             this.results.push(result);
           }

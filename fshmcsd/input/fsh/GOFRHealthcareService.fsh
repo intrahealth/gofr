@@ -112,8 +112,10 @@ Usage:          #example
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/IHE.mCSD.HealthcareService)
 * extension[display].extension[search][0].valueString = "Name|name"
 * extension[display].extension[search][1].valueString = "Active|active"
-* extension[display].extension[filter][0].valueString = "Name|name:contains"
-* extension[display].extension[filter][1].valueString = "Active|active"
+* extension[display].extension[search][2].valueString = "Facilities|location"
+* extension[display].extension[filter][0].valueString = "Name|name|name:contains"
+* extension[display].extension[filter][1].valueString = "Active|active|active"
+* extension[display].extension[filter][2].valueString = "Facility|location|location"
 * extension[section][0].extension[title].valueString = "Details"
 * extension[section][0].extension[description].valueString = "Healthcare service details"
 * extension[section][0].extension[name].valueString = "Healthcare service"

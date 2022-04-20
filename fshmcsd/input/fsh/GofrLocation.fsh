@@ -303,7 +303,7 @@ Usage:          #example
 * extension[display].extension[title].valueString = "Update Organization"
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/IHE.mCSD.FacilityOrganization)
 * extension[display].extension[search][0].valueString = "Name|name"
-* extension[display].extension[filter][0].valueString = "Name|name:contains"
+* extension[display].extension[filter][0].valueString = "Name|name|name:contains"
 * extension[display].extension[field][0].extension[readOnlyIfSet].valueBoolean = true
 * extension[display].extension[field][0].extension[path].valueString = "Organization.name"
 * extension[display].extension[field][1].extension[readOnlyIfSet].valueBoolean = true
@@ -323,7 +323,7 @@ Usage:          #example
 * extension[display].extension[title].valueString = "Update Organization"
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/IHE.mCSD.JurisdictionOrganization)
 * extension[display].extension[search][0].valueString = "Name|name"
-* extension[display].extension[filter][0].valueString = "Name|name:contains"
+* extension[display].extension[filter][0].valueString = "Name|name|name:contains"
 * extension[display].extension[field][0].extension[readOnlyIfSet].valueBoolean = true
 * extension[display].extension[field][0].extension[path].valueString = "Organization.name"
 * extension[section][0].extension[title].valueString = "Basic Details"
@@ -346,9 +346,9 @@ Usage:          #example
 * extension[display].extension[search][3].valueString = "Status|status"
 * extension[display].extension[search][4].valueString = "Longitute|position.longitude"
 * extension[display].extension[search][5].valueString = "Latitude|position.latitude"
-* extension[display].extension[filter][0].valueString = "Name|name:contains"
-* extension[display].extension[filter][1].valueString = "Type|type|http://gofr.org/fhir/ValueSet/gofr-location-type-valueset"
-* extension[display].extension[filter][2].valueString = "Physical Type|physicalType|http://hl7.org/fhir/ValueSet/location-physical-type"
+* extension[display].extension[filter][0].valueString = "Name|name|name:contains"
+* extension[display].extension[filter][1].valueString = "Type|type|type|http://gofr.org/fhir/ValueSet/gofr-location-type-valueset"
+* extension[display].extension[filter][2].valueString = "Location|partOf|partof"
 * extension[display].extension[field][0].extension[path].valueString = "position.longitude"
 * extension[display].extension[field][1].extension[path].valueString = "position.latitude"
 * extension[display].extension[field][2].extension[readOnlyIfSet].valueBoolean = true
@@ -418,10 +418,10 @@ Usage:          #example
 * extension[display].extension[search][5].valueString = "Longitute|position.longitude"
 * extension[display].extension[search][6].valueString = "Latitude|position.latitude"
 * extension[display].extension[search][7].valueString = "Request Status|extension.where(url='http://gofr.org/fhir/StructureDefinition/request-status').valueCoding.display"
-* extension[display].extension[filter][0].valueString = "Name|name:contains"
-* extension[display].extension[filter][1].valueString = "Type|type|http://terminology.hl7.org/CodeSystem/v3-RoleCode"
-* extension[display].extension[filter][2].valueString = "Physical Type|physicalType|http://hl7.org/fhir/ValueSet/location-physical-type"
-* extension[display].extension[filter][3].valueString = "Request Status|requeststatus|request-status-valueset"
+* extension[display].extension[filter][0].valueString = "Name|name|name:contains"
+* extension[display].extension[filter][1].valueString = "Type|type|type|http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+* extension[display].extension[filter][2].valueString = "Physical Type|physicalType|physicalType|http://hl7.org/fhir/ValueSet/location-physical-type"
+* extension[display].extension[filter][3].valueString = "Request Status|extension:requestStatus|requeststatus|request-status-valueset"
 * extension[display].extension[field][0].extension[path].valueString = "position.longitude"
 * extension[display].extension[field][1].extension[path].valueString = "position.latitude"
 * extension[display].extension[field][2].extension[readOnlyIfSet].valueBoolean = true
@@ -468,10 +468,10 @@ Usage:          #example
 * extension[display].extension[search][5].valueString = "Longitute|position.longitude"
 * extension[display].extension[search][6].valueString = "Latitude|position.latitude"
 * extension[display].extension[search][7].valueString = "Request Status|extension.where(url='http://gofr.org/fhir/StructureDefinition/request-status').valueCoding.display"
-* extension[display].extension[filter][0].valueString = "Name|name:contains"
-* extension[display].extension[filter][1].valueString = "Type|type|http://terminology.hl7.org/CodeSystem/v3-RoleCode"
-* extension[display].extension[filter][2].valueString = "Physical Type|physicalType|http://hl7.org/fhir/ValueSet/location-physical-type"
-* extension[display].extension[filter][3].valueString = "Request Status|requeststatus|request-status-valueset"
+* extension[display].extension[filter][0].valueString = "Name|name|name:contains"
+* extension[display].extension[filter][1].valueString = "Type|type|type|http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+* extension[display].extension[filter][2].valueString = "Physical Type|physicalType|physicalType|http://hl7.org/fhir/ValueSet/location-physical-type"
+* extension[display].extension[filter][3].valueString = "Request Status|extension:requestStatus|requeststatus|request-status-valueset"
 * extension[display].extension[field][0].extension[path].valueString = "position.longitude"
 * extension[display].extension[field][1].extension[path].valueString = "position.latitude"
 * extension[display].extension[field][2].extension[readOnlyIfSet].valueBoolean = true
@@ -529,9 +529,9 @@ Usage:          #example
 * extension[display].extension[search][1].valueString = "Type|type.coding.display"
 * extension[display].extension[search][2].valueString = "Physical Type|physicalType.text"
 * extension[display].extension[search][3].valueString = "Parent|partOf.reference"
-* extension[display].extension[filter][0].valueString = "Name|name:contains"
-* extension[display].extension[filter][1].valueString = "Type|type|http://gofr.org/fhir/ValueSet/gofr-jurisdiction-type"
-* extension[display].extension[filter][2].valueString = "Parent|partOf"
+* extension[display].extension[filter][0].valueString = "Name|name|name:contains"
+* extension[display].extension[filter][1].valueString = "Type|type|type|http://gofr.org/fhir/ValueSet/gofr-jurisdiction-type"
+* extension[display].extension[filter][2].valueString = "Parent|partOf|partof"
 * extension[section][0].extension[title].valueString = "Details"
 * extension[section][0].extension[description].valueString = "Jurisdiction details"
 * extension[section][0].extension[name].valueString = "Geographical Location"

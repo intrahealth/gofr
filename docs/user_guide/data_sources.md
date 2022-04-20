@@ -34,7 +34,7 @@ Select **Data Sources** -> **Add Data Sources** -> Select **Upload CSV** -> Sele
 
 The **next step** entails **mapping the headers** on the CSV file uploaded against the headers in the GOFR system:
 
-**Match Headers**
+> **Match Headers**
 
 Select the matching headers -> Click upload
 

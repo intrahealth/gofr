@@ -17,22 +17,23 @@ Also, **GOFR** is an **open-source system** which is is easy to install and can 
 
 ## Log In
 
-In order to access gofr, type the gofr url (web address) into the address bar of any browser.
+In order to access **GOFR**, type the gofr url (web address) into the address bar of any browser.
 
 A sample login screen is shown in the figure below.
 
-![Alt text](../img/gofrlogin.JPG 'GOFR Login Page')
+![Alt text](../img/gofr_sign_in.JPG 'GOFR Login Page')
 
 The **email address** and the user **password** are required to login to the system. On clicking the Login button, the details entered are validated and one is allowed access if the details are correct. Otherwise, access is denied.
 
 ## Reset Password
 
-To reset your password, Click -> Forgot Password -> Submit
-A reset password link will be sent via the email address to reset your password.
+To **reset** your password, **Click -> Forgot Password -> Submit**
+
+A link will be sent via the associated email address to allow you to reset your password.
 
 ![Alt text](../img/forgot_password.jpg 'GOFR Forgot Password Page')
 
-Click the link to 'Back to Login' and log in normally.
+Click the _'Back to Login'_  link and log in normally.
 
 ## Dashboard
 
@@ -44,7 +45,7 @@ Once you successfully log in to the system, the dashboard appears:
 
 ### Data Partitions
 
-Data is loaded into a partition. Users may have access to one or many partitions, some of which they may own or be able to share. Admins may view all partitions. 
+Data is loaded into a partition. Users may have access to one or many partitions, some of which they may own or be able to share. Admins may view all partitions.
 
 To know what partition you are on, see the list on the top left, which allows switching partitions.
 

@@ -19,7 +19,18 @@
     item-text="display"
     item-value="code">
   </v-select>
-  <v-text-field v-else :label="label" v-model="value" dense outlined hide-details shaped clearable @change="updateSearch()" @click:clear="clearSearch()">
+  <v-text-field
+    v-else 
+    :label="label" 
+    v-model="value" 
+    dense 
+    outlined 
+    hide-details 
+    shaped 
+    clearable 
+    @change="updateSearch()" 
+    @click:clear="clearSearch()"
+  >
   </v-text-field>
 </template>
 

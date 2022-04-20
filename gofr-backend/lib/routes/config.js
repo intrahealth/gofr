@@ -782,14 +782,13 @@ router.get('/page/:page/:type?', (req, res) => {
     };
 
     const createSearchTemplate = async (resource, structure) => {
-      logger.silly(JSON.stringify(structure, null, 2));
       let search = ['id'];
       try {
         search = pageDisplay.extension.filter(ext => ext.url === 'search').map(ext => ext.valueString.match(/^([^|]*)\|?([^|]*)?\|?(.*)?$/).slice(1, 4));
       } catch (err) { }
       let filters = [];
       try {
-        filters = pageDisplay.extension.filter(ext => ext.url === 'filter').map(ext => ext.valueString.match(/^([^|]*)\|?([^|]*)?\|?(.*)?$/).slice(1, 4));
+        filters = pageDisplay.extension.filter(ext => ext.url === 'filter').map(ext => ext.valueString.split('|'));
       } catch (err) { }
       let addLink = null;
       try {
@@ -822,18 +821,47 @@ router.get('/page/:page/:type?', (req, res) => {
       if (addLink) {
         searchTemplate += " :add-link='addLink'";
       }
+      const structureKeys = Object.keys(structure);
       searchTemplate += '>' + '\n';
+      let fieldDetails;
       for (const filter of filters) {
-        searchTemplate += '<gofr-search-term v-on:termChange="searchData"';
-        if (filter[1]) {
-          searchTemplate += ` label="${filter[0]}" expression="${filter[1]}"`;
+        for (const fhir of structureKeys) {
+          if (structure[fhir].fields && structure[fhir].fields[filter[1]]) {
+            fieldDetails = structure[fhir].fields[filter[1]];
+          }
+        }
+        if (!fieldDetails) {
+          continue;
+        }
+        let displayType;
+        if (pageFields.hasOwnProperty(fieldDetails.id)) {
+          if (pageFields[fieldDetails.id].type) {
+            displayType = pageFields[fieldDetails.id].type;
+          }
+        }
+        if (!displayType) {
+          if (config.get(`defaults:fields:${fieldDetails.id}:type`)) {
+            displayType = config.get(`defaults:fields:${fieldDetails.id}:type`);
+          }
+        }
+        if (fieldDetails.code === 'Reference') {
+          searchTemplate += `<gofr-search-reference-term v-on:termChange="searchData" field='${filter[1]}' label='${filter[0]}' expression='${filter[2]}'`;
+          if (fieldDetails.hasOwnProperty('targetProfile') && fieldDetails.targetProfile) {
+            fieldDetails.targetResource = await getProfileResource(fieldDetails.targetProfile);
+            searchTemplate += ` targetProfile='${fieldDetails.targetProfile}' targetResource='${fieldDetails.targetResource}'`;
+          }
+          if (displayType) {
+            searchTemplate += ` displayType='${displayType}'`;
+          }
+          searchTemplate += ' />\n';
         } else {
-          searchTemplate += ` label="Search" expression="${filter[0]}"`;
+          searchTemplate += '<gofr-search-string-term v-on:termChange="searchData"';
+          searchTemplate += ` label="${filter[0]}" expression="${filter[2]}"`;
+          if (filter[3]) {
+            searchTemplate += ` binding="${filter[3]}"`;
+          }
+          searchTemplate += '></gofr-search-string-term>\n';
         }
-        if (filter[2]) {
-          searchTemplate += ` binding="${filter[2]}"`;
-        }
-        searchTemplate += '></gofr-search-term>\n';
       }
       searchTemplate += `</${searchElement}>\n`;
       logger.debug(searchTemplate);

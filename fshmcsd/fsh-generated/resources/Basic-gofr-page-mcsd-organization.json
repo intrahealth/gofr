@@ -42,7 +42,7 @@
         },
         {
           "url": "filter",
-          "valueString": "Name|name:contains"
+          "valueString": "Name|name|name:contains"
         }
       ]
     },

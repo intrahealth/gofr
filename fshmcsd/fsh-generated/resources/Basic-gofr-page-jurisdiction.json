@@ -46,15 +46,15 @@
         },
         {
           "url": "filter",
-          "valueString": "Name|name:contains"
+          "valueString": "Name|name|name:contains"
         },
         {
           "url": "filter",
-          "valueString": "Type|type|http://gofr.org/fhir/ValueSet/gofr-jurisdiction-type"
+          "valueString": "Type|type|type|http://gofr.org/fhir/ValueSet/gofr-jurisdiction-type"
         },
         {
           "url": "filter",
-          "valueString": "Parent|partOf"
+          "valueString": "Parent|partOf|partof"
         }
       ]
     },

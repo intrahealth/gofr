@@ -709,14 +709,14 @@ app.post('/uploadCSV', (req, res) => {
 app.get('/', (req, res) => {
   res.sendFile(path.join(`${__dirname}/../gui/index.html`));
 });
-app.get('/static/js/:file', (req, res) => {
-  res.sendFile(path.join(`${__dirname}/../gui/static/js/${req.params.file}`));
+app.get('/js/:file', (req, res) => {
+  res.sendFile(path.join(`${__dirname}/../gui/js/${req.params.file}`));
 });
-app.get('/static/css/:file', (req, res) => {
-  res.sendFile(path.join(`${__dirname}/../gui/static/css/${req.params.file}`));
+app.get('/css/:file', (req, res) => {
+  res.sendFile(path.join(`${__dirname}/../gui/css/${req.params.file}`));
 });
-app.get('/static/img/:file', (req, res) => {
-  res.sendFile(path.join(`${__dirname}/../gui/static/img/${req.params.file}`));
+app.get('/img/:file', (req, res) => {
+  res.sendFile(path.join(`${__dirname}/../gui/img/${req.params.file}`));
 });
 
 server.listen(config.get('server:port'));

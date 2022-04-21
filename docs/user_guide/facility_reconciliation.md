@@ -6,7 +6,7 @@ Facility Reconciliation reconciles **data sources**, which usually involves choo
 
  **Reconcile**
 
-Reconciling data sources involves choosing a pair of sources to work with and then running the **automatic reconcile** or **manual matching** in GOFR. Any kind of match can be undone.
+Reconciling data sources involves choosing a pair of sources to work with and then running the **automatic reconcile** or **manual matching** in **GOFR**. Any kind of match can be undone.
 
 ## **Create and Manage Data Source Pair**
 
@@ -18,7 +18,7 @@ To create a data source pair, On the **Reconcile** tab -> Select **Create and Ma
 
 On the pair tab select one source on the left and one on the right.
 
-In the pairing process it is possible to share the pair with another user who may join in helping to match, for example where they are familiar with a specific area.
+In the pairing process it is possible to share the pair with another user who may join in helping to match, for example in a situation where they are familiar with a specific area.
 
 ## **Automatic Reconcile**
 

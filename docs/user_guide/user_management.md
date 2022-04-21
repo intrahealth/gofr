@@ -5,6 +5,7 @@
 ### Overview
 
 !!! important "How do you manage users in gofr?"
+
 In order to manage  user access in gofr, you need to access the **Keycloak Administration Console**. This should only be accessed by the system's Administrator.
 
 ![Alt text](../img/gofr_key_cloak.JPG 'GOFR Key CLoak Admin Console')
@@ -229,9 +230,26 @@ Registration form
 
 More information about the features and functions of gofr can be accessed  in the <a href="https://www.keycloak.org/docs/latest/server_admin/index.html"> User guide</a> </p>
 
-## Update Account
+### Update Account
 
-A user can update their account by browsing to **Account** on the **Navigator**. Some of the details a user can update include:
+A user can update their account by Clicking on **Account** on the **Navigator**. Some of the details a user can update include:
 
+#### Edit Account
 
+Here, a user can update their **Email, First Name, Last Name** and **Click Save** to record the new details
 
+![Alt text](../img/edit_account.JPG 'GOFR Edit Account')
+
+#### Change Password
+
+To update password, key in your **New Password**, enter the same password in **Confirmation** and **Click Save.**
+
+![Alt text](../img/change_password.JPG 'GOFR Change Password')
+
+#### Authentication
+
+To add authentication on your account, 
+
+**Select  Authenticator -> Follow the instructions to add authentication to your account.**
+
+![Alt text](../img/authenticator.JPG 'GOFR Authenticator')

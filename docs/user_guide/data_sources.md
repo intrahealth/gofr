@@ -12,11 +12,20 @@ The following table displays the various fields required for each source to be a
 
 ![Alt text](../img/data_sources.JPG 'GOFR Data Sources')
 
+To add a **data source** in **GOFR** :
+
+On the Navigation pane,select **Data Sources ->** Select **Add Data Source ->**
+
+![Alt text](../img/add_data_source.JPG 'GOFR Add Data Sources')
+
 ### Upload CSV
 
-The CSV file should have **headers** _(~column names~)_on  the first row of the file. **Empty lines** should be **removed.**
+In order to successfully upload a CSV file into **GOFR**
 
- The CSV file should be encoded as **Unicode (utf-8)** as that is what is used internally in the backend.
+* The **CSV file** should have **headers** _(column names)_ on  the first row of the file. 
+* **Empty lines** should be **removed.**
+
+* The **CSV file** should be encoded as **Unicode (utf-8)** as that is what is used internally in the backend.
 
 !!! Important  "If some entities are encoded in another format then matches that appear to be the same may not match as expected."
 
@@ -60,7 +69,7 @@ Click **Proceed** to continue uploading or click **Cancel**, to discard.
 
 GOFR supports **remote sources of data**. Any **DHIS2** or **FHIR** server can be used as a source if the user has credentials to access it.
 
-Extensive compatibility testing has not been performed but DHIS2 versions >=2.22 should be supported. Please contact the maintainers if there is an issue.
+Extensive compatibility testing has not been performed but **DHIS2 versions >=2.22** should be supported. Please contact the maintainers if there is an issue.
 
 **FHIR** is supported for **STU3** and **R4** support is anticipated.
 
@@ -82,18 +91,22 @@ Blank data sources can also be added. A blank data source can be **manually popu
 
 **To add a blank source:**
 
-Select Blank Source -> Add the name of the source -> Click Add
+Select **Blank Source -> Add the name of the source -> Click Add**
 
 ![Alt text](../img/add_blank_source.JPG 'GOFR view Blank Source')
 
 ![type:video](https://www.youtube.com/embed/5MQYF1V1Ou0)
 
-Once uploaded, you can view all the uploaded sources in the View tab.
+Once uploaded, you can view all the uploaded sources under **View Data Sources** .
 
-![Alt text](../img/view_sources.JPG 'GOFR view Data Source')
+![Alt text](../img/view_data_sources.JPG 'GOFR view Data Source')
 
 #### Force full Sync
 
+Force full sync allows full synchronization of all the data from the remote source.All the data from the remote source is added.This should be done the first time a remote source is added, in order to populate data into the newly added source.
+
 #### Sync Update
 
-CSV entries can be edited. Any edits do not modify the original data source but the edits will be exported after reconciliation.
+Sync Update only pulls new changes from the remote source, since the last synchronization was done. This means that any changes done in the system on the source are not overwritten by the synchronization.
+
+!!! important "CSV entries can be edited. Any edits do not modify the original data source but the edits will be exported after reconciliation."

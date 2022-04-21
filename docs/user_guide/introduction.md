@@ -33,17 +33,19 @@ A link will be sent via the associated email address to allow you to reset your 
 
 ![Alt text](../img/forgot_password.jpg 'GOFR Forgot Password Page')
 
-Click the _'Back to Login'_  link and log in normally.
+**Click** the _'Back to Login'_  **link** and log in normally.
 
 ## Dashboard
 
 Once you successfully log in to the system, the dashboard appears:
 
-![Alt text](../img/gofr2.png 'GOFR Dashboard Page')
+![Alt text](../img/gofr_dashboard.JPG 'GOFR Dashboard Page')
 
 !!! important "Active partition - A partition selected under 'Active Partition' becomes the active partition for the entire system e.g.when searching for a facilities/jurisdictions/organizations, the system will search facilities in the active partition."
 
-### Data Partitions
+There are various features on the dashboard  including:
+
+### Active Partition
 
 Data is loaded into a partition. Users may have access to one or many partitions, some of which they may own or be able to share. Admins may view all partitions.
 
@@ -51,7 +53,7 @@ To know what partition you are on, see the list on the top left, which allows sw
 
 ![Alt text](../img/partition.png 'Partitions')
 
-### Summary Statistics
+### Active Partition Stats
 
 There are summary statistics that show usage and other aspects of the current partition.
 
@@ -77,7 +79,7 @@ Map visualization displays the facilities in the active partition on a map
 
 Tabular Visualization displays the facilities in the active partition in a list/ tabular form
 
-## Logging Out
+## Log Out
 
 To log out of the GOFR system:
 Browse to the upper right corner on any page, click Log Out.

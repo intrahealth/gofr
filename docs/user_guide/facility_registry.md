@@ -12,14 +12,15 @@ The various features on this module include:
 
 ## Jurisdictions
 
-Jurisdictions in gofr refer to geographical locations. Level 1 jurisdictions refer to highest geographical definition e.g. If a country is divided into regions, the regions divided into provinces, and provinces into districts, then in this country, the level 1 jurisdiction is the region, province is level 2 and district is level 3 jurisdiction.
+**Jurisdictions** in **GOFR** refer to geographical locations. 
+
+**Level 1** jurisdictions refer to **highest geographical definition** e.g. If a country is divided into regions, the regions divided into provinces, and provinces into districts, then in this country, the level 1 jurisdiction is the region, province is level 2 and district is level 3 jurisdiction.
 
 ### Add Jurisdiction
 
 ### Search Jurisdiction
 
-This feature allows users to search for a jurisdiction by name, type and parent.
-
+This feature allows users to search for a jurisdiction by **name, type and parent.**
 ![Alt text](../img/search_jurisdictions.JPG 'GOFR Facility Registry')
 
 ## Facility

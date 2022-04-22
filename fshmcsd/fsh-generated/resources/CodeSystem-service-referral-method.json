@@ -1,0 +1,83 @@
+{
+  "resourceType": "CodeSystem",
+  "status": "draft",
+  "content": "complete",
+  "name": "ReferralMethod",
+  "id": "service-referral-method",
+  "title": "ReferralMethod",
+  "description": "The methods of referral can be used when referring to a specific HealthCareService resource.",
+  "version": "4.0.1",
+  "url": "http://terminology.hl7.org/CodeSystem/service-referral-method",
+  "concept": [
+    {
+      "code": "fax",
+      "display": "Fax",
+      "definition": "Referrals may be accepted by fax."
+    },
+    {
+      "code": "phone",
+      "display": "Phone",
+      "definition": "Referrals may be accepted over the phone from a practitioner."
+    },
+    {
+      "code": "elec",
+      "display": "Secure Messaging",
+      "definition": "Referrals may be accepted via a secure messaging system. To determine the types of secure messaging systems supported, refer to the identifiers collection. Callers will need to understand the specific identifier system used to know that they are able to transmit messages."
+    },
+    {
+      "code": "semail",
+      "display": "Secure Email",
+      "definition": "Referrals may be accepted via a secure email. To send please encrypt with the services public key."
+    },
+    {
+      "code": "mail",
+      "display": "Mail",
+      "definition": "Referrals may be accepted via regular postage (or hand delivered)."
+    }
+  ],
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2022-02-15T08:14:55.866+03:00",
+    "source": "#7xOILuq4dhs7erVn"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1142"
+    }
+  ],
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/service-referral-method",
+  "count": 5
+}

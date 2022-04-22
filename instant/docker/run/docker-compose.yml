@@ -1,6 +1,18 @@
 version: '3.7'
 
 services:
+  keycloak:
+    container_name: keycloak
+    image: jboss/keycloak:15.0.2
+    volumes:
+      - ../../../resources/keycloak/themes/gofr:/opt/jboss/keycloak/themes/gofr
+    command: ["-Djboss.http.port=8084"]
+    ports:
+      - "8084:8084"
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      
   redis:
     container_name: redis-gofr
     image: redis
@@ -32,21 +44,26 @@ services:
       # file:// can only deal with absolute paths, have to use classpath
     #   SPRING_CONFIG_LOCATION: 'classpath:./application.yaml'
 
-  hapi-cli:
-    container_name: hapi-cli
-    image: intrahealth/hapi-fhir-cli:latest
-    depends_on:
-      - fhir
-    command: /bin/sh -c "/upload-definitions.sh -p 8080 -h fhir"
+  # hapi-cli:
+  #   container_name: hapi-cli
+  #   image: intrahealth/hapi-fhir-cli:latest
+  #   depends_on:
+  #     - fhir
+  #   command: /bin/sh -c "/upload-definitions.sh -p 8080 -h fhir"
 
   gofr:
     container_name: gofr
     image: intrahealth/gofr:latest
+    depends_on:
+      - keycloak
     environment:
       - mCSD__server__protocal=http
       - mCSD__server__host=fhir
       - mCSD__server__port=8080
       - mCSD__server__basePath=fhir
+      - app__installed=true
+      - app__idp=gofr
+      - keycloak__baseURL=http://keycloak:8084/auth
       - REDIS_HOST=redis
     ports:
       - "4000:4000"

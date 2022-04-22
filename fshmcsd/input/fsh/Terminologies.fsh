@@ -5314,3 +5314,321 @@ Description: " A set of codes further specifying the kind of Role; specific clas
 * #SUBSCR "subscriber" "A party covered under a policy based on association with a sponsor who is the policy holder, and whose association may provide for the eligibility of dependents for coverage"
 * #SUBSCR ^property[0].code = #status
 * #SUBSCR ^property[=].valueCode = #retired
+
+Instance: ContactPoint
+InstanceOf: StructureDefinition
+Usage: #definition
+* meta.versionId = "1"
+* meta.lastUpdated = "2022-02-15T08:18:57.172+03:00"
+* meta.source = "#rMQE1iMv80qInhAV"
+* extension[0].url = "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status"
+* extension[=].valueCode = #normative
+* extension[+].url = "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version"
+* extension[=].valueCode = #4.0.0
+* url = "http://hl7.org/fhir/StructureDefinition/ContactPoint"
+* version = "4.0.0"
+* name = "ContactPoint"
+* status = #active
+* date = "2018-12-27T10:06:46-05:00"
+* publisher = "HL7 FHIR Standard"
+* contact.telecom.system = #url
+* contact.telecom.value = "http://hl7.org/fhir"
+* description = "Base StructureDefinition for ContactPoint Type: Details for all kinds of technology mediated contact points for a person or organization, including telephone, email, etc."
+* purpose = "Need to track phone, fax, mobile, sms numbers, email addresses, twitter tags, etc."
+* fhirVersion = #4.0.0
+* mapping[0].identity = "v2"
+* mapping[=].uri = "http://hl7.org/v2"
+* mapping[=].name = "HL7 v2 Mapping"
+* mapping[+].identity = "rim"
+* mapping[=].uri = "http://hl7.org/v3"
+* mapping[=].name = "RIM Mapping"
+* mapping[+].identity = "servd"
+* mapping[=].uri = "http://www.omg.org/spec/ServD/1.0/"
+* mapping[=].name = "ServD"
+* kind = #complex-type
+* abstract = false
+* type = "ContactPoint"
+* baseDefinition = "http://hl7.org/fhir/StructureDefinition/Element"
+* derivation = #specialization
+* snapshot.element[0].id = "ContactPoint"
+* snapshot.element[=].extension[0].url = "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status"
+* snapshot.element[=].extension[=].valueCode = #normative
+* snapshot.element[=].extension[+].url = "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version"
+* snapshot.element[=].extension[=].valueCode = #4.0.0
+* snapshot.element[=].path = "ContactPoint"
+* snapshot.element[=].short = "Details of a Technology mediated contact point (phone, fax, email, etc.)"
+* snapshot.element[=].definition = "Details for all kinds of technology mediated contact points for a person or organization, including telephone, email, etc."
+* snapshot.element[=].min = 0
+* snapshot.element[=].max = "*"
+* snapshot.element[=].base.path = "ContactPoint"
+* snapshot.element[=].base.min = 0
+* snapshot.element[=].base.max = "*"
+* snapshot.element[=].condition = "ele-1"
+* snapshot.element[=].constraint[0].key = "ele-1"
+* snapshot.element[=].constraint[=].severity = #error
+* snapshot.element[=].constraint[=].human = "All FHIR elements must have a @value or children"
+* snapshot.element[=].constraint[=].expression = "hasValue() or (children().count() > id.count())"
+* snapshot.element[=].constraint[=].xpath = "@value|f:*|h:div"
+* snapshot.element[=].constraint[=].source = "Element"
+* snapshot.element[=].constraint[+].key = "cpt-2"
+* snapshot.element[=].constraint[=].severity = #error
+* snapshot.element[=].constraint[=].human = "A system is required if a value is provided."
+* snapshot.element[=].constraint[=].expression = "value.empty() or system.exists()"
+* snapshot.element[=].constraint[=].xpath = "not(exists(f:value)) or exists(f:system)"
+* snapshot.element[=].isModifier = false
+* snapshot.element[=].mapping[0].identity = "rim"
+* snapshot.element[=].mapping[=].map = "n/a"
+* snapshot.element[=].mapping[+].identity = "v2"
+* snapshot.element[=].mapping[=].map = "XTN"
+* snapshot.element[=].mapping[+].identity = "rim"
+* snapshot.element[=].mapping[=].map = "TEL"
+* snapshot.element[=].mapping[+].identity = "servd"
+* snapshot.element[=].mapping[=].map = "ContactPoint"
+* snapshot.element[+].id = "ContactPoint.id"
+* snapshot.element[=].path = "ContactPoint.id"
+* snapshot.element[=].representation = #xmlAttr
+* snapshot.element[=].short = "Unique id for inter-element referencing"
+* snapshot.element[=].definition = "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
+* snapshot.element[=].min = 0
+* snapshot.element[=].max = "1"
+* snapshot.element[=].base.path = "Element.id"
+* snapshot.element[=].base.min = 0
+* snapshot.element[=].base.max = "1"
+* snapshot.element[=].type.code = "string"
+* snapshot.element[=].isModifier = false
+* snapshot.element[=].isSummary = false
+* snapshot.element[=].mapping.identity = "rim"
+* snapshot.element[=].mapping.map = "n/a"
+* snapshot.element[+].id = "ContactPoint.extension"
+* snapshot.element[=].path = "ContactPoint.extension"
+* snapshot.element[=].slicing.discriminator.type = #value
+* snapshot.element[=].slicing.discriminator.path = "url"
+* snapshot.element[=].slicing.description = "Extensions are always sliced by (at least) url"
+* snapshot.element[=].slicing.rules = #open
+* snapshot.element[=].short = "Additional content defined by implementations"
+* snapshot.element[=].definition = "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."
+* snapshot.element[=].comment = "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."
+* snapshot.element[=].alias[0] = "extensions"
+* snapshot.element[=].alias[+] = "user content"
+* snapshot.element[=].min = 0
+* snapshot.element[=].max = "*"
+* snapshot.element[=].base.path = "Element.extension"
+* snapshot.element[=].base.min = 0
+* snapshot.element[=].base.max = "*"
+* snapshot.element[=].type.code = "Extension"
+* snapshot.element[=].isModifier = false
+* snapshot.element[=].isSummary = false
+* snapshot.element[=].mapping.identity = "rim"
+* snapshot.element[=].mapping.map = "n/a"
+* snapshot.element[+].id = "ContactPoint.system"
+* snapshot.element[=].path = "ContactPoint.system"
+* snapshot.element[=].short = "phone | fax | email | pager | url | sms | other"
+* snapshot.element[=].definition = "Telecommunications form for contact point - what communications system is required to make use of the contact."
+* snapshot.element[=].min = 0
+* snapshot.element[=].max = "1"
+* snapshot.element[=].base.path = "ContactPoint.system"
+* snapshot.element[=].base.min = 0
+* snapshot.element[=].base.max = "1"
+* snapshot.element[=].type.code = "code"
+* snapshot.element[=].condition = "cpt-2"
+* snapshot.element[=].isModifier = false
+* snapshot.element[=].isSummary = true
+* snapshot.element[=].binding.extension.url = "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName"
+* snapshot.element[=].binding.extension.valueString = "ContactPointSystem"
+* snapshot.element[=].binding.strength = #required
+* snapshot.element[=].binding.description = "Telecommunications form for contact point."
+* snapshot.element[=].binding.valueSet = "http://hl7.org/fhir/ValueSet/contact-point-system|4.0.0"
+* snapshot.element[=].mapping[0].identity = "v2"
+* snapshot.element[=].mapping[=].map = "XTN.3"
+* snapshot.element[=].mapping[+].identity = "rim"
+* snapshot.element[=].mapping[=].map = "./scheme"
+* snapshot.element[=].mapping[+].identity = "servd"
+* snapshot.element[=].mapping[=].map = "./ContactPointType"
+* snapshot.element[+].id = "ContactPoint.value"
+* snapshot.element[=].path = "ContactPoint.value"
+* snapshot.element[=].short = "The actual contact point details"
+* snapshot.element[=].definition = "The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address)."
+* snapshot.element[=].comment = "Additional text data such as phone extension numbers, or notes about use of the contact are sometimes included in the value."
+* snapshot.element[=].requirements = "Need to support legacy numbers that are not in a tightly controlled format."
+* snapshot.element[=].min = 0
+* snapshot.element[=].max = "1"
+* snapshot.element[=].base.path = "ContactPoint.value"
+* snapshot.element[=].base.min = 0
+* snapshot.element[=].base.max = "1"
+* snapshot.element[=].type.code = "string"
+* snapshot.element[=].isModifier = false
+* snapshot.element[=].isSummary = true
+* snapshot.element[=].mapping[0].identity = "v2"
+* snapshot.element[=].mapping[=].map = "XTN.1 (or XTN.12)"
+* snapshot.element[=].mapping[+].identity = "rim"
+* snapshot.element[=].mapping[=].map = "./url"
+* snapshot.element[=].mapping[+].identity = "servd"
+* snapshot.element[=].mapping[=].map = "./Value"
+* snapshot.element[+].id = "ContactPoint.use"
+* snapshot.element[=].path = "ContactPoint.use"
+* snapshot.element[=].short = "home | work | temp | old | mobile - purpose of this contact point"
+* snapshot.element[=].definition = "Identifies the purpose for the contact point."
+* snapshot.element[=].comment = "Applications can assume that a contact is current unless it explicitly says that it is temporary or old."
+* snapshot.element[=].requirements = "Need to track the way a person uses this contact, so a user can choose which is appropriate for their purpose."
+* snapshot.element[=].min = 0
+* snapshot.element[=].max = "1"
+* snapshot.element[=].base.path = "ContactPoint.use"
+* snapshot.element[=].base.min = 0
+* snapshot.element[=].base.max = "1"
+* snapshot.element[=].type.code = "code"
+* snapshot.element[=].isModifier = true
+* snapshot.element[=].isModifierReason = "This is labeled as \"Is Modifier\" because applications should not mistake a temporary or old contact etc.for a current/permanent one"
+* snapshot.element[=].isSummary = true
+* snapshot.element[=].binding.extension.url = "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName"
+* snapshot.element[=].binding.extension.valueString = "ContactPointUse"
+* snapshot.element[=].binding.strength = #required
+* snapshot.element[=].binding.description = "Use of contact point."
+* snapshot.element[=].binding.valueSet = "http://hl7.org/fhir/ValueSet/contact-point-use|4.0.0"
+* snapshot.element[=].mapping[0].identity = "v2"
+* snapshot.element[=].mapping[=].map = "XTN.2 - but often indicated by field"
+* snapshot.element[=].mapping[+].identity = "rim"
+* snapshot.element[=].mapping[=].map = "unique(./use)"
+* snapshot.element[=].mapping[+].identity = "servd"
+* snapshot.element[=].mapping[=].map = "./ContactPointPurpose"
+* snapshot.element[+].id = "ContactPoint.rank"
+* snapshot.element[=].path = "ContactPoint.rank"
+* snapshot.element[=].short = "Specify preferred order of use (1 = highest)"
+* snapshot.element[=].definition = "Specifies a preferred order in which to use a set of contacts. ContactPoints with lower rank values are more preferred than those with higher rank values."
+* snapshot.element[=].comment = "Note that rank does not necessarily follow the order in which the contacts are represented in the instance."
+* snapshot.element[=].min = 0
+* snapshot.element[=].max = "1"
+* snapshot.element[=].base.path = "ContactPoint.rank"
+* snapshot.element[=].base.min = 0
+* snapshot.element[=].base.max = "1"
+* snapshot.element[=].type.code = "positiveInt"
+* snapshot.element[=].isModifier = false
+* snapshot.element[=].isSummary = true
+* snapshot.element[=].mapping[0].identity = "v2"
+* snapshot.element[=].mapping[=].map = "n/a"
+* snapshot.element[=].mapping[+].identity = "rim"
+* snapshot.element[=].mapping[=].map = "n/a"
+* snapshot.element[+].id = "ContactPoint.period"
+* snapshot.element[=].path = "ContactPoint.period"
+* snapshot.element[=].short = "Time period when the contact point was/is in use"
+* snapshot.element[=].definition = "Time period when the contact point was/is in use."
+* snapshot.element[=].min = 0
+* snapshot.element[=].max = "1"
+* snapshot.element[=].base.path = "ContactPoint.period"
+* snapshot.element[=].base.min = 0
+* snapshot.element[=].base.max = "1"
+* snapshot.element[=].type.code = "Period"
+* snapshot.element[=].isModifier = false
+* snapshot.element[=].isSummary = true
+* snapshot.element[=].mapping[0].identity = "v2"
+* snapshot.element[=].mapping[=].map = "N/A"
+* snapshot.element[=].mapping[+].identity = "rim"
+* snapshot.element[=].mapping[=].map = "./usablePeriod[type=\"IVL<TS>\"]"
+* snapshot.element[=].mapping[+].identity = "servd"
+* snapshot.element[=].mapping[=].map = "./StartDate and ./EndDate"
+* differential.element[0].id = "ContactPoint"
+* differential.element[=].extension[0].url = "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status"
+* differential.element[=].extension[=].valueCode = #normative
+* differential.element[=].extension[+].url = "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version"
+* differential.element[=].extension[=].valueCode = #4.0.0
+* differential.element[=].path = "ContactPoint"
+* differential.element[=].short = "Details of a Technology mediated contact point (phone, fax, email, etc.)"
+* differential.element[=].definition = "Details for all kinds of technology mediated contact points for a person or organization, including telephone, email, etc."
+* differential.element[=].min = 0
+* differential.element[=].max = "*"
+* differential.element[=].constraint.key = "cpt-2"
+* differential.element[=].constraint.severity = #error
+* differential.element[=].constraint.human = "A system is required if a value is provided."
+* differential.element[=].constraint.expression = "value.empty() or system.exists()"
+* differential.element[=].constraint.xpath = "not(exists(f:value)) or exists(f:system)"
+* differential.element[=].mapping[0].identity = "v2"
+* differential.element[=].mapping[=].map = "XTN"
+* differential.element[=].mapping[+].identity = "rim"
+* differential.element[=].mapping[=].map = "TEL"
+* differential.element[=].mapping[+].identity = "servd"
+* differential.element[=].mapping[=].map = "ContactPoint"
+* differential.element[+].id = "ContactPoint.system"
+* differential.element[=].path = "ContactPoint.system"
+* differential.element[=].short = "phone | fax | email | pager | url | sms | other"
+* differential.element[=].definition = "Telecommunications form for contact point - what communications system is required to make use of the contact."
+* differential.element[=].min = 0
+* differential.element[=].max = "1"
+* differential.element[=].type.code = "code"
+* differential.element[=].condition = "cpt-2"
+* differential.element[=].isSummary = true
+* differential.element[=].binding.extension.url = "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName"
+* differential.element[=].binding.extension.valueString = "ContactPointSystem"
+* differential.element[=].binding.strength = #required
+* differential.element[=].binding.description = "Telecommunications form for contact point."
+* differential.element[=].binding.valueSet = "http://hl7.org/fhir/ValueSet/contact-point-system|4.0.0"
+* differential.element[=].mapping[0].identity = "v2"
+* differential.element[=].mapping[=].map = "XTN.3"
+* differential.element[=].mapping[+].identity = "rim"
+* differential.element[=].mapping[=].map = "./scheme"
+* differential.element[=].mapping[+].identity = "servd"
+* differential.element[=].mapping[=].map = "./ContactPointType"
+* differential.element[+].id = "ContactPoint.value"
+* differential.element[=].path = "ContactPoint.value"
+* differential.element[=].short = "The actual contact point details"
+* differential.element[=].definition = "The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address)."
+* differential.element[=].comment = "Additional text data such as phone extension numbers, or notes about use of the contact are sometimes included in the value."
+* differential.element[=].requirements = "Need to support legacy numbers that are not in a tightly controlled format."
+* differential.element[=].min = 0
+* differential.element[=].max = "1"
+* differential.element[=].type.code = "string"
+* differential.element[=].isSummary = true
+* differential.element[=].mapping[0].identity = "v2"
+* differential.element[=].mapping[=].map = "XTN.1 (or XTN.12)"
+* differential.element[=].mapping[+].identity = "rim"
+* differential.element[=].mapping[=].map = "./url"
+* differential.element[=].mapping[+].identity = "servd"
+* differential.element[=].mapping[=].map = "./Value"
+* differential.element[+].id = "ContactPoint.use"
+* differential.element[=].path = "ContactPoint.use"
+* differential.element[=].short = "home | work | temp | old | mobile - purpose of this contact point"
+* differential.element[=].definition = "Identifies the purpose for the contact point."
+* differential.element[=].comment = "Applications can assume that a contact is current unless it explicitly says that it is temporary or old."
+* differential.element[=].requirements = "Need to track the way a person uses this contact, so a user can choose which is appropriate for their purpose."
+* differential.element[=].min = 0
+* differential.element[=].max = "1"
+* differential.element[=].type.code = "code"
+* differential.element[=].isModifier = true
+* differential.element[=].isModifierReason = "This is labeled as \"Is Modifier\" because applications should not mistake a temporary or old contact etc.for a current/permanent one"
+* differential.element[=].isSummary = true
+* differential.element[=].binding.extension.url = "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName"
+* differential.element[=].binding.extension.valueString = "ContactPointUse"
+* differential.element[=].binding.strength = #required
+* differential.element[=].binding.description = "Use of contact point."
+* differential.element[=].binding.valueSet = "http://hl7.org/fhir/ValueSet/contact-point-use|4.0.0"
+* differential.element[=].mapping[0].identity = "v2"
+* differential.element[=].mapping[=].map = "XTN.2 - but often indicated by field"
+* differential.element[=].mapping[+].identity = "rim"
+* differential.element[=].mapping[=].map = "unique(./use)"
+* differential.element[=].mapping[+].identity = "servd"
+* differential.element[=].mapping[=].map = "./ContactPointPurpose"
+* differential.element[+].id = "ContactPoint.rank"
+* differential.element[=].path = "ContactPoint.rank"
+* differential.element[=].short = "Specify preferred order of use (1 = highest)"
+* differential.element[=].definition = "Specifies a preferred order in which to use a set of contacts. ContactPoints with lower rank values are more preferred than those with higher rank values."
+* differential.element[=].comment = "Note that rank does not necessarily follow the order in which the contacts are represented in the instance."
+* differential.element[=].min = 0
+* differential.element[=].max = "1"
+* differential.element[=].type.code = "positiveInt"
+* differential.element[=].isSummary = true
+* differential.element[=].mapping[0].identity = "v2"
+* differential.element[=].mapping[=].map = "n/a"
+* differential.element[=].mapping[+].identity = "rim"
+* differential.element[=].mapping[=].map = "n/a"
+* differential.element[+].id = "ContactPoint.period"
+* differential.element[=].path = "ContactPoint.period"
+* differential.element[=].short = "Time period when the contact point was/is in use"
+* differential.element[=].definition = "Time period when the contact point was/is in use."
+* differential.element[=].min = 0
+* differential.element[=].max = "1"
+* differential.element[=].type.code = "Period"
+* differential.element[=].isSummary = true
+* differential.element[=].mapping[0].identity = "v2"
+* differential.element[=].mapping[=].map = "N/A"
+* differential.element[=].mapping[+].identity = "rim"
+* differential.element[=].mapping[=].map = "./usablePeriod[type=\"IVL<TS>\"]"
+* differential.element[=].mapping[+].identity = "servd"
+* differential.element[=].mapping[=].map = "./StartDate and ./EndDate"

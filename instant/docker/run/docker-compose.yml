@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.3'
 
 services:
 
@@ -40,12 +40,12 @@ services:
       - spring.jpa.properties.hibernate.search.backend.directory.root=target/lucenefiles
       - spring.jpa.properties.hibernate.search.backend.lucene_version=lucene_current
 
-  hapi-cli:
-    container_name: hapi-cli
-    image: docker.io/intrahealth/hapi-fhir-cli:latest
-    depends_on:
-      - fhir
-    command: /bin/sh -c "/upload-definitions.sh -p 8080 -h fhir"
+  # hapi-cli:
+  #   container_name: hapi-cli
+  #   image: docker.io/intrahealth/hapi-fhir-cli:latest
+  #   depends_on:
+  #     - fhir
+  #   command: /bin/sh -c "/upload-definitions.sh -p 8080 -h fhir"
 
   gofr:
     container_name: gofr

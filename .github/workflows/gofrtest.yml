@@ -1,0 +1,47 @@
+name: gofrtest
+
+on:
+  push:
+    branches: 
+      - main
+  pull_request:
+    branches: 
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  gofrtest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          repository: intrahealth/gofr
+
+      - run: ls -la
+
+      # or error from act: docker-compose: command not found
+      - name: docker-compose install if using act
+        run: |
+          sudo curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+        if: ${{ env.ACT }}
+
+      - name: Launch
+        working-directory: instant/docker/run
+        run: docker-compose up
+
+      # wait for stack to come up
+      - run: sleep 360
+
+      - name: Retrieve cert
+        # working-directory: tests
+        run: |
+          fhirid=$(curl http://localhost:8080/fhir/metadata)
+          echo ${fhirid}
+
+      - name: Teardown
+        run: |
+          docker-compose down

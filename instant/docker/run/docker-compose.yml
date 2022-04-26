@@ -55,7 +55,7 @@ services:
     container_name: gofr
     image: intrahealth/gofr:latest
     depends_on:
-      - keycloak
+      - fhir
     environment:
       # use gofr for authn/authz which is default
       # - app__idp=keycloak

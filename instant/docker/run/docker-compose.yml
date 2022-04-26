@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.3'
 
 services:
   keycloak:
@@ -15,20 +15,29 @@ services:
       
   redis:
     container_name: redis-gofr
-    image: redis
+    image: docker.io/redis
     ports:
       - "6379:6379"
     restart: always
 
   fhir:
     container_name: hapi-fhir
-    image: hapiproject/hapi:v5.5.2
+    image: docker.io/hapiproject/hapi:v5.5.2-distroless
     ports:
-      - "8080:8080"
+      - "8081:8080"
     restart: always
     depends_on:
       - redis
     environment:
+      # add mcsd ig
+      - hapi.fhir.implementationguides.mcsd.name=ihe.iti.mcsd
+      - hapi.fhir.implementationguides.mcsd.version=3.5.0
+      # bulk data export
+      - hapi.fhir.bulk_export_enabled=true
+      # subscriptions
+      - hapi.fhir.subscription.resthook_enabled=true
+      - hapi.fhir.subscription.websocket_enabled=true
+      # partitioning
       - hapi.fhir.partitioning.enabled=true
       - hapi.fhir.partitioning.allow_references_across_partitions=true
       - hapi.fhir.partitioning.partitioning_include_in_search_hashes=false
@@ -41,12 +50,10 @@ services:
       - spring.jpa.properties.hibernate.search.backend.directory.type=local-filesystem
       - spring.jpa.properties.hibernate.search.backend.directory.root=target/lucenefiles
       - spring.jpa.properties.hibernate.search.backend.lucene_version=lucene_current
-      # file:// can only deal with absolute paths, have to use classpath
-    #   SPRING_CONFIG_LOCATION: 'classpath:./application.yaml'
 
   # hapi-cli:
   #   container_name: hapi-cli
-  #   image: intrahealth/hapi-fhir-cli:latest
+  #   image: docker.io/intrahealth/hapi-fhir-cli:latest
   #   depends_on:
   #     - fhir
   #   command: /bin/sh -c "/upload-definitions.sh -p 8080 -h fhir"
@@ -57,6 +64,8 @@ services:
     depends_on:
       - keycloak
     environment:
+      # use gofr for authn/authz which is default
+      # - app__idp=keycloak
       - mCSD__server__protocal=http
       - mCSD__server__host=fhir
       - mCSD__server__port=8080

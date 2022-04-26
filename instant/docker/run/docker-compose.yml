@@ -1,17 +1,17 @@
 version: '3.3'
 
 services:
-  keycloak:
-    container_name: keycloak
-    image: jboss/keycloak:15.0.2
-    volumes:
-      - ../../../resources/keycloak/themes/gofr:/opt/jboss/keycloak/themes/gofr
-    command: ["-Djboss.http.port=8084"]
-    ports:
-      - "8084:8084"
-    environment:
-      - KEYCLOAK_USER=admin
-      - KEYCLOAK_PASSWORD=admin
+#   keycloak:
+#     container_name: keycloak
+#     image: jboss/keycloak:15.0.2
+#     volumes:
+#       - ../../../resources/keycloak/themes/gofr:/opt/jboss/keycloak/themes/gofr
+#     command: ["-Djboss.http.port=8084"]
+#     ports:
+#       - "8084:8084"
+#     environment:
+#       - KEYCLOAK_USER=admin
+#       - KEYCLOAK_PASSWORD=admin
       
   redis:
     container_name: redis-gofr
@@ -50,13 +50,6 @@ services:
       - spring.jpa.properties.hibernate.search.backend.directory.type=local-filesystem
       - spring.jpa.properties.hibernate.search.backend.directory.root=target/lucenefiles
       - spring.jpa.properties.hibernate.search.backend.lucene_version=lucene_current
-
-  # hapi-cli:
-  #   container_name: hapi-cli
-  #   image: docker.io/intrahealth/hapi-fhir-cli:latest
-  #   depends_on:
-  #     - fhir
-  #   command: /bin/sh -c "/upload-definitions.sh -p 8080 -h fhir"
 
   gofr:
     container_name: gofr

@@ -42,4 +42,5 @@ jobs:
         run: fhirid=$(curl http://localhost:4000/) && echo ${fhirid}
 
       - name: Teardown
+        working-directory: instant/docker/run
         run: docker-compose down

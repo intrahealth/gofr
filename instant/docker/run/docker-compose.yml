@@ -1,7 +1,18 @@
 version: '3.3'
 
 services:
-
+  keycloak:
+    container_name: keycloak
+    image: jboss/keycloak:15.0.2
+    volumes:
+      - ../../../resources/keycloak/themes/gofr:/opt/jboss/keycloak/themes/gofr
+    command: ["-Djboss.http.port=8084"]
+    ports:
+      - "8084:8084"
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      
   redis:
     container_name: redis-gofr
     image: docker.io/redis
@@ -49,7 +60,9 @@ services:
 
   gofr:
     container_name: gofr
-    image: docker.io/intrahealth/gofr:latest
+    image: intrahealth/gofr:latest
+    depends_on:
+      - keycloak
     environment:
       # use gofr for authn/authz which is default
       # - app__idp=keycloak
@@ -57,6 +70,9 @@ services:
       - mCSD__server__host=fhir
       - mCSD__server__port=8080
       - mCSD__server__basePath=fhir
+      - app__installed=${false}
+      - app__idp=gofr
+      - keycloak__baseURL=http://keycloak:8084/auth
       - REDIS_HOST=redis
     ports:
       - "4000:4000"

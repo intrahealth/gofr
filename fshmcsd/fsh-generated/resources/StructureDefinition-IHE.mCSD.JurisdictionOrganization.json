@@ -2142,7 +2142,7 @@
         "isSummary": true,
         "binding": {
           "strength": "required",
-          "valueSet": "http://hl7.org/fhir/ValueSet/organization-type"
+          "valueSet": "http://gofr.org/fhir/ValueSet/organization-type"
         },
         "mapping": [
           {
@@ -2403,7 +2403,7 @@
         "isSummary": true,
         "binding": {
           "strength": "required",
-          "valueSet": "http://hl7.org/fhir/ValueSet/organization-type"
+          "valueSet": "http://gofr.org/fhir/ValueSet/organization-type"
         },
         "mapping": [
           {

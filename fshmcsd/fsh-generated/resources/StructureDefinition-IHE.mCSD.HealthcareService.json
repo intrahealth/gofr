@@ -1343,7 +1343,7 @@
         "isSummary": true,
         "binding": {
           "strength": "required",
-          "valueSet": "http://hl7.org/fhir/ValueSet/service-category"
+          "valueSet": "http://gofr.org/fhir/ValueSet/service-category"
         },
         "mapping": [
           {
@@ -1593,7 +1593,7 @@
         "isSummary": true,
         "binding": {
           "strength": "required",
-          "valueSet": "http://hl7.org/fhir/ValueSet/service-type"
+          "valueSet": "http://gofr.org/fhir/ValueSet/service-type"
         },
         "mapping": [
           {
@@ -1840,7 +1840,7 @@
         "isSummary": true,
         "binding": {
           "strength": "required",
-          "valueSet": "http://hl7.org/fhir/ValueSet/c80-practice-codes"
+          "valueSet": "http://gofr.org/fhir/ValueSet/c80-practice-codes"
         },
         "mapping": [
           {
@@ -2708,7 +2708,7 @@
         "isSummary": true,
         "binding": {
           "strength": "required",
-          "valueSet": "http://hl7.org/fhir/ValueSet/service-provision-conditions"
+          "valueSet": "http://gofr.org/fhir/ValueSet/service-provision-conditions"
         },
         "mapping": [
           {
@@ -3122,7 +3122,7 @@
         "isSummary": true,
         "binding": {
           "strength": "required",
-          "valueSet": "http://hl7.org/fhir/ValueSet/clinical-findings"
+          "valueSet": "http://gofr.org/fhir/ValueSet/clinical-findings"
         },
         "mapping": [
           {
@@ -3407,7 +3407,7 @@
         "isSummary": true,
         "binding": {
           "strength": "required",
-          "valueSet": "http://hl7.org/fhir/ValueSet/program"
+          "valueSet": "http://gofr.org/fhir/ValueSet/program"
         },
         "mapping": [
           {
@@ -3951,7 +3951,7 @@
         "isSummary": true,
         "binding": {
           "strength": "required",
-          "valueSet": "http://hl7.org/fhir/ValueSet/service-referral-method"
+          "valueSet": "http://gofr.org/fhir/ValueSet/service-referral-method"
         },
         "mapping": [
           {
@@ -4983,7 +4983,7 @@
         "mustSupport": true,
         "binding": {
           "strength": "required",
-          "valueSet": "http://hl7.org/fhir/ValueSet/service-category"
+          "valueSet": "http://gofr.org/fhir/ValueSet/service-category"
         }
       },
       {
@@ -5002,7 +5002,7 @@
         "mustSupport": true,
         "binding": {
           "strength": "required",
-          "valueSet": "http://hl7.org/fhir/ValueSet/service-type"
+          "valueSet": "http://gofr.org/fhir/ValueSet/service-type"
         }
       },
       {
@@ -5020,7 +5020,7 @@
         "mustSupport": true,
         "binding": {
           "strength": "required",
-          "valueSet": "http://hl7.org/fhir/ValueSet/c80-practice-codes"
+          "valueSet": "http://gofr.org/fhir/ValueSet/c80-practice-codes"
         }
       },
       {
@@ -5090,7 +5090,7 @@
         "mustSupport": true,
         "binding": {
           "strength": "required",
-          "valueSet": "http://hl7.org/fhir/ValueSet/service-provision-conditions"
+          "valueSet": "http://gofr.org/fhir/ValueSet/service-provision-conditions"
         }
       },
       {
@@ -5115,7 +5115,7 @@
         "mustSupport": true,
         "binding": {
           "strength": "required",
-          "valueSet": "http://hl7.org/fhir/ValueSet/clinical-findings"
+          "valueSet": "http://gofr.org/fhir/ValueSet/clinical-findings"
         }
       },
       {
@@ -5133,7 +5133,7 @@
         "mustSupport": true,
         "binding": {
           "strength": "required",
-          "valueSet": "http://hl7.org/fhir/ValueSet/program"
+          "valueSet": "http://gofr.org/fhir/ValueSet/program"
         }
       },
       {
@@ -5169,7 +5169,7 @@
         "mustSupport": true,
         "binding": {
           "strength": "required",
-          "valueSet": "http://hl7.org/fhir/ValueSet/service-referral-method"
+          "valueSet": "http://gofr.org/fhir/ValueSet/service-referral-method"
         }
       },
       {

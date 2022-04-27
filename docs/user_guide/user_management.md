@@ -13,7 +13,7 @@ In order to manage  user access in gofr, you need to access the **Keycloak Admin
  From the **Admin Console**, you have a wide range of actions you can perform to manage users.
 ![Alt text](../img/gofr_manage_users.JPG 'GOFR Manage Users')
 
-## Administrator Roles 
+## Administrator Roles
 
 ### Managing User Roles
 
@@ -100,10 +100,9 @@ This is the non-confidential technical information about the credential. It is h
 
 This column has two actions:
 
-* *Click Save to record the value or the user field.*
+* _Click Save to record the value or the user field._
 
-* *Click Delete to remove the credential.*
-
+* _Click Delete to remove the credential._
 
 !!! important "You cannot configure other types of credentials for a specific user in the admin console; that task is the user’s responsibility."
 
@@ -181,7 +180,6 @@ To set actions required for a user ->
 5. Click the X next to the action name to remove it.
 6. Click Save after you select which actions to add.
 
-
 #### Setting required actions for all new users
 
 You can specify what **actions** are **required before the first login of all new users**. The requirements apply to a user created by the **Add User** button on the **Users** page or the **Register** link on the **login page**.
@@ -248,7 +246,7 @@ To update password, key in your **New Password**, enter the same password in **C
 
 #### Authentication
 
-To add authentication on your account, 
+To add authentication on your account,
 
 **Select  Authenticator -> Follow the instructions to add authentication to your account.**
 

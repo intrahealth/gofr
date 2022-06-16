@@ -60,7 +60,7 @@
     # vars:
     #   executable: "/usr/local/bin/npm"
 
-
+# start then restart gofr, to fix bug in loading fsh
   - name: run backend
     service: 
       name: gofr.service
@@ -68,4 +68,17 @@
       enabled: yes
       daemon_reload: yes
 
+  - name: run backend
+    service: 
+      name: gofr.service
+      state: stopped
+      enabled: yes
+      daemon_reload: yes
+
+  - name: run backend
+    service: 
+      name: gofr.service
+      state: restarted
+      enabled: yes
+      daemon_reload: yes
 

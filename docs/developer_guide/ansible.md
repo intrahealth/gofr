@@ -107,11 +107,11 @@ ansible-playbook -i hosts services.yaml -e user=gofr
 
 
 ### todo
-* nginx, apache, caddy etc
+* nginx, apache, caddy etc for gofr
 * encryption
-* run gofr start twice to fix upload/sql with hapi
 * fix next error with permissions...
 * make it work without keycloak, make it work with keycloak
+
 
 ## Troubleshooting
 

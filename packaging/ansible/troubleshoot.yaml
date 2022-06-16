@@ -13,21 +13,11 @@
   tasks:
 
   # mongo is running under systemd (ubuntu)
-  - name: run mongodb
+  - name: run postgres
     service: 
-      name: mongodb
+      name: postgresql@14-main.service
       state: started
       enabled: yes
-    when: ansible_distribution == 'Ubuntu'
-
-
-  # mongo is running under systemd (centos)
-  - name: run mongodb
-    service: 
-      name: mongod
-      state: started
-      enabled: yes
-    when: ansible_distribution == 'CentOS'
 
 
   # redis is running under systemd
@@ -40,53 +30,30 @@
 
   - name: run app
     service: 
-      name: facility-recon.service
+      name: gofr.service
       state: started
       enabled: yes
 
 
-  - name: hearth journalctl since last reboot
-    command: journalctl -u hearth.service -b
-    register: hearth
+  - name: gofr journalctl since last reboot
+    command: journalctl -u gofr.service -b
+    register: gofr
 
 
   - debug:
-      msg: "{{ hearth.stdout_lines }}"
+      msg: "{{ gofr.stdout_lines }}"
 
 
-  - name: app journalctl since last reboot
-    command: journalctl -u facility-recon.service -b
-    register: backend
+  - name: postgres journalctl since last reboot
+    command: journalctl -u postgresql@14-main.service -b
+    register: postgres
 
 
   - debug:
-      msg: "{{ backend.stdout_lines }}"
+      msg: "{{ postgres.stdout_lines }}"
 
 
 # status output
-
-  - name: status mongo
-    command: systemctl status mongod.service
-    register: statusm
-    when: ansible_distribution == 'CentOS'
-
-
-  - debug:
-      msg: "{{ statusm.stdout_lines }}"
-    when: ansible_distribution == 'CentOS'
-
-
-  - name: status mongo
-    command: systemctl status mongodb.service
-    register: statusm
-    when: ansible_distribution == 'Ubuntu'
-
-
-  - debug:
-      msg: "{{ statusm.stdout_lines }}"
-    when: ansible_distribution == 'Ubuntu'
-
-
   - name: status redis
     command: systemctl status redis.service
     register: statusr
@@ -96,21 +63,21 @@
       msg: "{{ statusr.stdout_lines }}"
 
 
-  - name: status hearth
-    command: systemctl status hearth.service
-    register: statush
+  - name: status postgres
+    command: systemctl status postgresql@14-main.service
+    register: statuspg
 
 
   - debug:
-      msg: "{{ statush.stdout_lines }}"
+      msg: "{{ statuspg.stdout_lines }}"
 
 
-  - name: status app
-    command: systemctl status facility-recon.service
-    register: statusb
+  - name: status gofr
+    command: systemctl status gofr.service
+    register: statusgofr
 
     
   - debug:
-      msg: "{{ statusb.stdout_lines }}"
+      msg: "{{ statusgofr.stdout_lines }}"
 
 

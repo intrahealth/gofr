@@ -1,0 +1,76 @@
+---
+- name: Install gofr
+  hosts: all
+  remote_user: "{{ user }}"
+  tags: install
+
+
+  vars_prompt:
+    - name: "user"
+      prompt: "Please enter the username (without sudo)"
+      private: no
+
+  tasks:
+
+  - name: Does gofr folder exist
+    stat:
+      path: $HOME/gofr
+    register: stat_result3
+
+
+  - name: git clone gofr repo
+    git:
+      repo: 'https://github.com/intrahealth/gofr.git'
+      dest: $HOME/gofr
+      # replace with your branch pref. if this changes, it may not work bc you'd need to checkout
+      version: master
+      clone: yes
+      update: yes
+    when: stat_result3.stat.exists == False
+
+
+  - name: git pull
+    shell: cd $HOME/gofr && git pull
+
+
+  - name: install/update gofr packages based on package.json.
+    npm:
+      path: $HOME/gofr/gofr-backend
+      state: latest
+
+
+  - name: replace line for logging which fails as it requires root perms
+    lineinfile: 
+      path: $HOME/gofr/gofr-backend/lib/winston.js
+      regexp: "^(.*)const logDir = '/var/log';(.*)$"
+      line: "const logDir = '/var/log/gofr';"
+      backrefs: yes
+
+
+  - name: Create a /var/log/gofr dir if is doesn't exist
+    ansible.builtin.file:
+      path: /var/log/gofr
+      state: directory
+      owner: gofr
+      group: gofr
+      mode: '0755'
+    become: true
+
+# move default.json.example to default.json
+  # - name: move default.json.example to default.json
+    # shell: cp $HOME/gofr/gofr-backend/config/default.json.example $HOME/gofr/gofr-backend/config/default.json 
+    # owner: gofr
+    # group: gofr
+    # mode: '0755'
+
+
+  - name: Copy file with owner and permissions
+    ansible.builtin.copy:
+      remote_src: true
+      src: $HOME/gofr/gofr-backend/config/default.json.example
+      dest: $HOME/gofr/gofr-backend/config/default.json 
+      owner: gofr
+      group: gofr
+      mode: '0755'
+
+

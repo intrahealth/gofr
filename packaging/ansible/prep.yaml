@@ -1,0 +1,89 @@
+---
+- name: Preparation for gofr
+  hosts: all
+  remote_user: "{{ user }}"
+  become: true
+  tags: prep
+
+  vars_prompt:
+    - name: "user"
+      prompt: "Please enter the username (with sudo)"
+      private: no
+
+  tasks:
+
+
+  - name: Run the equivalent of "apt-get update"
+    apt:
+      update_cache: yes
+
+
+  - name: Ensure git
+    apt:
+      name: git
+      state: present
+
+
+  - name: Install redis packages
+    apt: 
+      name: redis-server
+      state: present
+
+
+  - name: Install nodejs
+    apt: 
+      name: nodejs
+      state: present
+
+
+  - name: Install npm
+    apt: 
+      name: npm
+      state: present
+
+
+  - name: Ensure npm is latest
+    npm: 
+      name: npm
+      state: latest
+      global: yes
+
+
+  - name: Ensure tools for native builds
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - gcc
+      - g++
+      - make
+
+
+  - name: Install java, tomcat, maven
+    apt:
+      pkg:
+      # default is openjdk 11, avail in apt cache: 8, 11, 17, 18
+      - default-jre
+      - default-jre-headless
+      - default-jdk
+      - default-jdk-headless
+      # - openjdk-11-jdk-headless
+      # - openjdk-11-jdk
+      # - openjdk-11-jre-headless
+      # - openjdk-11-jre
+      - tomcat9
+      # - tomcat9-admin
+      - maven
+      # - jetty9
+
+
+  - name: Install postgres
+    apt:
+      pkg:
+      # 14 is the default and only in apt cache
+      - postgresql-14
+      # required for ansible
+      - python3-psycopg2
+      # for issues with ansible, see: https://stackoverflow.com/questions/46352173/ansible-failed-to-set-permissions-on-the-temporary
+      - acl
+

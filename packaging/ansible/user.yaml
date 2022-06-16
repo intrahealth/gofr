@@ -1,5 +1,5 @@
 ---
-- name: create fr user
+- name: create gofr user
   hosts: all
   remote_user: "{{ user }}"
   become: true
@@ -13,32 +13,32 @@
   tasks:
     - name: Create new user
       user:
-        name: fr
+        name: gofr
         shell: /bin/bash
 
 
     - name: Create .ssh folder
       file:
-        path: ~fr/.ssh
+        path: ~gofr/.ssh
         state: directory
-        owner: fr
-        group: fr
+        owner: gofr
+        group: gofr
         mode: 0700
 
 
     - name: Ensure authorized_keys file exists and dont write over it
       copy:
         content: ""
-        dest: ~fr/.ssh/authorized_keys
+        dest: ~gofr/.ssh/authorized_keys
         force: no
-        owner: fr
-        group: fr
+        owner: gofr
+        group: gofr
         mode: 0700
 
 
     - name: Set authorized key from ansible user
       authorized_key:
-        user: fr
+        user: gofr
         state: present
         key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
@@ -61,7 +61,7 @@
 
     - name: Add sudoers users to wheel group
       user: 
-        name: fr
+        name: gofr
         groups: wheel 
         append: yes
         state: present
@@ -70,11 +70,11 @@
 
     - name: Set backend server env var for app
       lineinfile: 
-        dest: ~fr/.bash_profile 
+        dest: ~gofr/.bash_profile 
         state: present 
         create: yes
-        owner: fr
-        group: fr
+        owner: gofr
+        group: gofr
         regexp: '^BACKEND_SERVER'
         line: 'BACKEND_SERVER={{ ansible_default_ipv4.address }}'
 

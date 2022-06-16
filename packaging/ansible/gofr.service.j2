@@ -7,19 +7,21 @@ After=network.target
 Type=simple
 User={{ user }}
 WorkingDirectory=/home/{{ user }}/gofr/gofr-backend
-ExecStart={{ executable }} start
+ExecStart=npm start
 Restart=on-failure
 
-Environment='mCSD__server__protocal=http'
-Environment='mCSD__server__host=localhost'
-Environment='mCSD__server__port=8080'
-Environment='mCSD__server__basePath=fhir'
-Environment='app__installed=false'
-Environment='app__idp=gofr'
-Environment='REDIS_HOST=redis'
+# must use ${false} or it will be converted to string
+Environment="app__installed=${false}"
+Environment="mCSD__server__protocal=http"
+Environment="mCSD__server__host=localhost"
+Environment="mCSD__server__port=8080"
+Environment="mCSD__server__basePath=fhir"
+Environment="app__idp=gofr"
+Environment="logger__level=info"
+# Environment="REDIS_HOST=localhost"
 
 # keycloak is not enabled but leaving this here for future reference
-Environment='keycloak__baseURL=http://keycloak:8084/auth'
+Environment="keycloak__baseURL=http://localhost:8084/auth"
 
 
 [Install]

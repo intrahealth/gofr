@@ -1,0 +1,71 @@
+---
+- name: Docker
+  hosts: all
+  remote_user: "{{ user }}"
+  become: true
+  tags: prep
+
+  vars_prompt:
+    - name: "user"
+      prompt: "Please enter the username (with sudo)"
+      private: no
+
+  tasks:
+
+
+  - name: ensure pre-req
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+
+
+  - name: key for docker repo
+    shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+
+  - name: apt repo for docker
+    shell: |
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] 
+      https://download.docker.com/linux/debian $(lsb_release -cs) stable" | 
+      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+  - name: Run the equivalent of "apt-get update"
+    apt:
+      update_cache: yes
+  
+
+  - name: install docker stuff
+    apt:
+      pkg:
+      - docker-ce
+      - docker-ce-cli 
+      - containerd.io 
+      - docker-compose-plugin
+
+
+  - name: ensure docker is running
+    service: 
+      name: docker
+      state: started
+      enabled: yes
+
+
+  - name: Add user to docker group
+    user: 
+      name: "{{ user }}"
+      groups: docker 
+      append: yes
+      state: present
+
+
+  # - name: Compose script
+  #   shell: curl -L https://github.com/docker/compose/releases/download/1.23.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+
+
+  # - name: Compose script perms
+  #   shell: chmod +x /usr/local/bin/docker-compose

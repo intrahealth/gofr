@@ -1,0 +1,7 @@
+[local]
+# localhost ansible_connection=local
+
+[servers]
+# 172.16.174.137
+85.217.160.13
+# ryzen.local

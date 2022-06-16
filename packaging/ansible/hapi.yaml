@@ -2,7 +2,7 @@
 - name: HAPI FHIR Server
   hosts: all
   remote_user: "{{ user }}"
-  become: true
+  # become: true
   tags: prep
 
   
@@ -20,49 +20,21 @@
 
   tasks:
 
-  - name: Create a new database with name hapi
-    postgresql_db:
-      name: hapi
-    become_user: postgres
-
-
-  - name: Connect to hapi database, create hapi user, and grant access
-    postgresql_user:
-      db: hapi
-      name: hapi
-      password: "{{ pgpass }}"
-      encrypted: yes
-      priv: ALL
-    become_user: postgres
-
-
-  - name: Confirm actions worked for hapi database/user
-    become: yes
-    become_user: postgres
-    postgresql_info:
-      db: hapi
-      filter: "!settings"
-    register: pginfo
-
-
-  - debug:
-      msg: "{{ pginfo }}"
-
-
-  - name: Does hapi folder exist
+  - name: hapi folder exists
     stat:
       path: $HOME/hapi-fhir-jpaserver-starter
     register: stat_result2
 
 
-  - name: git clone repo (hapi jpa-server-starter tag:image/v5.5.2)
+  - name: git clone repo hapi-jpa-server-starter
     git:
       repo: 'https://github.com/hapifhir/hapi-fhir-jpaserver-starter.git'
       dest: /home/{{ user }}/hapi-fhir-jpaserver-starter
       clone: yes
-      # note that this blows away any existing changes to files
+      # note that this blows away any existing changes to application.yaml
       force: yes
-      version: image/v5.5.2
+      # update: yes
+      # version: image/v5.5.2
     when: stat_result2.stat.exists == False
 
 
@@ -71,14 +43,48 @@
       repo: 'https://github.com/hapifhir/hapi-fhir-jpaserver-starter.git'
       dest: /home/{{ user }}/hapi-fhir-jpaserver-starter
       update: yes
+      force: yes
 
 
-  - name: maven --no-transfer-progress --batch-mode package
-    shell: mvn package -DskipTests
+  - name: git checkout image/v5.5.2
+    shell: git checkout image/v5.5.2
+    args:
+      chdir: /home/{{ user }}/hapi-fhir-jpaserver-starter
+
+
+  - name: install application.yaml template for hapi jpa Server
+    template:
+      src: 552-application.yaml
+      dest: /home/{{ user }}/hapi-fhir-jpaserver-starter/src/main/resources/application.yaml
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      mode: 0755
+      force: yes
+
+
+  - name: mvn --no-transfer-progress --batch-mode package
+    shell: mvn --no-transfer-progress --batch-mode package -DskipTests
     args:
       chdir: /home/{{ user }}/hapi-fhir-jpaserver-starter
     environment:
       MAVEN_OPTS: -Xmx2048m
+
+
+# stop tomcat
+  - name: stop tomcat9
+    service: 
+      name: tomcat9.service
+      state: stopped
+      enabled: yes
+    become: true
+
+
+# move default ROOT into ROOT-Closed
+  - name: move default ROOT into ROOT-Closed
+    shell: mv /var/lib/tomcat9/webapps/ROOT /var/lib/tomcat9/webapps/ROOT-Closed
+    become: true
+    # this works once, then fails
+    ignore_errors: yes
 
 
 # move package into /var/lib/tomcat9/webapps/
@@ -86,25 +92,40 @@
     shell: cp ROOT.war /var/lib/tomcat9/webapps/
     args:
       chdir: /home/{{ user }}/hapi-fhir-jpaserver-starter/target/
+    become: true
 
 
-  - name: Create a tomcast9 override directory if it does not exist
-    ansible.builtin.file:
-      path: /etc/systemd/system/tomcat9.service.d
-      state: directory
-      owner: root
-      group: root
-      mode: '0755'
+  # - name: Create a tomcast9 override directory if it does not exist
+  #   ansible.builtin.file:
+  #     path: /etc/systemd/system/tomcat9.service.d
+  #     state: directory
+  #     owner: root
+  #     group: root
+  #     mode: '0755'
+
+
+# stop tomcat
+  # - name: stop tomcat9
+  #   service: 
+  #     name: tomcat9.service
+  #     state: stopped
+  #     enabled: yes
+
 
 
 # todo move over tomcat9 override file for env vars
-  - name: Copy tomcat9 override file
-    ansible.builtin.copy:
-      src: /home/{{ user }}/gofr/packaging/ansible/tomcat9_override.conf
-      dest: /etc/systemd/system/tomcat9.service.d/tomcat9_override.conf
-      owner: root
-      group: root
-      mode: '0755'
+  # - name: Copy tomcat9 override file
+  #   ansible.builtin.copy:
+  #     # if src is on remote
+  #     # src: /home/{{ user }}/gofr/packaging/ansible/tomcat9_override.conf
+  #     # use file on controller
+  #     src: tomcat9_override.conf
+  #     dest: /etc/systemd/system/tomcat9.service.d/tomcat9_override.conf
+  #     # copy from remote clone, comment out to use local version
+  #     # remote_src: yes
+  #     owner: root
+  #     group: root
+  #     mode: '0755'
 
 
 
@@ -112,13 +133,14 @@
   - name: kick tomcat9
     service: 
       name: tomcat9.service
-      state: restarted
+      state: started
       enabled: yes
+    become: true
 
 
 # pause to let tomcat start and then check status
   - pause:
-      seconds: 5
+      seconds: 10
 
 # status
   - name: status

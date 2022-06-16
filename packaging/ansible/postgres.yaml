@@ -1,0 +1,54 @@
+---
+- name: PostgreSQL
+  hosts: all
+  remote_user: "{{ user }}"
+  # become: true
+  tags: prep
+
+  
+  vars_prompt:
+
+    - name: "user"
+      prompt: "Please enter the username (with sudo)"
+      private: no
+
+    - name: "pgpass"
+      prompt: "Please provide the password for the hapi postgres user in plain text (it will be md5-hashed)"
+      private: no
+
+
+
+  tasks:
+
+  - name: Create a new database with name hapi
+    postgresql_db:
+      name: hapi
+    become: true
+    # become_method: sudo
+    become_user: postgres
+
+
+  - name: Connect to hapi database, create hapi user, and grant access
+    postgresql_user:
+      db: hapi
+      name: hapi
+      password: "{{ pgpass }}"
+      encrypted: yes
+      priv: ALL
+    become: true
+    become_user: postgres
+
+
+  - name: Confirm actions worked for hapi database/user
+    postgresql_info:
+      db: hapi
+      filter: "!settings"
+    become: yes
+    become_user: postgres
+    register: pginfo
+
+
+  - debug:
+      msg: "{{ pginfo }}"
+
+

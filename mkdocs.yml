@@ -49,9 +49,9 @@ nav:
       - developer_guide/working_with_fhir.md
       - developer_guide/mcsd.md
       - developer_guide/forms.md
+      - developer_guide/ansible.md
       - developer_guide/server_administration.md
       - developer_guide/key_cloak.md
-      - developer_guide/install_gofr.md
       - developer_guide/configuration.md
 
 markdown_extensions:

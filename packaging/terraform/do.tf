@@ -19,6 +19,7 @@ resource "digitalocean_droplet" "web" {
 connection {
     user = "root"
     type = "ssh"
+    host = self.ipv4_address
     private_key = "${file("~/.ssh/id_rsa")}"
     timeout = "4m"
 }

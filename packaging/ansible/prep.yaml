@@ -10,8 +10,12 @@
       prompt: "Please enter the username (with sudo)"
       private: no
 
-  tasks:
+  # vars:
+  #   os_environment:
+  #     - key: JAVA_HOME
+  #       value: /usr/lib/jvm/java-17-openjdk-amd64
 
+  tasks:
 
   - name: Run the equivalent of "apt-get update"
     apt:
@@ -30,16 +34,53 @@
       state: present
 
 
+  - name: Remove nodejs default package (very old v12)
+    apt:
+      name: nodejs
+      state: absent
+      purge: yes
+
+
+  - name: Remove npm
+    apt:
+      name: npm
+      state: absent
+      purge: yes
+
+
+  - name: Remove node stuff
+    apt:
+      autoremove: true
+
+
+  - name: Download nodesource script for node
+    get_url:
+      url: https://deb.nodesource.com/setup_16.x
+      dest: $HOME/nodesource.sh
+      mode: 0644
+      # overwrite
+      force: yes
+
+
+  - name: Install nodesource for node
+    command: bash $HOME/nodesource.sh
+    register: hello
+
+
+  - debug:
+      msg: "{{ hello.stdout_lines }}"
+
+
   - name: Install nodejs
     apt: 
       name: nodejs
       state: present
 
 
-  - name: Install npm
-    apt: 
-      name: npm
-      state: present
+  # - name: Install npm
+  #   apt: 
+  #     name: npm
+  #     state: present
 
 
   - name: Ensure npm is latest
@@ -63,18 +104,41 @@
     apt:
       pkg:
       # default is openjdk 11, avail in apt cache: 8, 11, 17, 18
-      - default-jre
-      - default-jre-headless
-      - default-jdk
-      - default-jdk-headless
-      # - openjdk-11-jdk-headless
-      # - openjdk-11-jdk
-      # - openjdk-11-jre-headless
-      # - openjdk-11-jre
+      - openjdk-17-jdk-headless
+      - openjdk-17-jdk
+      - openjdk-17-jre-headless
+      - openjdk-17-jre
       - tomcat9
       # - tomcat9-admin
       - maven
       # - jetty9
+
+
+  - name: Insert a line at the end of a file.
+    lineinfile:
+      path: /etc/default/tomcat9
+      line: JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+
+
+  # kick systemd and then tomcat
+  - name: reread systemd and then kick tomcat9 and 
+    service: 
+      name: tomcat9.service
+      state: restarted
+      enabled: yes
+      daemon_reload: yes
+    become: true
+
+
+# tomcat9 doesn't pick up /etc/environment
+# add JAVA_HOME ofr jdk17 to path or tomcat wont find java
+  # - name: customize /etc/environment
+  #   ansible.builtin.lineinfile:
+  #     dest: "/etc/environment"
+  #     state: present
+  #     regexp: "^{{ item.key }}="
+  #     line: "{{ item.key }}={{ item.value }}"
+  #   with_items: "{{ os_environment }}"
 
 
   - name: Install postgres

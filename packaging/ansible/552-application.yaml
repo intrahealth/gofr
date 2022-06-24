@@ -22,11 +22,11 @@ spring:
 #      hibernate.cache.use_minimal_puts: false
 ###    These settings will enable fulltext search with lucene
 #      hibernate.search.enabled: true
-#      hibernate.search.backend.type: lucene
-#      hibernate.search.backend.analysis.configurer: ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer
-#      hibernate.search.backend.directory.type: local-filesystem
-#      hibernate.search.backend.directory.root: target/lucenefiles
-#      hibernate.search.backend.lucene_version: lucene_current
+      hibernate.search.backend.type: lucene
+      hibernate.search.backend.analysis.configurer: ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer
+      hibernate.search.backend.directory.type: local-filesystem
+      hibernate.search.backend.directory.root: target/lucenefiles
+      hibernate.search.backend.lucene_version: lucene_current
   batch:
     job:
       enabled: false
@@ -76,7 +76,7 @@ hapi:
 #    etag_support_enabled: true
 #    expunge_enabled: true
 #    daoconfig_client_id_strategy: null
-    client_id_strategy: ANY
+#    client_id_strategy: ANY
 #    fhirpath_interceptor_enabled: false
 #    filter_search_enabled: true
 #    graphql_enabled: true
@@ -111,7 +111,7 @@ hapi:
 #    reuse_cached_search_results_millis: 60000
     tester:
         home:
-          name: Local Tester
+          name: GOFR
           server_address: 'http://localhost:8080/fhir'
           refuse_to_fetch_third_party_urls: false
           fhir_version: R4

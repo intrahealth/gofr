@@ -1,0 +1,75 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"
+spring:
+  main:
+    allow-circular-references: true
+  flyway:
+    enabled: false
+    check-location: false
+    baselineOnMigrate: true
+  datasource:
+    url: 'jdbc:postgresql://localhost:5432/hapi'
+    username: hapi
+    password: hapi
+    driverClassName: org.postgresql.Driver
+    max-active: 15
+    hikari:
+      maximum-pool-size: 10
+  jpa:
+    properties:
+      hibernate.format_sql: false
+      hibernate.show_sql: false
+      # without setting defaults to: 
+      # org.hibernate.dialect.PostgreSQL10Dialect
+      # docker worked apparently:
+      # org.hibernate.dialect.PostgreSQL95Dialect
+      # recommended:
+      hibernate.dialect: ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect
+      hibernate.search.enabled: true
+      hibernate.search.backend.type: lucene
+      hibernate.search.backend.analysis.configurer: ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer
+      hibernate.search.backend.directory.type: local-filesystem
+      hibernate.search.backend.directory.root: target/lucenefiles
+      hibernate.search.backend.lucene_version: lucene_current
+      # this is obsolete
+      # hibernate.search.default.indexBase: /var/lib/tomcat9/target/lucenefiles
+
+
+  batch:
+    job:
+      enabled: false
+hapi:
+  fhir:
+    openapi_enabled: true
+    fhir_version: R4
+    auto_create_placeholder_reference_targets: true
+    enable_index_missing_fields: true
+    client_id_strategy: ANY
+    partitioning:
+      allow_references_across_partitions: false
+      partitioning_include_in_search_hashes: false
+    cors:
+      allow_Credentials: true
+      allowed_origin:
+        - '*'
+    search-coord-core-pool-size: 20
+    search-coord-max-pool-size: 100
+    search-coord-queue-capacity: 200
+    tester:
+      home:
+        name: GOFR
+        server_address: 'http://localhost:8080/fhir'
+        refuse_to_fetch_third_party_urls: false
+        fhir_version: R4
+      global:
+        name: Global Tester
+        server_address: "http://hapi.fhir.org/baseR4"
+        refuse_to_fetch_third_party_urls: false
+        fhir_version: R4
+    bulk_export_enabled: true
+    subscription:
+      resthook_enabled: true
+      websocket_enabled: true

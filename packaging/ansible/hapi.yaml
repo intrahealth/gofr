@@ -5,7 +5,6 @@
   # become: true
   tags: prep
 
-  
   vars_prompt:
 
     - name: "user"
@@ -15,8 +14,6 @@
     - name: "pgpass"
       prompt: "Please provide the password for the hapi postgres user in plain text (it will be md5-hashed)"
       private: no
-
-
 
   tasks:
 
@@ -34,7 +31,7 @@
       # note that this blows away any existing changes to application.yaml
       force: yes
       # update: yes
-      # version: image/v5.5.2
+      # version: v5.5.2
     when: stat_result2.stat.exists == False
 
 
@@ -46,15 +43,15 @@
       force: yes
 
 
-  - name: git checkout image/v5.5.2
-    shell: git checkout image/v5.5.2
+  - name: git checkout v6.0.1
+    shell: git checkout v6.0.1
     args:
       chdir: /home/{{ user }}/hapi-fhir-jpaserver-starter
 
 
   - name: install application.yaml template for hapi jpa Server
     template:
-      src: 552-application.yaml
+      src: 601-application.yaml
       dest: /home/{{ user }}/hapi-fhir-jpaserver-starter/src/main/resources/application.yaml
       owner: "{{ user }}"
       group: "{{ user }}"
@@ -62,8 +59,8 @@
       force: yes
 
 
-  - name: mvn --no-transfer-progress --batch-mode package
-    shell: mvn --no-transfer-progress --batch-mode package -DskipTests
+  - name: mvn clean --no-transfer-progress --batch-mode package
+    shell: mvn clean --no-transfer-progress --batch-mode package -DskipTests
     args:
       chdir: /home/{{ user }}/hapi-fhir-jpaserver-starter
     environment:
@@ -81,10 +78,12 @@
 
 # move default ROOT into ROOT-Closed
   - name: move default ROOT into ROOT-Closed
-    shell: mv /var/lib/tomcat9/webapps/ROOT /var/lib/tomcat9/webapps/ROOT-Closed
+    shell: rm -rf /var/lib/tomcat9/webapps/ROOT*
+    # shell: mv /var/lib/tomcat9/webapps/ROOT /var/lib/tomcat9/webapps/ROOT-Closed
     become: true
     # this works once, then fails
-    ignore_errors: yes
+    # ignore_errors: yes
+    ignore_errors: no
 
 
 # move package into /var/lib/tomcat9/webapps/
@@ -93,40 +92,52 @@
     args:
       chdir: /home/{{ user }}/hapi-fhir-jpaserver-starter/target/
     become: true
+    
+
+  - name: create lucene target
+    ansible.builtin.file:
+      path: /var/lib/tomcat9/target
+      state: directory
+      # needs broad perms
+      mode: '0777'
+      owner: tomcat
+      group: tomcat
+    become: true
+
+  - name: create lucenefiles
+    ansible.builtin.file:
+      path: /var/lib/tomcat9/target/lucenefiles
+      state: directory
+      mode: '0777'
+      owner: tomcat
+      group: tomcat
+    become: true
 
 
-  # - name: Create a tomcast9 override directory if it does not exist
-  #   ansible.builtin.file:
-  #     path: /etc/systemd/system/tomcat9.service.d
-  #     state: directory
-  #     owner: root
-  #     group: root
-  #     mode: '0755'
-
-
-# stop tomcat
-  # - name: stop tomcat9
-  #   service: 
-  #     name: tomcat9.service
-  #     state: stopped
-  #     enabled: yes
-
+  - name: Create a tomcast9 override directory if it does not exist
+    ansible.builtin.file:
+      path: /etc/systemd/system/tomcat9.service.d
+      state: directory
+      owner: root
+      group: root
+      mode: '0755'
+    become: true
 
 
 # todo move over tomcat9 override file for env vars
-  # - name: Copy tomcat9 override file
-  #   ansible.builtin.copy:
-  #     # if src is on remote
-  #     # src: /home/{{ user }}/gofr/packaging/ansible/tomcat9_override.conf
-  #     # use file on controller
-  #     src: tomcat9_override.conf
-  #     dest: /etc/systemd/system/tomcat9.service.d/tomcat9_override.conf
-  #     # copy from remote clone, comment out to use local version
-  #     # remote_src: yes
-  #     owner: root
-  #     group: root
-  #     mode: '0755'
-
+  - name: Copy tomcat9 override file
+    ansible.builtin.copy:
+      # if src is on remote
+      # src: /home/{{ user }}/gofr/packaging/ansible/tomcat9_override.conf
+      # use file on controller
+      src: tomcat9_override.conf
+      dest: /etc/systemd/system/tomcat9.service.d/tomcat9_override.conf
+      # copy from remote clone, comment out to use local version
+      # remote_src: yes
+      owner: root
+      group: root
+      mode: '0755'
+    become: true
 
 
 # kick tomcat

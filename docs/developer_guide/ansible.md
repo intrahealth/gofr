@@ -4,7 +4,8 @@
 
 > These steps are for installing on an Ubuntu system directly and requires experience with remote configuration and adherence to enterprise IT best practices which are out of scope for this document.
 
-These steps require:
+These steps require
+
 * An Ubuntu target, e.g. server, VM, or desktop. Ubuntu 22 is recommended and tested against.
 * Python3 installed on the target host. This is default on Ubuntu 22.
 * Python3 and Ansible installed on the controller that directs installation on target hosts, e.g. your laptop.
@@ -15,13 +16,13 @@ These steps require:
 
 Versions tested:
 * Ubuntu 22
-* HAPI FHIR JPA Server tag:image/v5.5.2
+* HAPI FHIR JPA Server tag: v6.0.1
 > All versions of below are defaults on Ubuntu 22
 * Python 3
 * Tomcat9
 * PostgreSQL 14
 * Nodejs 12
-* Java: openjdk 11
+* Java: openjdk 17 (HAPI requires 17 to build but 11 to run)
 
 
 ## Ansible Target Hosts
@@ -61,7 +62,7 @@ Create the `gofr` user and gives it sudo access:
 ansible-playbook -i hosts user.yaml
 ```
 
-As necessary, add additional ssh keys to the user `gofr`. (This is done using the keys exposed in GitHub accounts, so first ensure that the user's public key is available on github, ie. visit https://github.com/<github_username>.keys to use this script):
+As necessary, add additional ssh keys to the user. (This is done using the keys exposed in GitHub accounts, so first ensure that the user's public key is available on github, ie. visit https://github.com/<github_username>.keys to use this script):
 ```sh
 ansible-playbook -i hosts keys.yaml
 ```
@@ -88,9 +89,10 @@ ansible-playbook -i hosts postgres.yaml -e user=gofr -e pgpass=hapi
 
 Build and install HAPI FHIR JPA Server and run with tomcat9. 
 * This playbook copies over the application.yaml.
-* The tomcat9 systemd service file comes with installation and is not modified. (If you want to modify, use an overlay.)
+* tomcat9 looks for the default Java which isn't installed, rather 17 is installed. So, the script updates JAVA_HOME for tomcat9.
 * The DB name, user, and password defaults to `hapi`. 
 * Remove the last argument to change postgres password for the db to something else. This will also change the db password in the application.yaml file.
+
 ```sh
 ansible-playbook -i hosts hapi.yaml -e user=gofr -e pgpass=hapi
 ```
@@ -120,6 +122,17 @@ Check that all processes are running and see the latest status:
 ansible-playbook -i hosts troubleshoot.yaml -e user=gofr
 ```
 
+Confirm HAPI is working from localhost:
+```
+curl http://localhost:8080/fhir/DEFAULT/metadata
+```
+
+Run GOFR manually.
+```
+cd $HOME/gofr/gofr-backend
+app__installed=${false} mCSD__server__protocal=http mCSD__server__host=localhost mCSD__server__port=8080 mCSD__server__basePath=fhir  app__idp=gofr npm start
+```
+
 ## Upgrades
 
 Rerunning the `install` playbook updates intrahealth/hearth and app repos on the remote server. Rerunning the `services.yaml` playbook updates services. Services are restarted (not just reloaded).
@@ -138,6 +151,7 @@ systemctl status gofr
 
 #### Logs
 ```
+journalctl -u tomcat9.service -b
 journalctl -u postgresql@14-main.service -b
 journalctl -u gofr.service -b
 journalctl -u redis.service -b
@@ -171,3 +185,27 @@ Check for firewall blocks. Rerun the gui and:
 ```
 sudo tcpdump -n icmp 
 ```
+
+### Do not use
+
+> Do not use these commands on production systems. This for troubleshooting the install scripts on servers without any data and trying migrations between versions.
+
+Delete the hapi db in postgres
+```
+sudo -u postgres psql postgres
+postgres=# drop database hapi;
+DROP DATABASE
+postgres=# \q
+```
+
+### Todo
+
+HAPI v6.0.1 error with GOFR accessing HAPI:
+```
+{
+"severity": "error",
+"code": "processing",
+"diagnostics": "HAPI-0389: Failed to call access method: org.springframework.transaction.CannotCreateTransactionException: Could not open JPA EntityManager for transaction; nested exception is org.hibernate.exception.JDBCConnectionException: Unable to acquire JDBC Connection"
+}
+```
+

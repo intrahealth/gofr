@@ -30,8 +30,8 @@ services:
       - redis
     environment:
       # add mcsd ig
-      - hapi.fhir.implementationguides.mcsd.name=ihe.iti.mcsd
-      - hapi.fhir.implementationguides.mcsd.version=3.5.0
+      # - hapi.fhir.implementationguides.mcsd.name=ihe.iti.mcsd
+      # - hapi.fhir.implementationguides.mcsd.version=3.5.0
       # bulk data export
       - hapi.fhir.bulk_export_enabled=true
       # subscriptions

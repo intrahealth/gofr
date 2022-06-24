@@ -20,35 +20,72 @@
 
   tasks:
 
-  - name: Create a new database with name hapi
-    postgresql_db:
-      name: hapi
-    become: true
-    # become_method: sudo
-    become_user: postgres
+    # - name: "Create db user"
+    #   postgresql_user:
+    #     state: present
+    #     name: hapi
+    #     password: "{{ pgpass }}"
+    #   become: yes
+    #   become_user: postgres
+
+    # - name: "Grant hapi user access to hapi db"
+    #   postgresql_privs:
+    #     type: database
+    #     database: hapi
+    #     roles: hapi
+    #     grant_option: no
+    #     privs: all
+    #   become: yes
+    #   become_user: postgres
+
+    - name: Create a new database with name hapi
+      postgresql_db:
+        name: hapi
+      become: true
+      become_user: postgres
 
 
-  - name: Connect to hapi database, create hapi user, and grant access
-    postgresql_user:
-      db: hapi
-      name: hapi
-      password: "{{ pgpass }}"
-      encrypted: yes
-      priv: ALL
-    become: true
-    become_user: postgres
+    - name: Connect to hapi database, create hapi user, and grant access
+      postgresql_user:
+        db: hapi
+        name: hapi
+        password: "{{ pgpass }}"
+        encrypted: yes
+        priv: ALL
+      become: true
+      become_user: postgres
 
 
-  - name: Confirm actions worked for hapi database/user
-    postgresql_info:
-      db: hapi
-      filter: "!settings"
-    become: yes
-    become_user: postgres
-    register: pginfo
+    - name: "Allow md5 connection for the db user"
+      postgresql_pg_hba:
+        dest: "/etc/postgresql/14/main/pg_hba.conf"
+        contype: host
+        databases: all
+        method: md5
+        users: hapi
+        create: true
+      become: yes
+      become_user: postgres
+
+    - name: restart postgres
+      service: 
+        name: postgresql@14-main.service
+        state: restarted
+        enabled: yes
+        daemon_reload: yes
+      become: true
 
 
-  - debug:
-      msg: "{{ pginfo }}"
+    - name: Confirm actions worked for hapi database/user
+      postgresql_info:
+        db: hapi
+        filter: "!settings"
+      become: yes
+      become_user: postgres
+      register: pginfo
+
+
+    - debug:
+        msg: "{{ pginfo }}"
 
 

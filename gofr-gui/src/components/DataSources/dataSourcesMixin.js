@@ -48,6 +48,7 @@ export const dataSourcesMixin = {
           'Content-Type': 'multipart/form-data'
         }
       }).then((response) => {
+        eventBus.$emit('refresh-login')
         eventBus.$emit('dataSourceSaved')
         eventBus.$emit('dataSourceAddedSuccessfully')
         eventBus.$emit('getDataSources')

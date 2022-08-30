@@ -365,8 +365,13 @@ getDHIS2StoreConfig((storeConfig) => {
           }
           store.state.auth.userObj = authResp.data.userObj
           store.state.auth.userID = authResp.data.userObj.resource.id
-          VueCookies.set('userObj', JSON.stringify(authResp.data.userObj), 'infinity')
         } else if (genConfig.public_access.enabled === true) {
+          await gofrAuthenticatePublicUser()
+        }
+        Vue.prototype.$keycloak = null
+        renderApp(genConfig)
+      }).catch(async() => {
+        if (genConfig.public_access.enabled === true) {
           await gofrAuthenticatePublicUser()
         }
         Vue.prototype.$keycloak = null

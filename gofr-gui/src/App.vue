@@ -455,6 +455,23 @@ export default {
     eventBus.$on('getDataSourcePair', () => {
       this.getDataSourcePair()
     })
+    eventBus.$on('refresh-login', () => {
+      let method = 'GET'
+      if(this.$store.state.idp === 'keycloak') {
+        method = 'POST'
+      }
+      axios({
+        method,
+        url: '/auth'
+      }).then((authResp) => {
+        if(this.$store.state.idp === 'keycloak' && authResp.data.resource) {
+          this.$store.state.auth.userObj = authResp.data
+          this.$cookies.set('userObj', JSON.stringify(authResp.data), 'infinity')
+        } else if(authResp.data.userObj && authResp.data.userObj.resource){
+          this.$store.state.auth.userObj = authResp.data.userObj
+        }
+      })
+    })
   },
   mounted: function() {
     let elHtml = document.getElementsByTagName('html')[0]

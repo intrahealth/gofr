@@ -119,7 +119,7 @@ export default {
   methods: {
     authenticate () {
       axios
-        .post('/auth/login/', {username: this.username, password: this.password})
+        .post('/auth/login', {username: this.username, password: this.password})
         .then(authResp => {
           this.$store.state.auth.username = this.username
           this.$store.state.auth.userObj = authResp.data.userObj

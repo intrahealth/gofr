@@ -9,6 +9,7 @@ export default {
   mounted () {
     this.$store.state.auth.userID = ''
     if(this.$store.state.idp === 'keycloak') {
+      this.$cookies.remove('userObj')
       this.$store.state.auth.username = ''
       this.$store.state.auth.userObj = {}
       let redirect = window.location.href.split('#')[0]

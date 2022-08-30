@@ -28,6 +28,7 @@ export default {
     return {
       source: { path: "", data: {} },
       value: "",
+      qField: "valueInteger",
       disabled: false,
       errors: [],
       lockWatch: false

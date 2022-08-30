@@ -200,79 +200,69 @@ const loadFSHFiles = () => new Promise(async (resolvePar, rejectPar) => {
   }
   const fshDir = config.get('builtFSHFIles');
   const dirs = await fs.readdirSync(`${__dirname}/${fshDir}`);
-  const promises = [];
-  dirs.forEach((dir) => {
-    promises.push(new Promise(async (resolve, reject) => {
-      let files = [];
-      if (dir.split('.').length >= 2 && dir.split('.')[dir.split('.').length - 1] === 'json') {
-        files.push(dir);
-        dir = null;
-      } else {
-        try {
-          files = await fs.readdirSync(`${__dirname}/${fshDir}/${dir}`);
-        } catch (error) {
-          logger.error(error);
-          return reject();
-        }
+  let errorOccured = false;
+  async.eachSeries(dirs, (dir, nxtDir) => {
+    let files = [];
+    if (dir.split('.').length >= 2 && dir.split('.')[dir.split('.').length - 1] === 'json') {
+      files.push(dir);
+      dir = null;
+    } else {
+      try {
+        files = fs.readdirSync(`${__dirname}/${fshDir}/${dir}`);
+      } catch (error) {
+        logger.error(error);
+        errorOccured = true;
+        return nxtDir();
       }
-      let errorOccured = false;
-      async.eachSeries(files, (file, nxtFile) => {
-        let fullpath;
-        if (dir) {
-          fullpath = `${__dirname}/${fshDir}/${dir}/${file}`;
-        } else {
-          fullpath = `${__dirname}/${fshDir}/${file}`;
+    }
+    async.eachSeries(files, (file, nxtFile) => {
+      let fullpath;
+      if (dir) {
+        fullpath = `${__dirname}/${fshDir}/${dir}/${file}`;
+      } else {
+        fullpath = `${__dirname}/${fshDir}/${file}`;
+      }
+      fs.readFile(fullpath, { encoding: 'utf8', flag: 'r' }, (err, data) => {
+        if (err) {
+          logger.error(err);
+          errorOccured = true;
         }
-        fs.readFile(fullpath, { encoding: 'utf8', flag: 'r' }, (err, data) => {
-          if (err) {
-            logger.error(err);
+        const fhir = JSON.parse(data);
+        if (fhir.resourceType === 'Bundle'
+            && (fhir.type === 'transaction' || fhir.type === 'batch')) {
+          logger.info(`Saving ${fhir.type}`);
+          const url = fhirAxios.__genUrl('DEFAULT');
+          axios.post(url, fhir).then((res) => {
+            logger.info(`${url}: ${res.status}`);
+            logger.info(JSON.stringify(res.data, null, 2));
+            return nxtFile();
+          }).catch((err) => {
             errorOccured = true;
-          }
-          const fhir = JSON.parse(data);
-          if (fhir.resourceType === 'Bundle'
-              && (fhir.type === 'transaction' || fhir.type === 'batch')) {
-            logger.info(`Saving ${fhir.type}`);
-            const url = fhirAxios.__genUrl('DEFAULT');
-            axios.post(url, fhir).then((res) => {
-              logger.info(`${url}: ${res.status}`);
-              logger.info(JSON.stringify(res.data, null, 2));
-              return nxtFile();
-            }).catch((err) => {
-              errorOccured = true;
-              logger.error(err);
-              logger.error(`fullpath ${JSON.stringify(err.response.data, null, 2)}`);
-              return nxtFile();
-            });
-          } else {
-            logger.info(`Saving ${fhir.resourceType} - ${fhir.id}`);
-            const url = new URI(fhirAxios.__genUrl('DEFAULT')).segment(fhir.resourceType).segment(fhir.id).toString();
-            axios.put(url, fhir).then((res) => {
-              logger.info(`${url}: ${res.status}`);
-              logger.info(res.headers['content-location']);
-              return nxtFile();
-            }).catch((err) => {
-              errorOccured = true;
-              logger.error(err);
-              logger.error(`fullpath ${JSON.stringify(err.response.data, null, 2)}`);
-              return nxtFile();
-            });
-          }
-        });
-      }, () => {
-        if (errorOccured) {
-          return reject();
+            logger.error(err);
+            logger.error(`fullpath ${JSON.stringify(err.response.data, null, 2)}`);
+            return nxtFile();
+          });
+        } else {
+          logger.info(`Saving ${fhir.resourceType} - ${fhir.id}`);
+          const url = new URI(fhirAxios.__genUrl('DEFAULT')).segment(fhir.resourceType).segment(fhir.id).toString();
+          axios.put(url, fhir).then((res) => {
+            logger.info(`${url}: ${res.status}`);
+            logger.info(res.headers['content-location']);
+            return nxtFile();
+          }).catch((err) => {
+            errorOccured = true;
+            logger.error(err);
+            logger.error(`fullpath ${JSON.stringify(err.response.data, null, 2)}`);
+            return nxtFile();
+          });
         }
-        return resolve();
       });
-    }));
-  });
-
-  Promise.all(promises).then(() => {
-    logger.info('Done loading FSH files');
-    resolvePar();
-  }).catch(() => {
-    logger.error('reject');
-    rejectPar(true);
+    }, () => nxtDir());
+  }, () => {
+    if (errorOccured) {
+      return rejectPar(true);
+    }
+    return resolvePar();
   });
 });
 

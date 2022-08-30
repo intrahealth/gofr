@@ -79,7 +79,7 @@ const querystring = require('querystring')
 const fhirurl = "http://hl7.org/fhir/StructureDefinition/"
 export default {
   name: "fhir-reference",
-  props: ["field","label","targetProfile","targetResource","min","slotProps","edit","readOnlyIfSet", "displayType", "initialValue", "overrideValue"],
+  props: ["field","label","targetProfile","targetResource","min","slotProps", "path", "edit","readOnlyIfSet", "displayType", "initialValue", "overrideValue"],
   components: {
     GofrElement
   },

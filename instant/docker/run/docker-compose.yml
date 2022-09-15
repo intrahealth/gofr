@@ -74,11 +74,12 @@ services:
       - "4000:4000"
     restart: always
 
-# join core network
-# networks:
-#   default:
-#     external: true
-#     name: instant_default
+
+networks:
+# set app-wide default network
+  default:
+    name: demo
+
 
 volumes:
   redis-data:

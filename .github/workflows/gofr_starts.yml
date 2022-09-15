@@ -32,7 +32,7 @@ jobs:
         if: ${{ env.ACT }}
 
       - name: Launch
-        working-directory: instant/docker/run
+        working-directory: instant/docker
         run: docker-compose up -d
 
       # wait for stack to come up
@@ -42,5 +42,5 @@ jobs:
         run: fhirid=$(curl http://localhost:4000/) && echo ${fhirid}
 
       - name: Teardown
-        working-directory: instant/docker/run
+        working-directory: instant/docker
         run: docker-compose down

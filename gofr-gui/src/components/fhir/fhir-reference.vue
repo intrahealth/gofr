@@ -188,7 +188,6 @@ export default {
       let url = "/fhir/"+this.$store.state.config.userConfig.FRDatasource+"/"+this.resource+"?"+querystring.stringify( params )
       this.items = []
       this.addItems( url, this.items )
-
     },
     checkChildren: function(item) {
       let params = { "partof": item.id, "_summary": "count" }

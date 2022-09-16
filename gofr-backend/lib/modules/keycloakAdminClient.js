@@ -42,6 +42,10 @@ const loadTasksToKeycloak = () => new Promise(async (resolve, reject) => {
     return resolve();
   }
   const fshDir = config.get('builtFSHFIles');
+  if (!fshDir) {
+    logger.error('FSH dir not specified, cant load tasks');
+    return resolve();
+  }
   const clients = await kcAdminClient.clients.find();
   const client = clients.find(clt => clt.clientId === config.get('keycloak:UIClientId'));
   if (!client) {

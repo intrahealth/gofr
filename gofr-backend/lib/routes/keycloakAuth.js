@@ -62,10 +62,8 @@ router.post('/', (req, res) => {
         token: req.headers.authorization.split(' ')[1],
         user: usersRes.entry[0].resource,
       }).then(async (popResp) => {
-        let userObj;
         user.createUserInstance(usersRes.entry[0].resource, popResp.role).then((obj) => {
-          userObj = obj;
-          res.status(200).json(userObj);
+          res.status(200).json(obj);
         }).catch(() => {
           res.status(500).json();
         });

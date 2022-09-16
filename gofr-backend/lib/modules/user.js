@@ -310,7 +310,11 @@ User.prototype.updatePermissions = async function (roleResources) {
     for (const role of roles) {
       try {
         const roleResource = roleResources && roleResources.find(resource => resource.id === role.valueReference.reference.split('/')[1]);
-        await user.addRole({ permissions: this.permissions, roleRef: role.valueReference.reference, roleResource });
+        await user.addRole({
+          permissions: this.permissions,
+          roleRef: role.valueReference.reference,
+          roleResource,
+        });
       } catch (err) {
         logger.error('Unable to load permissions', role, err);
       }

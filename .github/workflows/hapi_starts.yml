@@ -32,16 +32,16 @@ jobs:
         if: ${{ env.ACT }}
 
       - name: Launch
-        working-directory: instant/docker/run
-        run: docker-compose up -d fhir
+        working-directory: instant/docker
+        run: docker-compose up -d
 
       # wait for stack to come up
       - run: sleep 360
 
       - name: HAPI starts
         # working-directory: tests
-        run: fhirid=$(curl http://localhost:8081/fhir/DEFAULT/metadata) && echo ${fhirid}
+        run: fhirid=$(curl http://localhost:8080/fhir/DEFAULT/metadata) && echo ${fhirid}
 
       - name: Teardown
-        working-directory: instant/docker/run
+        working-directory: instant/docker
         run: docker-compose down

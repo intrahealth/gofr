@@ -14,17 +14,18 @@ services:
 #       - KEYCLOAK_PASSWORD=admin
       
   redis:
-    container_name: redis-gofr
-    image: docker.io/redis
-    ports:
-      - "6379:6379"
+    image: redis:alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    container_name: redis
     restart: always
+    volumes:
+      - redis-data:/data
 
   fhir:
     container_name: hapi-fhir
-    image: docker.io/hapiproject/hapi:v5.5.2-distroless
+    image: hapiproject/hapi:v5.5.2-distroless
     ports:
-      - "8081:8080"
+      - "8080:8080"
     restart: always
     depends_on:
       - redis
@@ -50,6 +51,8 @@ services:
       - spring.jpa.properties.hibernate.search.backend.directory.type=local-filesystem
       - spring.jpa.properties.hibernate.search.backend.directory.root=target/lucenefiles
       - spring.jpa.properties.hibernate.search.backend.lucene_version=lucene_current
+    volumes:
+      - hapi-data:/data/hapi
 
   gofr:
     container_name: gofr
@@ -71,8 +74,13 @@ services:
       - "4000:4000"
     restart: always
 
-# join core network
-# networks:
-#   default:
-#     external: true
-#     name: instant_default
+
+networks:
+# set app-wide default network
+  default:
+    name: demo
+
+
+volumes:
+  redis-data:
+  hapi-data:

@@ -1,0 +1,17 @@
+{
+    "version": "1.0.1",
+    "appType": "APP",
+    "name": "Dictionary",
+    "description": "Translation of iHRIS texts into multiple languages",
+    "launch_path": "index.html",
+    "icons": {
+        "16": "dictionary.jpeg",
+        "48": "dictionary.jpeg",
+        "128": "dictionary.jpeg"
+    },
+    "developer": {
+        "name": "Intrahealth - Digital Health Team",
+        "url": "http://digitalhealth.intrahealth.org"
+    },
+    "default_locale": "en"
+}

@@ -3,7 +3,6 @@ const URL = require('url').URL;
 const URI = require('urijs');
 const Qs = require('qs');
 const async = require('async');
-const uuid4 = require('uuid/v4');
 const logger = require('../winston');
 const config = require('../config');
 

@@ -260,6 +260,22 @@ let router = new Router({
     name: 'questionnaire',
     component: () => import("../components/FacilityRegistry/fhir-page-questionnaire.vue")
   }, {
+    path: "/custom/:path/:component",
+    name: "custom_components",
+    component: () => import( /* webpackChunkName: "custom" */ "../views/custom.vue")
+  }, {
+    path: "/apps",
+    name: "apps",
+    component: () => import( /* webpackChunkName: "apps" */ "../views/apps.vue")
+  }, {
+    path: "/install-app",
+    name: "install-app",
+    component: () => import( /* webpackChunkName: "install-app" */ "../components/gofr/install-app.vue")
+  }, {
+    path: "/uninstall-app",
+    name: "uninstall-app",
+    component: () => import( /* webpackChunkName: "uninstall-app" */ "../components/gofr/uninstall-app.vue")
+  }, {
     path: "/ViewMap",
     name: "ViewMap",
     component: () => import("../components/ViewMap.vue")

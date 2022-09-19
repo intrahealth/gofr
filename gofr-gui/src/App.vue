@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <appToolbar></appToolbar>
-    <appSideMenu v-if="$store.state.auth.userID"></appSideMenu>
+    <appSideMenu v-if="$store.state.auth.userID" :nav="nav"></appSideMenu>
     <v-main>
       <v-dialog
         v-model="$store.state.dynamicProgress"
@@ -149,7 +149,11 @@ export default {
     return {
       fixed: false,
       activeDataSourcePair: {},
-      tasksVerification: tasksVerification
+      tasksVerification: tasksVerification,
+      nav: {
+        active: null,
+        menu: {}
+      }
     }
   },
   methods: {
@@ -297,12 +301,39 @@ export default {
       axios
         .get('/config/getUserConfig/' + userID)
         .then(config => {
-          if (config.data) {
-            this.$store.state.config.userConfig = { ...this.$store.state.config.userConfig, ...config.data }
+          if (config.data.config) {
+            this.$store.state.config.userConfig = { 
+              ...this.$store.state.config.userConfig, 
+              ...config.data.config
+            }
+          }
+          if(config.data.site && config.data.site.nav) {
+            if (config.data.site.nav.hasOwnProperty("active")) this.nav.active = config.data.site.nav.active
+            if (config.data.site.nav.hasOwnProperty("menu")) this.nav.menu = config.data.site.nav.menu
+            if (config.data.site.nav.hasOwnProperty("home")) this.nav.home = config.data.site.nav.home
+          }
+          if(this.$store.state.auth.username === 'public@gofr.org') {
+            config.data.site.nav.menu.home.url = '/HomePublic'
+          }
+          if(this.$store.state.idp === 'keycloak') {
+            config.data.site.nav.menu.account = {
+              text: this.$t('App.menu.account.msg'),
+              tooltip: this.$t('App.menu.account.tooltip'),
+              order: 6,
+              icon: 'mdi-account-outline',
+              url: this.$store.state.keycloak.baseURL + '/realms/' + this.$store.state.keycloak.realm + '/account',
+              external: true,
+              access: {
+                permission: 'special',
+                resource: 'custom',
+                id: 'manage-account'
+              },
+            }
           }
           this.getDataSources()
         })
-        .catch(() => {
+        .catch((err) => {
+          console.log(err);
           this.getDataSources()
         })
     },

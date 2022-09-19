@@ -994,9 +994,17 @@ router.post('/updateGeneralConfig', (req, res) => {
 });
 
 router.get('/getUserConfig/:userID', (req, res) => {
+  let site = JSON.parse(JSON.stringify(config.get('site') || {}));
+  if (config.getBool("security:disabled")) {
+    site.security = {disabled: true};
+  }
+  console.log(`gofr-user-config-${req.params.userID}`);
   fhirAxios.read('Parameters', `gofr-user-config-${req.params.userID}`, '', 'DEFAULT').then((response) => {
     const usrConfig = response.parameter.find(param => param.name === 'config');
-    return res.status(200).json(JSON.parse(usrConfig.valueString));
+    return res.status(200).json({
+      config: JSON.parse(usrConfig.valueString),
+      site
+    });
   }).catch((err) => {
     if (err.response && err.response.status === 404) {
       const configRes = {
@@ -1009,7 +1017,10 @@ router.get('/getUserConfig/:userID', (req, res) => {
       };
       fhirAxios.update(configRes, 'DEFAULT').then(() => {
         logger.info('User Config Saved');
-        return res.status(200).json({});
+        return res.status(200).json({
+          config: {},
+          site
+        });
       }).catch((err) => {
         logger.error(err);
       });

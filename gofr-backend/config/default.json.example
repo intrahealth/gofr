@@ -2,7 +2,14 @@
   "app": {
     "installed": false,
     "idp": "gofr",
-    "version": "2.2.0"
+    "version": "2.2.0",
+    "site": {
+      "path": "/var/lib/gofr/gofr-backend/site",
+      "routes": {}
+    },
+    "core": {
+      "path": "/var/lib/gofr/gofr-backend/lib"
+    }
   },
   "server": {
     "hostname": "0.0.0.0",

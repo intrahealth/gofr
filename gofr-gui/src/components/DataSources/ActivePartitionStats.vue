@@ -18,7 +18,7 @@
             ></v-progress-linear>
           </label>
           <label v-else>
-            Total Facilities: <v-chip
+            {{ $t(`App.hardcoded-texts.Total`) }} {{ $t(`App.hardcoded-texts.Facilities`) }}: <v-chip
                               class="ma-2"
                               color="#5f6062"
                               text-color="white"
@@ -35,7 +35,7 @@
             ></v-progress-linear>
           </label>
           <label v-else>
-            Total Jurisdictions: <v-chip
+            {{ $t(`App.hardcoded-texts.Total`) }} {{ $t(`App.hardcoded-texts.Jurisdictions`) }}: <v-chip
                                   class="ma-2"
                                   color="#5f6062"
                                   text-color="white"
@@ -44,7 +44,7 @@
                                 </v-chip>
           </label>
           <br>
-          Created: <v-chip
+          {{ $t(`App.hardcoded-texts.Created`) }}: <v-chip
                     class="ma-2"
                     color="#5f6062"
                     text-color="white"
@@ -56,7 +56,7 @@
         <v-spacer></v-spacer>
         <v-flex xs5>
           <label v-if="!activePartition.sharedToAll">
-            Shared Users: 
+            {{ $t(`App.hardcoded-texts.Shared Users`) }}: 
             <v-chip
               class="ma-2"
               color="#8a8d35"
@@ -65,7 +65,7 @@
               {{activePartition.sharedUsers}}
             </v-chip> <br>
           </label>
-          Shared To All: 
+          {{ $t(`App.hardcoded-texts.Shared To All`) }}: 
           <v-chip
             class="ma-2"
             color="#5f6062"
@@ -73,7 +73,7 @@
           >
             {{activePartition.sharedToAll}}
           </v-chip> <br>
-          Limited by User Location: 
+          {{ $t(`App.hardcoded-texts.Limited by User Location`) }}: 
           <v-chip
             class="ma-2"
             color="#5f6062"

@@ -11,7 +11,7 @@
             type="error"
             :value="authStatus"
           >
-            Authentication Failed
+          {{ $t(`App.hardcoded-texts.Authentication Failed`) }}
           </v-alert>
         </v-flex>
       </v-layout>
@@ -41,7 +41,7 @@
                 xs9
                 text-xs-right
               >
-                <b>Login</b>
+                <b>{{ $t(`App.hardcoded-texts.Login`) }}</b>
               </v-flex>
             </v-layout>
           </v-toolbar>
@@ -60,7 +60,7 @@
               v-model="username"
               filled
               color="deep-purple"
-              label="Username"
+              :label="$t(`App.hardcoded-texts.User Name`)"
             />
             <v-text-field
               required
@@ -72,7 +72,7 @@
               filled
               type="password"
               color="deep-purple"
-              label="Password"
+              :label="$t(`App.hardcoded-texts.Password`)"
             />
           </v-form>
         </v-card-text>
@@ -82,7 +82,7 @@
               v-if="$store.state.config.generalConfig.selfRegistration.enabled"
               color="primary"
               @click="displaySignup"
-            >Signup</v-btn>
+            >{{ $t(`App.hardcoded-texts.Signup`) }}</v-btn>
             <v-spacer></v-spacer>
             <v-btn
               @click="authenticate()"
@@ -90,7 +90,7 @@
               class="white--text"
               color="primary"
               depressed
-            >Login</v-btn>
+            >{{ $t(`App.hardcoded-texts.Login`) }}</v-btn>
           </v-toolbar>
         </v-card-actions>
       </v-card>
@@ -130,6 +130,7 @@ export default {
             this.$store.state.initializingApp = true
             this.$store.state.denyAccess = false
             eventBus.$emit('getUserConfig')
+            this.$router.push({ name: 'Home' })
           } else {
             this.authStatus = true
           }

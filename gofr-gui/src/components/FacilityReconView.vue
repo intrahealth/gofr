@@ -5,7 +5,7 @@
         type="info"
         :value="true"
       >
-        <b>Wait for upload to finish ...</b>
+        <b>{{ $t(`App.hardcoded-texts.Wait for upload to finish`) }} ...</b>
         <v-progress-linear
           indeterminate
           color="white"
@@ -28,7 +28,7 @@
             dark
           >
             <v-toolbar-title>
-              <v-icon>mdi-information</v-icon> About this page
+              <v-icon>mdi-information</v-icon> {{ $t(`App.hardcoded-texts.About this page`) }}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -40,8 +40,8 @@
             </v-btn>
           </v-toolbar>
           <v-card-text>
-            This page let you view dat you have uploaded or synchronized from a remote server
-            <v-list>1. Use the tree to filter grid data</v-list>
+            {{ $t(`App.hardcoded-texts.This page let you view what you have uploaded or synchronized from a remote server`) }}
+            <v-list>1. {{ $t(`App.hardcoded-texts.Use the tree to filter grid data`) }}</v-list>
           </v-card-text>
         </v-card>
       </v-dialog>
@@ -57,13 +57,13 @@
             dark
           >
             <v-toolbar-title>
-              Edit Location
+              {{ $t(`App.hardcoded-texts.Edit Location`) }}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-icon
               @click="editDialog = false"
               style="cursor: pointer"
-            >close</v-icon>
+            >mdi-close</v-icon>
           </v-toolbar>
           <v-card-text>
             <v-layout column>
@@ -74,7 +74,7 @@
                   @change="$v.editLocationName.$touch()"
                   :error-messages="editLocationNameErrors"
                   required
-                  label="Facility"
+                  :label="$t(`App.hardcoded-texts.Facility`)"
                 >
                 </v-text-field>
               </v-flex>
@@ -83,7 +83,7 @@
                   :items="editParents"
                   v-model="editLocationParent"
                   filled
-                  label="Parent"
+                  :label="$t(`App.hardcoded-texts.Parent`)"
                 ></v-select>
               </v-flex>
             </v-layout>
@@ -104,7 +104,7 @@
                     color="error"
                     @click.native="editDialog = false"
                   >
-                    <v-icon left>cancel</v-icon> Cancel
+                    <v-icon left>mdi-cancel</v-icon> {{ $t(`App.hardcoded-texts.Cancel`) }}
                   </v-btn>
                 </v-flex>
                 <v-flex
@@ -117,7 +117,7 @@
                     dark
                     @click="saveEdit()"
                   >
-                    <v-icon left>save</v-icon>Save
+                    <v-icon left>mdi-save</v-icon>{{ $t(`App.hardcoded-texts.Save`) }}
                   </v-btn>
                 </v-flex>
               </v-layout>
@@ -141,7 +141,7 @@
               <v-icon>mdi-help</v-icon>
             </v-btn>
           </template>
-          <span>Help</span>
+          <span>{{ $t(`App.hardcoded-texts.Help`) }}</span>
         </v-tooltip>
       </v-row>
       <v-layout
@@ -151,7 +151,7 @@
         <v-flex xs6>
           <v-card>
             <v-card-title primary-title>
-              <h3 class="headline mb-0">Source 1 Data Tree</h3>
+              <h3 class="headline mb-0">{{ $t(`App.hardcoded-texts.Source 1 Data Tree`) }}</h3>
             </v-card-title>
             <template v-if="loadingSource1Tree">
               <v-progress-linear :indeterminate="true"></v-progress-linear>
@@ -173,7 +173,7 @@
         <v-flex xs6>
           <v-card>
             <v-card-title primary-title>
-              <h3 class="headline mb-0">Source 2 Data Tree</h3>
+              <h3 class="headline mb-0">{{ $t(`App.hardcoded-texts.Source 2 Data Tree`) }}</h3>
             </v-card-title>
             <template v-if="loadingSource2Tree">
               <v-progress-linear :indeterminate="true"></v-progress-linear>
@@ -195,7 +195,7 @@
         <v-flex xs6>
           <v-card>
             <v-card-title primary-title>
-              <h3 class="headline mb-0">Source 1 Data Grid</h3>
+              <h3 class="headline mb-0">{{ $t(`App.hardcoded-texts.Source 1 Data Grid`) }}</h3>
             </v-card-title>
             <template v-if="loadingSource1Grid">
               <v-progress-linear :indeterminate="true"></v-progress-linear>
@@ -271,7 +271,7 @@
             @click='$router.push({name:"FacilityReconScores"})'
           >
             <v-icon left>mdi-file-find</v-icon>
-            Reconcile
+            {{ $t(`App.hardcoded-texts.Reconcile`) }}
           </v-btn>
         </v-flex>
       </v-layout>

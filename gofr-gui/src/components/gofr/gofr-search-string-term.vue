@@ -2,7 +2,7 @@
   <v-select
     v-if="binding"
     :loading="loading"
-    :label="label"
+    :label="$t(`App.fhir-resources-texts.${label}`)"
     v-model="value"
     :items="items"
     outlined
@@ -21,7 +21,7 @@
   </v-select>
   <v-text-field
     v-else 
-    :label="label" 
+    :label="$t(`App.fhir-resources-texts.${label}`)" 
     v-model="value" 
     dense 
     outlined 

@@ -11,7 +11,7 @@
           dark
         >
           <v-toolbar-title>
-            Select file type to download
+            {{ $t(`App.hardcoded-texts.Select file type to download`) }}
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-icon @click='closeDownloadDialog'>mdi-close</v-icon>
@@ -26,7 +26,7 @@
             @click='downloadMatched'
           >
             <v-icon left>mdi-file-multiple-outline</v-icon>
-            Matched
+            {{ $t(`App.hardcoded-texts.Matched`) }}
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
@@ -35,7 +35,7 @@
             @click='downloadSource1Unmatched'
           >
             <v-icon left>mdi-file-multiple-outline</v-icon>
-            Source1 Unmatched
+            {{ $t(`App.hardcoded-texts.Source1 Unmatched`) }}
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
@@ -44,7 +44,7 @@
             @click='downloadSource2Unmatched'
           >
             <v-icon left>mdi-file-multiple-outline</v-icon>
-            Source2 Unmatched
+            {{ $t(`App.hardcoded-texts.Source2 Unmatched`) }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -66,7 +66,7 @@
             indeterminate
             color="red"
           ></v-progress-circular>
-          CSV Export
+          {{ $t(`App.hardcoded-texts.CSV Export`) }}
         </v-btn>
       </v-flex>
       <v-flex xs6>
@@ -82,7 +82,7 @@
             indeterminate
             color="red"
           ></v-progress-circular>
-          FHIR Export
+          {{ $t(`App.hardcoded-texts.FHIR Export`) }}
         </v-btn>
       </v-flex>
     </v-layout>

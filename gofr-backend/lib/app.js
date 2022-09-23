@@ -44,6 +44,7 @@ const FRConfig = require('./routes/config');
 const questionnaireRouter = require('./routes/questionnaire');
 const facilitiesRequests = require('./routes/facilitiesRequests');
 const fhirRouter = require('./routes/fhir');
+const dictionaryRouter = require('./routes/core-apps/gofr-google-translator/index');
 const gofrAppsRouter = require('./routes/apps');
 const mcsd = require('./mcsd')();
 const dhis = require('./dhis');
@@ -189,7 +190,9 @@ async function startUp() {
   app.use('/fhir', questionnaireRouter);
   app.use('/fhir', fhirRouter);
   app.use('/facilitiesRequests', facilitiesRequests);
+  app.use('/dictionary', dictionaryRouter);
   app.use('/apps', gofrAppsRouter);
+  app.use('/gofrapp', express.static(path.join(__dirname, 'apps')));
 
   process.on('message', (message) => {
     if (message.content === 'clean') {

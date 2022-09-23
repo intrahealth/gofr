@@ -169,9 +169,6 @@ export default {
           this.$store.state.config.userConfig.FRDatasource = this.$store.state.dataSources[0].name
         }
       }
-      // this.$store.state.initializingApp = false
-      // this.$router.push({ name: 'ViewMap' })
-      // return
       let source1DB = this.$store.state.activePair.source1.name
       let source2DB = this.$store.state.activePair.source2.name
       if (
@@ -182,7 +179,7 @@ export default {
         if(this.$store.state.auth.username === "public@gofr.org") {
           this.$router.push({ name: 'HomePublic' })
         } else {
-          this.$router.push({ name: 'Home' })
+          // this.$router.push({ name: 'Home' })
         }
         return
       }
@@ -190,7 +187,7 @@ export default {
         if(this.$store.state.auth.username === "public@gofr.org") {
           this.$router.push({ name: 'HomePublic' })
         } else {
-          this.$router.push({ name: 'Home' })
+          // this.$router.push({ name: 'Home' })
         }
         return
       }
@@ -201,13 +198,13 @@ export default {
           if(this.$store.state.auth.username === "public@gofr.org") {
             this.$router.push({ name: 'HomePublic' })
           } else {
-            this.$router.push({ name: 'Home' })
+            // this.$router.push({ name: 'Home' })
           }
         } else {
           if(this.$store.state.auth.username === "public@gofr.org") {
             this.$router.push({ name: 'HomePublic' })
           } else {
-            this.$router.push({ name: 'Home' })
+            // this.$router.push({ name: 'Home' })
           }
         }
       })
@@ -216,7 +213,7 @@ export default {
         if(this.$store.state.auth.username === "public@gofr.org") {
           this.$router.push({ name: 'HomePublic' })
         } else {
-          this.$router.push({ name: 'Home' })
+          // this.$router.push({ name: 'Home' })
         }
       })
     },
@@ -443,8 +440,6 @@ export default {
     'appSideMenu': SideMenu
   },
   created () {
-    // this.$router.push({ name: 'AddDataSources' })
-    // this.$router.push({ name: 'Home' })
     this.$store.state.config.generalConfig = this.generalConfig
     if(this.$store.state.idp === 'keycloak') {
       this.$store.state.clientId = uuid.v4()

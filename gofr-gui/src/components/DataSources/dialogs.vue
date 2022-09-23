@@ -14,7 +14,7 @@
           dark
         >
           <v-toolbar-title>
-            <v-icon>info</v-icon> Datasets limit Warning
+            <v-icon>mdi-info</v-icon> {{ $t(`App.hardcoded-texts.Datasets limit Warning`) }}
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn
@@ -22,18 +22,18 @@
             dark
             @click.native="datasetLimit = false"
           >
-            <v-icon>close</v-icon>
+            <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card-text>
-          You cant add more datasets as you have reached the datasets limit, contact system administrator for help
+          {{ $t(`App.hardcoded-texts.You cant add more datasets as you have reached the datasets limit, contact system administrator for help`) }}
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
             color="primary"
             @click.native="datasetLimit = false"
-          >Ok</v-btn>
+          >{{ $t(`App.hardcoded-texts.Ok`) }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

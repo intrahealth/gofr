@@ -10,7 +10,7 @@
                 <v-card height="209">
                   <v-card-title primary-title>
                     <v-toolbar color="#78496a" dark height="40"  style="font-size: 14px">
-                      Active Partition
+                      {{ $t(`App.hardcoded-texts.Active Partition`) }}
                     </v-toolbar>
                   </v-card-title>
                   <v-card-text>
@@ -19,7 +19,7 @@
                       item-text="display"
                       item-value="name"
                       v-model="$store.state.config.userConfig.FRDatasource"
-                      label="Facility Registry Datasource"
+                      :label="$t(`App.hardcoded-texts.Facility Registry Datasource`)"
                       @change="partitionChanged()"
                     ></v-select>
                   </v-card-text>
@@ -29,7 +29,7 @@
               <v-flex xs6>
                 <ActivePartitionStats 
                   :partition="$store.state.config.userConfig.FRDatasource" 
-                  title="Active Partition Stats"
+                  :title="$t(`App.hardcoded-texts.Active Partition Stats`)"
                   :key="reload"
                 />
               </v-flex>
@@ -38,15 +38,15 @@
                 <v-card height="209">
                   <v-card-title primary-title>
                     <v-toolbar color="#78496a" dark height="40" style="font-size: 14px">
-                      Active Reconciliation Pair
+                      {{ $t(`App.hardcoded-texts.Active Reconciliation Pair`) }}
                     </v-toolbar>
                   </v-card-title>
                   <v-card-text>
                     <label v-if="Object.keys($store.state.activePair.source1).length > 0">
-                      Name: <b>{{$store.state.activePair.display}}</b> <br>
-                      Source 1: <b>{{$store.state.activePair.source1.display}}</b> <br>
-                      Source 2: <b>{{$store.state.activePair.source2.display}}</b> <br>
-                      Status: <b>{{$store.state.recoStatus}}</b> <v-icon
+                      {{ $t(`App.hardcoded-texts.Name`) }}: <b>{{$store.state.activePair.display}}</b> <br>
+                      {{ $t(`App.hardcoded-texts.Source 1`) }}: <b>{{$store.state.activePair.source1.display}}</b> <br>
+                      {{ $t(`App.hardcoded-texts.Source 2`) }}: <b>{{$store.state.activePair.source2.display}}</b> <br>
+                      {{ $t(`App.hardcoded-texts.Status`) }}: <b>{{$store.state.recoStatus}}</b> <v-icon
                                 small
                                 v-if="$store.state.recoStatus === 'in-progress'"
                               >mdi-lock-open-variant-outline</v-icon>

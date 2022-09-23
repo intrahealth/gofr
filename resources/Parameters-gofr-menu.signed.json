@@ -16,11 +16,11 @@
             "code": "1.2.840.10065.1.12.1.14"
           }
         ],
-        "when": "2022-09-19T10:58:53.242Z",
+        "when": "2022-09-20T03:44:20.575Z",
         "who": {
           "reference": "http://ihris.org/fhir/Organization/ihris"
         },
-        "data": "DfOUhrhreMrXSLq5X+bVceHZPLHLS7SmCDbXNyo2JHp4/nrzyNPlXDWYmuw3z30KRWTHm11JXrAPi+iPjwhi8MLZijSchuePbawiE+i4+dHQhQ4+eeJCAvHrHtGrchWdS5xZUx/X1pNFQYGc6J/DQKy4aHMDNfmegy0TLDHqSf0="
+        "data": "V6Bo9nNnuTomn6Xxay6Ryr7GAjjAA22uZDrcXvw/OjViwjTU62pbJiup3H4SeXzBzuZllGHUKxkeS+bABmUXNV3sUpRXUh40FBIo9LsVxIFI5rzuOBOahmuOeVW5Uih/ogun7bmpYIWSnvDE7XjC+NRtXGpiA1rjOFaBIL1TPNs="
       }
     },
     {
@@ -932,7 +932,7 @@
         },
         {
           "name": "site:nav:menu:apps:text",
-          "valueString": "Apps"
+          "valueString": "GOFR Apps"
         },
         {
           "name": "site:nav:menu:apps:order",
@@ -945,6 +945,18 @@
         {
           "name": "site:nav:menu:apps:url",
           "valueString": "/apps"
+        },
+        {
+          "name": "site:nav:menu:account:menu:viewuser:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:account:menu:viewuser:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:account:menu:viewuser:access:id",
+          "valueString": "view-apps"
         }
       ]
     }

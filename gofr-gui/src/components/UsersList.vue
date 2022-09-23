@@ -19,7 +19,7 @@
       </v-toolbar>
       <v-card>
         <v-card-title primary-title>
-          User {{user.userName}}
+          {{ $t(`App.hardcoded-texts.User`) }} {{user.userName}}
         </v-card-title>
         <v-card-text>
           <v-layout
@@ -65,7 +65,7 @@
                 @change="$v.role.$touch()"
                 :error-messages="roleErrors"
                 filled
-                label="Role"
+                :label="$t(`App.hardcoded-texts.Role`)"
               ></v-select>
             </v-flex>
           </v-layout>
@@ -75,7 +75,7 @@
             color="error"
             @click="changeStatus('Rejected')"
           >
-            <v-icon left>mdi-cancel</v-icon>Reject
+            <v-icon left>mdi-cancel</v-icon>{{ $t(`App.hardcoded-texts.Reject`) }}
           </v-btn>
           <v-spacer />
           <v-btn
@@ -85,7 +85,7 @@
             color="deep-purple accent-4"
             depressed
           >
-            <v-icon left>mdi-check-circle</v-icon>Approve
+            <v-icon left>mdi-check-circle</v-icon>{{ $t(`App.hardcoded-texts.Approve`) }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -123,12 +123,12 @@
           color="white"
           style="font-weight: bold; font-size: 18px;"
         >
-          Users List
+          {{ $t(`App.hardcoded-texts.Users List`) }}
           <v-spacer></v-spacer>
           <v-text-field
             v-model="searchUsers"
             append-icon="mdi-magnify"
-            label="Search"
+            :label="$t(`App.hardcoded-texts.Search`)"
             single-line
             hide-details
           ></v-text-field>
@@ -151,44 +151,46 @@
           <template
             v-slot:item="{ item }"
           >
-            <td>{{item.firstName}}</td>
-            <td>{{item.surname}}</td>
-            <td>{{item.otherName}}</td>
-            <td>{{item.phone}}</td>
-            <td>{{item.email}}</td>
-            <td>{{item.userName}}</td>
-            <td v-if='item.role'>{{item.role.name}}</td>
-            <td v-else></td>
-            <td>{{item.status}}</td>
-            <td v-if='item.status === "Pending" || item.status === "Rejected"'>
-              <v-btn
-                color="success"
-                small
-                @click="displayApprovalDialog(item)"
-              >Approve/Reject</v-btn>
-            </td>
-            <td v-else>
-              <v-btn
-                small
-                color="error"
-                v-if='item.status === "Active"'
-                @click="accountAction('Inactive', item)"
-              >Deactivate</v-btn>
-              <v-btn
-                small
-                color="success"
-                v-else
-                @click="accountAction('Active', item)"
-              >Activate</v-btn>
-              |
-              <v-btn
-                small
-                color="error"
-                @click="accountAction('reset', item)"
-              >
-                <v-icon left>mdi-refresh</v-icon> Reset Password
-              </v-btn>
-            </td>
+            <tr>
+              <td>{{item.firstName}}</td>
+              <td>{{item.surname}}</td>
+              <td>{{item.otherName}}</td>
+              <td>{{item.phone}}</td>
+              <td>{{item.email}}</td>
+              <td>{{item.userName}}</td>
+              <td v-if='item.role'>{{item.role.name}}</td>
+              <td v-else></td>
+              <td>{{item.status}}</td>
+              <td v-if='item.status === "Pending" || item.status === "Rejected"'>
+                <v-btn
+                  color="success"
+                  small
+                  @click="displayApprovalDialog(item)"
+                >{{ $t(`App.hardcoded-texts.Approve/Reject`) }}</v-btn>
+              </td>
+              <td v-else>
+                <v-btn
+                  small
+                  color="error"
+                  v-if='item.status === "Active"'
+                  @click="accountAction('Inactive', item)"
+                >{{ $t(`App.hardcoded-texts.Deactivate`) }}</v-btn>
+                <v-btn
+                  small
+                  color="success"
+                  v-else
+                  @click="accountAction('Active', item)"
+                >{{ $t(`App.hardcoded-texts.Activate`) }}</v-btn>
+                |
+                <v-btn
+                  small
+                  color="error"
+                  @click="accountAction('reset', item)"
+                >
+                  <v-icon left>mdi-refresh</v-icon> {{ $t(`App.hardcoded-texts.Reset Password`) }}
+                </v-btn>
+              </td>
+            </tr>
           </template>
         </v-data-table>
       </v-card-text>
@@ -207,16 +209,6 @@ export default {
   },
   data () {
     return {
-      usersHeader: [
-        { text: 'Firstname', value: 'firstName' },
-        { text: 'Surname', value: 'surname' },
-        { text: 'Othername', value: 'otherName' },
-        { text: 'Phone', value: 'phone' },
-        { text: 'Email', value: 'email' },
-        { text: 'User Name', value: 'username' },
-        { text: 'Role', value: 'role' },
-        { text: 'Status', value: 'status' }
-      ],
       users: [],
       user: {},
       role: '',
@@ -314,6 +306,18 @@ export default {
     }
   },
   computed: {
+    usersHeader() {
+      return [
+        { text: this.$t(`App.hardcoded-texts.First Name`), value: 'firstName' },
+        { text: this.$t(`App.hardcoded-texts.Surname`), value: 'surname' },
+        { text: this.$t(`App.hardcoded-texts.Other Name`), value: 'otherName' },
+        { text: this.$t(`App.hardcoded-texts.Phone`), value: 'phone' },
+        { text: this.$t(`App.hardcoded-texts.Email`), value: 'email' },
+        { text: this.$t(`App.hardcoded-texts.User Name`), value: 'username' },
+        { text: this.$t(`App.hardcoded-texts.Role`), value: 'role' },
+        { text: this.$t(`App.hardcoded-texts.Status`), value: 'status' }
+      ]
+    },
     roleErrors () {
       const errors = []
       if (!this.$v.role.$dirty) return errors

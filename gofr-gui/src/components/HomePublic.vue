@@ -5,17 +5,17 @@
         <v-layout row wrap>
           <v-flex xs2>
             <v-chip color="primary" dark outlined>
-              Facilities: {{totalFacilities}}
+              {{ $t(`App.hardcoded-texts.Facilities`) }}: {{totalFacilities}}
             </v-chip>
           </v-flex>
           <v-flex xs2>
             <v-chip color="primary" dark outlined>
-              Jurisdictions: {{totalJurisdictions}}
+              {{ $t(`App.hardcoded-texts.Jurisdictions`) }}: {{totalJurisdictions}}
             </v-chip>
           </v-flex>
           <v-flex xs2>
             <v-chip color="primary" dark outlined>
-              Services: {{totalServices}}
+              {{ $t(`App.hardcoded-texts.Services`) }}: {{totalServices}}
             </v-chip>
           </v-flex>
           <v-spacer></v-spacer>
@@ -28,7 +28,7 @@
               small
               to="/questionnaire/gofr-facility-add-request-questionnaire/facility-add-request"
             >
-              {{$t('App.menu.requestNewFacility.msg')}}
+              {{ $t('App.hardcoded-texts.Request Addition of New Facility') }}
             </v-btn>
           </v-flex>
           <v-flex xs3>
@@ -40,7 +40,7 @@
               small
               to="/Resource/Search/facility?searchAction=send-update-request"
             >
-              {{$t('App.menu.requestUpdateFacility.msg')}}
+              {{ $t('App.hardcoded-texts.Request Update of Facility Details') }}
             </v-btn>
           </v-flex>
         </v-layout>

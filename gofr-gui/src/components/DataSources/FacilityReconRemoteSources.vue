@@ -16,7 +16,8 @@
             dark
             text
           >
-            <v-card-title class="title font-weight-regular">Add New Remote Source</v-card-title>
+            <v-card-title class="title font-weight-regular">
+              </v-card-title>
             <v-spacer></v-spacer>
             <v-btn
               icon
@@ -34,7 +35,7 @@
               :items="$store.state.remoteDataSources"
               v-model="sourceType"
               required
-              label="Source Type"
+              :label="$t(`App.hardcoded-texts.Source Type`)"
             ></v-select>
             <v-text-field
               v-model="name"
@@ -44,26 +45,26 @@
               @input="ensureNameUnique"
               :error-messages="nameErrors"
               color="deep-purple"
-              label="Source Name"
+              :label="$t(`App.hardcoded-texts.Source Name`)"
             ></v-text-field>
             <v-text-field
               v-model="host"
               filled
               required
               color="deep-purple"
-              label="Base URL"
+              :label="$t(`App.hardcoded-texts.Base URL`)"
             ></v-text-field>
             <v-text-field
               v-model="username"
               filled
               color="deep-purple"
-              label="Username"
+              :label="$t(`App.hardcoded-texts.User Name`)"
             ></v-text-field>
             <v-text-field
               v-model="password"
               filled
               color="deep-purple"
-              label="Password"
+              :label="$t(`App.hardcoded-texts.Source Name`)"
               style="min-height: 96px"
               type="password"
             ></v-text-field>
@@ -74,18 +75,18 @@
                   :disabled="shareWithAll"
                   slot="activator"
                   color="primary"
-                  label="Share with other users of the same org unit as yours"
+                  :label="$t(`App.hardcoded-texts.Share with other users of the same org unit as yours`)"
                   v-model="shareToSameOrgid"
                 ></v-checkbox>
                 <span>
-                  Share this dataset with all other users that are on the same org unit as you
+                  {{ $t(`App.hardcoded-texts.Share this dataset with all other users that are on the same org unit as you`) }}
                 </span>
               </v-tooltip>
               <v-checkbox
                 v-if='$store.state.config.generalConfig.allowShareToAllForNonAdmin || $store.state.auth.role === "Admin"'
                 @change="sharingOptions"
                 color="primary"
-                label="Share with all other users"
+                :label="$t(`App.hardcoded-texts.Share with all other users`)"
                 v-model="shareWithAll"
               >
               </v-checkbox>
@@ -94,12 +95,12 @@
                   v-if="shareWithAll && $store.state.dhis.user.orgId"
                   slot="activator"
                   color="primary"
-                  label="Limit orgs sharing by user orgid"
+                  :label="$t(`App.hardcoded-texts.Limit orgs sharing by user orgid`)"
                   v-model="limitShareByOrgId"
                 >
                 </v-checkbox>
                 <span>
-                  if activated, other users will see locations (including location children) that has the same location id as their location id
+                  {{ $t(`App.hardcoded-texts.if activated, other users will see locations (including location children) that has the same location id as their location id`) }}
                 </span>
               </v-tooltip>
             </template>
@@ -114,7 +115,7 @@
               color="#569fd3"
               depressed
             >
-              Add
+              {{ $t(`App.hardcoded-texts.Add`) }}
             </v-btn>
           </v-card-actions>
         </v-card>

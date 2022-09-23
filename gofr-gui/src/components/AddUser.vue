@@ -20,7 +20,7 @@
             dark
             flat
           >
-            <v-card-title class="title font-weight-regular">Add New User</v-card-title>
+            <v-card-title class="title font-weight-regular">{{ $t(`App.hardcoded-texts.Add New User`) }}</v-card-title>
           </v-toolbar>
           <v-form
             ref="form"
@@ -34,13 +34,13 @@
               v-model="firstName"
               filled
               color="deep-purple"
-              label="First Name*"
+              :label="$t(`App.hardcoded-texts.First Name`) + '*'"
             />
             <v-text-field
               v-model="otherName"
               filled
               color="deep-purple"
-              label="Middle Names"
+              :label="$t(`App.hardcoded-texts.Middle Names`)"
             />
             <v-text-field
               required
@@ -50,7 +50,7 @@
               v-model="surname"
               filled
               color="deep-purple"
-              label="Surname*"
+              :label="$t(`App.hardcoded-texts.Surname`) + '*'"
             />
             <v-text-field
               required
@@ -61,7 +61,7 @@
               v-model="phone"
               filled
               color="deep-purple"
-              label="Phone*"
+              :label="$t(`App.hardcoded-texts.Phone`) + '*'"
             />
             <v-text-field
               required
@@ -72,7 +72,7 @@
               v-model="email"
               filled
               color="deep-purple"
-              label="Email*"
+              :label="$t(`App.hardcoded-texts.Email`) + '*'"
             />
             <v-text-field
               required
@@ -82,7 +82,7 @@
               v-model="userName"
               filled
               color="deep-purple"
-              label="Username*"
+              :label="$t(`App.hardcoded-texts.User Name`) + '*'"
             />
             <v-text-field
               required
@@ -93,7 +93,7 @@
               type="password"
               filled
               color="deep-purple"
-              label="Password*"
+              :label="$t(`App.hardcoded-texts.Password`) + '*'"
             />
             <v-text-field
               required
@@ -104,7 +104,7 @@
               type="password"
               filled
               color="deep-purple"
-              label="Re-type Password*"
+              :label="$t(`App.hardcoded-texts.Re-type Password`) + '*'"
             />
             <v-select
               required
@@ -116,7 +116,7 @@
               @change="$v.role.$touch()"
               :error-messages="roleErrors"
               filled
-              label="Role*"
+              :label="$t(`App.hardcoded-texts.Role`) + '*'"
             ></v-select>
           </v-form>
           <v-divider />
@@ -135,7 +135,7 @@
               color="deep-purple accent-4"
               depressed
             >
-              <v-icon left>mdi-web</v-icon>Add
+              <v-icon left>mdi-web</v-icon>{{ $t(`App.hardcoded-texts.Add`) }}
             </v-btn>
           </v-card-actions>
         </v-card>

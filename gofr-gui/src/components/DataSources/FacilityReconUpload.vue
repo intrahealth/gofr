@@ -12,7 +12,7 @@
           dark
         >
           <v-toolbar-title>
-            Information
+            {{ $t(`App.hardcoded-texts.Information`) }}
           </v-toolbar-title>
         </v-toolbar>
         <v-card-text>
@@ -25,7 +25,7 @@
             @click.native="closeDialog('FacilityReconView')"
           >
             <v-icon left>mdi-format-list-bulleted-square</v-icon>
-            View Data
+            {{ $t(`App.hardcoded-texts.View Data`) }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -42,7 +42,7 @@
           dark
         >
           <v-toolbar-title>
-            <v-icon>mdi-close-circle</v-icon>Data Upload was not successful,review below invalid rows in your CSV
+            <v-icon>mdi-close-circle</v-icon>{{ $t(`App.hardcoded-texts.Data Upload was not successful,review below invalid rows in your CSV`) }}
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn
@@ -85,23 +85,23 @@
           dark
         >
           <v-toolbar-title>
-            Warning
+            {{ $t(`App.hardcoded-texts.Warning`) }}
           </v-toolbar-title>
         </v-toolbar>
         <v-card-text>
-          You are about to upload CSV data into the app, click proceed to upload
+          {{ $t(`App.hardcoded-texts.You are about to upload CSV data into the app, click proceed to upload`) }}
         </v-card-text>
         <v-card-actions>
           <v-btn
             color="error"
             @click.native="confirmUpload = false"
-          >Cancel</v-btn>
+          >{{ $t(`App.hardcoded-texts.Cancel`) }}</v-btn>
           <v-spacer></v-spacer>
           <v-btn
             color="primary"
             dark
             @click.native="performExtraCheck"
-          >Proceed</v-btn>
+          >{{ $t(`App.hardcoded-texts.Proceed`) }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -122,7 +122,7 @@
           <v-btn
             color="error"
             @click.native="errorDialog = false"
-          >Ok</v-btn>
+          >{{ $t(`App.hardcoded-texts.Ok`) }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -196,12 +196,12 @@
           <v-stepper-step
             step="1"
             :complete="e1 > 1"
-          >Upload CSV</v-stepper-step>
+          >{{ $t(`App.hardcoded-texts.Upload CSV`) }}</v-stepper-step>
           <v-divider></v-divider>
           <v-stepper-step
             step="2"
             :complete="e1 > 2"
-          >Map Headers</v-stepper-step>
+          >{{ $t(`App.hardcoded-texts.Map Headers`) }}</v-stepper-step>
           <v-btn
             icon
             @click.native="closeUploadWindow()"
@@ -212,7 +212,7 @@
         <v-stepper-items>
           <v-stepper-content step="1">
             <v-card class="mb-5">
-              <v-card-title>Upload CSV (utf-8 only) - <b>Select a CSV file and upload</b></v-card-title>
+              <v-card-title>{{ $t(`App.hardcoded-texts.Upload CSV (utf-8 only)`) }} - <b>{{ $t(`App.hardcoded-texts.Select a CSV file and upload`) }}</b></v-card-title>
               <v-card-text>
                 <v-text-field
                   label="Enter Unique Name For Your Data"
@@ -229,7 +229,7 @@
                 <br><br>
                 <v-card>
                   <v-card-title primary-title>
-                    Advanced Options
+                    {{ $t(`App.hardcoded-texts.Advanced Options`) }}
                   </v-card-title>
                   <v-card-text>
                     <v-tooltip top>
@@ -244,7 +244,7 @@
                         ></v-checkbox>
                       </template>
                       <span>
-                        Share this dataset with all other users that are on the same org unit as you
+                        {{ $t(`App.hardcoded-texts.Share this dataset with all other users that are on the same org unit as you`) }}
                       </span>
                     </v-tooltip>
                     <v-checkbox
@@ -261,13 +261,13 @@
                           v-if="shareWithAll && $store.state.dhis.user.orgId"
                           v-on="on"
                           color="primary"
-                          label="Limit orgs sharing by user orgid"
+                          :label="$t(`App.hardcoded-texts.Limit orgs sharing by user orgid`)"
                           v-model="limitShareByOrgId"
                         >
                         </v-checkbox>
                       </template>
                       <span>
-                        if activated, other users will see locations (including location children) that has the same location id as their location id
+                        {{ $t(`App.hardcoded-texts.if activated, other users will see locations (including location children) that has the same location id as their location id`) }}
                       </span>
                     </v-tooltip>
                   </v-card-text>
@@ -278,16 +278,16 @@
               color="primary"
               @click.native="e1 = 2"
               v-if='uploadedFileName && uploadName && uploadNameErrors.length === 0'
-            >Continue</v-btn>
+            >{{ $t(`App.hardcoded-texts.Continue`) }}</v-btn>
             <v-btn
               color="primary"
               @click.native="e1 = 2"
               v-else
               disabled
-            >Continue</v-btn>
+            >{{ $t(`App.hardcoded-texts.Continue`) }}</v-btn>
           </v-stepper-content>
           <v-stepper-content step="2">
-            <b>Map an appropriate CSV header against those on the app.</b>
+            <b>{{ $t(`App.hardcoded-texts.Map an appropriate CSV header against those on the app`) }}.</b>
             <v-layout
               row
               wrap
@@ -295,7 +295,7 @@
               v-model="valid"
             >
               <v-flex xs6>
-                <v-subheader>Facility*</v-subheader>
+                <v-subheader>{{ $t(`App.hardcoded-texts.Facility`) }}*</v-subheader>
               </v-flex>
               <v-flex xs6>
                 <v-select
@@ -312,7 +312,7 @@
                 </v-select>
               </v-flex>
               <v-flex xs6>
-                <v-subheader>Code*</v-subheader>
+                <v-subheader>{{ $t(`App.hardcoded-texts.Code`) }}*</v-subheader>
               </v-flex>
               <v-flex xs6>
                 <v-select
@@ -321,7 +321,7 @@
                   @blur="$v.code.$touch()"
                   @change="$v.code.$touch()"
                   :error-messages="codeErrors"
-                  label="Select"
+                  :label="$t(`App.hardcoded-texts.Select`)"
                   required
                   single-line
                   clearable
@@ -329,7 +329,7 @@
                 </v-select>
               </v-flex>
               <v-flex xs6>
-                <v-subheader>Latitude</v-subheader>
+                <v-subheader>{{ $t(`App.hardcoded-texts.Latitude`) }}</v-subheader>
               </v-flex>
               <v-flex xs6>
                 <v-select
@@ -342,7 +342,7 @@
                 </v-select>
               </v-flex>
               <v-flex xs6>
-                <v-subheader>Longitude</v-subheader>
+                <v-subheader>{{ $t(`App.hardcoded-texts.Longitude`) }}</v-subheader>
               </v-flex>
               <v-flex xs6>
                 <v-select
@@ -356,7 +356,7 @@
               </v-flex>
               <template>
                 <v-flex xs6>
-                  <v-subheader>Level 1</v-subheader>
+                  <v-subheader>{{ $t(`App.hardcoded-texts.Level`) }} 1</v-subheader>
                 </v-flex>
                 <v-flex xs6>
                   <v-select
@@ -371,7 +371,7 @@
               </template>
               <template>
                 <v-flex xs6>
-                  <v-subheader>Level 2</v-subheader>
+                  <v-subheader>{{ $t(`App.hardcoded-texts.Level`) }} 2</v-subheader>
                 </v-flex>
                 <v-flex xs6>
                   <v-select
@@ -386,7 +386,7 @@
               </template>
               <template v-if='showLevel3'>
                 <v-flex xs6>
-                  <v-subheader>Level 3</v-subheader>
+                  <v-subheader>{{ $t(`App.hardcoded-texts.Level`) }} 3</v-subheader>
                 </v-flex>
                 <v-flex xs6>
                   <v-select
@@ -401,7 +401,7 @@
               </template>
               <template v-if='showLevel4'>
                 <v-flex xs6>
-                  <v-subheader>Level 4</v-subheader>
+                  <v-subheader>{{ $t(`App.hardcoded-texts.Level`) }} 4</v-subheader>
                 </v-flex>
                 <v-flex xs6>
                   <v-select
@@ -416,7 +416,7 @@
               </template>
               <template v-if='showLevel5'>
                 <v-flex xs6>
-                  <v-subheader>Level 5</v-subheader>
+                  <v-subheader>{{ $t(`App.hardcoded-texts.Level`) }} 5</v-subheader>
                 </v-flex>
                 <v-flex xs6>
                   <v-select
@@ -431,7 +431,7 @@
               </template>
               <template v-if='showLevel6'>
                 <v-flex xs6>
-                  <v-subheader>Level 6</v-subheader>
+                  <v-subheader>{{ $t(`App.hardcoded-texts.Level`) }} 6</v-subheader>
                 </v-flex>
                 <v-flex xs6>
                   <v-select
@@ -446,7 +446,7 @@
               </template>
               <template v-if='showLevel7'>
                 <v-flex xs6>
-                  <v-subheader>Level 7</v-subheader>
+                  <v-subheader>{{ $t(`App.hardcoded-texts.Level`) }} 7</v-subheader>
                 </v-flex>
                 <v-flex xs6>
                   <v-select
@@ -483,7 +483,7 @@
                     </v-icon>
                   </v-btn>
                 </template>
-                <span>Add More Level</span>
+                <span>{{ $t(`App.hardcoded-texts.Add More Level`) }}</span>
               </v-tooltip>
               </v-flex>
             </v-layout>
@@ -503,7 +503,7 @@
                   color="primary"
                   @click.native="confirmUpload = true"
                   :disabled="$v.$invalid"
-                >Upload</v-btn>
+                >{{ $t(`App.hardcoded-texts.Upload`) }}</v-btn>
               </v-flex>
             </v-layout>
           </v-stepper-content>

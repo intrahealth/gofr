@@ -10,7 +10,7 @@
           dark
         >
           <v-toolbar-title>
-            This will delete the datasource {{server.display}} from the database
+            {{ $t(`App.hardcoded-texts.This will delete the datasource`) }} {{server.display}} {{ $t(`App.hardcoded-texts.from the database`) }}
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn
@@ -23,7 +23,7 @@
         </v-toolbar>
         <v-card-text>
           <label v-if='loadingPairs || pairs.length > 0'>
-            Below data source pairs (mapping) will also be deleted
+            {{ $t(`App.hardcoded-texts.Below data source pairs (mapping) will also be deleted`) }}
             <v-data-table
               :headers="pairsHeaders"
               :items="pairs"
@@ -41,21 +41,21 @@
             </v-data-table>
           </label>
           <label v-else>
-            There is no any data source pair (mapping) associated with this data source<br>
+            {{ $t(`App.hardcoded-texts.no_src_pair_for_src`) }}<br>
           </label>
           <br>
-          <b>Do you want to proceed and delete?</b>
+          <b>{{ $t(`App.hardcoded-texts.Do you want to proceed and delete`) }}?</b>
         </v-card-text>
         <v-card-actions>
           <v-btn
             color="error"
             @click="deleteConfirm = false"
-          >Cancel</v-btn>
+          >{{ $t(`App.hardcoded-texts.Cancel`) }}</v-btn>
           <v-spacer></v-spacer>
           <v-btn
             color="success"
             @click="deleteDataSource"
-          >Yes</v-btn>
+          >{{ $t(`App.hardcoded-texts.Yes`) }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -70,7 +70,7 @@
           dark
         >
           <v-toolbar-title>
-            Editing {{server.host}}
+            {{ $t(`App.hardcoded-texts.Editing`) }} {{server.host}}
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn
@@ -86,33 +86,33 @@
             <v-flex xs1>
               <v-text-field
                 v-model="server.display"
-                label="Name"
+                :label="$t(`App.hardcoded-texts.Name`)"
                 disabled
               ></v-text-field>
             </v-flex>
             <v-flex xs1>
               <v-text-field
                 v-model="server.host"
-                label="Host"
+                :label="$t(`App.hardcoded-texts.Host`)"
               ></v-text-field>
             </v-flex>
             <v-flex xs1>
               <v-select
                 :items="$store.state.remoteDataSources"
                 v-model="server.sourceType"
-                label="Source Type"
+                :label="$t(`App.hardcoded-texts.Source Type`)"
               ></v-select>
             </v-flex>
             <v-flex xs1>
               <v-text-field
                 v-model="server.username"
-                label="User Name"
+                :label="$t(`App.hardcoded-texts.User Name`)"
               ></v-text-field>
             </v-flex>
             <v-flex xs1>
               <v-text-field
                 v-model="server.password"
-                label="Password"
+                :label="$t(`App.hardcoded-texts.Password`)"
                 type="password"
               ></v-text-field>
             </v-flex>
@@ -127,7 +127,7 @@
             <v-icon
               dark
               left
-            >cancel</v-icon>Cancel
+            >mdi-cancel</v-icon>{{ $t(`App.hardcoded-texts.Cancel`) }}
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
@@ -135,7 +135,7 @@
             dark
             @click.native="saveEdit('match')"
           >
-            <v-icon left>save</v-icon>Save
+            <v-icon left>mdi-save</v-icon>{{ $t(`App.hardcoded-texts.Save`) }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -151,7 +151,7 @@
           dark
         >
           <v-toolbar-title>
-            Sharing {{shareSource.display}}
+            {{ $t(`App.hardcoded-texts.Sharing`) }} {{shareSource.display}}
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn
@@ -178,7 +178,7 @@
               </p>
             </v-card-text>
           </template>
-          <v-icon small>mdi-lock</v-icon> Limiting Sharing to: <b>{{limitLocationName}}</b><br>
+          <v-icon small>mdi-lock</v-icon> {{ $t(`App.hardcoded-texts.limit_share`) }}: <b>{{limitLocationName}}</b><br>
           <permissions @grantedPermissions="receivedPermissions"></permissions>
           <v-text-field
             v-model="searchUsers"
@@ -219,7 +219,7 @@
             <v-icon
               dark
               left
-            >mdi-cancel</v-icon>Cancel
+            >mdi-cancel</v-icon>{{ $t(`App.hardcoded-texts.Cancel`) }}
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
@@ -227,7 +227,7 @@
             :disabled='loadingLocationTree || permissions.length === 0 || sharedUsers.length === 0'
             @click.native="share('', 'saveShare')"
           >
-            <v-icon left>mdi-share</v-icon>Share
+            <v-icon left>mdi-share</v-icon>{{ $t(`App.hardcoded-texts.Share`) }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -246,7 +246,7 @@
           dark
         >
           <v-toolbar-title>
-            <v-icon>mdi-information</v-icon> About this page
+            <v-icon>mdi-information</v-icon> {{ $t(`App.hardcoded-texts.About this page`) }}
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn
@@ -258,11 +258,11 @@
           </v-btn>
         </v-toolbar>
         <v-card-text>
-          This page let you visualize various data sets you have added into the app as well as synchronize remote servers with the app
-          <v-list>1. Use Force Full Sync to fetch all data from the remote server and update the app</v-list>
-          <v-list>2. Use Sync (Update) to pull updated records from the remote server and update the app</v-list>
-          <v-list>3. You may proceed to the 'Data Source Pair' page after you have added atleast two data sources</v-list>
-          <v-list>4. You may come back to this page and add more sources at any time</v-list>
+          {{ $t(`App.hardcoded-texts.This page let you visualize various data sets you have added into the app as well as synchronize remote servers with the app`) }}
+          <v-list>1. {{ $t(`App.hardcoded-texts.Use Force Full Sync to fetch all data from the remote server and update the app`) }}</v-list>
+          <v-list>2. {{ $t(`App.hardcoded-texts.Use Sync (Update) to pull updated records from the remote server and update the app`) }}</v-list>
+          <v-list>3. {{ $t(`App.hardcoded-texts.You may proceed to the 'Data Source Pair' page after you have added atleast two data sources`) }}</v-list>
+          <v-list>4. {{ $t(`App.hardcoded-texts.You may come back to this page and add more sources at any time`) }}</v-list>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -289,7 +289,7 @@
               <v-icon>mdi-help</v-icon>
             </v-btn>
           </template>
-          <span>Help</span>
+          <span>{{ $t(`App.hardcoded-texts.Help`) }}</span>
         </v-tooltip>
       </v-flex>
     </v-layout>
@@ -327,7 +327,7 @@
               color="white"
               style="font-weight: bold; font-size: 18px;"
             >
-              Remote Sources
+              {{ $t(`App.hardcoded-texts.Remote Sources`) }}
             </v-toolbar>
           </v-card-title>
           <v-card-actions>
@@ -337,7 +337,7 @@
               rounded
               v-if="remoteServers.length > 0"
             >
-              <v-icon left>mdi-sync</v-icon>Force Full Sync
+              <v-icon left>mdi-sync</v-icon>{{ $t(`App.hardcoded-texts.Force Full Sync`) }}
             </v-btn>
             <v-btn
               color="primary"
@@ -346,7 +346,7 @@
               disabled
               v-else
             >
-              <v-icon left>mdi-sync</v-icon>Force Full Sync
+              <v-icon left>mdi-sync</v-icon>{{ $t(`App.hardcoded-texts.Force Full Sync`) }}
             </v-btn>
             <v-btn
               color="primary lighten-1"
@@ -354,7 +354,7 @@
               rounded
               v-if="remoteServers.length > 0"
             >
-              <v-icon left>mdi-sync</v-icon>Sync (Update)
+              <v-icon left>mdi-sync</v-icon>{{ $t(`App.hardcoded-texts.sync_update`) }}
             </v-btn>
             <v-btn
               color="primary lighten-1"
@@ -363,7 +363,7 @@
               disabled
               v-else
             >
-              <v-icon left>mdi-sync</v-icon>Sync (Update)
+              <v-icon left>mdi-sync</v-icon>{{ $t(`App.hardcoded-texts.sync_update`) }}
             </v-btn>
             <v-spacer></v-spacer>
             <v-btn
@@ -372,7 +372,7 @@
               rounded
               v-if="remoteServers.length > 0"
             >
-              <v-icon left>mdi-pencil</v-icon>Edit
+              <v-icon left>mdi-pencil</v-icon>{{ $t(`App.hardcoded-texts.Edit`) }}
             </v-btn>
             <v-btn
               color="success"
@@ -381,7 +381,7 @@
               disabled
               v-else
             >
-              <v-icon left>mdi-pencil</v-icon>Edit
+              <v-icon left>mdi-pencil</v-icon>{{ $t(`App.hardcoded-texts.Edit`) }}
             </v-btn>
             <v-btn
               color="error"
@@ -389,7 +389,7 @@
               rounded
               v-if="remoteServers.length > 0"
             >
-              <v-icon left>mdi-delete</v-icon>Delete
+              <v-icon left>mdi-delete</v-icon>{{ $t(`App.hardcoded-texts.Delete`) }}
             </v-btn>
             <v-btn
               color="error"
@@ -398,7 +398,7 @@
               disabled
               v-else
             >
-              <v-icon left>mdi-delete</v-icon>Delete
+              <v-icon left>mdi-delete</v-icon>{{ $t(`App.hardcoded-texts.Delete`) }}
             </v-btn>
           </v-card-actions>
           <v-card-text>
@@ -449,7 +449,7 @@
                       text
                       @click="share(item, 'showDialog')"
                     >
-                      <v-icon>mdi-share-variant-outline</v-icon> Share
+                      <v-icon>mdi-share-variant-outline</v-icon> {{ $t(`App.hardcoded-texts.Share`) }}
                     </v-btn>
                   </td>
                 </tr>
@@ -461,7 +461,7 @@
               color="white"
               style="font-weight: bold; font-size: 18px;"
             >
-              Uploaded Sources
+              {{ $t(`App.hardcoded-texts.Uploaded Sources`) }}
             </v-toolbar>
           </v-card-title>
           <v-card-actions>
@@ -475,7 +475,7 @@
                   v-if="uploadedSources.length > 0"
                   v-on="on"
                 >
-                  <v-icon left>mdi-file-document-multiple</v-icon>Export
+                  <v-icon left>mdi-file-document-multiple</v-icon>{{ $t(`App.hardcoded-texts.Export`) }}
                 </v-btn>
                 <v-btn
                   color="success"
@@ -486,10 +486,10 @@
                   v-else
                   v-on="on"
                 >
-                  <v-icon left>mdi-file-document-multiple</v-icon>Export
+                  <v-icon left>mdi-file-document-multiple</v-icon>{{ $t(`App.hardcoded-texts.Export`) }}
                 </v-btn>
               </template>
-              <span>Export Original CSV</span>
+              <span>{{ $t(`App.hardcoded-texts.Export Original CSV`) }}</span>
             </v-tooltip>
             <v-spacer></v-spacer>
             <v-btn
@@ -499,7 +499,7 @@
               small
               v-if="uploadedSources.length > 0"
             >
-              <v-icon left>mdi-delete</v-icon>Delete
+              <v-icon left>mdi-delete</v-icon>{{ $t(`App.hardcoded-texts.Delete`) }}
             </v-btn>
             <v-btn
               color="error"
@@ -509,7 +509,7 @@
               disabled
               v-else
             >
-              <v-icon left>mdi-delete</v-icon>Delete
+              <v-icon left>mdi-delete</v-icon>{{ $t(`App.hardcoded-texts.Delete`) }}
             </v-btn>
           </v-card-actions>
           <v-card-text>
@@ -552,7 +552,7 @@
                       text
                       @click="share(item, 'showDialog')"
                     >
-                      <v-icon>mdi-share-variant-outline</v-icon> Share
+                      <v-icon>mdi-share-variant-outline</v-icon> {{ $t(`App.hardcoded-texts.Share`) }}
                     </v-btn>
                     |
                     <v-btn
@@ -560,7 +560,7 @@
                       text
                       @click="viewshare(item)"
                     >
-                      <v-icon>mdi-monitor-share</v-icon> Detailed View
+                      <v-icon>mdi-monitor-share</v-icon> {{ $t(`App.hardcoded-texts.Detailed View`) }}
                     </v-btn>
                   </td>
                 </tr>
@@ -604,8 +604,8 @@ export default {
       loadingPairs: false,
       pairs: [],
       pairsHeaders: [
-        { text: 'Pair Name', value: 'name' },
-        { text: 'Owner', value: 'owner' }
+        { text: this.$t(`App.hardcoded-texts.Pair Name`), value: 'name' },
+        { text: this.$t(`App.hardcoded-texts.Owner`), value: 'owner' }
       ],
       helpDialog: false,
       deleteConfirm: false,
@@ -625,35 +625,35 @@ export default {
       searchUsers: '',
       remoteServersHeader: [
         { sortable: false },
-        { text: 'Source Name', value: 'name' },
-        { text: 'Base URL', value: 'host' },
-        { text: 'Source Type', value: 'sourceType' },
-        { text: 'User Name', value: 'username' },
-        { text: 'Password', value: 'password' },
-        { text: 'Last Sync', value: 'lastsync' },
-        { text: 'Owner', value: 'owner', sortable: false },
-        { text: 'Shared To', value: 'shareStatus' },
-        { text: 'Created Time', value: 'createdTime' }
+        { text: this.$t(`App.hardcoded-texts.Source Name`), value: 'name' },
+        { text: this.$t(`App.hardcoded-texts.Base URL`), value: 'host' },
+        { text: this.$t(`App.hardcoded-texts.Source Type`), value: 'sourceType' },
+        { text: this.$t(`App.hardcoded-texts.User Name`), value: 'username' },
+        { text: this.$t(`App.hardcoded-texts.Password`), value: 'password' },
+        { text: this.$t(`App.hardcoded-texts.Last Sync`), value: 'lastsync' },
+        { text: this.$t(`App.hardcoded-texts.Owner`), value: 'owner', sortable: false },
+        { text: this.$t(`App.hardcoded-texts.Shared To`), value: 'shareStatus' },
+        { text: this.$t(`App.hardcoded-texts.Created Time`), value: 'createdTime' }
       ],
       uploadSourcesHeader: [
         { sortable: false },
         {
-          text: 'Source Name',
+          text: this.$t(`App.hardcoded-texts.Source Name`),
           align: 'left',
           value: 'name'
         },
-        { text: 'Owner', value: 'owner', sortable: false },
-        { text: 'Created Time', value: 'createdTime' },
-        { text: 'Action', value: 'action' }
+        { text: this.$t(`App.hardcoded-texts.Owner`), value: 'owner', sortable: false },
+        { text: this.$t(`App.hardcoded-texts.Created Time`), value: 'createdTime' },
+        { text: this.$t(`App.hardcoded-texts.Action`), value: 'action' }
       ],
       dataSources: [
-        { text: 'Upload CSV', value: 'upload' },
-        { text: 'Remote Source', value: 'remote' }
+        { text: this.$t(`App.hardcoded-texts.Upload CSV`), value: 'upload' },
+        { text: this.$t(`App.hardcoded-texts.Remote Source`), value: 'remote' }
       ],
       usersHeader: [
         { sortable: false },
-        { text: 'Username', value: 'userName', sortable: true },
-        { text: 'Fullname', value: 'fullName', sortable: true }
+        { text: this.$t(`App.hardcoded-texts.User Name`), value: 'userName', sortable: true },
+        { text: this.$t(`App.hardcoded-texts.Fullname`), value: 'fullName', sortable: true }
       ],
       dataSource: '',
       addDataSource: true,

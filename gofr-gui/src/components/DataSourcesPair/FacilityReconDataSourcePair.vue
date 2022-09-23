@@ -24,18 +24,18 @@
             </v-btn>
           </v-toolbar>
           <v-card-text>
-            Are you sure you want to delete this data source pair
+            {{ $t(`App.hardcoded-texts.Are you sure you want to delete this data source pair`) }}
           </v-card-text>
           <v-card-actions>
             <v-btn
               color="primary"
               @click.native="confirmPairDeleteDialog = false"
-            >Cancel</v-btn>
+            >{{ $t(`App.hardcoded-texts.Cancel`) }}</v-btn>
             <v-spacer></v-spacer>
             <v-btn
               color="error"
               @click.native="deletePair"
-            >Ok</v-btn>
+            >{{ $t(`App.hardcoded-texts.Ok`) }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -71,7 +71,7 @@
             dark
           >
             <v-toolbar-title>
-              <v-icon>mdi-information</v-icon> Pair creation limit
+              <v-icon>mdi-information</v-icon> {{ $t(`App.hardcoded-texts.Pair creation limit`) }}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -83,14 +83,14 @@
             </v-btn>
           </v-toolbar>
           <v-card-text>
-            You cant create more pairs as this account is limited to one pair only at a time.
+            {{ $t(`App.hardcoded-texts.You cant create more pairs as this account is limited to one pair only at a time`) }}.
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
               color="primary"
               @click.native="pairLimitWarn = false"
-            >Ok</v-btn>
+            >{{ $t(`App.hardcoded-texts.Ok`) }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -108,7 +108,8 @@
             dark
           >
             <v-toolbar-title>
-              <v-icon>mdi-information</v-icon> Data sources has different level counts, please map Levels to proceed
+              <v-icon>mdi-information</v-icon> 
+              {{ $t(`App.hardcoded-texts.Data sources has different level counts, please map Levels to proceed`) }}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -155,14 +156,14 @@
               rounded
               @click="closeLevelMappingDialog"
             >
-              <v-icon left>mdi-cancel</v-icon> Cancel
+              <v-icon left>mdi-cancel</v-icon> {{ $t(`App.hardcoded-texts.Cancel`) }}
             </v-btn>
             <v-spacer></v-spacer>
             <v-btn
               color="primary"
               rounded
             >
-              <v-icon left>mdi-content-save</v-icon>Save Mapping
+              <v-icon left>mdi-content-save</v-icon>{{ $t(`App.hardcoded-texts.Save`) }} {{ $t(`App.hardcoded-texts.Mapping`) }}
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -181,7 +182,7 @@
             dark
           >
             <v-toolbar-title>
-              <v-icon>mdi-information</v-icon> About this page
+              <v-icon>mdi-information</v-icon> {{ $t(`App.hardcoded-texts.About this page`) }}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -193,8 +194,8 @@
             </v-btn>
           </v-toolbar>
           <v-card-text>
-            This page let you choose a pair of data sources to use for reconciliation
-            <v-list>1. Source 1 is the source while source 2 is the target</v-list>
+            {{ $t(`App.hardcoded-texts.This page let you choose a pair of data sources to use for reconciliation`) }}
+            <v-list>1. {{ $t(`App.hardcoded-texts.Source 1 is the source while source 2 is the target`) }}</v-list>
           </v-card-text>
         </v-card>
       </v-dialog>
@@ -209,7 +210,7 @@
             dark
           >
             <v-toolbar-title>
-              Sharing Pair {{sharePair.display}}
+              {{ $t(`App.hardcoded-texts.Sharing Pair`) }} {{sharePair.display}}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -259,7 +260,7 @@
               <v-icon
                 dark
                 left
-              >mdi-cancel</v-icon>Cancel
+              >mdi-cancel</v-icon>{{ $t(`App.hardcoded-texts.Cancel`) }}
             </v-btn>
             <v-spacer></v-spacer>
             <v-btn
@@ -267,14 +268,14 @@
               dark
               @click.native="share('', 'saveShare')"
             >
-              <v-icon left>mdi-share-variant-outline</v-icon>Share
+              <v-icon left>mdi-share-variant-outline</v-icon>{{ $t(`App.hardcoded-texts.Share`) }}
             </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
       <v-layout row>
         <v-flex xs11>
-          Create/Choose a pair of data sources to use for reconciliation. Source 1 is the source while source 2 is the target
+          {{ $t(`App.hardcoded-texts.create_choose_pair`) }}
         </v-flex>
         <v-flex
           xs1
@@ -294,7 +295,7 @@
                 <v-icon>mdi-help</v-icon>
               </v-btn>
             </template>
-            <span>Help</span>
+            <span>{{ $t(`App.hardcoded-texts.Help`) }}</span>
           </v-tooltip>
         </v-flex>
       </v-layout>
@@ -309,14 +310,14 @@
                 color="white lighten-2"
                 style="font-weight: bold; font-size: 18px;"
               >
-                Create Data Source Pair
+              {{ $t(`App.hardcoded-texts.Create Data Source Pair`) }}
               </v-toolbar>
             </v-card-title>
             <v-card-text style="float: center">
               <v-row>
                 <v-text-field
                   v-model="pairName"
-                  label="Pair Name*"
+                  :label="$t(`App.hardcoded-texts.Pair Name`) + '*'"
                   @blur="ensureNameUnique"
                   @input="ensureNameUnique"
                   :error-messages="pairNameErrors"
@@ -396,7 +397,7 @@
                 rounded
                 @click="reset"
               >
-                <v-icon left>mdi-refresh</v-icon> Reset
+                <v-icon left>mdi-refresh</v-icon> {{ $t(`App.hardcoded-texts.Reset`) }}
               </v-btn>
               <v-spacer></v-spacer>
               <v-btn
@@ -405,7 +406,7 @@
                 rounded
                 @click="checkLevels"
               >
-                <v-icon left>mdi-content-save</v-icon> Save
+                <v-icon left>mdi-content-save</v-icon> {{ $t(`App.hardcoded-texts.Save`) }}
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -420,12 +421,12 @@
                 color="white lighten-2"
                 style="font-weight: bold; font-size: 18px;"
               >
-                Existing Data Source Pairs
+              {{ $t(`App.hardcoded-texts.Existing Data Source Pairs`) }}
                 <v-spacer></v-spacer>
                 <v-text-field
                   v-model="searchPairs"
                   append-icon="mdi-magnify"
-                  label="Search"
+                  :label="$t(`App.hardcoded-texts.Search`)"
                   single-line
                   hide-details
                 ></v-text-field>
@@ -469,7 +470,7 @@
                         color="primary"
                         @click="share(item, 'showDialog')"
                       >
-                        <v-icon>mdi-share-variant-outline</v-icon>Share
+                        <v-icon>mdi-share-variant-outline</v-icon>{{ $t(`App.hardcoded-texts.Share`) }}
                       </v-btn>
                       |
                       <v-btn
@@ -477,7 +478,7 @@
                         text
                         @click="viewshare(item)"
                       >
-                        <v-icon>mdi-monitor-share</v-icon> Detailed View
+                        <v-icon>mdi-monitor-share</v-icon> {{ $t(`App.hardcoded-texts.Detailed View`) }}
                       </v-btn>
                     </td>
                   </tr>
@@ -491,7 +492,7 @@
                 rounded
                 @click="confirmDeletePair"
               >
-                <v-icon left>mdi-delete</v-icon>Delete Pair
+                <v-icon left>mdi-delete</v-icon>{{ $t(`App.hardcoded-texts.Delete`) }} {{ $t(`App.hardcoded-texts.Pair`) }}
               </v-btn>
               <v-spacer></v-spacer>
               <v-btn
@@ -500,7 +501,7 @@
                 rounded
                 @click="activatePair"
               >
-                <v-icon left>mdi-content-save</v-icon>Activate Pair
+                <v-icon left>mdi-content-save</v-icon>{{ $t(`App.hardcoded-texts.Activate Pair`) }}
               </v-btn>
             </v-card-actions>
           </v-card>

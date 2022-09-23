@@ -8,7 +8,9 @@
     height="50"
   >
     
-    <img src="../assets/GOFR_RGB_high-res.png" width="220" />
+    <router-link to="/">
+      <img src="../assets/GOFR_RGB_high-res.png" width="220" />
+    </router-link>
     <template v-if="$store.state.auth.userID">
       <v-spacer></v-spacer>
       <label style="color: #569fd3">
@@ -26,27 +28,15 @@
           <img src="../assets/dhis2.png" />
         </v-btn>
       </template>
-      <v-radio-group
-        v-model="locale"
-        row
-      >
-        <v-radio
-          label="EN"
-          value="en"
-          color="#78496a"
-        ></v-radio>
-        <v-radio
-          label="FR"
-          value="fr"
-          color="#78496a"
-        ></v-radio>
-      </v-radio-group>
+      <div>
+        <language-switcher />
+      </div>
       <template v-if="$store.state.auth.userID">
         <v-btn color="white" light to="/logout" small v-if="!$store.state.public_access">
-          <v-icon>mdi-logout</v-icon>Logout
+          <v-icon>mdi-logout</v-icon>{{ $t(`App.hardcoded-texts.Logout`) }}
         </v-btn>
         <v-btn color="white" light to="/logout-public" small v-else>
-          <v-icon>mdi-login</v-icon>Login
+          <v-icon>mdi-login</v-icon>{{ $t(`App.hardcoded-texts.Login`) }}
         </v-btn>
       </template>
     </v-toolbar-items>
@@ -54,16 +44,8 @@
 </template>
 
 <script>
+import LanguageSwitcher from "@/components/language-switcher";
 export default {
-  data () {
-    return {
-      locale: 'en',
-      locales: [
-        { text: 'English', value: 'en' },
-        { text: 'French', value: 'fr' }
-      ]
-    }
-  },
   computed: {
     dhisLink () {
       if (this.$store.state.dhis.user.orgId) {
@@ -73,10 +55,8 @@ export default {
       }
     }
   },
-  watch: {
-    locale (val) {
-      this.$i18n.locale = val
-    }
-  },
+  components: {
+    LanguageSwitcher,
+  }
 }
 </script>

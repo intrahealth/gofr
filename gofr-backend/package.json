@@ -23,6 +23,7 @@
   "homepage": "https://github.com/openhie/facility-recon/blob/master/README.md",
   "dependencies": {
     "@keycloak/keycloak-admin-client": "^15.0.2",
+    "@vitalets/google-translate-api": "^8.0.0",
     "adm-zip": "^0.5.9",
     "async": "^2.6.1",
     "axios": "^0.21.1",
@@ -51,6 +52,7 @@
     "is-empty": "^1.2.0",
     "is-json": "^2.0.1",
     "jsdom": "^16.5.3",
+    "json-as-xlsx": "^2.4.2",
     "json-merger": "^1.1.7",
     "json2csv": "^4.2.1",
     "jsonwebtoken": "^8.5.1",

@@ -12,7 +12,7 @@
     <template v-slot:activator="{ on }">
       <v-text-field
         v-model="displayValue"
-        :label="display"
+        :label="$t(`App.fhir-resources-texts.${display}`)"
         v-on="on"
         outlined
         hide-details="auto"
@@ -22,7 +22,7 @@
         shaped 
         clearable
       >
-        <template #label>{{display}}</template>
+        <template #label>{{$t(`App.fhir-resources-texts.${display}`)}}</template>
       </v-text-field>
     </template>
     <v-card>
@@ -49,13 +49,13 @@
     flat
     hide-no-data
     hide-details
-    :label="display"
+    :label="$t(`App.fhir-resources-texts.${display}`)"
     outlined
     dense
     placeholder="Start typing for selection"
     @click:clear="clearSearch()"
   >
-    <template #label>{{display}}</template>
+    <template #label>{{$t(`App.fhir-resources-texts.${display}`)}}</template>
   </v-autocomplete>
 </template>
 

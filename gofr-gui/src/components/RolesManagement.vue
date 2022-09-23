@@ -1,17 +1,17 @@
 <template>
   <v-container>
-    Select role to edit tasks
+    {{ $t(`App.hardcoded-texts.Select role to edit tasks`) }}
     <v-select
       required
       :items="roles"
       @change="roleSelected"
       single-line
       filled
-      label="Select Role"
+      :label="$t(`App.hardcoded-texts.Select Role`)"
     ></v-select>
     <v-card v-if="role.value">
       <v-card-title primary-title>
-        Tasks assigned to role {{role.text}}
+        {{ $t(`App.hardcoded-texts.Tasks assigned to role`) }} {{role.text}}
       </v-card-title>
       <v-card-text>
         <v-data-table
@@ -39,7 +39,7 @@
           color="primary"
           @click="saveRole"
         >
-          <v-icon left>mdi-content-save</v-icon> Save
+          <v-icon left>mdi-content-save</v-icon> {{ $t(`App.hardcoded-texts.Save`) }}
         </v-btn>
       </v-card-actions>
     </v-card>

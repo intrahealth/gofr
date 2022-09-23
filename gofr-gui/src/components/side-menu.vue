@@ -25,7 +25,7 @@
         <v-icon class="white--text" v-else>mdi-menu-left-outline</v-icon>
       </v-list-item-avatar>
 
-      <v-list-item-title class="white--text">Navigator</v-list-item-title>
+      <v-list-item-title class="white--text">{{$t("App.menu.menuTitle")}}</v-list-item-title>
     </v-list-item>
 
     <v-divider color="white"></v-divider>
@@ -48,7 +48,9 @@
             no-action
           >
             <template v-slot:activator>
-              <v-list-item-title class="subtitle-1 font-weight-bold text-uppercase">{{item.text}}</v-list-item-title>
+              <v-list-item-title class="subtitle-1 font-weight-bold text-uppercase">
+                {{$t(`App.menu.${item.text}`)}}
+              </v-list-item-title>
             </template>
             <template v-for="sub in item.menu">
               <template v-if="sub.menu">
@@ -63,7 +65,7 @@
                   no-action
                 >
                   <template v-slot:activator>
-                    <v-list-item-title class="subtitle-1 font-weight-bold text-uppercase">{{sub.text}}</v-list-item-title>
+                    <v-list-item-title class="subtitle-1 font-weight-bold text-uppercase">{{$t(`App.menu.${sub.text}`)}}</v-list-item-title>
                   </template>
                   <template v-for="sub_sub in sub.menu">
                     <v-list-item
@@ -74,7 +76,7 @@
                       dense
                     >
                       <v-icon v-if="sub_sub.icon" left>{{sub_sub.icon}}</v-icon>
-                      <v-list-item-title>{{sub_sub.text}}</v-list-item-title>
+                      <v-list-item-title>{{$t(`App.menu.${sub_sub.text}`)}}</v-list-item-title>
                       <v-icon>mdi-chevron-right</v-icon>
                     </v-list-item>
                     <v-list-item
@@ -86,7 +88,7 @@
                       dense
                     >
                       <v-icon v-if="sub_sub.icon" left>{{sub_sub.icon}}</v-icon>
-                      <v-list-item-title>{{sub_sub.text}}</v-list-item-title>
+                      <v-list-item-title>{{$t(`App.menu.${sub_sub.text}`)}}</v-list-item-title>
                       <v-icon>mdi-chevron-right</v-icon>
                     </v-list-item>
                   </template>
@@ -102,7 +104,7 @@
                   v-if="sub.external != true"
                 >
                   <v-icon v-if="sub.icon" left>{{sub.icon}}</v-icon>
-                  <v-list-item-title>{{sub.text}}</v-list-item-title>
+                  <v-list-item-title>{{$t(`App.menu.${sub.text}`)}}</v-list-item-title>
                   <v-icon>mdi-chevron-right</v-icon>
                 </v-list-item>
                 <v-list-item
@@ -114,7 +116,7 @@
                   dense
                 >
                   <v-icon v-if="sub.icon" left>{{sub.icon}}</v-icon>
-                  <v-list-item-title>{{sub.text}}</v-list-item-title>
+                  <v-list-item-title>{{$t(`App.menu.${sub.text}`)}}</v-list-item-title>
                   <v-icon>mdi-chevron-right</v-icon>
                 </v-list-item>
               </template>
@@ -127,13 +129,13 @@
             <v-list-item-icon>
               <v-icon>{{item.icon}}</v-icon>
             </v-list-item-icon>
-            <v-list-item-title class="subtitle-1 font-weight-bold text-uppercase">{{item.text}}</v-list-item-title>
+            <v-list-item-title class="subtitle-1 font-weight-bold text-uppercase">{{$t(`App.menu.${item.text}`)}}</v-list-item-title>
           </v-list-item>
           <v-list-item :href="item.url" target="_blank" :key="item.id" v-else>
             <v-list-item-icon>
               <v-icon>{{item.icon}}</v-icon>
             </v-list-item-icon>
-            <v-list-item-title class="subtitle-1 font-weight-bold text-uppercase">{{item.text}}</v-list-item-title>
+            <v-list-item-title class="subtitle-1 font-weight-bold text-uppercase">{{$t(`App.menu.${item.text}`)}}</v-list-item-title>
           </v-list-item>
         </template>
       </template>

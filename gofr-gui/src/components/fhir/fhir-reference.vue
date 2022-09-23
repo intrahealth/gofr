@@ -14,7 +14,7 @@
         <template v-slot:activator="{ on }">
           <v-text-field
             v-model="displayValue"
-            :label="display"
+            :label="$t(`App.fhir-resources-texts.${display}`)"
             readonly
             v-on="on"
             outlined
@@ -23,7 +23,9 @@
             :error-messages="errors"
             :loading="loading"
             dense>
-            <template #label>{{display}} <span v-if="required" class="red--text font-weight-bold">*</span></template>
+            <template #label>
+              {{ $t(`App.fhir-resources-texts.${display}`) }} <span v-if="required" class="red--text font-weight-bold">*</span>
+            </template>
           </v-text-field>
         </template>
         <v-card v-if="!((disabled) || (preset && $route.name === 'ResourceAdd'))">
@@ -37,7 +39,7 @@
             :multiple-active="false"
             selection-type="independent"
             :loading="loading"
-            ></v-treeview>
+          ></v-treeview>
         </v-card>
       </v-menu>
       <v-autocomplete
@@ -50,7 +52,7 @@
         flat
         hide-no-data
         hide-details
-        :label="display"
+        :label="$t(`App.fhir-resources-texts.${display}`)"
         outlined
         dense
         placeholder="Start typing for selection"
@@ -59,11 +61,11 @@
         :error-messages="errors"
         @change="errors = []"
       >
-        <template #label>{{display}} <span v-if="required" class="red--text font-weight-bold">*</span></template>
+        <template #label>{{$t(`App.fhir-resources-texts.${display}`)}} <span v-if="required" class="red--text font-weight-bold">*</span></template>
       </v-autocomplete>
     </template>
     <template #header>
-      {{display}}
+      {{$t(`App.fhir-resources-texts.${display}`)}}
     </template>
     <template #value>
       {{displayValue}}

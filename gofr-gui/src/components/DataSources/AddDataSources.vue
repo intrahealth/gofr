@@ -14,7 +14,7 @@
           dark
         >
           <v-toolbar-title>
-            <v-icon>mdi-information</v-icon> About this page
+            <v-icon>mdi-information</v-icon> {{ $t(`App.hardcoded-texts.About this page`) }}
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn
@@ -26,14 +26,14 @@
           </v-btn>
         </v-toolbar>
         <v-card-text>
-          This page let you load data from various sources into the app for reconciliation
-          <v-list>1. Select to add remote source if you have a DHIS2 or FHIR server that you want to use its data on this app</v-list>
-          <v-list>2. Select Upload CSV if you have a CSV file and want to upload its data on the app</v-list>
-          <v-list>3. The system requires CSV data to have atleast 2 levels above facility</v-list>
-          <v-list>4. Level 1 is the highest level on the hierarchy i.e Country</v-list>
+          {{ $t(`App.hardcoded-texts.This page let you load data from various sources into the app for reconciliation`) }}
+          <v-list>1. {{ $t(`App.hardcoded-texts.Select to add remote source if you have a DHIS2 or FHIR server that you want to use its data on this app`) }}</v-list>
+          <v-list>2. {{ $t(`App.hardcoded-texts.Select Upload CSV if you have a CSV file and want to upload its data on the app`) }}</v-list>
+          <v-list>3. {{ $t(`App.hardcoded-texts.The system requires CSV data to have atleast 2 levels above facility`) }}</v-list>
+          <v-list>4. {{ $t(`App.hardcoded-texts.Level 1 is the highest level on the hierarchy i.e Country`) }}</v-list>
           <v-list>
-            5. Base URL under remote sources section refer to the URL i.e http://localhost:3447/fhir and not http://localhost:3447/fhir/Location.
-            Same applies to DHIS2 base URL
+            5. {{ $t(`App.hardcoded-texts.Base URL under remote sources section refer to the URL i.e `) }}http://localhost:3447/fhir {{ $t(`App.hardcoded-texts.and not`) }} http://localhost:3447/fhir/Location.
+            {{ $t(`App.hardcoded-texts.Same applies to DHIS2 base URL`) }}
           </v-list>
         </v-card-text>
       </v-card>
@@ -68,7 +68,7 @@
               color="white"
               style="font-weight: bold; font-size: 18px;"
             >
-              Choose way to add data source
+            {{ $t(`App.hardcoded-texts.Choose way to add data source`) }}
             </v-toolbar>
             <v-spacer></v-spacer>
           </v-card-title>
@@ -82,21 +82,21 @@
                 v-if='canUseUploadWay'
                 :disabled="!canAddDataset"
                 color="primary"
-                label="Upload CSV"
+                :label="$t(`App.hardcoded-texts.Upload CSV`)"
                 value="upload"
               ></v-radio>
               <v-radio
                 v-if='canUseRemoteWay'
                 :disabled="!canAddDataset"
                 color="primary"
-                label="Remote Source"
+                :label="$t(`App.hardcoded-texts.Remote Source`)"
                 value="remote"
               ></v-radio>
               <v-radio
                 v-if='canUseBlankWay'
                 :disabled="!canAddDataset"
                 color="primary"
-                label="Blank Source"
+                :label="$t(`App.hardcoded-texts.Blank Source`)"
                 value="blank"
               ></v-radio>
             </v-radio-group>
@@ -122,7 +122,7 @@
               <v-icon>mdi-help</v-icon>
             </v-btn>
           </template>
-          <span>Help</span>
+          <span>{{ $t(`App.hardcoded-texts.Help`) }}</span>
         </v-tooltip>
       </v-flex>
       <v-flex xs12>

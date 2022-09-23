@@ -26,8 +26,13 @@ import {store} from '../store/store.js'
 Vue.use(Router)
 
 let router = new Router({
+  mode: "history",
   routes: [{
     path: '/Home',
+    name: 'Home',
+    component: Home
+  }, {
+    path: '/',
     name: 'Home',
     component: Home
   }, {
@@ -225,24 +230,6 @@ let router = new Router({
     component: FacilityRecoStatus,
     beforeEnter: (to, from, next) => {
       let hasTask = Vue.$tasksVerification.hasPermissionByName('special', 'custom', 'view-matching-status')
-      if (hasTask) {
-        return next()
-      }
-      next({
-        name: 'GofrOutcome',
-        params: {
-          issues: [{
-            diagnostics: 'Access Denied'
-          }]
-        }
-      })
-    }
-  }, {
-    path: '/',
-    name: 'FacilityReconHome',
-    component: FacilityReconScores,
-    beforeEnter: (to, from, next) => {
-      let hasTask = Vue.$tasksVerification.hasPermissionByName('special', 'custom', 'data-source-reconciliation')
       if (hasTask) {
         return next()
       }

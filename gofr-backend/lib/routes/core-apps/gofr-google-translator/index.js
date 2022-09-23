@@ -1,7 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const translate = require('@vitalets/google-translate-api');
-const ihrissmartrequire = require("ihrissmartrequire")
+const config = require('../../../config')
+const ihrissmartrequire = require("ihrissmartrequire")(config.get("app:site:path"), config.get("app:core:path"))
 const async = require("async")
 const fs = require("fs")
 
@@ -103,9 +104,7 @@ router.get("/getTranslatedLanguages", async(req, res) => {
 router.get("/extractTexts/:locale", async(req, res) => {
   if(req.params.locale === 'en') {
     extractTexts().then(() => {
-      setTimeout(() => {
-        return res.status(200).send()
-      }, 2000);
+      return res.status(200).send()
     }).catch(() => {
       return res.status(500).send()
     })
@@ -121,9 +120,7 @@ router.get("/extractTexts/:locale", async(req, res) => {
     enTrans = JSON.parse(enTrans)
     build(enTrans, "")
     await fs.writeFileSync(localesPath + req.params.locale + ".json", JSON.stringify(translations, 0, 2))
-    setTimeout(() => {
-      return res.status(200).json()
-    }, 2000);
+    return res.status(200).json()
     
     function build(source, keys) {
       for(let key in source) {
@@ -408,6 +405,10 @@ function translator(texts, translations, from, to, type) {
         if(!translations[key]) {
           translations[key] = {}
         }
+        let translated = false
+        setTimeout(() => {
+          translated = true
+        }, 60000);
         translator(texts[key], translations[key], from, to, type).then(() => {
           return nxt()
         }).catch(() => {

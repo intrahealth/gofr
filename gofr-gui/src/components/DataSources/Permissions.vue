@@ -7,7 +7,7 @@
         height="30"
       >
         <v-toolbar-title>
-          Permissions
+          {{ $t(`App.hardcoded-texts.Permissions`) }}
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-icon>mdi-shield-lock-outline</v-icon>
@@ -22,7 +22,7 @@
                 height="20"
               >
                 <v-toolbar-title style="font-size:12px">
-                  Facilities
+                  {{ $t(`App.hardcoded-texts.Facilities`) }}
                 </v-toolbar-title>
                 <v-spacer></v-spacer>
                 <v-icon small>mdi-hospital-marker</v-icon>
@@ -50,7 +50,7 @@
                     hide-details
                   >
                     <template v-slot:label>
-                      <span style="font-size: 12px">Add/Update</span>
+                      <span style="font-size: 12px">{{ $t(`App.hardcoded-texts.Add`) }}/{{ $t(`App.hardcoded-texts.Update`) }}</span>
                     </template>
                   </v-checkbox>
                 </v-layout>
@@ -66,7 +66,7 @@
                 height="20"
               >
                 <v-toolbar-title style="font-size:12px">
-                  Jurisdictions
+                  {{ $t(`App.hardcoded-texts.Jurisdictions`) }}
                 </v-toolbar-title>
                 <v-spacer></v-spacer>
                 <v-icon small>mdi-home-group</v-icon>
@@ -82,7 +82,7 @@
                       hide-details
                     >
                       <template v-slot:label>
-                        <span style="font-size: 12px">View</span>
+                        <span style="font-size: 12px">{{ $t(`App.hardcoded-texts.View`) }}</span>
                       </template>
                     </v-checkbox>
                   </v-flex>
@@ -94,7 +94,7 @@
                     hide-details
                   >
                     <template v-slot:label>
-                      <span style="font-size: 12px">Add/Update</span>
+                      <span style="font-size: 12px">{{ $t(`App.hardcoded-texts.Add`) }}/{{ $t(`App.hardcoded-texts.Update`) }}</span>
                     </template>
                   </v-checkbox>
                 </v-layout>
@@ -109,7 +109,7 @@
                 height="20"
               >
                 <v-toolbar-title style="font-size:12px">
-                  Organizations
+                  {{ $t(`App.hardcoded-texts.Organizations`) }}
                 </v-toolbar-title>
                 <v-spacer></v-spacer>
                 <v-icon small>mdi-hospital-marker</v-icon>
@@ -125,7 +125,7 @@
                       hide-details
                     >
                       <template v-slot:label>
-                        <span style="font-size: 12px">View</span>
+                        <span style="font-size: 12px">{{ $t(`App.hardcoded-texts.View`) }}</span>
                       </template>
                     </v-checkbox>
                   </v-flex>
@@ -137,7 +137,7 @@
                     hide-details
                   >
                     <template v-slot:label>
-                      <span style="font-size: 12px">Add/Update</span>
+                      <span style="font-size: 12px">{{ $t(`App.hardcoded-texts.Add`) }}/{{ $t(`App.hardcoded-texts.Update`) }}</span>
                     </template>
                   </v-checkbox>
                 </v-layout>
@@ -153,7 +153,7 @@
                 height="20"
               >
                 <v-toolbar-title style="font-size:12px">
-                  Healthcare Services
+                  {{ $t(`App.hardcoded-texts.Healthcare Services`) }}
                 </v-toolbar-title>
                 <v-spacer></v-spacer>
                 <v-icon small>mdi-room-service</v-icon>
@@ -169,7 +169,7 @@
                       hide-details
                     >
                       <template v-slot:label>
-                        <span style="font-size: 12px">View</span>
+                        <span style="font-size: 12px">{{ $t(`App.hardcoded-texts.View`) }}</span>
                       </template>
                     </v-checkbox>
                   </v-flex>
@@ -181,7 +181,7 @@
                     hide-details
                   >
                     <template v-slot:label>
-                      <span style="font-size: 12px">Add/Update</span>
+                      <span style="font-size: 12px">{{ $t(`App.hardcoded-texts.Add`) }}/{{ $t(`App.hardcoded-texts.Update`) }}</span>
                     </template>
                   </v-checkbox>
                 </v-layout>

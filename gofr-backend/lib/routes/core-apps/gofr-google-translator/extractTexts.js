@@ -1,11 +1,12 @@
 const fs = require("fs")
 const async = require("async")
 const axios = require("axios")
-const ihrissmartrequire = require("ihrissmartrequire")
+const URI = require('urijs');
+const config = require('../../../config')
+const ihrissmartrequire = require("ihrissmartrequire")(config.get("app:site:path"), config.get("app:core:path"))
 let resourcesData = []
-const nconf = ihrissmartrequire('modules/config')
-const fhirAxios = nconf.fhirAxios
-const fhirDefinition = ihrissmartrequire('modules/fhir/fhirDefinition');
+const fhirDefinition = ihrissmartrequire('modules/fhirDefinition');
+const fhirAxios = ihrissmartrequire('modules/fhirAxios');
 let keys = ihrissmartrequire("locales/en_startup.json", );
 
 let nxturl = true
@@ -16,7 +17,7 @@ function run() {
       for(let resource of resourcesData) {
         resource = resource.resource
         promises.push(new Promise(async(resolve1, reject1) => {
-          if(resource.resourceType === "Basic" && resource.meta && resource.meta.profile && resource.meta.profile.includes("http://ihris.org/fhir/StructureDefinition/ihris-page")) {
+          if(resource.resourceType === "Basic" && resource.meta && resource.meta.profile && resource.meta.profile.includes("http://gofr.org/fhir/StructureDefinition/gofr-page")) {
             extractFromPage(resource.id, ["resource", "search"]).then(() => {
               resolve1()
             }).catch(() => {
@@ -25,8 +26,8 @@ function run() {
           } else if(resource.resourceType === "Questionnaire") {
             extractTextFromQuestionnaire(resource)
             resolve1()
-          } else if(resource.id === "ihris-config") {
-            let site = JSON.parse(JSON.stringify(nconf.get("site") || {}))
+          } else if(resource.id === "gofr-config") {
+            let site = JSON.parse(JSON.stringify(config.get("site") || {}))
             if(site.title) {
               keys.App.title = site.title
             }
@@ -72,9 +73,7 @@ function getResources() {
       promises.push(new Promise((resolve1) => {
         let params = {}
         async.whilst(
-          (callback) => {
-            return callback(null, nxturl !== false)
-          },
+          () => nxturl !== false,
           (callback) => {
             if(Object.keys(params).length > 0) {
               resource = ""
@@ -174,11 +173,18 @@ function extractMenus(nav) {
 }
 
 function extractTextFromQuestionnaire(resource) {
+  if(resource.title) {
+    keys.App["fhir-resources-texts"][resource.title] = resource.title
+  }
   for(let item of resource.item) {
     if(item.type === "group") {
       let labels = item.text.split('|',2)
       for(let label of labels) {
-        keys.App["ihris-questionnaire-section"][label] = label
+        /*
+        lets avoid grouping texts by component
+        keys.App["gofr-questionnaire-section"][label] = label
+        */
+        keys.App["fhir-resources-texts"][label] = label
       }
       processQuestionnaireItems(item)
     }
@@ -201,19 +207,29 @@ function extractTextFromCodeSystem(resource) {
 function processQuestionnaireItems(qitem) {
   for(let item of qitem.item) {
     if(item.repeats && !item.readOnly) {
-      if(!keys.App["ihris-array"]) {
-        keys.App["ihris-array"] = {}
+      /*
+      lets avoid grouping texts by component
+      if(!keys.App["gofr-array"]) {
+        keys.App["gofr-array"] = {}
       }
-      keys.App["ihris-array"][item.text] = item.text
-      keys.App["ihris-complex-card"][item.text] = item.text
+      keys.App["gofr-array"][item.text] = item.text
+      keys.App["gofr-complex-card"][item.text] = item.text
+      */
+      keys.App["fhir-resources-texts"][item.text] = item.text
     }
     if(item.type === "group") {
       let labels = item.text.split('|',2)
       for(let label of labels) {
-        keys.App["ihris-questionnaire-group"][label] = label
+        /*
+        lets avoid grouping texts by component
+        keys.App["gofr-questionnaire-group"][label] = label
+        */
+        keys.App["fhir-resources-texts"][label] = label
       }
       processQuestionnaireItems(item)
     } else {
+      /*
+      lets avoid grouping texts by component
       let trans_type = "fhir-" + item.type
       if(item.type === "dateTime") {
         trans_type = "fhir-date-time"
@@ -222,34 +238,38 @@ function processQuestionnaireItems(qitem) {
         keys.App[trans_type] = {}
       }
       keys.App[trans_type][item.text] = item.text
+      */
+      keys.App["fhir-resources-texts"][item.text] = item.text
     }
   }
 }
 
 function extractFromPage(page_id, type) {
   return new Promise((resolve, reject) => {
-    fhirAxios.read("Basic", page_id).then(async (resource) => {
-      let pageDisplay = resource.extension.find(ext => ext.url === "http://ihris.org/fhir/StructureDefinition/ihris-page-display")
+    fhirAxios.read("Basic", page_id, '', 'DEFAULT').then(async (resource) => {
+      let pageDisplay = resource.extension.find(ext => ext.url === "http://gofr.org/fhir/StructureDefinition/gofr-page-display")
   
       let pageResource = pageDisplay.extension.find(ext => ext.url === "resource").valueReference.reference
+      let pageTitle = pageDisplay.extension.find(ext => ext.url === "title").valueString
+      keys.App["fhir-resources-texts"][pageTitle] = pageTitle
       let pageFields = {}
-        try {
-          pageDisplay.extension.filter(ext => ext.url === "field").map(ext => {
-            let path = ext.extension.find(subext => subext.url === "path").valueString
-            let type, readOnlyIfSet
-            try {
-                type = ext.extension.find(subext => subext.url === "type").valueString
-            } catch (err) {
-            }
-            try {
-                readOnlyIfSet = ext.extension.find(subext => subext.url === "readOnlyIfSet").valueBoolean
-            } catch (err) {
-            }
-            pageFields[path] = {type: type, readOnlyIfSet: readOnlyIfSet}
-          })
-        } catch (err) {
-        }
-        let pageSections = resource.extension.filter(ext => ext.url === "http://ihris.org/fhir/StructureDefinition/ihris-page-section")
+      try {
+        pageDisplay.extension.filter(ext => ext.url === "field").map(ext => {
+          let path = ext.extension.find(subext => subext.url === "path").valueString
+          let type, readOnlyIfSet
+          try {
+              type = ext.extension.find(subext => subext.url === "type").valueString
+          } catch (err) {
+          }
+          try {
+              readOnlyIfSet = ext.extension.find(subext => subext.url === "readOnlyIfSet").valueBoolean
+          } catch (err) {
+          }
+          pageFields[path] = {type: type, readOnlyIfSet: readOnlyIfSet}
+        })
+      } catch (err) {
+      }
+      let pageSections = resource.extension.filter(ext => ext.url === "http://gofr.org/fhir/StructureDefinition/gofr-page-section")
       if (pageResource.startsWith("CodeSystem")) {
         getProperties(pageResource).then((resource) => {
           if (resource.total !== 1) {
@@ -309,7 +329,7 @@ function extractFromPage(page_id, type) {
 
 const getDefinition = (resource) => {
   let structureDef = resource.split('/')
-  return fhirAxios.read(structureDef[0], structureDef[1])
+  return fhirAxios.read(structureDef[0], structureDef[1], '', 'DEFAULT')
 }
 
 const getProperties = (resource) => {
@@ -330,29 +350,45 @@ const createSearchTemplate = async (resource, pageDisplay) => {
   } catch (err) {
   }
   for(let field of fields) {
-    keys.App["ihris-search"][field[0]] = field[0]
+    /*
+    lets avoid grouping texts by component
+    keys.App["gofr-search"][field[0]] = field[0]
+    */
+    keys.App["fhir-resources-texts"][field[0]] = field[0]
   }
   let filters = []
   try {
     filters = pageDisplay.extension.filter(ext => ext.url === "filter").map(ext =>
-        ext.valueString.match(/^([^|]*)\|?([^|]*)?\|?(.*)?$/).slice(1, 4)
+      ext.valueString.match(/^([^|]*)\|?([^|]*)?\|?(.*)?$/).slice(1, 4)
     )
   } catch (err) {
   }
 
-  let searchElement = "ihris-search"
+  let searchElement = "gofr-search"
   if (resource.resourceType === "CodeSystem") {
     searchElement += "-code"
   }
   let label = (resource.title || resource.name)
   if(label) {
+    /*
+    lets avoid grouping texts by component
     keys.App[searchElement][label] = label
+    */
+    keys.App["fhir-resources-texts"][label] = label
   }
   for (let filter of filters) {
+      /*
+      lets avoid grouping texts by component
       if (filter[1]) {
-        keys.App["ihris-search-term"][filter[0]] = filter[0]
+        keys.App["gofr-search-term"][filter[0]] = filter[0]
       } else {
-        keys.App["ihris-search-term"]["Search"] = "Search"
+        keys.App["gofr-search-term"]["Search"] = "Search"
+      }
+      */
+      if (filter[1]) {
+        keys.App["fhir-resources-texts"][filter[0]] = filter[0]
+      } else {
+        keys.App["fhir-resources-texts"]["Search"] = "Search"
       }
   }
 }
@@ -478,9 +514,9 @@ const createTemplate = async (resource, structure, pageSections) => {
           }
         }
         let sectionKeys = Object.keys(sections)
-        let resourceElement = "ihris-resource"
+        let resourceElement = "gofr-resource"
         if (resource.resourceType === "CodeSystem") {
-          resourceElement = "ihris-codesystem"
+          resourceElement = "gofr-codesystem"
         }
   
         if (sectionKeys.length > 1) {
@@ -521,16 +557,29 @@ const createTemplate = async (resource, structure, pageSections) => {
                 }
                 let eleName = fhirDefinition.camelToKebab(fields[field].code)
                 if (fields[field]["max"] !== "1") {
+                  /*
+                  lets avoid grouping texts by component
                   if(fields[field].label) {
-                    keys.App["ihris-array"][fields[field].label] = fields[field].label
-                    keys.App["ihris-complex-card"][fields[field].label] = fields[field].label
+                    keys.App["gofr-array"][fields[field].label] = fields[field].label
+                    keys.App["gofr-complex-card"][fields[field].label] = fields[field].label
+                  }
+                  */
+                  if(fields[field].label) {
+                    keys.App["fhir-resources-texts"][fields[field].label] = fields[field].label
+                    keys.App["fhir-resources-texts"][fields[field].label] = fields[field].label
                   }
                 }
+                /*
+                lets avoid grouping texts by component
                 if(!keys.App["fhir-" + eleName]) {
                   keys.App["fhir-" + eleName] = {}
                 }
                 if(fields[field].label) {
                   keys.App["fhir-" + eleName][fields[field].label] = fields[field].label
+                }
+                */
+                if(fields[field].label) {
+                  keys.App["fhir-resources-texts"][fields[field].label] = fields[field].label
                 }
                 let subFields
                 if (eleName === "reference" && fields[field].hasOwnProperty("fields")) {
@@ -566,34 +615,57 @@ const createTemplate = async (resource, structure, pageSections) => {
         const promises2 = []
         for (let name of sectionKeys) {
           promises2.push(new Promise(async(resolve2) => {
-            if(!keys.App["ihris-section"]) {
-              keys.App["ihris-section"] = {}
+            /*
+            lets avoid grouping texts by component
+            if(!keys.App["gofr-section"]) {
+              keys.App["gofr-section"] = {}
             }
-            if(!keys.App["ihris-resource"]) {
-              keys.App["ihris-resource"] = {}
+            if(!keys.App["gofr-resource"]) {
+              keys.App["gofr-resource"] = {}
             }
             if(sections[name].title) {
-              keys.App["ihris-section"][sections[name].title] = sections[name].title
-              keys.App["ihris-resource"][sections[name].title] = sections[name].title
+              keys.App["gofr-section"][sections[name].title] = sections[name].title
+              keys.App["gofr-resource"][sections[name].title] = sections[name].title
             }
             if([sections[name].description]) {
-              keys.App["ihris-section"][sections[name].description] = sections[name].description
-              keys.App["ihris-resource"][sections[name].description] = sections[name].description
+              keys.App["gofr-section"][sections[name].description] = sections[name].description
+              keys.App["gofr-resource"][sections[name].description] = sections[name].description
+            }
+            */
+
+            if(sections[name].title) {
+              keys.App["fhir-resources-texts"][sections[name].title] = sections[name].title
+            }
+            if([sections[name].description]) {
+              keys.App["fhir-resources-texts"][sections[name].description] = sections[name].description
             }
             if (sections[name].resource) {
-              if(!keys.App["ihris-secondary"]) {
-                keys.App["ihris-secondary"] = {
+              /*
+              lets avoid grouping texts by component
+              if(!keys.App["gofr-secondary"]) {
+                keys.App["gofr-secondary"] = {
                   table: {}
                 }
               }
               if(sections[name].title) {
-                keys.App["ihris-secondary"][sections[name].title] = sections[name].title
+                keys.App["gofr-secondary"][sections[name].title] = sections[name].title
               }
               for(let action of sections[name].actions) {
-                keys.App["ihris-secondary"][action.text] = action.text
+                keys.App["gofr-secondary"][action.text] = action.text
               }
               for(let column of sections[name].columns) {
-                keys.App["ihris-secondary"].table[column.text] = column.text
+                keys.App["gofr-secondary"].table[column.text] = column.text
+              }
+              */
+
+              if(sections[name].title) {
+                keys.App["fhir-resources-texts"][sections[name].title] = sections[name].title
+              }
+              for(let action of sections[name].actions) {
+                keys.App["fhir-resources-texts"][action.text] = action.text
+              }
+              for(let column of sections[name].columns) {
+                keys.App["fhir-resources-texts"][column.text] = column.text
               }
             } else {
               await processFields(sections[name].elements, fhir, sections[name].order)
@@ -614,14 +686,13 @@ const createTemplate = async (resource, structure, pageSections) => {
 
 function search( resource, params ) {
   return new Promise( (resolve, reject) => {
-    let url = new URL(fhirAxios.baseUrl.href)
+    let url = fhirAxios.__genUrl('DEFAULT')
     if ( resource ) {
-      url.pathname += resource
+      url = new URI(url).segment(resource);
     }
     let auth = fhirAxios.__getAuth()
 
-    //axios.get( url.href, { auth, params } ).then( (response) => {
-    axios.get( url.href, { auth, params, headers: { 'Cache-Control': 'no-cache'} } ).then( (response) => {
+    axios.get( url.toString(), { auth, params, headers: { 'Cache-Control': 'no-cache'} } ).then( (response) => {
       resolve( response.data )
     } ).catch( (err) => {
       reject( err )

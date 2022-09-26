@@ -51,7 +51,7 @@
             <v-btn
               color="primary"
               @click.native="closeDialogError"
-            >Ok</v-btn>
+            >{{ $t(`App.hardcoded-texts.Ok`) }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -65,7 +65,7 @@
           dark
         >
           <v-card-text>
-            {{ $t('App.initApp') }}
+            {{ $t(`App.hardcoded-texts.initApp`) }}
             <v-progress-linear
               indeterminate
               color="white"
@@ -124,7 +124,7 @@
     >
       <v-spacer></v-spacer>
       <label style="font-size: 10px">
-        GOFR Version {{$store.state.version}}
+        {{ $t(`App.hardcoded-texts.GOFR Version`) }} {{$store.state.version}}
       </label>
     </v-footer>
   </v-app>

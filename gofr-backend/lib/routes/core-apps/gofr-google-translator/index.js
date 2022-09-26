@@ -157,7 +157,17 @@ router.get("/extractTexts/:locale", async(req, res) => {
   }
 })
 
-router.get("/getLocales", async(req, res) => {
+router.get("/getLocale/:locale", async(req, res) => {
+  let localesPath = getLocalePath()
+  if(!translate.languages.isSupported(req.params.locale)) {
+    return res.status(400).send()
+  }
+  let translations = await fs.readFileSync(localesPath + req.params.locale + ".json", 'utf8')
+  translations = JSON.parse(translations)
+  return res.json(translations)
+})
+
+router.get("/getLocales/:locale?", async(req, res) => {
   let localesPath = getLocalePath()
   const files = await fs.readdirSync(localesPath);
   let locales = {

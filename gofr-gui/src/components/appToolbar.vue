@@ -9,7 +9,7 @@
   >
     
     <router-link to="/">
-      <img src="../assets/GOFR_RGB_high-res.png" width="220" />
+      <img src="../assets/GOFR_RGB_high-res.png" width="220" style="margin-top: 11px"/>
     </router-link>
     <template v-if="$store.state.auth.userID">
       <v-spacer></v-spacer>

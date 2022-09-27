@@ -1,5 +1,6 @@
 <template>
   <v-container fluid>
+    <br>
     <v-layout column>
       <v-flex>
         <v-layout row wrap>
@@ -45,7 +46,8 @@
           </v-flex>
         </v-layout>
       </v-flex>
-      <br>
+      <!-- <br> -->
+      <p></p>
       <v-flex>
         <v-layout row wrap>
           <v-spacer></v-spacer>

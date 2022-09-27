@@ -44,7 +44,7 @@ const FRConfig = require('./routes/config');
 const questionnaireRouter = require('./routes/questionnaire');
 const facilitiesRequests = require('./routes/facilitiesRequests');
 const fhirRouter = require('./routes/fhir');
-const dictionaryRouter = require('./routes/core-apps/gofr-google-translator/index');
+const translatorRouter = require('./routes/core-apps/gofr-google-translator/index');
 const gofrAppsRouter = require('./routes/apps');
 const mcsd = require('./mcsd')();
 const dhis = require('./dhis');
@@ -71,6 +71,7 @@ let configLoaded = false;
 
 async function startUp() {
   const isLoggedIn = (req, res, next) => {
+    return next()
     if (req.method == 'OPTIONS'
       || (req.query.hasOwnProperty('authDisabled') && req.query.authDisabled)
       || req.path.startsWith('/auth/login')
@@ -190,7 +191,7 @@ async function startUp() {
   app.use('/fhir', questionnaireRouter);
   app.use('/fhir', fhirRouter);
   app.use('/facilitiesRequests', facilitiesRequests);
-  app.use('/dictionary', dictionaryRouter);
+  app.use('/translator', translatorRouter);
   app.use('/apps', gofrAppsRouter);
   app.use('/gofrapp', express.static(path.join(__dirname, 'apps')));
 

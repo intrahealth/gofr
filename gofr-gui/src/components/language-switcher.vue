@@ -46,7 +46,7 @@ export default {
       this.activeFlag = lang.flag
     },
     getLanguageList() {
-      axios.get("/dictionary/getTranslatedLanguages").then((response) => {
+      axios.get("/translator/getTranslatedLanguages").then((response) => {
         this.languages = response.data
         this.languages.sort((a, b) => {
           if (a.language < b.language) {

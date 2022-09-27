@@ -9,7 +9,7 @@ module.exports = {
         target: 'http://localhost:4000/',
         logLevel: 'debug'
       },
-      '^/dictionary': {
+      '^/translator': {
         target: 'http://localhost:4000/',
         logLevel: 'debug'
       },

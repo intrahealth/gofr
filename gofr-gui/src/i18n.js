@@ -13,7 +13,7 @@ export const i18n = new VueI18n({
 
 export function loadLanguage(lang) {
   store.state.initializingApp = true
-  axios.get( `/dictionary/getLocale/${lang}` ).then( response => {
+  axios.get( `/translator/getLocale/${lang}` ).then(response => {
     store.state.initializingApp = false
     i18n.setLocaleMessage(lang, response.data)
     i18n.locale = lang

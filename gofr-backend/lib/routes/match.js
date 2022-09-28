@@ -55,11 +55,9 @@ router.get('/reconcile', (req, res) => {
     totalSource2Levels,
     recoLevel,
     clientId,
-    userID,
-    source1,
-    source2,
-    source1Owner,
-    source2Owner,
+    partition1,
+    partition2,
+    mappingPartition,
     id,
   } = req.query;
   let {
@@ -68,10 +66,10 @@ router.get('/reconcile', (req, res) => {
     getPotential,
   } = req.query;
   if (source1LimitOrgId.length === 0) {
-    source1LimitOrgId = [mixin.getTopOrgId(mixin.toTitleCase(source1 + source1Owner), 'Location')];
+    source1LimitOrgId = [mixin.getTopOrgId(partition1, 'Location')];
   }
   if (source2LimitOrgId.length === 0) {
-    source2LimitOrgId = [mixin.getTopOrgId(mixin.toTitleCase(source2 + source2Owner), 'Location')];
+    source2LimitOrgId = [mixin.getTopOrgId(partition2, 'Location')];
   }
   let {
     parentConstraint,
@@ -90,7 +88,7 @@ router.get('/reconcile', (req, res) => {
   if (recoLevel == 2) {
     parentConstraint = false;
   }
-  if (!source1 || !source2 || !recoLevel || !userID) {
+  if (!partition1 || !partition2 || !recoLevel) {
     logger.error({
       error: 'Missing source1 or source2 or reconciliation Level or userID',
     });
@@ -117,9 +115,8 @@ router.get('/reconcile', (req, res) => {
     redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
     async.parallel({
       source2Locations(callback) {
-        const dbSource2 = mixin.toTitleCase(source2 + source2Owner);
         mcsd.getLocationChildren({
-          database: dbSource2,
+          database: partition2,
           parent: source2LimitOrgId[0],
         }, (mcsdSource2) => {
           mcsdSource2All = mcsdSource2;
@@ -137,9 +134,8 @@ router.get('/reconcile', (req, res) => {
         });
       },
       source1Loations(callback) {
-        const dbSource1 = mixin.toTitleCase(source1 + source1Owner);
         mcsd.getLocationChildren({
-          database: dbSource1,
+          database: partition1,
           parent: source1LimitOrgId[0],
         }, (mcsdSource1) => {
           mcsdSource1All = mcsdSource1;
@@ -160,13 +156,9 @@ router.get('/reconcile', (req, res) => {
         });
       },
       mappingData(callback) {
-        const mappingDB = mixin.toTitleCase(source1 + userID + source2);
-        mcsd.getLocations(mappingDB, mcsdMapped => callback(false, mcsdMapped));
+        mcsd.getLocations(mappingPartition, mcsdMapped => callback(false, mcsdMapped));
       },
     }, (error, results) => {
-      const source1DB = mixin.toTitleCase(source1 + source1Owner);
-      const source2DB = mixin.toTitleCase(source2 + source2Owner);
-      const mappingDB = mixin.toTitleCase(source1 + userID + source2);
       if (recoLevel == totalSource1Levels) {
         scores.getBuildingsScores(
           results.source1Loations,
@@ -174,9 +166,9 @@ router.get('/reconcile', (req, res) => {
           results.mappingData,
           mcsdSource2All,
           mcsdSource1All,
-          source1DB,
-          source2DB,
-          mappingDB,
+          partition1,
+          partition2,
+          mappingPartition,
           recoLevel,
           totalSource1Levels,
           clientId,
@@ -217,9 +209,9 @@ router.get('/reconcile', (req, res) => {
           results.mappingData,
           mcsdSource2All,
           mcsdSource1All,
-          source1DB,
-          source2DB,
-          mappingDB,
+          partition1,
+          partition2,
+          mappingPartition,
           recoLevel,
           totalSource1Levels,
           clientId,
@@ -262,20 +254,17 @@ router.get('/reconcile', (req, res) => {
 router.get('/matchedLocations', (req, res) => {
   logger.info(`Received a request to return matched Locations in ${req.query.type} format for ${req.query.source1}${req.query.source2}`);
   const {
-    userID,
-    source1Owner,
-    source2Owner,
+    partition1,
+    partition2,
+    mappingPartition,
     type,
   } = req.query;
   let {
     source1LimitOrgId,
     source2LimitOrgId,
   } = req.query;
-  const source1DB = mixin.toTitleCase(req.query.source1 + source1Owner);
-  const source2DB = mixin.toTitleCase(req.query.source2 + source2Owner);
-  const mappingDB = mixin.toTitleCase(req.query.source1 + userID + req.query.source2);
-  const topOrgId1 = mixin.getTopOrgId(source1DB, 'Location');
-  const topOrgId2 = mixin.getTopOrgId(source2DB, 'Location');
+  const topOrgId1 = mixin.getTopOrgId(partition1, 'Location');
+  const topOrgId2 = mixin.getTopOrgId(partition2, 'Location');
   if (source1LimitOrgId.length === 0) {
     source1LimitOrgId = [topOrgId1];
   }
@@ -292,7 +281,7 @@ router.get('/matchedLocations', (req, res) => {
   const autoMatchedCode = config.get('mapping:autoMatchedCode');
   const manualllyMatchedCode = config.get('mapping:manualllyMatchedCode');
 
-  mcsd.getLocations(mappingDB, (mapped) => {
+  mcsd.getLocations(mappingPartition, (mapped) => {
     if (type === 'FHIR') {
       logger.info('Sending back matched locations in FHIR specification');
       const mappedmCSD = {
@@ -379,10 +368,10 @@ router.get('/matchedLocations', (req, res) => {
       }, () => {
         async.series({
           source1mCSD(callback) {
-            mcsd.getLocations(source1DB, mcsd => callback(null, mcsd));
+            mcsd.getLocations(partition1, mcsd => callback(null, mcsd));
           },
           source2mCSD(callback) {
-            mcsd.getLocations(source2DB, mcsd => callback(null, mcsd));
+            mcsd.getLocations(partition2, mcsd => callback(null, mcsd));
           },
         }, (error, response) => {
           // remove unmapped levels
@@ -537,21 +526,19 @@ router.get('/matchedLocations', (req, res) => {
 
 router.get('/unmatchedLocations', (req, res) => {
   const {
-    userID,
-    source1Owner,
-    source2Owner,
+    partition1,
+    partition2,
+    mappingPartition,
     type,
   } = req.query;
   let {
     source1LimitOrgId,
     source2LimitOrgId,
   } = req.query;
-  const source1DB = mixin.toTitleCase(req.query.source1 + source1Owner);
-  const source2DB = mixin.toTitleCase(req.query.source2 + source2Owner);
   const levelMapping1 = JSON.parse(req.query.levelMapping1);
   const levelMapping2 = JSON.parse(req.query.levelMapping2);
-  const topOrgId1 = mixin.getTopOrgId(source1DB, 'Location');
-  const topOrgId2 = mixin.getTopOrgId(source2DB, 'Location');
+  const topOrgId1 = mixin.getTopOrgId(partition1, 'Location');
+  const topOrgId2 = mixin.getTopOrgId(partition2, 'Location');
   if (source1LimitOrgId.length === 0) {
     source1LimitOrgId = [topOrgId1];
   }
@@ -563,27 +550,26 @@ router.get('/unmatchedLocations', (req, res) => {
     async.series({
       source1mCSD(callback) {
         mcsd.getLocationChildren({
-          database: source1DB,
+          database: partition1,
           parent: source1LimitOrgId[0],
         }, mcsdRes => callback(null, mcsdRes));
       },
       source2mCSD(callback) {
         mcsd.getLocationChildren({
-          database: source2DB,
+          database: partition2,
           parent: source2LimitOrgId[0],
         }, mcsdRes => callback(null, mcsdRes));
       },
     }, (error, response) => {
-      const mappingDB = mixin.toTitleCase(req.query.source1 + userID + req.query.source2);
       async.parallel({
         source1Unmatched(callback) {
-          scores.getUnmatched(response.source1mCSD, response.source1mCSD, mappingDB, true, 'source1', null, (unmatched, mcsdUnmatched) => callback(null, {
+          scores.getUnmatched(response.source1mCSD, response.source1mCSD, mappingPartition, true, 'source1', null, (unmatched, mcsdUnmatched) => callback(null, {
             unmatched,
             mcsdUnmatched,
           }));
         },
         source2Unmatched(callback) {
-          scores.getUnmatched(response.source2mCSD, response.source2mCSD, mappingDB, true, 'source2', null, (unmatched, mcsdUnmatched) => callback(null, {
+          scores.getUnmatched(response.source2mCSD, response.source2mCSD, mappingPartition, true, 'source2', null, (unmatched, mcsdUnmatched) => callback(null, {
             unmatched,
             mcsdUnmatched,
           }));
@@ -602,18 +588,17 @@ router.get('/unmatchedLocations', (req, res) => {
     fields.push('id');
     fields.push('name');
     const levels = Object.keys(levelMapping1);
-    const mappingDB = mixin.toTitleCase(req.query.source1 + userID + req.query.source2);
 
     async.parallel({
       source1mCSD(callback) {
         mcsd.getLocationChildren({
-          database: source1DB,
+          database: partition1,
           parent: source1LimitOrgId[0],
         }, mcsdRes => callback(null, mcsdRes));
       },
       source2mCSD(callback) {
         mcsd.getLocationChildren({
-          database: source2DB,
+          database: partition2,
           parent: source2LimitOrgId[0],
         }, (mcsdRes) => {
           callback(null, mcsdRes);
@@ -673,7 +658,7 @@ router.get('/unmatchedLocations', (req, res) => {
               thisFields.push(level);
             });
             mcsd.filterLocations(response.source1mCSD, source1LimitOrgId[0], level, (mcsdLevel) => {
-              scores.getUnmatched(response.source1mCSD, mcsdLevel, mappingDB, true, 'source1', parentsFields, (unmatched) => {
+              scores.getUnmatched(response.source1mCSD, mcsdLevel, mappingPartition, true, 'source1', parentsFields, (unmatched) => {
                 if (unmatched.length > 0) {
                   thisFields.push('status');
                   thisFields.push('comment');
@@ -718,7 +703,7 @@ router.get('/unmatchedLocations', (req, res) => {
             });
 
             mcsd.filterLocations(response.source2mCSD, source2LimitOrgId[0], level, (mcsdLevel) => {
-              scores.getUnmatched(response.source2mCSD, mcsdLevel, mappingDB, true, 'source2', parentsFields, (unmatched) => {
+              scores.getUnmatched(response.source2mCSD, mcsdLevel, mappingPartition, true, 'source2', parentsFields, (unmatched) => {
                 if (unmatched.length > 0) {
                   thisFields.push('status');
                   thisFields.push('comment');
@@ -767,28 +752,25 @@ router.post('/performMatch/:type', (req, res) => {
         error: 'Reconciliation closed',
       });
     }
-    if (!fields.source1DB || !fields.source2DB) {
+    if (!fields.partition1 || !fields.partition2) {
       logger.error({
-        error: 'Missing Source1 or Source2',
+        error: 'Missing partition1 or partition2',
       });
       res.status(400).json({
-        error: 'Missing Source1 or Source2',
+        error: 'Missing partition1 or partition2',
       });
       return;
     }
     const {
+      partition1,
+      partition2,
+      mappingPartition,
       source1Id,
       source2Id,
       recoLevel,
       totalLevels,
-      userID,
-      source1Owner,
-      source2Owner,
       flagComment,
     } = fields;
-    const source1DB = mixin.toTitleCase(fields.source1DB + source1Owner);
-    const source2DB = mixin.toTitleCase(fields.source2DB + source2Owner);
-    const mappingDB = mixin.toTitleCase(fields.source1DB + userID + fields.source2DB);
     if (!source1Id || !source2Id) {
       logger.error({
         error: 'Missing either Source1 ID or Source2 ID or both',
@@ -798,7 +780,7 @@ router.post('/performMatch/:type', (req, res) => {
       });
       return;
     }
-    mcsd.saveMatch(source1Id, source2Id, source1DB, source2DB, mappingDB, recoLevel, totalLevels, type, false, flagComment, (err, matchComments) => {
+    mcsd.saveMatch(source1Id, source2Id, partition1, partition2, mappingPartition, recoLevel, totalLevels, type, false, flagComment, (err, matchComments) => {
       logger.info('Done matching');
       if (err) {
         logger.error(err);
@@ -814,25 +796,12 @@ router.post('/performMatch/:type', (req, res) => {
   });
 });
 
-router.post('/acceptFlag/:source1/:source2/:userID', (req, res) => {
+router.post('/acceptFlag/:mappingPartition', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'accept-flagged-location');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
   logger.info('Received data for marking flag as a match');
-  if (!req.params.source1 || !req.params.source2) {
-    logger.error({
-      error: 'Missing Source1 or Source2',
-    });
-    res.status(400).json({
-      error: 'Missing Source1 or Source2',
-    });
-    return;
-  }
-  const {
-    userID,
-  } = req.params;
-  const mappingDB = mixin.toTitleCase(req.params.source1 + userID + req.params.source2);
   const form = new formidable.IncomingForm();
   form.parse(req, async (err, fields, files) => {
     const status = await recoStatus(fields.pairId);
@@ -853,7 +822,7 @@ router.post('/acceptFlag/:source1/:source2/:userID', (req, res) => {
       });
       return;
     }
-    mcsd.acceptFlag(source1Id, mappingDB, (err) => {
+    mcsd.acceptFlag(source1Id, req.params.mappingPartition, (err) => {
       logger.info('Done marking flag as a match');
       if (err) {
         res.status(400).send({
@@ -864,31 +833,15 @@ router.post('/acceptFlag/:source1/:source2/:userID', (req, res) => {
   });
 });
 
-router.post('/noMatch/:type/:source1/:source2/:source1Owner/:source2Owner/:userID', (req, res) => {
+router.post('/noMatch/:type', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'match-location');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
   logger.info('Received data for matching');
-  if (!req.params.source1 || !req.params.source2) {
-    logger.error({
-      error: 'Missing Source1 or Source2',
-    });
-    res.set('Access-Control-Allow-Origin', '*');
-    res.status(400).json({
-      error: 'Missing Source1 or Source2',
-    });
-    return;
-  }
   const {
-    userID,
-    source1Owner,
-    source2Owner,
     type,
   } = req.params;
-  const source1DB = mixin.toTitleCase(req.params.source1 + source1Owner);
-  const source2DB = mixin.toTitleCase(req.params.source2 + source2Owner);
-  const mappingDB = mixin.toTitleCase(req.params.source1 + userID + req.params.source2);
   const form = new formidable.IncomingForm();
   form.parse(req, async (err, fields, files) => {
     const status = await recoStatus(fields.pairId);
@@ -898,10 +851,23 @@ router.post('/noMatch/:type/:source1/:source2/:source1Owner/:source2Owner/:userI
       });
     }
     const {
+      partition1,
+      partition2,
+      mappingPartition,
       source1Id,
       recoLevel,
       totalLevels,
     } = fields;
+    if (!partition1 || !partition2) {
+      logger.error({
+        error: 'Missing partition1 or partition2',
+      });
+      res.set('Access-Control-Allow-Origin', '*');
+      res.status(400).json({
+        error: 'Missing partition1 or partition2',
+      });
+      return;
+    }
     if (!source1Id) {
       logger.error({
         error: 'Missing either Source1 ID',
@@ -913,7 +879,7 @@ router.post('/noMatch/:type/:source1/:source2/:source1Owner/:source2Owner/:userI
       return;
     }
 
-    mcsd.saveNoMatch(source1Id, source1DB, source2DB, mappingDB, recoLevel, totalLevels, type, (err) => {
+    mcsd.saveNoMatch(source1Id, partition1, partition2, mappingPartition, recoLevel, totalLevels, type, (err) => {
       logger.info('Done matching');
       if (err) {
         res.status(400).send({
@@ -924,26 +890,22 @@ router.post('/noMatch/:type/:source1/:source2/:source1Owner/:source2Owner/:userI
   });
 });
 
-router.post('/breakMatch/:source1/:source2/:source1Owner/:source2Owner/:userID', (req, res) => {
+router.post('/breakMatch', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'break-matched-location');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
-  if (!req.params.source1) {
-    logger.error({
-      error: 'Missing Source1',
-    });
-    res.status(400).json({
-      error: 'Missing Source1',
-    });
-    return;
-  }
-  const userID = req.params.userID;
-  const source1Owner = req.params.source1Owner;
-  const source1DB = mixin.toTitleCase(req.params.source1 + source1Owner);
-  const mappingDB = mixin.toTitleCase(req.params.source1 + userID + req.params.source2);
   const form = new formidable.IncomingForm();
   form.parse(req, async (err, fields, files) => {
+    if (!fields.partition1) {
+      logger.error({
+        error: 'Missing partition1',
+      });
+      res.status(400).json({
+        error: 'Missing partition1',
+      });
+      return;
+    }
     const status = await recoStatus(fields.pairId);
     if (status !== 'in-progress') {
       return res.status(400).send({
@@ -951,9 +913,9 @@ router.post('/breakMatch/:source1/:source2/:source1Owner/:source2Owner/:userID',
       });
     }
     logger.info(`Received break match request for ${fields.source1Id}`);
-    const source1Id = fields.source1Id;
+    const { source1Id } = fields;
 
-    mcsd.breakMatch(source1Id, mappingDB, source1DB, (err, results) => {
+    mcsd.breakMatch(source1Id, fields.mappingPartition, fields.partition1, (err, results) => {
       if (err) {
         logger.error(err);
         return res.status(500).json({
@@ -966,30 +928,30 @@ router.post('/breakMatch/:source1/:source2/:source1Owner/:source2Owner/:userID',
   });
 });
 
-router.post('/breakNoMatch/:type/:source1/:source2/:userID', (req, res) => {
+router.post('/breakNoMatch/:type', (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'break-matched-location');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
-  if (!req.params.source1 || !req.params.source2) {
-    logger.error({
-      error: 'Missing Source1',
-    });
-    res.status(500).json({
-      error: 'Missing Source1',
-    });
-    return;
-  }
   const form = new formidable.IncomingForm();
   form.parse(req, async (err, fields, files) => {
     const status = await recoStatus(fields.pairId);
+    if (!fields.mappingPartition) {
+      logger.error({
+        error: 'Missing mapping partition',
+      });
+      res.status(500).json({
+        error: 'Missing mapping partition',
+      });
+      return;
+    }
     if (status !== 'in-progress') {
       return res.status(400).send({
         error: 'Reconciliation closed',
       });
     }
     logger.info(`Received break no match request for ${fields.source1Id}`);
-    const source1Id = fields.source1Id;
+    const { source1Id } = fields;
     if (!source1Id) {
       logger.error({
         error: 'Missing Source1 ID',
@@ -998,12 +960,8 @@ router.post('/breakNoMatch/:type/:source1/:source2/:userID', (req, res) => {
         error: 'Missing Source1 ID',
       });
     }
-    const {
-      userID,
-    } = req.params;
-    const mappingDB = mixin.toTitleCase(req.params.source1 + userID + req.params.source2);
 
-    mcsd.breakNoMatch(source1Id, mappingDB, (err) => {
+    mcsd.breakNoMatch(source1Id, fields.mappingPartition, (err) => {
       logger.info(`break no match done for ${fields.source1Id}`);
       res.status(200).send(err);
     });

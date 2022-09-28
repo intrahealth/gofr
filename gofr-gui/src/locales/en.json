@@ -133,7 +133,7 @@
         "tooltip": "Add Service offered by health facilities"
       },
       "viewMap": {
-        "msg": "View Map",
+        "msg": "Map",
         "tooltip": "View Map"
       },
       "services": {
@@ -182,8 +182,8 @@
         "tooltip": "Add a new dataset that you want to reconcile"
       },
       "view": {
-        "msg": "View",
-        "tooltip": "Explore data sources contents"
+        "msg": "Pair Side to Side View",
+        "tooltip": "Explore data sources pair contents"
       },
       "recoParent": {
         "msg": "Reconcile"

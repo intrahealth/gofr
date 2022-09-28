@@ -4,7 +4,6 @@
       ref="form"
       v-model="valid"
     >
-
       <slot :source="source"></slot>
       <v-overlay :value="overlay">
         <v-progress-circular
@@ -16,7 +15,7 @@
 
       <v-navigation-drawer
         app
-        left
+        right
         permanent
         clipped
         class="primary darken-1 white--text"
@@ -28,7 +27,7 @@
             <template v-if="!edit">
               <v-btn small dark class="secondary" @click="$emit('set-edit', !edit)">
                 <v-icon left light>mdi-pencil</v-icon>
-                <span>Edit</span>
+                <span>{{ $t(`App.hardcoded-texts.Edit`) }}</span>
               </v-btn>
               <v-spacer></v-spacer>
               <v-btn
@@ -38,7 +37,7 @@
                 v-if="$store.state.requestResourceUpdateData.requestAction && hasPermission"
                 :disabled="currentRequestStatus === 'approved' || currentRequestStatus === ''"
               >
-                <v-icon left>mdi-check-circle</v-icon> Approve
+                <v-icon left>mdi-check-circle</v-icon> {{ $t(`App.hardcoded-texts.Approve`) }}
               </v-btn>
               <v-spacer></v-spacer>
               <v-btn
@@ -48,22 +47,22 @@
                 v-if="$store.state.requestResourceUpdateData.requestAction && hasPermission"
                 :disabled="currentRequestStatus !== 'pending'"
               >
-                <v-icon left>mdi-cancel</v-icon> Reject
+                <v-icon left>mdi-cancel</v-icon> {{ $t(`App.hardcoded-texts.Reject`) }}
               </v-btn>
             </template>
-            <v-btn small v-else dark class="secondary" @click="$router.go(0)">
+            <v-btn small v-else dark class="secondary" @click="$emit('set-edit', !edit)">
               <v-icon light>mdi-pencil-off</v-icon>
-              <span>Cancel</span>
+              <span>{{ $t(`App.hardcoded-texts.Cancel`) }}</span>
             </v-btn>
             <v-spacer></v-spacer>
             <template v-if="edit && $store.state.searchAction !== 'send-update-request'">
               <v-btn small v-if="valid" dark class="success darken-1" @click="processFHIR()" :disabled="!valid">
                 <v-icon light>mdi-content-save</v-icon>
-                <span>Save</span>
+                <span>{{ $t(`App.hardcoded-texts.Save`) }}</span>
               </v-btn>
               <v-btn small v-else dark class="warning" @click="$refs.form.validate()">
                 <v-icon light>mdi-content-save</v-icon>
-                <span>Save</span>
+                <span>{{ $t(`App.hardcoded-texts.Save`) }}</span>
               </v-btn>
             </template>
             <template v-else-if="edit && $store.state.searchAction === 'send-update-request'">
@@ -72,7 +71,7 @@
                 @click="createUpdateRequest"
                 color="success"
               >
-                <v-icon left>mdi-check-circle</v-icon> Send Update Request
+                <v-icon left>mdi-check-circle</v-icon> {{ $t(`App.hardcoded-texts.Save`) }}
               </v-btn>
             </template>
           </v-list-item>
@@ -88,8 +87,12 @@
           <v-subheader v-if="sectionMenu" class="white--text"><h2>Sections</h2></v-subheader>
           <v-list-item v-for="section in sectionMenu" :href="'#section-'+section.name" :key="section.name">
             <v-list-item-content class="white--text" v-if="!edit || !section.secondary">
-              <v-list-item-title class="text-uppercase"><h4>{{ section.title }}</h4></v-list-item-title>
-              <v-list-item-subtitle class="white--text">{{ section.desc }}</v-list-item-subtitle>
+              <v-list-item-title class="text-uppercase">
+                <h4>{{ $t(`App.fhir-resources-texts.${section.title}`) }}</h4>
+              </v-list-item-title>
+              <v-list-item-subtitle class="white--text">
+                {{ $t(`App.fhir-resources-texts.${section.desc}`) }}
+              </v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
         </v-list>
@@ -104,7 +107,7 @@
 import axios from 'axios'
 export default {
   name: "gofr-resource",
-  props: ["title","field","fhirId","page","profile","section-menu","edit","links","constraints" ],
+  props: ["title","field","fhirId","page","profile","section-menu","edit","links","constraints", "partition" ],
   data: function() {
     return {
       fhir: {},
@@ -122,7 +125,11 @@ export default {
   created: function() {
     if ( this.fhirId ) {
       this.loading = true
-      axios.get( "/fhir/" + this.$store.state.config.userConfig.FRDatasource + "/" + this.field+"/"+this.fhirId ).then(response => {
+      let partition = this.$store.state.config.userConfig.FRDatasource
+      if(this.partition) {
+        partition = this.partition
+      }
+      axios.get( "/fhir/" + partition + "/" + this.field+"/"+this.fhirId ).then(response => {
         let data = response.data
         this.orig = data
         this.source = { data: data, path: this.field }
@@ -302,7 +309,8 @@ export default {
         },
         data: {
           resource: this.source.data,
-          requestStatus: newStatus
+          requestStatus: newStatus,
+          requestUpdatingResource: this.$store.state.requestResourceUpdateData.requestUpdatingResource
         }
       }
       this.overlay = true
@@ -458,7 +466,11 @@ export default {
         this.$store.commit('setMessage', { type: 'error', text: 'There were errors on the form.' })
         return
       }
-      let url = "/fhir/" + this.$store.state.config.userConfig.FRDatasource + "/" + this.field
+      let partition = this.$store.state.config.userConfig.FRDatasource
+      if(this.partition) {
+        partition = this.partition
+      }
+      let url = "/fhir/" + partition + "/" + this.field
       let opts = {
         method: "POST",
         url,
@@ -478,7 +490,7 @@ export default {
         this.overlay = false
         this.loading = false
         if ( this.fhirId ) {
-          this.$router.go(0)
+          this.$emit('set-edit', false)
         } else {
           this.$router.push({ name:"ResourceView", params: {page: this.page, id: data.id } })
         }

@@ -34,7 +34,7 @@ getCrontime((time) => {
       async.eachSeries(sourcesRes, (entry, nxtDtSrc) => {
         const autoSync = entry.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/autoSync');
         const source = entry.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/source');
-        if (autoSync && autoSync.valueBoolean && source && source.valueString === 'syncServer') {
+        if (autoSync && autoSync.valueBoolean && source && source.valueString === 'remoteServer') {
           const partitionRef = entry.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
           if (!partitionRef) {
             return nxtDtSrc();

@@ -39,6 +39,9 @@ router.post('/add', (req, res) => {
         }
       }
     }
+    if (approvRes.extension && approvRes.extension.length === 0) {
+      delete approvRes.extension;
+    }
     approvRes.id = uuid4();
     bundle.entry.push({
       resource: approvRes,
@@ -96,7 +99,6 @@ router.post('/add', (req, res) => {
       url: `Location/${reqRes.id}`,
     },
   });
-
   fhirAxios.create(bundle).then(() => res.status(200).send()).catch((err) => {
     logger.error(err);
     return res.status(500).send();

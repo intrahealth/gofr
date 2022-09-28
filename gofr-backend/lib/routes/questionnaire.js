@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const config = require('../config');
 
-const fhirAxios = require('../modules/fhirAxios')
+const fhirAxios = require('../modules/fhirAxios');
 const fhirQuestionnaire = require('../modules/fhirQuestionnaire');
 const fhirModules = require('../modules/fhirModules');
 const outcomes = require('../../config/operationOutcomes');

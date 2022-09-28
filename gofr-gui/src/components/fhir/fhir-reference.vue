@@ -14,7 +14,7 @@
         <template v-slot:activator="{ on }">
           <v-text-field
             v-model="displayValue"
-            :label="display"
+            :label="$t(`App.fhir-resources-texts.${display}`)"
             readonly
             v-on="on"
             outlined
@@ -23,7 +23,9 @@
             :error-messages="errors"
             :loading="loading"
             dense>
-            <template #label>{{display}} <span v-if="required" class="red--text font-weight-bold">*</span></template>
+            <template #label>
+              {{ $t(`App.fhir-resources-texts.${display}`) }} <span v-if="required" class="red--text font-weight-bold">*</span>
+            </template>
           </v-text-field>
         </template>
         <v-card v-if="!((disabled) || (preset && $route.name === 'ResourceAdd'))">
@@ -37,7 +39,7 @@
             :multiple-active="false"
             selection-type="independent"
             :loading="loading"
-            ></v-treeview>
+          ></v-treeview>
         </v-card>
       </v-menu>
       <v-autocomplete
@@ -50,7 +52,7 @@
         flat
         hide-no-data
         hide-details
-        :label="display"
+        :label="$t(`App.fhir-resources-texts.${display}`)"
         outlined
         dense
         placeholder="Start typing for selection"
@@ -59,11 +61,11 @@
         :error-messages="errors"
         @change="errors = []"
       >
-        <template #label>{{display}} <span v-if="required" class="red--text font-weight-bold">*</span></template>
+        <template #label>{{$t(`App.fhir-resources-texts.${display}`)}} <span v-if="required" class="red--text font-weight-bold">*</span></template>
       </v-autocomplete>
     </template>
     <template #header>
-      {{display}}
+      {{$t(`App.fhir-resources-texts.${display}`)}}
     </template>
     <template #value>
       {{displayValue}}
@@ -79,8 +81,7 @@ const querystring = require('querystring')
 const fhirurl = "http://hl7.org/fhir/StructureDefinition/"
 export default {
   name: "fhir-reference",
-  props: ["field","label","sliceName","targetProfile","targetResource","min","max","base-min","base-max",
-    "slotProps","path","sub-fields","edit","readOnlyIfSet","constraints", "displayType", "initialValue", "overrideValue"],
+  props: ["field","label","targetProfile","targetResource","min","slotProps", "path", "edit","readOnlyIfSet", "displayType", "initialValue", "overrideValue"],
   components: {
     GofrElement
   },
@@ -186,11 +187,9 @@ export default {
         params = { "partof:missing": true }
       }
       params._count = 200
-      params._profile = this.targetProfile
       let url = "/fhir/"+this.$store.state.config.userConfig.FRDatasource+"/"+this.resource+"?"+querystring.stringify( params )
       this.items = []
       this.addItems( url, this.items )
-
     },
     checkChildren: function(item) {
       let params = { "partof": item.id, "_summary": "count" }
@@ -213,7 +212,7 @@ export default {
         let data = response.data
         if ( data.entry && data.entry.length > 0 ) {
           for( let entry of data.entry ) {
-            let locked = this.allAllowed ? false : !entry.resource.meta.profile.includes( this.targetProfile )
+            let locked = this.allAllowed ? false : !entry.resource.meta.profile || !entry.resource.meta.profile.includes( this.targetProfile )
             let item = {
               id: entry.resource.resourceType+"/"+entry.resource.id,
               name: entry.resource.name,

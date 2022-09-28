@@ -1,0 +1,49 @@
+---
+- name: Nice to haves
+  hosts: all
+  remote_user: "{{ user }}"
+  become: true
+  tags: prep
+
+  vars_prompt:
+    - name: "user"
+      prompt: "Please enter the username (with sudo)"
+      private: no
+
+  tasks:
+
+
+  - name: Run the equivalent of "apt-get update"
+    apt:
+      update_cache: yes
+
+
+  - name: git clone git-bash-prompt
+    git:
+      repo: 'https://github.com/magicmonty/bash-git-prompt.git'
+      dest: /home/{{ user }}/.bash-git-prompt
+      clone: yes
+      update: yes
+
+
+  - name: add bashrc source to .bash_profile
+    blockinfile:
+      path: /home/{{ user }}/.bash_profile
+      block: |
+        if [ -n "$BASH_VERSION" ] && [ -f $HOME/.bashrc ];then
+            source $HOME/.bashrc
+        fi
+
+  - name: add git-bash-prompt to bashrc
+    blockinfile:
+      path: /home/{{ user }}/.bashrc
+      block: |
+        if [ -f "$HOME/.bash-git-prompt/gitprompt.sh" ]; then
+            GIT_PROMPT_ONLY_IN_REPO=1
+            source $HOME/.bash-git-prompt/gitprompt.sh
+        fi
+  
+  # - name: install dialog
+  #   apt: 
+  #     name: dialog
+  #     state: present

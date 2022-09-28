@@ -13,12 +13,14 @@
           color="primary"
           indeterminate
           ></v-progress-circular>
-        <v-btn icon @click="overlay = false"><v-icon>mdi-close</v-icon></v-btn>
+        <v-btn icon @click="overlay = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
       </v-overlay>
 
       <v-navigation-drawer
         app
-        left
+        right
         permanent
         clipped
         class="primary darken-1 white--text"
@@ -28,24 +30,28 @@
           <v-list-item>
             <v-btn small dark class="secondary" @click="$router.go(-1)">
               <v-icon light>mdi-pencil-off</v-icon>
-              <span>Cancel</span>
+              <span>{{ $t("App.hardcoded-texts.Cancel") }}</span>
             </v-btn>
             <v-spacer></v-spacer>
             <v-btn small v-if="valid" dark class="success darken-1" @click="processFHIR()" :disabled="!valid">
               <v-icon light>mdi-content-save</v-icon>
-              <span>Save</span>
+              <span>{{ $t("App.hardcoded-texts.Save") }}</span>
             </v-btn>
             <v-btn v-else dark small class="warning" @click="$refs.form.validate()">
               <v-icon light>mdi-content-save</v-icon>
-              <span>Save</span>
+              <span>{{ $t("App.hardcoded-texts.Save") }}</span>
             </v-btn>
           </v-list-item>
           <v-divider color="white"></v-divider>
           <v-subheader class="white--text" v-if="sectionMenu"><h2>Sections</h2></v-subheader>
           <v-list-item v-for="section in sectionMenu" :href="'#section-'+section.id" :key="section.id">
             <v-list-item-content class="white--text">
-              <v-list-item-title class="text-uppercase"><h4>{{ section.title }}</h4></v-list-item-title>
-              <v-list-item-subtitle class="white--text">{{ section.desc }}</v-list-item-subtitle>
+              <v-list-item-title class="text-uppercase" v-if="section.title">
+                <h4>{{ $t(`App.fhir-resources-texts.${section.title}`) }}</h4>
+              </v-list-item-title>
+              <v-list-item-subtitle class="white--text" v-if="section.desc">
+                {{$t(`App.fhir-resources-texts.${section.desc}`)}}
+              </v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
         </v-list>
@@ -157,7 +163,6 @@ export default {
         status: "completed",
         item: []
       }
-      //console.log(this)
       try {
         await processChildren( this.fhir.item, this.$children )
       } catch( err ) {
@@ -170,13 +175,11 @@ export default {
         this.$store.commit('setMessage', { type: 'error', text: 'There were errors on the form.' })
         return
       }
-      console.log("SAVE",this.fhir)
-      console.error(JSON.stringify(this.fhir,0,2));
       axios({
         url: "/fhir/" + this.$store.state.config.userConfig.FRDatasource + "/QuestionnaireResponse?"+querystring.stringify(this.$route.query),
         method: "POST",
         data: this.fhir
-      } ).then((response) => {
+      }).then((response) => {
         this.overlay = false
         this.loading = false
         this.$store.state.alert.show = true
@@ -184,7 +187,7 @@ export default {
         this.$store.state.alert.msg = 'Saved successfully!'
         this.$store.state.alert.type = 'success'
         this.$router.push({ name:"ResourceView", params: {page: this.viewPage, id: response.data.subject.reference.split('/')[1] } })
-      } ).catch(err => {
+      }).catch(err => {
         this.overlay = false
         this.loading = false
         console.log(err)

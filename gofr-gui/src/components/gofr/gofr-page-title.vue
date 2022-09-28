@@ -7,7 +7,7 @@
       elevation="2"
       max-width="700"
     >
-      {{title}}
+      {{ $t(`App.fhir-resources-texts.${title}`) }}
     </v-alert>
   </center>
 </template>

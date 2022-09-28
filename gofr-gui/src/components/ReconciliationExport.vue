@@ -11,7 +11,7 @@
           dark
         >
           <v-toolbar-title>
-            Select file type to download
+            {{ $t(`App.hardcoded-texts.Select file type to download`) }}
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-icon @click='closeDownloadDialog'>mdi-close</v-icon>
@@ -26,7 +26,7 @@
             @click='downloadMatched'
           >
             <v-icon left>mdi-file-multiple-outline</v-icon>
-            Matched
+            {{ $t(`App.hardcoded-texts.Matched`) }}
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
@@ -35,7 +35,7 @@
             @click='downloadSource1Unmatched'
           >
             <v-icon left>mdi-file-multiple-outline</v-icon>
-            Source1 Unmatched
+            {{ $t(`App.hardcoded-texts.Source1 Unmatched`) }}
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
@@ -44,7 +44,7 @@
             @click='downloadSource2Unmatched'
           >
             <v-icon left>mdi-file-multiple-outline</v-icon>
-            Source2 Unmatched
+            {{ $t(`App.hardcoded-texts.Source2 Unmatched`) }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -66,7 +66,7 @@
             indeterminate
             color="red"
           ></v-progress-circular>
-          CSV Export
+          {{ $t(`App.hardcoded-texts.CSV Export`) }}
         </v-btn>
       </v-flex>
       <v-flex xs6>
@@ -82,7 +82,7 @@
             indeterminate
             color="red"
           ></v-progress-circular>
-          FHIR Export
+          {{ $t(`App.hardcoded-texts.FHIR Export`) }}
         </v-btn>
       </v-flex>
     </v-layout>
@@ -113,23 +113,18 @@ export default {
       this.unmatchedSource2DownloadData = ''
     },
     matchedLocations (type) {
-      let userID = this.$store.state.activePair.userID
-      let source1 = this.getSource1()
-      let source2 = this.getSource2()
-      let sourcesOwner = this.getDatasourceOwner()
-      let source1Owner = sourcesOwner.source1Owner
-      let source2Owner = sourcesOwner.source2Owner
+      let partition1 = this.$store.state.activePair.source1.name
+      let partition2 = this.$store.state.activePair.source2.name
+      let mappingPartition = this.$store.state.activePair.name
       let levelMapping1 = JSON.stringify(this.$store.state.levelMapping.source1)
       let levelMapping2 = JSON.stringify(this.$store.state.levelMapping.source2)
       let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
       let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
       let params = {
-        source1,
-        source2,
-        source1Owner,
-        source2Owner,
+        partition1,
+        partition2,
+        mappingPartition,
         type,
-        userID,
         source1LimitOrgId,
         source2LimitOrgId,
         levelMapping1,
@@ -138,23 +133,18 @@ export default {
       return axios.get('/match/matchedLocations', { params })
     },
     unMatchedLocations (type) {
-      let userID = this.$store.state.activePair.userID
-      let sourcesOwner = this.getDatasourceOwner()
-      let source1Owner = sourcesOwner.source1Owner
-      let source2Owner = sourcesOwner.source2Owner
+      let partition1 = this.$store.state.activePair.source1.name
+      let partition2 = this.$store.state.activePair.source2.name
+      let mappingPartition = this.$store.state.activePair.name
       let levelMapping1 = this.$store.state.levelMapping.source1
       let levelMapping2 = this.$store.state.levelMapping.source2
       let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
       let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
-      let source1 = this.getSource1()
-      let source2 = this.getSource2()
       let params = {
-        source1,
-        source2,
-        source1Owner,
-        source2Owner,
+        partition1,
+        partition2,
+        mappingPartition,
         type,
-        userID,
         source1LimitOrgId,
         source2LimitOrgId,
         levelMapping1,

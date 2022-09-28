@@ -104,6 +104,9 @@ const fhir = {
             const totalRows = locations.entry.length;
             let count = 0;
             async.each(locations.entry, (entry, nxtEntry) => {
+              if (!entry.resource) {
+                return nxtEntry();
+              }
               count++;
               saveBundle.entry.push({
                 resource: entry.resource,

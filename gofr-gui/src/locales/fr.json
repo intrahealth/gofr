@@ -1,6 +1,6 @@
 {
   "App": {
-    "title": "Facility Reconciliation",
+    "title": "Registre Mondial Des Installations Ouvertes",
     "initApp": "Initialisation de l'App",
     "source": "la source",
     "menu": {
@@ -129,7 +129,7 @@
         "tooltip": "Ajouter le service offert par les établissements de santé"
       },
       "viewMap": {
-        "msg": "voir la carte",
+        "msg": "carte",
         "tooltip": "voir la carte"
       },
       "services": {
@@ -177,8 +177,8 @@
         "tooltip": "Ajouter un nouveau jeu de données que vous souhaitez réconcilier"
       },
       "view": {
-        "msg": "Vue",
-        "tooltip": "Explorer le contenu des sources de données"
+        "msg": "Paire de vue côte à côte",
+        "tooltip": "Explorer le contenu des paires de sources de données"
       },
       "recoParent": {
         "msg": "Réconcilier"

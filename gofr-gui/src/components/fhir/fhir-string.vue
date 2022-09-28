@@ -5,7 +5,7 @@
         :error-messages="errors"
         @change="errors = []"
         :disabled="disabled"
-        :label="display"
+        :label="$t(`App.fhir-resources-texts.${display}`)"
         v-model="value"
         outlined
         hide-details="auto"
@@ -15,11 +15,11 @@
         @click:append="showPassword = !showPassword"
         dense
       >
-      <template #label>{{display}}<span v-if="required" class="red--text font-weight-bold">*</span></template>
+      <template #label>{{ $t(`App.fhir-resources-texts.${display}`) }}<span v-if="required" class="red--text font-weight-bold">*</span></template>
       </v-text-field>
     </template>
     <template #header>
-      {{display}}
+      {{ $t(`App.fhir-resources-texts.${display}`) }}
     </template>
     <template #value>
       {{value}}
@@ -49,7 +49,7 @@ export default {
     }
   },
   created: function() {
-    //console.log("CREATE STRING",this.field,this.slotProps)
+    // console.log("CREATE STRING",this.field,this.slotProps)
     this.setupData()
   },
   watch: {

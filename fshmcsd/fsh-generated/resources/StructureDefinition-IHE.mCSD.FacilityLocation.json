@@ -14,7 +14,7 @@
   "url": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.FacilityLocation",
   "version": "0.1.0",
   "name": "MCSDFacilityLocation",
-  "title": "mCSD Location for Facilities",
+  "title": "Facilities",
   "status": "active",
   "description": "A profile on the mCSD Location profile for mCSD Facilities.",
   "fhirVersion": "4.0.1",

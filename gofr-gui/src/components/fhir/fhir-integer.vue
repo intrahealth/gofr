@@ -1,12 +1,12 @@
 <template>
   <gofr-element :edit="edit" :loading="false">
     <template #form>
-      <v-text-field :error-messages="errors" @change="errors = []" :label="display" :disabled="disabled" :name="field" v-model.number="value" outlined hide-details="auto" :rules="rules" dense>
-        <template #label>{{display}} <span v-if="required" class="red--text font-weight-bold">*</span></template>
+      <v-text-field :error-messages="errors" @change="errors = []" :label="$t(`App.fhir-resources-texts.${display}`)" :disabled="disabled" :name="field" v-model.number="value" outlined hide-details="auto" :rules="rules" dense>
+        <template #label>{{ $t(`App.fhir-resources-texts.${display}`) }} <span v-if="required" class="red--text font-weight-bold">*</span></template>
       </v-text-field>
     </template>
     <template #header>
-      {{display}}
+      {{ $t(`App.fhir-resources-texts.${display}`) }}
     </template>
     <template #value>
       {{value}}
@@ -28,6 +28,7 @@ export default {
     return {
       source: { path: "", data: {} },
       value: "",
+      qField: "valueInteger",
       disabled: false,
       errors: [],
       lockWatch: false

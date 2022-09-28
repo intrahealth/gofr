@@ -119,7 +119,7 @@ const fhirFilter = {
       if (fullAccess) {
         continue;
       } else {
-        const fieldList = user.hasPermissionByObject(permission, resource, '', partition);
+        const fieldList = user.hasPermissionByObject(permission, resource, partition);
         if (fieldList === true) {
           continue;
         } else if (!fieldList) {

@@ -13,7 +13,7 @@
       <template v-slot:top>
         <v-toolbar flat color="white">
           <v-toolbar-title>
-            {{ title }}
+            {{ $t(`App.fhir-resources-texts.${title}`) }}
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn
@@ -36,7 +36,7 @@
           small
           rounded
           >
-          {{ action.text }}
+          {{ $t(`App.fhir-resources-texts.${action.text}`) }}
         </v-btn>
       </template>
     </v-data-table>

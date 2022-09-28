@@ -104,14 +104,14 @@ router.use(passport.session());
 
 router.passport = passport;
 
-router.get('/', (req, res, next) => {
+router.get('/', async (req, res) => {
   if (req.user) {
-    res.status(200).json({
+    await req.user.updatePermissions();
+    return res.status(200).json({
       userObj: req.user,
     });
-  } else {
-    return res.status(200).send();
   }
+  return res.status(200).send();
 },
 passport.authenticate('custom-loggedout', {}), (req, res) => {
   if (req.user) {

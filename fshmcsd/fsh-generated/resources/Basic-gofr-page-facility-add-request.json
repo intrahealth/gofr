@@ -20,7 +20,7 @@
       "extension": [
         {
           "url": "title",
-          "valueString": "Request Adding Facility"
+          "valueString": "Create Change Request"
         },
         {
           "url": "resource",
@@ -68,19 +68,19 @@
         },
         {
           "url": "filter",
-          "valueString": "Name|name:contains"
+          "valueString": "Name|name|name:contains"
         },
         {
           "url": "filter",
-          "valueString": "Type|type|http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+          "valueString": "Type|type|type|http://terminology.hl7.org/CodeSystem/v3-RoleCode"
         },
         {
           "url": "filter",
-          "valueString": "Physical Type|physicalType|http://hl7.org/fhir/ValueSet/location-physical-type"
+          "valueString": "Physical Type|physicalType|physicalType|http://hl7.org/fhir/ValueSet/location-physical-type"
         },
         {
           "url": "filter",
-          "valueString": "Request Status|requeststatus|request-status-valueset"
+          "valueString": "Request Status|extension:requestStatus|requeststatus|request-status-valueset"
         },
         {
           "extension": [

@@ -24,18 +24,18 @@
             </v-btn>
           </v-toolbar>
           <v-card-text>
-            Are you sure you want to delete this data source pair
+            {{ $t(`App.hardcoded-texts.Are you sure you want to delete this data source pair`) }}
           </v-card-text>
           <v-card-actions>
             <v-btn
               color="primary"
               @click.native="confirmPairDeleteDialog = false"
-            >Cancel</v-btn>
+            >{{ $t(`App.hardcoded-texts.Cancel`) }}</v-btn>
             <v-spacer></v-spacer>
             <v-btn
               color="error"
               @click.native="deletePair"
-            >Ok</v-btn>
+            >{{ $t(`App.hardcoded-texts.Ok`) }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -71,7 +71,7 @@
             dark
           >
             <v-toolbar-title>
-              <v-icon>mdi-information</v-icon> Pair creation limit
+              <v-icon>mdi-information</v-icon> {{ $t(`App.hardcoded-texts.Pair creation limit`) }}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -83,14 +83,14 @@
             </v-btn>
           </v-toolbar>
           <v-card-text>
-            You cant create more pairs as this account is limited to one pair only at a time.
+            {{ $t(`App.hardcoded-texts.You cant create more pairs as this account is limited to one pair only at a time`) }}.
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
               color="primary"
               @click.native="pairLimitWarn = false"
-            >Ok</v-btn>
+            >{{ $t(`App.hardcoded-texts.Ok`) }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -108,7 +108,8 @@
             dark
           >
             <v-toolbar-title>
-              <v-icon>mdi-information</v-icon> Data sources has different level counts, please map Levels to proceed
+              <v-icon>mdi-information</v-icon> 
+              {{ $t(`App.hardcoded-texts.Data sources has different level counts, please map Levels to proceed`) }}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -155,14 +156,14 @@
               rounded
               @click="closeLevelMappingDialog"
             >
-              <v-icon left>mdi-cancel</v-icon> Cancel
+              <v-icon left>mdi-cancel</v-icon> {{ $t(`App.hardcoded-texts.Cancel`) }}
             </v-btn>
             <v-spacer></v-spacer>
             <v-btn
               color="primary"
               rounded
             >
-              <v-icon left>mdi-content-save</v-icon>Save Mapping
+              <v-icon left>mdi-content-save</v-icon>{{ $t(`App.hardcoded-texts.Save`) }} {{ $t(`App.hardcoded-texts.Mapping`) }}
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -181,7 +182,7 @@
             dark
           >
             <v-toolbar-title>
-              <v-icon>mdi-information</v-icon> About this page
+              <v-icon>mdi-information</v-icon> {{ $t(`App.hardcoded-texts.About this page`) }}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -193,8 +194,8 @@
             </v-btn>
           </v-toolbar>
           <v-card-text>
-            This page let you choose a pair of data sources to use for reconciliation
-            <v-list>1. Source 1 is the source while source 2 is the target</v-list>
+            {{ $t(`App.hardcoded-texts.This page let you choose a pair of data sources to use for reconciliation`) }}
+            <v-list>1. {{ $t(`App.hardcoded-texts.Source 1 is the source while source 2 is the target`) }}</v-list>
           </v-card-text>
         </v-card>
       </v-dialog>
@@ -209,7 +210,7 @@
             dark
           >
             <v-toolbar-title>
-              Sharing <template v-if="sharePair.hasOwnProperty('source1')">{{sharePair.source1.display}} - {{sharePair.source2.display}}</template>
+              {{ $t(`App.hardcoded-texts.Sharing Pair`) }} {{sharePair.display}}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -221,6 +222,7 @@
             </v-btn>
           </v-toolbar>
           <v-card-text>
+            <permissions @grantedPermissions="receivedPermissions"></permissions>
             <v-text-field
               v-model="searchUsers"
               append-icon="mdi-magnify"
@@ -258,7 +260,7 @@
               <v-icon
                 dark
                 left
-              >mdi-cancel</v-icon>Cancel
+              >mdi-cancel</v-icon>{{ $t(`App.hardcoded-texts.Cancel`) }}
             </v-btn>
             <v-spacer></v-spacer>
             <v-btn
@@ -266,14 +268,14 @@
               dark
               @click.native="share('', 'saveShare')"
             >
-              <v-icon left>mdi-share-variant-outline</v-icon>Share
+              <v-icon left>mdi-share-variant-outline</v-icon>{{ $t(`App.hardcoded-texts.Share`) }}
             </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
       <v-layout row>
         <v-flex xs11>
-          Create/Choose a pair of data sources to use for reconciliation. Source 1 is the source while source 2 is the target
+          {{ $t(`App.hardcoded-texts.create_choose_pair`) }}
         </v-flex>
         <v-flex
           xs1
@@ -293,7 +295,7 @@
                 <v-icon>mdi-help</v-icon>
               </v-btn>
             </template>
-            <span>Help</span>
+            <span>{{ $t(`App.hardcoded-texts.Help`) }}</span>
           </v-tooltip>
         </v-flex>
       </v-layout>
@@ -308,10 +310,19 @@
                 color="white lighten-2"
                 style="font-weight: bold; font-size: 18px;"
               >
-                Create Data Source Pair
+              {{ $t(`App.hardcoded-texts.Create Data Source Pair`) }}
               </v-toolbar>
             </v-card-title>
             <v-card-text style="float: center">
+              <v-row>
+                <v-text-field
+                  v-model="pairName"
+                  :label="$t(`App.hardcoded-texts.Pair Name`) + '*'"
+                  @blur="ensureNameUnique"
+                  @input="ensureNameUnique"
+                  :error-messages="pairNameErrors"
+                ></v-text-field>
+              </v-row>
               <v-row>
                 <v-col>
                   <v-data-table
@@ -386,7 +397,7 @@
                 rounded
                 @click="reset"
               >
-                <v-icon left>mdi-refresh</v-icon> Reset
+                <v-icon left>mdi-refresh</v-icon> {{ $t(`App.hardcoded-texts.Reset`) }}
               </v-btn>
               <v-spacer></v-spacer>
               <v-btn
@@ -395,7 +406,7 @@
                 rounded
                 @click="checkLevels"
               >
-                <v-icon left>mdi-content-save</v-icon> Save
+                <v-icon left>mdi-content-save</v-icon> {{ $t(`App.hardcoded-texts.Save`) }}
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -410,12 +421,12 @@
                 color="white lighten-2"
                 style="font-weight: bold; font-size: 18px;"
               >
-                Existing Data Source Pairs
+              {{ $t(`App.hardcoded-texts.Existing Data Source Pairs`) }}
                 <v-spacer></v-spacer>
                 <v-text-field
                   v-model="searchPairs"
                   append-icon="mdi-magnify"
-                  label="Search"
+                  :label="$t(`App.hardcoded-texts.Search`)"
                   single-line
                   hide-details
                 ></v-text-field>
@@ -437,7 +448,7 @@
                   v-slot:item="{ item }"
                 >
                   <tr>
-                    <td>{{item.source1.display}} - {{item.source2.display}}</td>
+                    <td>{{item.display}}</td>
                     <td>{{item.user.name}}</td>
                     <v-radio-group
                       v-model='activeDataSourcePair'
@@ -459,7 +470,15 @@
                         color="primary"
                         @click="share(item, 'showDialog')"
                       >
-                        <v-icon>mdi-share-variant-outline</v-icon>Share
+                        <v-icon>mdi-share-variant-outline</v-icon>{{ $t(`App.hardcoded-texts.Share`) }}
+                      </v-btn>
+                      |
+                      <v-btn
+                        color="success"
+                        text
+                        @click="viewshare(item)"
+                      >
+                        <v-icon>mdi-monitor-share</v-icon> {{ $t(`App.hardcoded-texts.Detailed View`) }}
                       </v-btn>
                     </td>
                   </tr>
@@ -473,7 +492,7 @@
                 rounded
                 @click="confirmDeletePair"
               >
-                <v-icon left>mdi-delete</v-icon>Delete Pair
+                <v-icon left>mdi-delete</v-icon>{{ $t(`App.hardcoded-texts.Delete`) }} {{ $t(`App.hardcoded-texts.Pair`) }}
               </v-btn>
               <v-spacer></v-spacer>
               <v-btn
@@ -482,7 +501,7 @@
                 rounded
                 @click="activatePair"
               >
-                <v-icon left>mdi-content-save</v-icon>Activate Pair
+                <v-icon left>mdi-content-save</v-icon>{{ $t(`App.hardcoded-texts.Activate Pair`) }}
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -496,6 +515,7 @@ import axios from 'axios'
 import { eventBus } from '@/main'
 import { generalMixin } from '@/mixins/generalMixin'
 import { dataSourcePairMixin } from './dataSourcePairMixin'
+import permissions from '../DataSources/Permissions.vue'
 export default {
   mixins: [generalMixin, dataSourcePairMixin],
   data () {
@@ -507,8 +527,12 @@ export default {
       alertMsg: '',
       pairLimitWarn: false,
       shareDialog: false,
+      permissions: [],
       mapSourcePairLevels: false,
       pairLevelsMapping: {},
+      pairNameErrors: [],
+      invalidCharacters: ['"', '/', '\\', '.'],
+      pairName: '',
       sharePair: {},
       source1: {},
       source2: {},
@@ -568,6 +592,9 @@ export default {
     }
   },
   methods: {
+    receivedPermissions(perms) {
+      this.permissions = perms
+    },
     confirmDeletePair () {
       this.confirmPairDeleteDialog = true
     },
@@ -589,6 +616,35 @@ export default {
         console.log(JSON.stringify(err))
       })
     },
+    ensureNameUnique () {
+      this.pairNameErrors = []
+      if (this.pairName === '') {
+        return this.pairNameErrors.push('Upload name is required')
+      }
+      if (this.pairName.length > 35) {
+        return this.pairNameErrors.push('Name must not exceed 35 characters')
+      }
+      for (let invalidChar of this.invalidCharacters) {
+        if (this.pairName.indexOf(invalidChar) !== -1) {
+          return this.pairNameErrors.push('Name is invalid')
+        }
+      }
+      for (let dtSrc of this.$store.state.dataSources) {
+        if (dtSrc.display.toLowerCase() === this.pairName.toLowerCase()) {
+          this.pairNameErrors.push('This Name Exists')
+          return false
+        }
+      }
+    },
+    viewshare(source) {
+      this.$router.push({
+        name: 'AdvanceDatasourceDetails',
+        params: {
+          sourceid: source.id,
+          partitionid: source.name
+        }
+      })
+    },
     reset () {
       this.source1 = {}
       this.source2 = {}
@@ -608,6 +664,14 @@ export default {
       })
     },
     checkLevels () {
+      if(!this.pairName) {
+        this.pairNameErrors.push('Upload name is required')
+        this.$store.state.errorColor = 'error'
+        this.$store.state.errorTitle = 'No pair name'
+        this.$store.state.errorDescription = 'Please provide the name of the pair'
+        this.$store.state.dialogError = true
+        return
+      }
       this.pairLevelsMapping = {}
       let sourcesLimitOrgId = JSON.stringify({
         source1LimitOrgId: this.getLimitOrgIdOnDataSource(this.source1),
@@ -633,7 +697,7 @@ export default {
             this.$store.state.errorDescription = 'Make sure source1 has the same or less levels as source2'
             this.$store.state.dialogError = true
           } else {
-            this.createDatasourcePair(this.source1, this.source2)
+            this.createDatasourcePair(this.source1, this.source2, this.pairName)
           }
         })
     },
@@ -686,6 +750,7 @@ export default {
         let formData = new FormData()
         formData.append('sharePair', this.sharePair.id)
         formData.append('users', JSON.stringify(this.sharedUsers))
+        formData.append('permissions', JSON.stringify(this.permissions))
         formData.append('userID', this.$store.state.auth.userID)
         formData.append('orgId', this.$store.state.dhis.user.orgId)
         this.$store.state.loadingServers = true
@@ -759,6 +824,9 @@ export default {
       }
       return true
     }
+  },
+  components: {
+    'permissions': permissions
   },
   created () {
     if (!this.canCreatePair) {

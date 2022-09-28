@@ -50,6 +50,7 @@ nav:
       - developer_guide/working_with_fhir.md
       - developer_guide/mcsd.md
       - developer_guide/forms.md
+      - developer_guide/ansible.md
       - developer_guide/server_administration.md
 
 markdown_extensions:

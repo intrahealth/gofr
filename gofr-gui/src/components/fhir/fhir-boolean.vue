@@ -3,18 +3,18 @@
     <template #form>
       <v-switch
         v-model="value"
-        :label="display+`: ${value.toString()}`"
+        :label="$t(`App.fhir-resources-texts.${display}`)+ `: ` + $t(`App.fhir-resources-texts.${value.toString()}`)"
         :disabled="disabled"
         :rules="rules"
         dense
         :error-messages="errors"
         @change="errors = []"
       >
-      <template #label>{{display}}: {{value.toString()}} <span v-if="required" class="red--text font-weight-bold">*</span></template>
+      <template #label>{{ $t(`App.fhir-resources-texts.${display}`) }}: {{ $t(`App.fhir-resources-texts.${value.toString()}`) }} <span v-if="required" class="red--text font-weight-bold">*</span></template>
       </v-switch>
     </template>
     <template #header>
-      {{display}}
+      {{ $t(`App.fhir-resources-texts.${display}`) }}
     </template>
     <template #value>
       {{value}}

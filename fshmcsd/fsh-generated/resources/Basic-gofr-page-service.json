@@ -37,12 +37,20 @@
           "valueString": "Active|active"
         },
         {
-          "url": "filter",
-          "valueString": "Name|name:contains"
+          "url": "search",
+          "valueString": "Facilities|location"
         },
         {
           "url": "filter",
-          "valueString": "Active|active"
+          "valueString": "Name|name|name:contains"
+        },
+        {
+          "url": "filter",
+          "valueString": "Active|active|active"
+        },
+        {
+          "url": "filter",
+          "valueString": "Facility|location|location"
         }
       ]
     },

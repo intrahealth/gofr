@@ -90,7 +90,6 @@ router.get('/:partition/:resource/:id?', (req, res, next) => {
 
 router.post('/:partition/:resource', (req, res) => {
   const allowed = req.user.hasPermissionByObject('write', req.body, req.params.partition);
-
   let resource;
   if (allowed === true) {
     resource = req.body;
@@ -240,7 +239,7 @@ router.get('/:partition/ValueSet/:id/\\$expand', (req, res) => {
 });
 
 router.get('/:partition/CodeSystem/\\$lookup', (req, res) => {
-  const allowed = req.user.hasPermissionByName('read', 'CodeSystem', '', req.params.partition);
+  const allowed = req.user.hasPermissionByName('read', 'CodeSystem');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }

@@ -333,6 +333,10 @@ router.get('/page/:page/:type?', (req, res) => {
 
     const pageResource = pageDisplay.extension.find(ext => ext.url === 'resource').valueReference.reference;
     const pageTitle = pageDisplay.extension.find(ext => ext.url === 'title').valueString;
+    let pagePartition = '';
+    if (pageDisplay.extension.find(ext => ext.url === 'partition')) {
+      pagePartition = pageDisplay.extension.find(ext => ext.url === 'partition').valueString;
+    }
     let pageUpdatingResource = pageDisplay.extension.find(ext => ext.url === 'requestUpdatingResource');
     if (pageUpdatingResource) {
       pageUpdatingResource = pageUpdatingResource.valueReference.reference;
@@ -546,7 +550,7 @@ router.get('/page/:page/:type?', (req, res) => {
           resourceElement = 'gofr-codesystem';
         }
 
-        vueOutput = `<${resourceElement} :fhirId="fhirId" :edit="isEdit" v-on:set-edit="setEdit($event)" profile="${resource.url}" :key="$route.params.page+($route.params.id || '')" page="${req.params.page}" field="${fhir}" title="${sections[fhir].title}" :constraints="constraints"`;
+        vueOutput = `<${resourceElement} partition="${pagePartition}" :fhirId="fhirId" :edit="isEdit" v-on:set-edit="setEdit($event)" profile="${resource.url}" :key="$route.params.page+($route.params.id || '')" page="${req.params.page}" field="${fhir}" title="${sections[fhir].title}" :constraints="constraints"`;
         if (sectionKeys.length > 1) {
           sectionMenu = sectionKeys.map(name => ({
             name, title: sections[name].title, desc: sections[name].description, secondary: !!sections[name].resource,
@@ -778,14 +782,13 @@ router.get('/page/:page/:type?', (req, res) => {
     };
 
     const createSearchTemplate = async (resource, structure) => {
-      logger.silly(JSON.stringify(structure, null, 2));
       let search = ['id'];
       try {
         search = pageDisplay.extension.filter(ext => ext.url === 'search').map(ext => ext.valueString.match(/^([^|]*)\|?([^|]*)?\|?(.*)?$/).slice(1, 4));
       } catch (err) { }
       let filters = [];
       try {
-        filters = pageDisplay.extension.filter(ext => ext.url === 'filter').map(ext => ext.valueString.match(/^([^|]*)\|?([^|]*)?\|?(.*)?$/).slice(1, 4));
+        filters = pageDisplay.extension.filter(ext => ext.url === 'filter').map(ext => ext.valueString.split('|'));
       } catch (err) { }
       let addLink = null;
       try {
@@ -818,18 +821,47 @@ router.get('/page/:page/:type?', (req, res) => {
       if (addLink) {
         searchTemplate += " :add-link='addLink'";
       }
+      const structureKeys = Object.keys(structure);
       searchTemplate += '>' + '\n';
+      let fieldDetails;
       for (const filter of filters) {
-        searchTemplate += '<gofr-search-term v-on:termChange="searchData"';
-        if (filter[1]) {
-          searchTemplate += ` label="${filter[0]}" expression="${filter[1]}"`;
+        for (const fhir of structureKeys) {
+          if (structure[fhir].fields && structure[fhir].fields[filter[1]]) {
+            fieldDetails = structure[fhir].fields[filter[1]];
+          }
+        }
+        if (!fieldDetails) {
+          continue;
+        }
+        let displayType;
+        if (pageFields.hasOwnProperty(fieldDetails.id)) {
+          if (pageFields[fieldDetails.id].type) {
+            displayType = pageFields[fieldDetails.id].type;
+          }
+        }
+        if (!displayType) {
+          if (config.get(`defaults:fields:${fieldDetails.id}:type`)) {
+            displayType = config.get(`defaults:fields:${fieldDetails.id}:type`);
+          }
+        }
+        if (fieldDetails.code === 'Reference') {
+          searchTemplate += `<gofr-search-reference-term v-on:termChange="searchData" field='${filter[1]}' label='${filter[0]}' expression='${filter[2]}'`;
+          if (fieldDetails.hasOwnProperty('targetProfile') && fieldDetails.targetProfile) {
+            fieldDetails.targetResource = await getProfileResource(fieldDetails.targetProfile);
+            searchTemplate += ` targetProfile='${fieldDetails.targetProfile}' targetResource='${fieldDetails.targetResource}'`;
+          }
+          if (displayType) {
+            searchTemplate += ` displayType='${displayType}'`;
+          }
+          searchTemplate += ' />\n';
         } else {
-          searchTemplate += ` label="Search" expression="${filter[0]}"`;
+          searchTemplate += '<gofr-search-string-term v-on:termChange="searchData"';
+          searchTemplate += ` label="${filter[0]}" expression="${filter[2]}"`;
+          if (filter[3]) {
+            searchTemplate += ` binding="${filter[3]}"`;
+          }
+          searchTemplate += '></gofr-search-string-term>\n';
         }
-        if (filter[2]) {
-          searchTemplate += ` binding="${filter[2]}"`;
-        }
-        searchTemplate += '></gofr-search-term>\n';
       }
       searchTemplate += `</${searchElement}>\n`;
       logger.debug(searchTemplate);
@@ -962,9 +994,17 @@ router.post('/updateGeneralConfig', (req, res) => {
 });
 
 router.get('/getUserConfig/:userID', (req, res) => {
+  let site = JSON.parse(JSON.stringify(config.get('site') || {}));
+  if (config.getBool("security:disabled")) {
+    site.security = {disabled: true};
+  }
+  console.log(`gofr-user-config-${req.params.userID}`);
   fhirAxios.read('Parameters', `gofr-user-config-${req.params.userID}`, '', 'DEFAULT').then((response) => {
     const usrConfig = response.parameter.find(param => param.name === 'config');
-    return res.status(200).json(JSON.parse(usrConfig.valueString));
+    return res.status(200).json({
+      config: JSON.parse(usrConfig.valueString),
+      site
+    });
   }).catch((err) => {
     if (err.response && err.response.status === 404) {
       const configRes = {
@@ -977,7 +1017,10 @@ router.get('/getUserConfig/:userID', (req, res) => {
       };
       fhirAxios.update(configRes, 'DEFAULT').then(() => {
         logger.info('User Config Saved');
-        return res.status(200).json({});
+        return res.status(200).json({
+          config: {},
+          site
+        });
       }).catch((err) => {
         logger.error(err);
       });
@@ -1010,6 +1053,7 @@ router.get('/getGeneralConfig', (req, res) => {
         baseURL: config.get('keycloak:baseURL'),
         realm: config.get('keycloak:realm'),
         UIClientId: config.get('keycloak:UIClientId'),
+        clientSecret: config.get('keycloak:clientSecret'),
       },
     };
     res.status(200).json({ generalConfig: merged, otherConfig, version: config.get('app:version') });

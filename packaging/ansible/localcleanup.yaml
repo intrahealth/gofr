@@ -1,0 +1,24 @@
+---
+- name: remove local ip in known hosts
+  hosts: localhost
+  connection: local
+  # hosts: all
+  # remote_user: "{{ user }}"
+  # become: true
+  tags: prep
+
+  
+  vars_prompt:
+
+    - name: "server"
+      prompt: "Server IP"
+      private: no
+
+
+  tasks:
+
+  - name: Add host with custom SSH port
+    ansible.builtin.known_hosts:
+      name: '{{ server }}'
+      path: $HOME/.ssh/known_hosts
+      state: absent

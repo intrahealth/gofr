@@ -45,7 +45,7 @@ const fhirQuestionnaire = {
           processChildren(item.item);
         } else {
           // is an answer
-          while (!path.startsWith(replaceList[0])) {
+          while (path && !path.startsWith(replaceList[0])) {
             const ended = replaceList.shift();
             for (const remove of Object.keys(pathSeen).filter(rem => rem.startsWith(ended))) {
               pathSeen[remove] = false;

@@ -22,7 +22,27 @@
       "code": "practitioner-link",
       "display": "GOFR Practitioner Link",
       "definition": "Basic resource for customization that links to a Practitioner."
+    },
+    {
+      "code": "datasourcepair",
+      "display": "GOFR Datasource Pair",
+      "definition": "GOFR Datasource Pair"
+    },
+    {
+      "code": "datasource",
+      "display": "GOFR Datasource",
+      "definition": "GOFR Datasource"
+    },
+    {
+      "code": "partition",
+      "display": "GOFR Partition",
+      "definition": "GOFR Partition"
+    },
+    {
+      "code": "task",
+      "display": "GOFR Task",
+      "definition": "GOFR Task"
     }
   ],
-  "count": 3
+  "count": 7
 }

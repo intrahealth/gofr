@@ -6,7 +6,7 @@
     >
       <v-row>
         <v-col cols="7">
-          Detailed View Of {{dataSource.display}} Data Source
+          {{ $t(`App.hardcoded-texts.Detailed View Of`) }} {{dataSource.display}} {{ $t(`App.hardcoded-texts.Data Source`) }}
         </v-col>
         <v-spacer></v-spacer>
         <v-col>
@@ -16,14 +16,30 @@
             small
           >
             <v-icon left>mdi-format-list-bulleted-square</v-icon>
-            Back to Datasources
+            {{ $t(`App.hardcoded-texts.Back to Datasources`) }}
           </v-btn>
         </v-col>
       </v-row>
     </v-alert>
     <v-row>
-      <v-col cols="12">
+      <v-col cols="7">
         <ActivePartitionStats :partition="partitionid" title="Datasource Statistics"></ActivePartitionStats>
+      </v-col>
+      <v-col cols="5">
+        <v-card>
+          <v-card-title primary-title>
+            <v-toolbar color="#385F73" dark height="40" style="font-size: 14px">
+              {{ $t(`App.hardcoded-texts.Datasources Contributing To This Data Source`) }}
+            </v-toolbar>
+          </v-card-title>
+          <v-card-text>
+            <v-row>
+              <v-col cols="6" v-for="(generatedFrom, index) in sourceAdvanceDetails.generatedFrom" :key="generatedFrom.name">
+                {{++index}}. {{generatedFrom.name}}
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
       </v-col>
     </v-row>
     <v-row>
@@ -34,16 +50,16 @@
             dark
           >
             <v-toolbar-title>
-              Shared Users
+              {{ $t(`App.hardcoded-texts.Shared Users`) }}
             </v-toolbar-title>
           </v-toolbar>
           <v-card-title>
-            Select user to view permisions
+            {{ $t(`App.hardcoded-texts.Select user to view permisions`) }}
           </v-card-title>
           <v-card-text>
             <v-data-table
               :headers="advDetailsHeader"
-              :items="sourceAdvanceDetails"
+              :items="sourceAdvanceDetails.sharedUsers"
               class="elevation-1"
             >
               <template v-slot:item="{ item }">
@@ -77,7 +93,7 @@
             dark
           >
             <v-toolbar-title>
-              Permissions for user {{user.name}}
+              {{ $t(`App.hardcoded-texts.Permissions for user`) }} {{user.name}}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-icon large>mdi-shield-lock-outline</v-icon>
@@ -92,7 +108,7 @@
                     height="30"
                   >
                     <v-toolbar-title style="font-size:16px">
-                      Facilities
+                      {{ $t(`App.hardcoded-texts.Facilities`) }}
                     </v-toolbar-title>
                     <v-spacer></v-spacer>
                     <v-icon small>mdi-hospital-marker</v-icon>
@@ -108,7 +124,7 @@
                           hide-details
                         >
                           <template v-slot:label>
-                            <span style="font-size: 15px">View</span>
+                            <span style="font-size: 15px">{{ $t(`App.hardcoded-texts.View`) }}</span>
                           </template>
                         </v-checkbox>
                       </v-flex>
@@ -120,7 +136,7 @@
                         hide-details
                       >
                         <template v-slot:label>
-                          <span style="font-size: 15px">Add/Update</span>
+                          <span style="font-size: 15px">{{ $t(`App.hardcoded-texts.Add`) }}/{{ $t(`App.hardcoded-texts.Update`) }}</span>
                         </template>
                       </v-checkbox>
                     </v-layout>
@@ -136,7 +152,7 @@
                     height="30"
                   >
                     <v-toolbar-title style="font-size:16px">
-                      Jurisdictions
+                      {{ $t(`App.hardcoded-texts.Jurisdictions`) }}
                     </v-toolbar-title>
                     <v-spacer></v-spacer>
                     <v-icon small>mdi-home-group</v-icon>
@@ -152,7 +168,7 @@
                           hide-details
                         >
                           <template v-slot:label>
-                            <span style="font-size: 15px">View</span>
+                            <span style="font-size: 15px">{{ $t(`App.hardcoded-texts.View`) }}</span>
                           </template>
                         </v-checkbox>
                       </v-flex>
@@ -164,7 +180,7 @@
                         hide-details
                       >
                         <template v-slot:label>
-                          <span style="font-size: 15px">Add/Update</span>
+                          <span style="font-size: 15px">{{ $t(`App.hardcoded-texts.Add`) }}/{{ $t(`App.hardcoded-texts.Update`) }}</span>
                         </template>
                       </v-checkbox>
                     </v-layout>
@@ -179,7 +195,7 @@
                     height="30"
                   >
                     <v-toolbar-title style="font-size:16px">
-                      Organizations
+                      {{ $t(`App.hardcoded-texts.Organizations`) }}
                     </v-toolbar-title>
                     <v-spacer></v-spacer>
                     <v-icon small>mdi-hospital-marker</v-icon>
@@ -195,7 +211,7 @@
                           hide-details
                         >
                           <template v-slot:label>
-                            <span style="font-size: 15px">View</span>
+                            <span style="font-size: 15px">{{ $t(`App.hardcoded-texts.View`) }}</span>
                           </template>
                         </v-checkbox>
                       </v-flex>
@@ -207,7 +223,7 @@
                         hide-details
                       >
                         <template v-slot:label>
-                          <span style="font-size: 15px">View</span>
+                          <span style="font-size: 15px">{{ $t(`App.hardcoded-texts.Add`) }}/{{ $t(`App.hardcoded-texts.Update`) }}</span>
                         </template>
                       </v-checkbox>
                     </v-layout>
@@ -223,7 +239,7 @@
                     height="30"
                   >
                     <v-toolbar-title style="font-size:16px">
-                      Healthcare Services
+                      {{ $t(`App.hardcoded-texts.Healthcare Services`) }}
                     </v-toolbar-title>
                     <v-spacer></v-spacer>
                     <v-icon small>mdi-room-service</v-icon>
@@ -239,7 +255,7 @@
                           hide-details
                         >
                           <template v-slot:label>
-                            <span style="font-size: 15px">View</span>
+                            <span style="font-size: 15px">{{ $t(`App.hardcoded-texts.View`) }}</span>
                           </template>
                         </v-checkbox>
                       </v-flex>
@@ -251,7 +267,7 @@
                         hide-details
                       >
                         <template v-slot:label>
-                          <span style="font-size: 15px">Add/Update</span>
+                          <span style="font-size: 15px">{{ $t(`App.hardcoded-texts.Add`) }}/{{ $t(`App.hardcoded-texts.Update`) }}</span>
                         </template>
                       </v-checkbox>
                     </v-layout>
@@ -267,7 +283,9 @@
             <v-spacer></v-spacer>
             <v-spacer></v-spacer>
             <v-col>
-              <v-btn dark small color="red darken-3" @click="changePermissions"><v-icon left>mdi-cog-refresh-outline</v-icon> Update Permissions</v-btn>
+              <v-btn dark small color="red darken-3" @click="changePermissions">
+                <v-icon left>mdi-cog-refresh-outline</v-icon> {{ $t(`App.hardcoded-texts.Update Permissions`) }}
+              </v-btn>
             </v-col>
           </v-row>
         </v-card>
@@ -365,8 +383,8 @@ export default {
     this.$store.state.progressTitle = 'Getting Datasource Details'
     axios.get(`/datasource/getSourceDetails/${this.dataSource.partitionID}`).then((response) => {
       this.sourceAdvanceDetails = response.data
-      if(this.sourceAdvanceDetails.length > 0) {
-        this.user = this.sourceAdvanceDetails[0]
+      if(this.sourceAdvanceDetails.sharedUsers.length > 0) {
+        this.user = this.sourceAdvanceDetails.sharedUsers[0]
         this.showPermissions(this.user)
       }
       this.$store.state.dynamicProgress = false

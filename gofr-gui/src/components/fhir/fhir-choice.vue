@@ -2,7 +2,7 @@
   <v-container>
     <v-select
       :loading="loading"
-      :label="label"
+      :label="$t(`App.fhir-resources-texts.${label}`)"
       v-model="valueCode"
       :items="items"
       outlined
@@ -14,7 +14,7 @@
       dense
       @change="errors = []"
       >
-      <template #label>{{label}} <span v-if="required" class="red--text font-weight-bold">*</span></template>
+      <template #label>{{ $t(`App.fhir-resources-texts.${label}`) }} <span v-if="required" class="red--text font-weight-bold">*</span></template>
     </v-select>
   </v-container>
 </template>

@@ -11,12 +11,12 @@
           style="max-width: 500px;"
         >
           <v-toolbar
-            color="deep-purple accent-4"
+            color="#569fd3"
             cards
             dark
             text
           >
-            <v-card-title class="title font-weight-regular">Add Blank Source</v-card-title>
+            <v-card-title class="title font-weight-regular">{{ $t(`App.hardcoded-texts.Add Blank Source`) }}</v-card-title>
             <v-spacer></v-spacer>
             <v-btn
               icon
@@ -40,7 +40,7 @@
                   @input="ensureNameUnique"
                   :error-messages="nameErrors"
                   color="deep-purple"
-                  label="Source Name"
+                  :label="$t(`App.hardcoded-texts.Source Name`)"
                 ></v-text-field>
               </v-flex>
               <v-flex>
@@ -51,12 +51,12 @@
                       :disabled="shareWithAll"
                       v-on="on"
                       color="primary"
-                      label="Share with other users of the same org unit as yours"
+                      :label="$t(`App.hardcoded-texts.Share with other users of the same org unit as yours`)"
                       v-model="shareToSameOrgid"
                     ></v-checkbox>
                   </template>
                   <span>
-                    Share this dataset with all other users that are on the same org unit as you
+                    {{ $t(`App.hardcoded-texts.Share this dataset with all other users that are on the same org unit as you`) }}
                   </span>
                 </v-tooltip>
               </v-flex>
@@ -65,7 +65,7 @@
                   v-if='$store.state.config.generalConfig.allowShareToAllForNonAdmin || $store.state.auth.role === "Admin"'
                   @change="sharingOptions"
                   color="primary"
-                  label="Share with all other users"
+                  :label="$t(`App.hardcoded-texts.Share with all other users`)"
                   v-model="shareWithAll"
                 >
                 </v-checkbox>
@@ -77,13 +77,13 @@
                       v-if="shareWithAll && $store.state.dhis.user.orgId"
                       v-on="on"
                       color="primary"
-                      label="Limit orgs sharing by user orgid"
+                      :label="$t(`App.hardcoded-texts.Limit orgs sharing by user orgid`)"
                       v-model="limitShareByOrgId"
                     >
                     </v-checkbox>
                   </template>
                   <span>
-                    if activated, other users will see locations (including location children) that has the same location id as their location id
+                    {{ $t(`App.hardcoded-texts.if activated, other users will see locations (including location children) that has the same location id as their location id`) }}
                   </span>
                 </v-tooltip>
               </v-flex>
@@ -96,10 +96,10 @@
               @click="performExtraCheck"
               :disabled="$v.$invalid"
               class="white--text"
-              color="deep-purple accent-4"
+              color="#569fd3"
               depressed
             >
-              Add
+            {{ $t(`App.hardcoded-texts.Add`) }}
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -136,6 +136,7 @@ export default {
         this.datasetLimitWarn = false
         this.$store.state.dynamicProgress = false
         if (this.canAddDataset) {
+          this.sourceType = 'blank'
           this.addDataSource('blank', '')
         } else {
           this.datasetLimitWarn = true

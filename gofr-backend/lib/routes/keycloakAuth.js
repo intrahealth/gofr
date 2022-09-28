@@ -1,9 +1,7 @@
 const express = require('express');
 const jwtDecode = require('jwt-decode');
-const deepmerge = require('deepmerge');
 const user = require('../modules/user');
 const kcadmin = require('../modules/keycloakAdminClient');
-const dataSources = require('../modules/dataSources');
 
 const router = express.Router();
 
@@ -46,43 +44,8 @@ router.post('/', (req, res) => {
           token: req.headers.authorization.split(' ')[1],
           user: resp,
         }).then((popResp) => {
-          let userObj;
           user.createUserInstance(resp, popResp.role).then((obj) => {
-            let isAdmin = false;
-            if (obj.permissions['*'] && obj.permissions['*']['*']) {
-              isAdmin = true;
-            }
-            dataSources.getSources({ isAdmin, userID: userResource.id }).then((sources) => {
-              sources.forEach((source) => {
-                const shareDetails = source.sharedUsers && source.sharedUsers.find(share => share.id === userResource.id);
-                const partIndex = obj.permissions.partitions.findIndex(part => part.name === source.name);
-                let partPerm = {};
-                if (source.userID === userResource.id) {
-                  partPerm = {
-                    name: source.name,
-                    '*': {
-                      '*': true,
-                    },
-                  };
-                } else if (shareDetails && shareDetails.permissions) {
-                  partPerm = {
-                    name: source.name,
-                    ...shareDetails.permissions,
-                  };
-                }
-                if (partIndex === -1) {
-                  obj.permissions.partitions.push(partPerm);
-                } else {
-                  deepmerge(obj.permissions.partitions[partIndex], partPerm);
-                }
-              });
-              userObj = obj;
-              logger.error(JSON.stringify(userObj, 0, 2));
-              res.status(200).json(userObj);
-            }).catch(() => {
-              userObj = obj;
-              res.status(200).json(userObj);
-            });
+            res.status(200).json(obj);
           }).catch(() => {
             res.status(500).json();
           });
@@ -99,10 +62,8 @@ router.post('/', (req, res) => {
         token: req.headers.authorization.split(' ')[1],
         user: usersRes.entry[0].resource,
       }).then(async (popResp) => {
-        let userObj;
         user.createUserInstance(usersRes.entry[0].resource, popResp.role).then((obj) => {
-          userObj = obj;
-          res.status(200).json(userObj);
+          res.status(200).json(obj);
         }).catch(() => {
           res.status(500).json();
         });

@@ -38,7 +38,9 @@
             dark
             text
           >
-            <v-card-title class="title font-weight-regular">Create Account</v-card-title>
+            <v-card-title class="title font-weight-regular">
+              {{ $t(`App.hardcoded-texts.Create Account`) }}
+            </v-card-title>
           </v-toolbar>
           <v-form
             ref="form"
@@ -62,7 +64,7 @@
                       v-model="firstname"
                       filled
                       color="deep-purple"
-                      label="First Name"
+                      :label="$t(`App.hardcoded-texts.First Name`)"
                     />
                   </v-flex>
                   <v-spacer></v-spacer>
@@ -75,7 +77,7 @@
                       v-model="surname"
                       filled
                       color="deep-purple"
-                      label="Surname"
+                      :label="$t(`App.hardcoded-texts.Surname`)"
                     />
                   </v-flex>
                 </v-layout>
@@ -90,7 +92,7 @@
                       v-model="othername"
                       filled
                       color="deep-purple"
-                      label="Middle Names"
+                      :label="$t(`App.hardcoded-texts.Middle Names`)"
                     />
                   </v-flex>
                   <v-spacer></v-spacer>
@@ -104,7 +106,7 @@
                       v-model="phone"
                       filled
                       color="deep-purple"
-                      label="Phone"
+                      :label="$t(`App.hardcoded-texts.Phone`)"
                     />
                   </v-flex>
                 </v-layout>
@@ -124,7 +126,7 @@
                       v-model="email"
                       filled
                       color="deep-purple"
-                      label="Email*"
+                      :label="$t(`App.hardcoded-texts.Email`) + '*'"
                     />
                   </v-flex>
                   <v-spacer></v-spacer>
@@ -137,7 +139,7 @@
                       v-model="username"
                       filled
                       color="deep-purple"
-                      label="Username"
+                      :label="$t(`App.hardcoded-texts.User Name`)"
                     />
                   </v-flex>
                 </v-layout>
@@ -157,7 +159,7 @@
                       type="password"
                       filled
                       color="deep-purple"
-                      label="Password"
+                      :label="$t(`App.hardcoded-texts.Password`)"
                     />
                   </v-flex>
                   <v-spacer></v-spacer>
@@ -171,7 +173,7 @@
                       type="password"
                       filled
                       color="deep-purple"
-                      label="Re-type Password"
+                      :label="$t(`App.hardcoded-texts.Re-type Password`)"
                     />
                   </v-flex>
                 </v-layout>
@@ -184,14 +186,14 @@
               text
               @click="$refs.form.reset()"
             >
-              <v-icon>mdi-close</v-icon>Clear
+              <v-icon>mdi-close</v-icon>{{ $t(`App.hardcoded-texts.Clear`) }}
             </v-btn>
             <v-spacer />
             <v-btn
               @click="displayLogin"
               text
             >
-              <v-icon left>mdi-lock</v-icon>Back To Login
+              <v-icon left>mdi-lock</v-icon>{{ $t(`App.hardcoded-texts.Back To Login`) }}
             </v-btn>
             <v-spacer />
             <v-btn
@@ -201,7 +203,7 @@
               color="deep-purple accent-4"
               depressed
             >
-              <v-icon left>mdi-plus</v-icon>Add
+              <v-icon left>mdi-plus</v-icon>{{ $t(`App.hardcoded-texts.Add`) }}
             </v-btn>
           </v-card-actions>
         </v-card>

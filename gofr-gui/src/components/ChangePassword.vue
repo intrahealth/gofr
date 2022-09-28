@@ -20,7 +20,9 @@
             dark
             filled
           >
-            <v-card-title class="title font-weight-regular">Change Password</v-card-title>
+            <v-card-title class="title font-weight-regular">
+              {{ $t(`App.hardcoded-texts.Change Password`) }}
+            </v-card-title>
           </v-toolbar>
           <v-form
             ref="form"
@@ -35,7 +37,7 @@
               type="password"
               filled
               color="deep-purple"
-              label="Old Password"
+              :label="$t(`App.hardcoded-texts.Old Password`)"
             />
             <v-text-field
               required
@@ -46,7 +48,7 @@
               type="password"
               filled
               color="deep-purple"
-              label="Password"
+              :label="$t(`App.hardcoded-texts.Password`)"
             />
             <v-text-field
               required
@@ -57,7 +59,7 @@
               type="password"
               filled
               color="deep-purple"
-              label="Re-type Password"
+              :label="$t(`App.hardcoded-texts.Re-type Password`)"
             />
           </v-form>
           <v-divider />
@@ -66,7 +68,7 @@
               filled
               @click="$store.state.baseRouterViewKey++"
             >
-              <v-icon>mdi-close</v-icon>Clear
+              <v-icon>mdi-close</v-icon>{{ $t(`App.hardcoded-texts.Clear`) }}
             </v-btn>
             <v-spacer />
             <v-btn
@@ -76,7 +78,7 @@
               color="deep-purple accent-4"
               depressed
             >
-              <v-icon left>mdi-find-replace</v-icon>Change
+              <v-icon left>mdi-find-replace</v-icon>{{ $t(`App.hardcoded-texts.Change`) }}
             </v-btn>
           </v-card-actions>
         </v-card>

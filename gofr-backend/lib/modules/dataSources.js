@@ -165,12 +165,17 @@ const getSources = ({ isAdmin = false, orgId, userID }) => new Promise((resolve,
             permissions,
           });
         });
+        const generatedFrom = fhirpath.evaluate(
+          dsDetails,
+          "extension.where(url='http://gofr.org/fhir/StructureDefinition/generatedFrom').valueString",
+        );
         const source = {
           id: entry.resource.id,
           partitionID: partId.split('/')[1],
           source: sourceExt['http://gofr.org/fhir/StructureDefinition/source'],
           autoSync: sourceExt['http://gofr.org/fhir/StructureDefinition/autoSync'],
           sourceType: sourceExt['http://gofr.org/fhir/StructureDefinition/sourceType'],
+          generatedFrom,
           name: partExt['http://gofr.org/fhir/StructureDefinition/name'],
           display: sourceExt['http://gofr.org/fhir/StructureDefinition/name'],
           username: sourceExt['http://gofr.org/fhir/StructureDefinition/username'],

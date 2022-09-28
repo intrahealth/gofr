@@ -56,7 +56,7 @@
             dark
           >
             <v-toolbar-title>
-              <v-icon>mdi-information</v-icon> About this page
+              <v-icon>mdi-information</v-icon> {{ $t(`App.hardcoded-texts.About this page`) }}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -68,15 +68,15 @@
             </v-btn>
           </v-toolbar>
           <v-card-text>
-            This page let you visualize the mapping status for various levels
+            {{ $t(`App.hardcoded-texts.This page let you visualize the mapping status for various levels`) }}
             <v-list>
-              1. Right boxes shows reconciliation status for a selected level
+              1. {{ $t(`App.hardcoded-texts.Right boxes shows reconciliation status for a selected level`) }}
             </v-list>
             <v-list>
-              2. Left boxes shows reconciliation status for a all levels
+              2. {{ $t(`App.hardcoded-texts.Left boxes shows reconciliation status for a all levels`) }}
             </v-list>
             <v-list>
-              3. The search box let you search locations for a selected level only
+              3. {{ $t(`App.hardcoded-texts.The search box let you search locations for a selected level only`) }}
             </v-list>
           </v-card-text>
         </v-card>
@@ -105,7 +105,7 @@
                   <v-icon>mdi-help</v-icon>
                 </v-btn>
               </template>
-              <span>Help</span>
+              <span>{{ $t(`App.hardcoded-texts.Help`) }}</span>
             </v-tooltip>
           </v-col>
         </v-row>
@@ -117,7 +117,7 @@
       </v-col>
       <v-spacer></v-spacer>
       <v-col cols="1">
-        <b>{{currentLevelText}} Only</b>
+        <b>{{currentLevelText}} {{ $t(`App.hardcoded-texts.Only`) }}</b>
       </v-col>
     </v-row>
     <v-row>
@@ -129,7 +129,7 @@
         >
           <v-layout column>
             <v-flex xs1>
-              <b>Source 1 Matched</b>
+              <b>{{ $t(`App.hardcoded-texts.Source 1 Matched`) }}</b>
             </v-flex>
             <v-flex
               xs1
@@ -165,7 +165,7 @@
         >
           <v-layout column>
             <v-flex xs1>
-              <b>Source 1 No Match</b>
+              <b>{{ $t(`App.hardcoded-texts.Source 1 No Match`) }}</b>
             </v-flex>
             <v-flex
               xs1
@@ -201,7 +201,7 @@
         >
           <v-layout column>
             <v-flex xs1>
-              <b>Source 1 Flagged</b>
+              <b>{{ $t(`App.hardcoded-texts.Source 1 Flagged`) }}</b>
             </v-flex>
             <v-flex
               xs1
@@ -237,7 +237,7 @@
         >
           <v-layout column>
             <v-flex xs1>
-              <b>Source 2 Matched</b>
+              <b>{{ $t(`App.hardcoded-texts.Source 2 Matched`) }}</b>
             </v-flex>
             <v-flex
               xs1
@@ -273,7 +273,7 @@
         >
           <v-layout column>
             <v-flex xs1>
-              <b>Source 2 Flagged</b>
+              <b>{{ $t(`App.hardcoded-texts.Source 2 Flagged`) }}</b>
             </v-flex>
             <v-flex
               xs1
@@ -310,7 +310,7 @@
         >
           <v-layout column>
             <v-flex xs1>
-              <b>Source 1 Matched</b>
+              <b>{{ $t(`App.hardcoded-texts.Source 1 Matched`) }}</b>
             </v-flex>
             <v-flex
               xs1
@@ -346,7 +346,7 @@
         >
           <v-layout column>
             <v-flex xs1>
-              <b>Source 1 No Match</b>
+              <b>{{ $t(`App.hardcoded-texts.Source 1 No Match`) }}</b>
             </v-flex>
             <v-flex
               xs1
@@ -382,7 +382,7 @@
         >
           <v-layout column>
             <v-flex xs1>
-              <b>Source 1 Flagged</b>
+              <b>{{ $t(`App.hardcoded-texts.Source 1 Flagged`) }}</b>
             </v-flex>
             <v-flex
               xs1
@@ -416,7 +416,7 @@
         <v-text-field
           v-model="searchMatched"
           append-icon="mdi-magnify"
-          label="Search"
+          :label="$t(`App.hardcoded-texts.Search`)"
           single-line
           hide-details
         ></v-text-field>
@@ -430,7 +430,7 @@
             @click='markRecoDone'
             v-if="$store.state.recoStatus !== 'Done' && ($store.state.activePair.userID === $store.state.auth.userID || $tasksVerification.hasPermissionByName('special', 'custom', 'close-matching'))"
           >
-            <v-icon>mdi-lock</v-icon>Mark Reconciliation As Done
+            <v-icon>mdi-lock</v-icon>{{ $t(`App.hardcoded-texts.Mark Reconciliation As Done`) }}
           </v-btn>
           <v-btn
             color="success"
@@ -438,7 +438,7 @@
             @click='markRecoUnDone'
             v-if="$store.state.recoStatus === 'Done' && ($store.state.activePair.userID === $store.state.auth.userID || $tasksVerification.hasPermissionByName('special', 'custom', 'close-matching'))"
           >
-            <v-icon left>mdi-lock-open-variant</v-icon>Mark Reconciliation As UnDone
+            <v-icon left>mdi-lock-open-variant</v-icon>{{ $t(`App.hardcoded-texts.Mark Reconciliation As UnDone`) }}
           </v-btn>
         </template>
       </v-col>
@@ -449,7 +449,7 @@
           v-model="recoLevel"
           :item-value='locationLevels.value'
           :item-name='locationLevels.text'
-          label="Level"
+          :label="$t(`App.hardcoded-texts.Level`)"
           class="input-group--focused"
           height='1'
           full-width
@@ -493,35 +493,35 @@
         >
           <v-tabs-slider color="red"></v-tabs-slider>
           <v-tab key="match">
-            MATCHED ({{totalMapped}})
+            {{ $t(`App.hardcoded-texts.MATCHED`) }} ({{totalMapped}})
             <v-icon
               color="white"
               right
             >mdi-thumb-up</v-icon>
           </v-tab>
           <v-tab key="notMapped">
-            Source 1 Not Mapped ({{totalNotMapped}})
+            {{ $t(`App.hardcoded-texts.Source 1 Not Mapped`) }} ({{totalNotMapped}})
             <v-icon
               color="white"
               right
             >mdi-thumb-down</v-icon>
           </v-tab>
           <v-tab key="nomatch">
-            Source 1 NO MATCH ({{totalNoMatch}})
+            {{ $t(`App.hardcoded-texts.Source 1 NO MATCH`) }} ({{totalNoMatch}})
             <v-icon
               color="white"
               right
             >mdi-thumb-down</v-icon>
           </v-tab>
           <v-tab key="ignore">
-            Source 1 IGNORED ({{totalIgnore}})
+            {{ $t(`App.hardcoded-texts.Source 1 IGNORED`) }} ({{totalIgnore}})
             <v-icon
               color="white"
               right
             >mdi-thumb-down</v-icon>
           </v-tab>
           <v-tab key="flagged">
-            FLAGGED ({{totalFlagged}})
+            {{ $t(`App.hardcoded-texts.FLAGGED`) }} ({{totalFlagged}})
             <v-icon
               color="white"
               right
@@ -627,24 +627,24 @@ export default {
     return {
       helpDialog: false,
       matchedHeaders: [
-        { text: 'Source 1 Location', value: 'source1Name' },
-        { text: 'Source 1 ID', value: 'source1Id' },
-        { text: 'Source 2 Location', value: 'source2Name' },
-        { text: 'Source 2 ID', value: 'source2Id' }
+        { text: this.$t(`App.hardcoded-texts.Source1 Location`), value: 'source1Name' },
+        { text: this.$t(`App.hardcoded-texts.Source1 ID`), value: 'source1Id' },
+        { text: this.$t(`App.hardcoded-texts.Source2 Location`), value: 'source2Name' },
+        { text: this.$t(`App.hardcoded-texts.Source2 ID`), value: 'source2Id' }
       ],
       noMatchHeaders: [
-        { text: 'Source 1 Location', value: 'source1Name' },
-        { text: 'Source 1 ID', value: 'source1Id' }
+        { text: this.$t(`App.hardcoded-texts.Source1 Location`), value: 'source1Name' },
+        { text: this.$t(`App.hardcoded-texts.Source1 ID`), value: 'source1Id' }
       ],
       notMappedHeaders: [
-        { text: 'Source 1 Location', value: 'source1Name' },
-        { text: 'Source 1 ID', value: 'source1Id' }
+        { text: this.$t(`App.hardcoded-texts.Source1 Location`), value: 'source1Name' },
+        { text: this.$t(`App.hardcoded-texts.Source1 ID`), value: 'source1Id' }
       ],
       flaggedHeaders: [
-        { text: 'Source 1 Location', value: 'source1Name' },
-        { text: 'Source 1 ID', value: 'source1Id' },
-        { text: 'Source 2 Location', value: 'source2Name' },
-        { text: 'Source 2 ID', value: 'source2Id' }
+        { text: this.$t(`App.hardcoded-texts.Source1 Location`), value: 'source1Name' },
+        { text: this.$t(`App.hardcoded-texts.Source1 ID`), value: 'source1Id' },
+        { text: this.$t(`App.hardcoded-texts.Source2 Location`), value: 'source2Name' },
+        { text: this.$t(`App.hardcoded-texts.Source2 ID`), value: 'source2Id' }
       ],
       searchMatched: '',
       mappingData: {},

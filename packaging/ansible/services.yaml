@@ -1,5 +1,5 @@
 ---
-- name: Preparation for facility reconciliation
+- name: Install and run gofr service
   hosts: all
   remote_user: "{{ user }}"
   become: true
@@ -10,8 +10,8 @@
       prompt: "Please enter the username (with sudo) -- NOT root user or it will fail"
       private: no
   
-  vars:
-    executable: "/bin/node"
+  # vars:
+  #   executable: "/bin/node"
 
   tasks:
 
@@ -31,68 +31,54 @@
       backup: no
 
 
-# hearth
-
-  - name: install systemd template for hearth service (ubuntu)
-    template:
-      src: hearth.service.j2
-      dest: /etc/systemd/system/hearth.service
-      mode: 644
-      force: yes
-    vars:
-      executable: "/usr/bin/npm"
-    when: ansible_distribution == 'Ubuntu'
+  # redis is running under systemd
+  - name: Start redis
+    service:
+      name: redis
+      state: started
+      enabled: yes
 
 
-  - name: install systemd template for hearth service (centos)
-    template:
-      src: hearth.service.j2
-      dest: /etc/systemd/system/hearth.service
-      mode: 644
-      force: yes
-    vars:
-      executable: "/bin/npm"
-    when: ansible_distribution == 'CentOS'
-
-
-  - name: run hearth
+# postgres
+# sudo systemctl status postgresql@14-main.service
+  - name: run postgres
     service: 
-      name: hearth.service
-      # https://docs.ansible.com/ansible/2.7/modules/systemd_module.html
-      state: restarted
+      name: postgresql@14-main.service
+      state: started
       enabled: yes
       daemon_reload: yes
 
 
-# backend
 
-  - name: install systemd template for facility-recon service (ubuntu)
+# gofr
+  - name: install systemd template for gofr service
     template:
-      src: facility-recon.service.j2
-      dest: /etc/systemd/system/facility-recon.service
-      mode: 644
+      src: gofr.service.j2
+      dest: /etc/systemd/system/gofr.service
+      mode: 0755
       force: yes
-    vars:
-      executable: "/usr/bin/npm"
-    when: ansible_distribution == 'Ubuntu'
+    # vars:
+    #   executable: "/usr/local/bin/npm"
 
-
-  - name: install systemd template for facility-recon service (centos)
-    template:
-      src: facility-recon.service.j2
-      dest: /etc/systemd/system/facility-recon.service
-      mode: 644
-      force: yes
-    vars:
-      executable: "/bin/npm"
-    when: ansible_distribution == 'CentOS'
-
+# start then restart gofr, to fix bug in loading fsh
+  - name: run backend
+    service: 
+      name: gofr.service
+      state: restarted
+      enabled: yes
+      daemon_reload: yes
 
   - name: run backend
     service: 
-      name: facility-recon.service
-      state: restarted
+      name: gofr.service
+      state: stopped
       enabled: yes
       daemon_reload: yes
 
+  - name: run backend
+    service: 
+      name: gofr.service
+      state: restarted
+      enabled: yes
+      daemon_reload: yes
 

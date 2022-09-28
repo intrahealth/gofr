@@ -5,7 +5,7 @@
         type="info"
         :value="true"
       >
-        <b>Wait for upload to finish ...</b>
+        <b>{{ $t(`App.hardcoded-texts.Wait for upload to finish`) }} ...</b>
         <v-progress-linear
           indeterminate
           color="white"
@@ -28,7 +28,7 @@
             dark
           >
             <v-toolbar-title>
-              <v-icon>mdi-information</v-icon> About this page
+              <v-icon>mdi-information</v-icon> {{ $t(`App.hardcoded-texts.About this page`) }}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn
@@ -40,8 +40,8 @@
             </v-btn>
           </v-toolbar>
           <v-card-text>
-            This page let you view dat you have uploaded or synchronized from a remote server
-            <v-list>1. Use the tree to filter grid data</v-list>
+            {{ $t(`App.hardcoded-texts.This page let you view what you have uploaded or synchronized from a remote server`) }}
+            <v-list>1. {{ $t(`App.hardcoded-texts.Use the tree to filter grid data`) }}</v-list>
           </v-card-text>
         </v-card>
       </v-dialog>
@@ -57,13 +57,13 @@
             dark
           >
             <v-toolbar-title>
-              Edit Location
+              {{ $t(`App.hardcoded-texts.Edit Location`) }}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-icon
               @click="editDialog = false"
               style="cursor: pointer"
-            >close</v-icon>
+            >mdi-close</v-icon>
           </v-toolbar>
           <v-card-text>
             <v-layout column>
@@ -74,7 +74,7 @@
                   @change="$v.editLocationName.$touch()"
                   :error-messages="editLocationNameErrors"
                   required
-                  label="Facility"
+                  :label="$t(`App.hardcoded-texts.Facility`)"
                 >
                 </v-text-field>
               </v-flex>
@@ -83,7 +83,7 @@
                   :items="editParents"
                   v-model="editLocationParent"
                   filled
-                  label="Parent"
+                  :label="$t(`App.hardcoded-texts.Parent`)"
                 ></v-select>
               </v-flex>
             </v-layout>
@@ -104,7 +104,7 @@
                     color="error"
                     @click.native="editDialog = false"
                   >
-                    <v-icon left>cancel</v-icon> Cancel
+                    <v-icon left>mdi-cancel</v-icon> {{ $t(`App.hardcoded-texts.Cancel`) }}
                   </v-btn>
                 </v-flex>
                 <v-flex
@@ -117,7 +117,7 @@
                     dark
                     @click="saveEdit()"
                   >
-                    <v-icon left>save</v-icon>Save
+                    <v-icon left>mdi-save</v-icon>{{ $t(`App.hardcoded-texts.Save`) }}
                   </v-btn>
                 </v-flex>
               </v-layout>
@@ -141,7 +141,7 @@
               <v-icon>mdi-help</v-icon>
             </v-btn>
           </template>
-          <span>Help</span>
+          <span>{{ $t(`App.hardcoded-texts.Help`) }}</span>
         </v-tooltip>
       </v-row>
       <v-layout
@@ -151,7 +151,7 @@
         <v-flex xs6>
           <v-card>
             <v-card-title primary-title>
-              <h3 class="headline mb-0">Source 1 Data Tree</h3>
+              <h3 class="headline mb-0">{{ $t(`App.hardcoded-texts.Source 1 Data Tree`) }}</h3>
             </v-card-title>
             <template v-if="loadingSource1Tree">
               <v-progress-linear :indeterminate="true"></v-progress-linear>
@@ -173,7 +173,7 @@
         <v-flex xs6>
           <v-card>
             <v-card-title primary-title>
-              <h3 class="headline mb-0">Source 2 Data Tree</h3>
+              <h3 class="headline mb-0">{{ $t(`App.hardcoded-texts.Source 2 Data Tree`) }}</h3>
             </v-card-title>
             <template v-if="loadingSource2Tree">
               <v-progress-linear :indeterminate="true"></v-progress-linear>
@@ -195,21 +195,12 @@
         <v-flex xs6>
           <v-card>
             <v-card-title primary-title>
-              <h3 class="headline mb-0">Source 1 Data Grid</h3>
+              <h3 class="headline mb-0">{{ $t(`App.hardcoded-texts.Source 1 Data Grid`) }}</h3>
             </v-card-title>
             <template v-if="loadingSource1Grid">
               <v-progress-linear :indeterminate="true"></v-progress-linear>
             </template>
             <template v-else>
-              <!-- <v-card-title>
-                <v-text-field
-                  v-model="searchSource1"
-                  append-icon="search"
-                  label="Search"
-                  single-line
-                  hide-details
-                ></v-text-field>
-              </v-card-title> -->
               <v-card-text>
                 <v-data-table
                   :headers="source1GridHeader"
@@ -221,29 +212,10 @@
                   hide-default-footer
                   class="elevation-1"
                 >
-                  <template
-                    slot="items"
-                    slot-scope="props"
-                  >
-                    <td
-                      v-for='(header, key) in source1GridHeader'
-                      style="white-space:nowrap;overflow: hidden;"
-                      :key="header.value + 1"
-                    >
-                      <template v-if="key === 0 && isDataset1Owner">
-                        <v-icon
-                          @click="edit(props.item, 'source1')"
-                          style="cursor: pointer"
-                        >edit</v-icon>
-                      </template>
-                      <template v-else>
-                        {{props.item[header.value]}}
-                      </template>
-                    </td>
-                  </template>
                 </v-data-table>
               </v-card-text>
               <div class="text-xs-center pt-2">
+                {{source1Pagination}} - {{source1Count}}
                 <v-pagination
                   v-model="source1Pagination.page"
                   :length="source1Pages"
@@ -261,15 +233,6 @@
               <v-progress-linear :indeterminate="true"></v-progress-linear>
             </template>
             <template v-else>
-              <!-- <v-card-title>
-                <v-text-field
-                  v-model="searchSource2"
-                  append-icon="search"
-                  label="Search"
-                  single-line
-                  hide-details
-                ></v-text-field>
-              </v-card-title> -->
               <v-card-text>
                 <v-data-table
                   :headers="source2GridHeader"
@@ -281,26 +244,6 @@
                   hide-default-footer
                   class="elevation-1"
                 >
-                  <template
-                    slot="items"
-                    slot-scope="props"
-                  >
-                    <td
-                      v-for='(header, key) in source2GridHeader'
-                      style="white-space:nowrap;overflow: hidden;"
-                      :key="header.value + 2"
-                    >
-                      <template v-if="key === 0 && isDataset2Owner">
-                        <v-icon
-                          @click="edit(props.item, 'source2')"
-                          style="cursor: pointer"
-                        >edit</v-icon>
-                      </template>
-                      <template v-else>
-                        {{props.item[header.value]}}
-                      </template>
-                    </td>
-                  </template>
                 </v-data-table>
               </v-card-text>
               <div class="text-xs-center pt-2">
@@ -328,7 +271,7 @@
             @click='$router.push({name:"FacilityReconScores"})'
           >
             <v-icon left>mdi-file-find</v-icon>
-            Reconcile
+            {{ $t(`App.hardcoded-texts.Reconcile`) }}
           </v-btn>
         </v-flex>
       </v-layout>
@@ -389,8 +332,8 @@ export default {
       searchSource2: '',
       filterSource1: { text: '', level: '' },
       filterSource2: { text: '', level: '' },
-      source2Pagination: { rowsPerPage: 20 },
-      source1Pagination: { rowsPerPage: 20 },
+      source2Pagination: { rowsPerPage: 10, totalItems: null },
+      source1Pagination: { rowsPerPage: 10, totalItems: null },
       loadingSource1: false,
       loadingSource2: false,
       totalSource1Records: 0,
@@ -467,10 +410,10 @@ export default {
         id = ''
       }
       this.loadingSource1Grid = true
-      let source1Owner = this.getDatasourceOwner().source1Owner
       let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
       let userID = this.$store.state.activePair.userID
-      let path = `/hierarchy?source=${this.source1}&start=${this.source1Start}&count=${this.source1Count}&id=${id}&userID=${userID}&sourceOwner=${source1Owner}&sourceLimitOrgId=${source1LimitOrgId}`
+      let partition = this.$store.state.activePair.source1.name
+      let path = `/hierarchy?partition=${partition}&start=${this.source1Start}&count=${this.source1Count}&id=${id}&userID=${userID}&sourceLimitOrgId=${source1LimitOrgId}`
       axios.get(path).then((hierarchy) => {
         this.loadingSource1Grid = false
         if (hierarchy.data) {
@@ -521,10 +464,10 @@ export default {
       }
       this.loadingSource2 = true
       this.loadingSource2Grid = true
-      let source2Owner = this.getDatasourceOwner().source2Owner
       let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
       let userID = this.$store.state.activePair.userID
-      let path = `/hierarchy?source=${this.source2}&start=${this.source2Start}&count=${this.source2Count}&id=${id}&userID=${userID}&sourceOwner=${source2Owner}&sourceLimitOrgId=${source2LimitOrgId}`
+      let partition = this.$store.state.activePair.source2.name
+      let path = `/hierarchy?partition=${partition}&start=${this.source2Start}&count=${this.source2Count}&id=${id}&userID=${userID}&sourceLimitOrgId=${source2LimitOrgId}`
       axios.get(path).then((hierarchy) => {
         this.loadingSource2Grid = false
         if (hierarchy.data) {
@@ -571,19 +514,19 @@ export default {
       if (!this.source1 || !this.source2) {
         return
       }
-      let source2Owner = this.getDatasourceOwner().source2Owner
+      let partition1 = this.$store.state.activePair.source1.name
+      let partition2 = this.$store.state.activePair.source2.name
       let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
       this.loadingSource2Tree = true
-      axios.get('/getTree/' + this.source2 + '/' + source2Owner + '/' + source2LimitOrgId).then((hierarchy) => {
+      axios.get('/getTree/' + partition2 + '/' + source2LimitOrgId).then((hierarchy) => {
         this.loadingSource2Tree = false
         if (hierarchy.data) {
           this.source2Tree = hierarchy.data
         }
       })
-      let source1Owner = this.getDatasourceOwner().source1Owner
       let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
       this.loadingSource1Tree = true
-      axios.get('/getTree/' + this.source1 + '/' + source1Owner + '/' + source1LimitOrgId).then((hierarchy) => {
+      axios.get('/getTree/' + partition1 + '/' + source1LimitOrgId).then((hierarchy) => {
         this.loadingSource1Tree = false
         if (hierarchy.data) {
           this.source1Tree = hierarchy.data

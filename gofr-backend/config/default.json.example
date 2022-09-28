@@ -2,7 +2,14 @@
   "app": {
     "installed": false,
     "idp": "gofr",
-    "version": "2.2.0"
+    "version": "2.2.0",
+    "site": {
+      "path": "/var/lib/gofr/gofr-backend/site",
+      "routes": {}
+    },
+    "core": {
+      "path": "/var/lib/gofr/gofr-backend/lib"
+    }
   },
   "server": {
     "hostname": "0.0.0.0",
@@ -17,7 +24,8 @@
     "UIClientId": "gofr-gui",
     "backendClientId": "gofr-backend",
     "RESTClientUser": "gofr@keycloak.org",
-    "RESTClientPassword": "gofr"
+    "RESTClientPassword": "gofr",
+    "clientSecret": "df3dcc28-f79f-4df7-bd5c-427afe60a41b"
   },
   "redis": {
     "host": "127.0.0.1"
@@ -45,7 +53,7 @@
       }
     }
   },
-  "builtFSHFIles": "../../fshmcsd/build/input",
+  "builtFSHFIles": "../../fshmcsd/fsh-generated/resources",
   "workflow": {
     "processor": {},
     "questionnaire": {}
@@ -66,12 +74,11 @@
     ]
   },
   "mCSD": {
-    "url": "http://localhost:8081/hapi54/fhir",
     "server": {
       "protocal": "http",
       "host": "localhost",
       "port": "8081",
-      "basePath": "hapi54/fhir",
+      "basePath": "gofr/fhir",
       "username": "",
       "password": ""
     },

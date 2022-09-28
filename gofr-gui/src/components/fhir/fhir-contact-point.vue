@@ -2,7 +2,7 @@
   <gofr-complex-card
     :complexField="field"
     :slotProps="slotProps"
-    :label="label"
+    :label="$t(`App.fhir-resources-texts.${label}`)"
     :errors="errors"
   >
     <template #default="slotProps">

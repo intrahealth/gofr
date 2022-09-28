@@ -2,13 +2,13 @@
   <v-container class="py-5">
     <v-card>
       <v-card-title>
-        Search {{ label }}
+        {{ $t("App.hardcoded-texts.Search") }} {{ $t(`App.fhir-resources-texts.${label}`) }}
         <v-spacer></v-spacer>
-        <!-- <v-btn :class="addLink ? addLink.class || 'primary' : 'primary'" :to="addLink ? addLink.url : '/resource/add/'+page">
+        <v-btn :class="addLink ? addLink.class || 'primary' : 'primary'" :to="addLink ? addLink.url : '/resource/add/'+page">
           <v-icon v-if="addLink && addLink.icon">{{ addLink.icon }}</v-icon>
           <v-icon v-else>mdi-database-plus</v-icon>
-          Add {{label}}
-        </v-btn> -->
+          {{ $t("App.hardcoded-texts.Add") }} {{ $t(`App.fhir-resources-texts.${label}`) }}
+        </v-btn>
       </v-card-title>
       <v-card-title>
         <slot></slot>
@@ -27,7 +27,7 @@
           item-key="id"
           :options.sync="options"
           :server-items-length="total"
-          :footer-props="{ 'items-per-page-options': [5,10,20,50] }"
+          :footer-props="{ 'items-per-page-text':$t('App.hardcoded-texts.TableText'), 'items-per-page-options': [5,10,20,50] }"
           :loading="loading"
           class="elevation-1"
           @click:row="clickIt"
@@ -163,6 +163,9 @@ export default {
             for (let field of this.fields) {
               let fieldDisplay = this.$fhirpath.evaluate( entry.resource, field[1] );
               result[field[1]] = await this.$fhirutils.lookup( fieldDisplay[0], field[2] )
+              if(fieldDisplay.length > 1) {
+                result[field[1]] += ' ...'
+              }
             }
             this.results.push(result);
           }

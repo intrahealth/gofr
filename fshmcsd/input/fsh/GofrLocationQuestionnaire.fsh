@@ -292,6 +292,21 @@ Usage:          #definition
 * item[5].item[0].item[3].required = false
 * item[5].item[0].item[3].repeats = false
 
+// * item[6].linkId = "HealthcareService"
+// * item[6].definition = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.HealthcareService"
+// * item[6].text = "Services Offered"
+// * item[6].type = #group
+
+// * item[6].item[0].linkId = "HealthcareService.location"
+// * item[6].item[0].definition = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.HealthcareService#HealthcareService.location"
+// * item[6].item[0].text = "HealthcareService"
+// * item[6].item[0].type = #string
+// * item[6].item[0].required = true
+// * item[6].item[0].repeats = true
+// * item[6].item[0].readOnly = true
+// * item[6].item[0].answerOption.valueString = "__REPLACE__Location"
+// * item[6].item[0].answerOption.initialSelected = true
+
 * item[6].linkId = "Organization"
 * item[6].definition = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.FacilityOrganization"
 * item[6].text = "Organization"
@@ -299,7 +314,7 @@ Usage:          #definition
 
 * item[6].item[0].linkId = "Organization.name"
 * item[6].item[0].definition = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.FacilityOrganization#Organization.name"
-* item[6].item[0].text = "Oranization Names"
+* item[6].item[0].text = "Organization Names"
 * item[6].item[0].type = #string
 * item[6].item[0].repeats = false
 * item[6].item[0].required = true
@@ -309,7 +324,7 @@ Usage:          #definition
 
 * item[6].item[1].linkId = "Organization.type"
 * item[6].item[1].definition = "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.FacilityOrganization#Organization.type"
-* item[6].item[1].text = "Oranization Type"
+* item[6].item[1].text = "Organization Type"
 * item[6].item[1].type = #string
 * item[6].item[1].repeats = false
 * item[6].item[1].required = true

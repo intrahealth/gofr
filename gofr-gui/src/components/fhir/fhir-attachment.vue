@@ -3,7 +3,7 @@
     <template #form>
       <v-file-input
         :disabled="disabled"
-        :label="display"
+        :label="$t(`App.fhir-resources-texts.${display}`)"
         :loading="loading"
         v-model="upload"
         outlined
@@ -13,7 +13,7 @@
         @change='doUpload'
         :error-messages="errors"
       >
-        <template #label>{{display}} <span v-if="required" class="red--text font-weight-bold">*</span></template>
+        <template #label>{{ $t(`App.fhir-resources-texts.${display}`) }} <span v-if="required" class="red--text font-weight-bold">*</span></template>
         <template #append-outer>
           <v-menu
             v-if="objURL"
@@ -41,7 +41,7 @@
       </v-file-input>
     </template>
     <template #header>
-      {{display}}
+      {{ $t(`App.fhir-resources-texts.${display}`) }}
     </template>
     <template #value>
       <v-menu

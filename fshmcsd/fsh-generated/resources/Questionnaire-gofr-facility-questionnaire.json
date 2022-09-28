@@ -510,7 +510,7 @@
         {
           "linkId": "Organization.name",
           "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.FacilityOrganization#Organization.name",
-          "text": "Oranization Names",
+          "text": "Organization Names",
           "type": "string",
           "repeats": false,
           "required": true,
@@ -525,7 +525,7 @@
         {
           "linkId": "Organization.type",
           "definition": "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.FacilityOrganization#Organization.type",
-          "text": "Oranization Type",
+          "text": "Organization Type",
           "type": "string",
           "repeats": false,
           "required": true,

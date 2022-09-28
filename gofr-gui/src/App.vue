@@ -1,29 +1,7 @@
 <template>
   <v-app>
-    <v-app-bar
-      color="primary"
-      dark
-      app
-      clipped-left
-      clipped-right
-    >
-      <v-toolbar-title v-text="title"></v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-toolbar-items v-if="($keycloak && $keycloak.authenticated) || $store.state.auth.userID || $store.state.config.generalConfig.authDisabled">
-        <v-btn
-          flat
-          :href="dhisLink"
-          v-if='dhisLink'
-        >
-          <img src="./assets/dhis2.png" />
-        </v-btn>
-        <appMenu></appMenu>
-      </v-toolbar-items>
-      <v-spacer></v-spacer>
-      <v-toolbar-items>
-
-      </v-toolbar-items>
-    </v-app-bar>
+    <appToolbar></appToolbar>
+    <appSideMenu v-if="$store.state.auth.userID" :nav="nav"></appSideMenu>
     <v-main>
       <v-dialog
         v-model="$store.state.dynamicProgress"
@@ -73,7 +51,7 @@
             <v-btn
               color="primary"
               @click.native="closeDialogError"
-            >Ok</v-btn>
+            >{{ $t(`App.hardcoded-texts.Ok`) }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -87,7 +65,7 @@
           dark
         >
           <v-card-text>
-            {{ $t('App.initApp') }}
+            {{ $t(`App.hardcoded-texts.initApp`) }}
             <v-progress-linear
               indeterminate
               color="white"
@@ -146,14 +124,15 @@
     >
       <v-spacer></v-spacer>
       <label style="font-size: 10px">
-        GOFR Version {{$store.state.version}}
+        {{ $t(`App.hardcoded-texts.GOFR Version`) }} {{$store.state.version}}
       </label>
     </v-footer>
   </v-app>
 </template>
 <script>
 import axios from 'axios'
-import Menu from '@/components/menu'
+import AppToolbar from '@/components/appToolbar'
+import SideMenu from '@/components/side-menu'
 import { scoresMixin } from './mixins/scoresMixin'
 import { generalMixin } from './mixins/generalMixin'
 import { dataSourcePairMixin } from './components/DataSourcesPair/dataSourcePairMixin'
@@ -168,16 +147,13 @@ export default {
   props: ['generalConfig'],
   data () {
     return {
-      items: [
-        { title: 'Click Me' },
-        { title: 'Click Me' },
-        { title: 'Click Me' },
-        { title: 'Click Me 2' }
-      ],
       fixed: false,
-      title: this.$t('App.title'),
       activeDataSourcePair: {},
-      tasksVerification: tasksVerification
+      tasksVerification: tasksVerification,
+      nav: {
+        active: null,
+        menu: {}
+      }
     }
   },
   methods: {
@@ -186,9 +162,13 @@ export default {
       this.$store.state.dialogError = false
     },
     renderInitialPage () {
-      // this.$store.state.initializingApp = false
-      // this.$router.push({ name: 'ViewMap' })
-      // return
+      if(!this.$store.state.config.userConfig.FRDatasource) {
+        if(this.$store.state.auth.username === "public@gofr.org") {
+          this.$store.state.config.userConfig.FRDatasource = this.$store.state.config.generalConfig.public_access.partition
+        } else if(this.$store.state.dataSources.length > 0) {
+          this.$store.state.config.userConfig.FRDatasource = this.$store.state.dataSources[0].name
+        }
+      }
       let source1DB = this.$store.state.activePair.source1.name
       let source2DB = this.$store.state.activePair.source2.name
       if (
@@ -196,30 +176,45 @@ export default {
         (this.$store.state.dataSources.length > 1 ||
           this.$store.state.dataSourcePairs.length > 0)
       ) {
-        this.$router.push({ name: 'Home' })
-        // this.$router.push({ name: 'DataSourcesPair' })
+        if(this.$store.state.auth.username === "public@gofr.org") {
+          this.$router.push({ name: 'HomePublic' })
+        } else {
+          // this.$router.push({ name: 'Home' })
+        }
         return
       }
       if (!source1DB || !source2DB) {
-        // this.$router.push({ name: 'AddDataSources' })
-        this.$router.push({ name: 'Home' })
+        if(this.$store.state.auth.username === "public@gofr.org") {
+          this.$router.push({ name: 'HomePublic' })
+        } else {
+          // this.$router.push({ name: 'Home' })
+        }
         return
       }
       axios.get( '/uploadAvailable/' + source1DB + '/' + source2DB ).then(results => {
         this.$store.state.initializingApp = false
         if (results.data.dataUploaded) {
           this.$store.state.recalculateScores = true
-          // this.$router.push({ name: 'FacilityReconScores' })
-          this.$router.push({ name: 'Home' })
+          if(this.$store.state.auth.username === "public@gofr.org") {
+            this.$router.push({ name: 'HomePublic' })
+          } else {
+            // this.$router.push({ name: 'Home' })
+          }
         } else {
-          // this.$router.push({ name: 'AddDataSources' })
-          this.$router.push({ name: 'Home' })
+          if(this.$store.state.auth.username === "public@gofr.org") {
+            this.$router.push({ name: 'HomePublic' })
+          } else {
+            // this.$router.push({ name: 'Home' })
+          }
         }
       })
       .catch(err => {
         console.log(err)
-        // this.$router.push({ name: 'AddDataSources' })
-        this.$router.push({ name: 'Home' })
+        if(this.$store.state.auth.username === "public@gofr.org") {
+          this.$router.push({ name: 'HomePublic' })
+        } else {
+          // this.$router.push({ name: 'Home' })
+        }
       })
     },
     getTotalLevels () {
@@ -295,6 +290,7 @@ export default {
         .catch(err => {
           this.$store.state.loadingServers = false
           console.log(err)
+          this.getDataSourcePair()
         })
     },
     getUserConfig () {
@@ -302,12 +298,39 @@ export default {
       axios
         .get('/config/getUserConfig/' + userID)
         .then(config => {
-          if (config.data) {
-            this.$store.state.config.userConfig = { ...this.$store.state.config.userConfig, ...config.data }
+          if (config.data.config) {
+            this.$store.state.config.userConfig = { 
+              ...this.$store.state.config.userConfig, 
+              ...config.data.config
+            }
+          }
+          if(config.data.site && config.data.site.nav) {
+            if (config.data.site.nav.hasOwnProperty("active")) this.nav.active = config.data.site.nav.active
+            if (config.data.site.nav.hasOwnProperty("menu")) this.nav.menu = config.data.site.nav.menu
+            if (config.data.site.nav.hasOwnProperty("home")) this.nav.home = config.data.site.nav.home
+          }
+          if(this.$store.state.auth.username === 'public@gofr.org') {
+            config.data.site.nav.menu.home.url = '/HomePublic'
+          }
+          if(this.$store.state.idp === 'keycloak') {
+            config.data.site.nav.menu.account = {
+              text: this.$t('App.menu.account.msg'),
+              tooltip: this.$t('App.menu.account.tooltip'),
+              order: 6,
+              icon: 'mdi-account-outline',
+              url: this.$store.state.keycloak.baseURL + '/realms/' + this.$store.state.keycloak.realm + '/account',
+              external: true,
+              access: {
+                permission: 'special',
+                resource: 'custom',
+                id: 'manage-account'
+              },
+            }
           }
           this.getDataSources()
         })
-        .catch(() => {
+        .catch((err) => {
+          console.log(err);
           this.getDataSources()
         })
     },
@@ -333,6 +356,8 @@ export default {
             this.$store.state.activePair.source2.display = activeSource.source2.display
             this.$store.state.activePair.source2.userID = activeSource.source2.user.id
             this.$store.state.activePair.id = activeSource.id
+            this.$store.state.activePair.name = activeSource.name
+            this.$store.state.activePair.display = activeSource.display
             this.$store.state.activePair.shared = activeSource.sharedUsers
             this.$store.state.activePair.activeUsers = activeSource.activeUsers
             this.$store.state.activePair.userID = activeSource.user.id
@@ -410,21 +435,11 @@ export default {
       }
     }
   },
-  computed: {
-    dhisLink () {
-      if (this.$store.state.dhis.user.orgId) {
-        return window.location.protocol + '//' + window.location.hostname
-      } else {
-        return false
-      }
-    }
-  },
   components: {
-    'appMenu': Menu
+    'appToolbar': AppToolbar,
+    'appSideMenu': SideMenu
   },
   created () {
-    // this.$router.push({ name: 'AddDataSources' })
-    // this.$router.push({ name: 'Home' })
     this.$store.state.config.generalConfig = this.generalConfig
     if(this.$store.state.idp === 'keycloak') {
       this.$store.state.clientId = uuid.v4()
@@ -465,6 +480,23 @@ export default {
     })
     eventBus.$on('getDataSourcePair', () => {
       this.getDataSourcePair()
+    })
+    eventBus.$on('refresh-login', () => {
+      let method = 'GET'
+      if(this.$store.state.idp === 'keycloak') {
+        method = 'POST'
+      }
+      axios({
+        method,
+        url: '/auth'
+      }).then((authResp) => {
+        if(this.$store.state.idp === 'keycloak' && authResp.data.resource) {
+          this.$store.state.auth.userObj = authResp.data
+          this.$cookies.set('userObj', JSON.stringify(authResp.data), 'infinity')
+        } else if(authResp.data.userObj && authResp.data.userObj.resource){
+          this.$store.state.auth.userObj = authResp.data.userObj
+        }
+      })
     })
   },
   mounted: function() {

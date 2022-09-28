@@ -1,12 +1,12 @@
 <template>
   <gofr-element :edit="edit" :loading="false">
     <template #form>
-      <v-textarea :error-messages="errors" @change="errors = []" :disabled="disabled" :label="display" v-model="value" outlined hide-details="auto" :rules="rules" dense>
-        <template #label>{{display}} <span v-if="required" class="red--text font-weight-bold">*</span></template>
+      <v-textarea :error-messages="errors" @change="errors = []" :disabled="disabled" :label="$t(`App.fhir-resources-texts.${display}`)" v-model="value" outlined hide-details="auto" :rules="rules" dense>
+        <template #label>{{ $t(`App.fhir-resources-texts.${display}`) }} <span v-if="required" class="red--text font-weight-bold">*</span></template>
       </v-textarea>
     </template>
     <template #header>
-      {{display}}
+      {{$t(`App.fhir-resources-texts.${display}`)}}
     </template>
     <template #value>
       {{value}}

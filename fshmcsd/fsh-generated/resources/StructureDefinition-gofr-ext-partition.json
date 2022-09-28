@@ -3781,9 +3781,9 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission",
         "path": "Extension.extension.extension.extension",
-        "sliceName": "permission",
+        "sliceName": "userpermission",
         "short": "Additional content defined by implementations",
         "definition": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
         "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
@@ -3802,7 +3802,7 @@
           {
             "code": "Extension",
             "profile": [
-              "http://gofr.org/fhir/StructureDefinition/permission"
+              "http://gofr.org/fhir/StructureDefinition/userpermission"
             ]
           }
         ],
@@ -3835,7 +3835,7 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.id",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.id",
         "path": "Extension.extension.extension.extension.id",
         "representation": [
           "xmlAttr"
@@ -3870,7 +3870,7 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension",
         "path": "Extension.extension.extension.extension.extension",
         "slicing": {
           "discriminator": [
@@ -3929,7 +3929,7 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension:resource",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:resource",
         "path": "Extension.extension.extension.extension.extension",
         "sliceName": "resource",
         "label": "Resource",
@@ -3981,7 +3981,7 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension:resource.id",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:resource.id",
         "path": "Extension.extension.extension.extension.extension.id",
         "representation": [
           "xmlAttr"
@@ -4016,7 +4016,7 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension:resource.extension",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:resource.extension",
         "path": "Extension.extension.extension.extension.extension.extension",
         "slicing": {
           "discriminator": [
@@ -4075,7 +4075,7 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension:resource.url",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:resource.url",
         "path": "Extension.extension.extension.extension.extension.url",
         "representation": [
           "xmlAttr"
@@ -4112,7 +4112,7 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension:resource.value[x]",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:resource.value[x]",
         "path": "Extension.extension.extension.extension.extension.value[x]",
         "slicing": {
           "discriminator": [
@@ -4158,7 +4158,7 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension:resource.value[x]:valueCode",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:resource.value[x]:valueCode",
         "path": "Extension.extension.extension.extension.extension.value[x]",
         "sliceName": "valueCode",
         "label": "Resource",
@@ -4201,7 +4201,7 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension:permission",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:permission",
         "path": "Extension.extension.extension.extension.extension",
         "sliceName": "permission",
         "label": "Permission",
@@ -4253,7 +4253,7 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension:permission.id",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:permission.id",
         "path": "Extension.extension.extension.extension.extension.id",
         "representation": [
           "xmlAttr"
@@ -4288,7 +4288,7 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension:permission.extension",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:permission.extension",
         "path": "Extension.extension.extension.extension.extension.extension",
         "slicing": {
           "discriminator": [
@@ -4347,7 +4347,7 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension:permission.url",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:permission.url",
         "path": "Extension.extension.extension.extension.extension.url",
         "representation": [
           "xmlAttr"
@@ -4384,7 +4384,7 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension:permission.value[x]",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:permission.value[x]",
         "path": "Extension.extension.extension.extension.extension.value[x]",
         "slicing": {
           "discriminator": [
@@ -4430,7 +4430,7 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension:permission.value[x]:valueCode",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:permission.value[x]:valueCode",
         "path": "Extension.extension.extension.extension.extension.value[x]",
         "sliceName": "valueCode",
         "label": "Permission",
@@ -4473,7 +4473,275 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.url",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:constraint",
+        "path": "Extension.extension.extension.extension.extension",
+        "sliceName": "constraint",
+        "label": "Constraint",
+        "short": "Additional content defined by implementations",
+        "definition": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+        "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+        "alias": [
+          "extensions",
+          "user content"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Element.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ext-1",
+            "severity": "error",
+            "human": "Must have either extensions or value[x], not both",
+            "expression": "extension.exists() != value.exists()",
+            "xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), \"value\")])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Extension"
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:constraint.id",
+        "path": "Extension.extension.extension.extension.extension.id",
+        "representation": [
+          "xmlAttr"
+        ],
+        "short": "Unique id for inter-element referencing",
+        "definition": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Element.id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "http://hl7.org/fhirpath/System.String",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+                "valueUrl": "string"
+              }
+            ]
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:constraint.extension",
+        "path": "Extension.extension.extension.extension.extension.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "description": "Extensions are always sliced by (at least) url",
+          "rules": "open"
+        },
+        "short": "Additional content defined by implementations",
+        "definition": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+        "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+        "alias": [
+          "extensions",
+          "user content"
+        ],
+        "min": 0,
+        "max": "0",
+        "base": {
+          "path": "Element.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ext-1",
+            "severity": "error",
+            "human": "Must have either extensions or value[x], not both",
+            "expression": "extension.exists() != value.exists()",
+            "xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), \"value\")])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Extension"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:constraint.url",
+        "path": "Extension.extension.extension.extension.extension.url",
+        "representation": [
+          "xmlAttr"
+        ],
+        "short": "identifies the meaning of the extension",
+        "definition": "Source of the definition for the extension code - a logical name or a URL.",
+        "comment": "The definition may point directly to a computable or human-readable definition of the extensibility codes, or it may be a logical URI as declared in some other specification. The definition SHALL be a URI for the Structure Definition defining the extension.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Extension.url",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "http://hl7.org/fhirpath/System.String",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+                "valueUrl": "uri"
+              }
+            ]
+          }
+        ],
+        "fixedUri": "constraint",
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:constraint.value[x]",
+        "path": "Extension.extension.extension.extension.extension.value[x]",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "type",
+              "path": "$this"
+            }
+          ],
+          "ordered": false,
+          "rules": "open"
+        },
+        "short": "Value of extension",
+        "definition": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Extension.value[x]",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:constraint.value[x]:valueString",
+        "path": "Extension.extension.extension.extension.extension.value[x]",
+        "sliceName": "valueString",
+        "label": "Constraint",
+        "short": "Value of extension",
+        "definition": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Extension.value[x]",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.url",
         "path": "Extension.extension.extension.extension.url",
         "representation": [
           "xmlAttr"
@@ -4499,7 +4767,7 @@
             ]
           }
         ],
-        "fixedUri": "http://gofr.org/fhir/StructureDefinition/permission",
+        "fixedUri": "http://gofr.org/fhir/StructureDefinition/userpermission",
         "isModifier": false,
         "isSummary": false,
         "mapping": [
@@ -4510,7 +4778,7 @@
         ]
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.value[x]",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.value[x]",
         "path": "Extension.extension.extension.extension.value[x]",
         "short": "Value of extension",
         "definition": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
@@ -7074,27 +7342,27 @@
         "mustSupport": true
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission",
         "path": "Extension.extension.extension.extension",
-        "sliceName": "permission"
+        "sliceName": "userpermission"
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension:resource",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:resource",
         "path": "Extension.extension.extension.extension.extension",
         "sliceName": "resource"
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension:resource.valueCode",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:resource.valueCode",
         "path": "Extension.extension.extension.extension.extension.valueCode",
         "mustSupport": true
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension:permission",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:permission",
         "path": "Extension.extension.extension.extension.extension",
         "sliceName": "permission"
       },
       {
-        "id": "Extension.extension:shared.extension:shareduser.extension:permission.extension:permission.valueCode",
+        "id": "Extension.extension:shared.extension:shareduser.extension:userpermission.extension:permission.valueCode",
         "path": "Extension.extension.extension.extension.extension.valueCode",
         "mustSupport": true
       },

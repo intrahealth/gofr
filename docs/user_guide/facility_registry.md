@@ -1,9 +1,8 @@
 # Facility Registry
 
 !!! important "What is the Facility Registry?"
-The **Facility Registry** is **repository** of facilities and healthcare services information in a particular jurisdiction(e.g.country, district etc.)
 
-The Facility Registry Module is a central repository of information on all the facilities in a particular jurisdiction e.g.(country)
+The **Facility Registry Module** is a **central repository** of **information on all the facilities** and **healthcare services information** in a particular **jurisdiction** e.g.(country,region etc.)
 
 The various features on this module include:
 
@@ -13,14 +12,15 @@ The various features on this module include:
 
 ## Jurisdictions
 
-Jurisdictions in gofr refer to geographical locations. Level 1 jurisdictions refer to highest geographical definition e.g. If a country is divided into regions, the regions divided into provinces, and provinces into districts, then in this country, the level 1 jurisdiction is the region, province is level 2 and district is level 3 jurisdiction.
+**Jurisdictions** in **GOFR** refer to geographical locations. 
+
+**Level 1** jurisdictions refer to **highest geographical definition** e.g. If a country is divided into regions, the regions divided into provinces, and provinces into districts, then in this country, the level 1 jurisdiction is the region, province is level 2 and district is level 3 jurisdiction.
 
 ### Add Jurisdiction
 
 ### Search Jurisdiction
 
-This feature allows users to search for a jurisdiction by name, type and parent.
-
+This feature allows users to search for a jurisdiction by **name, type and parent.**
 ![Alt text](../img/search_jurisdictions.JPG 'GOFR Facility Registry')
 
 ## Facility

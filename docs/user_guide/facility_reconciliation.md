@@ -6,7 +6,7 @@ Facility Reconciliation reconciles **data sources**, which usually involves choo
 
  **Reconcile**
 
-Reconciling data sources involves choosing a pair of sources to work with and then running the **automatic reconcile** or **manual matching** in GOFR. Any kind of match can be undone.
+Reconciling data sources involves choosing a pair of sources to work with and then running the **automatic reconcile** or **manual matching** in **GOFR**. Any kind of match can be undone.
 
 ## **Create and Manage Data Source Pair**
 
@@ -18,21 +18,21 @@ To create a data source pair, On the **Reconcile** tab -> Select **Create and Ma
 
 On the pair tab select one source on the left and one on the right.
 
-In the pairing process it is possible to share the pair with another user who may join in helping to match, for example where they are familiar with a specific area.
+In the pairing process it is possible to share the pair with another user who may join in helping to match, for example in a situation where they are familiar with a specific area.
 
 ## **Automatic Reconcile**
 
-When the reconciliation process starts it uses automatic matching. Matching proceeds like this:
+When the reconciliation process starts it uses **automatic matching.** Matching proceeds like this:
 
- <p>  The first level matches the highest administrative area names (termed region in GOFR) using the <a href="https://en.wikipedia.org/wiki/Levenshtein_distance"> Levenshtein distance.</a> </p>
+ <p> <strong> The first level matches the highest administrative area names (termed region in GOFR) using the </strong> <a href="https://en.wikipedia.org/wiki/Levenshtein_distance"> Levenshtein distance.</a> </p>
 
 ![Alt text](../img/reconciling_level_one.JPG 'GOFR Reconciliation')
 
-The second level matches based on the first level and also the Levenshtein distance for the second level names, termed district in GOFR.
+The **second level** matches based on the **first level** and also the **Levenshtein distance** for the **second level names**, termed **district** in GOFR.
 
 ![Alt text](../img/reconciling_level_two.JPG 'GOFR Reconciliation')
 
-The final level matches based on the second level (which was already matched according to the level above it) as well as the Levenshtein distance.
+The **final level** matches based on the **previous level** (which was already matched according to the level above it) as well as the **Levenshtein distance.**
 
 ![Alt text](../img/reconciling_level_three.JPG 'GOFR Reconciliation')
 
@@ -42,7 +42,7 @@ There is a detailed explanation of the processes:
 
 ### Recalculate Scores
 
-During the matching process at any level, it is possible to ask GOFR to match unmatched entities using the Recalculate Scores button. This process does not remove matches.
+During the matching process at any level, it is possible to match unmatched entities using the **Recalculate Scores** button. This process does not remove matches.
 
 ![Alt text](../img/recalculate_scores.JPG 'GOFR Reconciliation')
 

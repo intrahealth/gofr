@@ -8,6 +8,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const config = require('./config');
 const logger = require('./winston');
+const ihrissmartrequire = require('ihrissmartrequire')
 
 module.exports = {
   getFilesFromDir(searchDir) {
@@ -270,16 +271,18 @@ module.exports = {
     const pathString = path.join(':');
     config.set(pathString, newValue);
     logger.info('Updating config file');
-    const configFile = `${__dirname}/../config/default.json`;
+    const configFile = ihrissmartrequire.path("config/default.json");
     const configData = require(configFile);
     this.setNestedKey(configData, path, newValue);
-    fs.writeFile(configFile, JSON.stringify(configData, 0, 2), (err) => {
-      if (err) {
-        throw err;
-      }
-      logger.info('Done updating config file');
-      return callback();
-    });
+    setTimeout(() => {
+      fs.writeFile(configFile, JSON.stringify(configData, 0, 2), (err) => {
+        if (err) {
+          throw err;
+        }
+        logger.info('Done updating config file');
+        return callback();
+      });
+    }, 100);
   },
   encrypt(text) {
     const algorithm = config.get('encryption:algorithm');

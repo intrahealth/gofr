@@ -2,7 +2,6 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable consistent-return */
 const express = require('express');
-const formidable = require('formidable');
 const async = require('async');
 
 const router = express.Router();
@@ -15,11 +14,34 @@ const topOrgId = mixin.getTopOrgId(config.get('mCSD:registryDB'), 'Location');
 
 router.post('/addService', (req, res) => {
   logger.info('Received a request to add a new service');
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    mcsd.addService(fields, (error) => {
+  const fields = req.body
+  mcsd.addService(fields, (error) => {
+    if (error) {
+      res.status(400).send(error);
+    } else {
+      logger.info('New Jurisdiction added successfully');
+      res.status(200).send();
+    }
+  });
+});
+router.post('/addJurisdiction', (req, res) => {
+  logger.info('Received a request to add a new Jurisdiction');
+  const fields = req.body
+  const defaultDB = config.get('mCSD:registryDB');
+  fields.database = defaultDB;
+  mcsd.addJurisdiction(fields, (error, id) => {
+    if (error) {
+      logger.error(error);
+      res.status(500).send(error);
+      return;
+    }
+    const requestsDB = config.get('mCSD:requestsDB');
+    fields.database = requestsDB;
+    fields.id = id;
+    mcsd.addJurisdiction(fields, (error) => {
       if (error) {
-        res.status(400).send(error);
+        logger.error(error);
+        res.status(500).send(error);
       } else {
         logger.info('New Jurisdiction added successfully');
         res.status(200).send();
@@ -27,71 +49,40 @@ router.post('/addService', (req, res) => {
     });
   });
 });
-router.post('/addJurisdiction', (req, res) => {
-  logger.info('Received a request to add a new Jurisdiction');
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    const defaultDB = config.get('mCSD:registryDB');
-    fields.database = defaultDB;
-    mcsd.addJurisdiction(fields, (error, id) => {
-      if (error) {
-        logger.error(error);
-        res.status(500).send(error);
-        return;
-      }
-      const requestsDB = config.get('mCSD:requestsDB');
-      fields.database = requestsDB;
-      fields.id = id;
-      mcsd.addJurisdiction(fields, (error) => {
-        if (error) {
-          logger.error(error);
-          res.status(500).send(error);
-        } else {
-          logger.info('New Jurisdiction added successfully');
-          res.status(200).send();
-        }
-      });
-    });
-  });
-});
 
 router.post('/addBuilding', (req, res) => {
   logger.info('Received a request to add a new Building');
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    mcsd.addBuilding(fields, (error) => {
-      if (error) {
-        res.status(500).send(error);
-      } else {
-        logger.info('New Building added successfully');
-        res.status(200).send();
-      }
-    });
+  const fields = req.body
+  mcsd.addBuilding(fields, (error) => {
+    if (error) {
+      res.status(500).send(error);
+    } else {
+      logger.info('New Building added successfully');
+      res.status(200).send();
+    }
   });
 });
 
 router.post('/changeBuildingRequestStatus', (req, res) => {
   logger.info('Received a request to change building request status');
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    const {
-      id,
-      status,
-      requestType,
-    } = fields;
-    mcsd.changeBuildingRequestStatus({
-      id,
-      status,
-      requestType,
-    }, (error) => {
-      if (error) {
-        logger.error('An error has occured while changing request status');
-        res.status(500).send(error);
-      } else {
-        logger.info('Building Request Status Changed Successfully');
-        res.status(200).send();
-      }
-    });
+  const fields = req.body
+  const {
+    id,
+    status,
+    requestType,
+  } = fields;
+  mcsd.changeBuildingRequestStatus({
+    id,
+    status,
+    requestType,
+  }, (error) => {
+    if (error) {
+      logger.error('An error has occured while changing request status');
+      res.status(500).send(error);
+    } else {
+      logger.info('Building Request Status Changed Successfully');
+      res.status(200).send();
+    }
   });
 });
 
@@ -371,8 +362,7 @@ router.get('/getBuildings', (req, res) => {
 
 router.post('/addCodeSystem', (req, res) => {
   logger.info('Received a request to add code system');
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
+  const fields = req.body
     mcsd.addCodeSystem(fields, (error) => {
       if (error) {
         res.status(500).send(error);
@@ -381,7 +371,6 @@ router.post('/addCodeSystem', (req, res) => {
         res.status(200).send();
       }
     });
-  });
 });
 
 router.get('/getCodeSystem', (req, res) => {

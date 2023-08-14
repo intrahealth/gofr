@@ -412,7 +412,7 @@
                           color="primary"
                           :disabled='datasetNameErrors.length > 0 || !$store.state.config.generalConfig.externalAuth.datasetName'
                           small
-                          round
+                          rounded
                           v-if="$store.state.config.generalConfig.externalAuth.pullOrgUnits"
                           @click="pullOrgUnits"
                         >{{ $t(`App.hardcoded-texts.start pulling`) }}</v-btn>

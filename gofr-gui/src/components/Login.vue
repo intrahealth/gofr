@@ -160,8 +160,8 @@ export default {
       return errors
     }
   },
-  beforeCreate () {
-    if (this.$store.state.config.generalConfig.authDisabled) {
+  created () {
+    if (this.$store.state.idp === 'dhis2') {
       this.$store.state.clientId = uuid.v4()
       this.$store.state.initializingApp = true
       this.$store.state.denyAccess = false

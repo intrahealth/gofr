@@ -239,7 +239,27 @@ module.exports = () => ({
       );
     });
   },
-
+  countLocations(database, callback) {
+    const baseUrl = URI(fhirAxios.__genUrl(database)).segment('Location')
+      .toString();
+    let url = `${baseUrl}?_count=0&_total=accurate`;
+    const options = {
+      url,
+      headers: {
+        'Cache-Control': 'no-cache',
+      },
+    };
+    request.get(options, (err, res, body) => {
+      if(err) {
+        return callback(null, 0);
+      }
+      if (!isJSON(body)) {
+        return callback(null, 0);
+      }
+      body = JSON.parse(body);
+      return callback(body.total);
+    })
+  },
   getLocations(database, callback) {
     const baseUrl = URI(fhirAxios.__genUrl(database)).segment('Location')
       .toString();

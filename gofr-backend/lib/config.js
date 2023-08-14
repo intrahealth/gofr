@@ -1,9 +1,10 @@
 const nconf = require('nconf');
 const fhirConfig = require('./modules/fhirConfig');
+const ihrissmartrequire = require('ihrissmartrequire')
 
 nconf.argv()
   .env({ separator: '__' })
-  .file(`${__dirname}/../config/default.json`);
+  .file(ihrissmartrequire.path('config/default.json'))
 nconf.set('REDIS_HOST', process.env.REDIS_HOST || '127.0.0.1');
 
 nconf.getBool = key => fhirConfig.checkBoolean(nconf.get(key));

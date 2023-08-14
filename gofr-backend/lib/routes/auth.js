@@ -8,5 +8,4 @@ if (config.get('app:idp') === 'keycloak') {
   authRoutes = require('./passportAuth');
 }
 
-
 module.exports = authRoutes;

@@ -1,7 +1,6 @@
 const async = require('async');
 const URI = require('urijs');
 const fhirpath = require('fhirpath');
-const formidable = require('formidable');
 const express = require('express');
 
 const router = express.Router();
@@ -479,164 +478,162 @@ router.post('/addSource', (req, res) => {
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    logger.info('Received a request to add a new data source');
-    const createPartition = new Promise((resolve, reject) => {
-      if (!fields.partitionID) {
-        const database = mixin.toTitleCase(fields.name + fields.userID);
-        hapi.addPartition({ name: database, description: 'reco data source', userID: fields.userID }).then(async (partitionID) => {
-          await mcsd.createFakeOrgID(database).catch((err) => {
-            logger.error(err);
-          });
-          resolve(partitionID);
-        }).catch((err) => {
-          logger.error((err));
-          return reject();
+  const fields = req.body
+  logger.info('Received a request to add a new data source');
+  const createPartition = new Promise((resolve, reject) => {
+    if (!fields.partitionID) {
+      const database = mixin.toTitleCase(fields.name + fields.userID);
+      hapi.addPartition({ name: database, description: 'reco data source', userID: fields.userID }).then(async (partitionID) => {
+        await mcsd.createFakeOrgID(database).catch((err) => {
+          logger.error(err);
         });
-      } else {
-        return resolve(fields.partitionID);
-      }
-    });
-    createPartition.then(async (partitionID) => {
-      let partition;
-      try {
-        partition = await fhirAxios.read('Basic', partitionID.split('/')[1], '', 'DEFAULT');
-      } catch (error) {
-        logger.error(error);
-        return res.status(500).send();
-      }
-      if (!partition) {
-        return res.status(500).send();
-      }
-      if (!fields.shareToSameOrgid) {
-        fields.shareToSameOrgid = false;
-      }
-      if (!fields.shareToAll) {
-        fields.shareToAll = false;
-      }
-      if (!fields.limitByUserLocation) {
-        fields.limitByUserLocation = false;
-      }
-      const resource = {
-        resourceType: 'Basic',
-        meta: {
-          profile: ['http://gofr.org/fhir/StructureDefinition/gofr-datasource'],
-        },
-        extension: [{
-          url: 'http://gofr.org/fhir/StructureDefinition/datasource',
-          extension: [{
-            url: 'http://gofr.org/fhir/StructureDefinition/partition',
-            valueReference: {
-              reference: partitionID,
-            },
-          }],
-        }],
-      };
-      resource.extension[0].extension.push({
-        url: 'http://gofr.org/fhir/StructureDefinition/name',
-        valueString: fields.name,
-      });
-      if (fields.host) {
-        resource.extension[0].extension.push({
-          url: 'http://gofr.org/fhir/StructureDefinition/host',
-          valueString: fields.host,
-        });
-      }
-      if (fields.sourceType) {
-        resource.extension[0].extension.push({
-          url: 'http://gofr.org/fhir/StructureDefinition/sourceType',
-          valueString: fields.sourceType,
-        });
-      }
-      if (fields.source) {
-        resource.extension[0].extension.push({
-          url: 'http://gofr.org/fhir/StructureDefinition/source',
-          valueString: fields.source,
-        });
-      }
-      if (fields.username) {
-        resource.extension[0].extension.push({
-          url: 'http://gofr.org/fhir/StructureDefinition/username',
-          valueString: fields.username,
-        });
-      }
-      if (fields.password) {
-        resource.extension[0].extension.push({
-          url: 'http://gofr.org/fhir/StructureDefinition/password',
-          valueString: mixin.encrypt(fields.password),
-        });
-      }
-      const partitionExtInd = partition.extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
-      partition.extension[partitionExtInd].extension.push({
-        url: 'http://gofr.org/fhir/StructureDefinition/shared',
-        extension: [{
-          url: 'shareToSameOrgid',
-          valueBoolean: fields.shareToSameOrgid,
-        }, {
-          url: 'http://gofr.org/fhir/StructureDefinition/shareToAll',
-          extension: [{
-            url: 'activated',
-            valueBoolean: fields.shareToAll,
-          }, {
-            url: 'limitByUserLocation',
-            valueBoolean: fields.limitByUserLocation,
-          }],
-        }],
-      });
-      if (fields.levelData) {
-        let levelData;
-        try {
-          levelData = JSON.parse(fields.levelData);
-        } catch (error) {
-          levelData = fields.levelData;
-        }
-        const levels = Object.keys(levelData);
-        const dbLevel = {};
-        for (const level of levels) {
-          if (level.startsWith('level') && levelData[level]) {
-            dbLevel[level] = levelData[level];
-          }
-        }
-        dbLevel.code = levelData.code;
-        dbLevel.facility = levelData.facility;
-        resource.extension[0].extension.push({
-          url: 'http://gofr.org/fhir/StructureDefinition/levelMapping',
-          valueString: JSON.stringify(dbLevel),
-        });
-      }
-      const bundle = {
-        resourceType: 'Bundle',
-        type: 'batch',
-        entry: [{
-          resource: partition,
-          request: {
-            method: 'PUT',
-            url: `Basic/${partition.id}`,
-          },
-        }, {
-          resource,
-          request: {
-            method: 'POST',
-            url: 'Basic',
-          },
-        }],
-      };
-      fhirAxios.create(bundle, 'DEFAULT').then(() => {
-        let password = '';
-        if (fields.password) {
-          password = mixin.encrypt(fields.password);
-        }
-        return res.status(200).json({
-          status: 'done',
-          password,
-        });
+        resolve(partitionID);
       }).catch((err) => {
-        logger.error(err);
-        res.status(500).send();
+        logger.error((err));
+        return reject();
       });
-    }).catch(() => res.status(500).send());
+    } else {
+      return resolve(fields.partitionID);
+    }
   });
+  createPartition.then(async (partitionID) => {
+    let partition;
+    try {
+      partition = await fhirAxios.read('Basic', partitionID.split('/')[1], '', 'DEFAULT');
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send();
+    }
+    if (!partition) {
+      return res.status(500).send();
+    }
+    if (!fields.shareToSameOrgid) {
+      fields.shareToSameOrgid = false;
+    }
+    if (!fields.shareToAll) {
+      fields.shareToAll = false;
+    }
+    if (!fields.limitByUserLocation) {
+      fields.limitByUserLocation = false;
+    }
+    const resource = {
+      resourceType: 'Basic',
+      meta: {
+        profile: ['http://gofr.org/fhir/StructureDefinition/gofr-datasource'],
+      },
+      extension: [{
+        url: 'http://gofr.org/fhir/StructureDefinition/datasource',
+        extension: [{
+          url: 'http://gofr.org/fhir/StructureDefinition/partition',
+          valueReference: {
+            reference: partitionID,
+          },
+        }],
+      }],
+    };
+    resource.extension[0].extension.push({
+      url: 'http://gofr.org/fhir/StructureDefinition/name',
+      valueString: fields.name,
+    });
+    if (fields.host) {
+      resource.extension[0].extension.push({
+        url: 'http://gofr.org/fhir/StructureDefinition/host',
+        valueString: fields.host,
+      });
+    }
+    if (fields.sourceType) {
+      resource.extension[0].extension.push({
+        url: 'http://gofr.org/fhir/StructureDefinition/sourceType',
+        valueString: fields.sourceType,
+      });
+    }
+    if (fields.source) {
+      resource.extension[0].extension.push({
+        url: 'http://gofr.org/fhir/StructureDefinition/source',
+        valueString: fields.source,
+      });
+    }
+    if (fields.username) {
+      resource.extension[0].extension.push({
+        url: 'http://gofr.org/fhir/StructureDefinition/username',
+        valueString: fields.username,
+      });
+    }
+    if (fields.password) {
+      resource.extension[0].extension.push({
+        url: 'http://gofr.org/fhir/StructureDefinition/password',
+        valueString: mixin.encrypt(fields.password),
+      });
+    }
+    const partitionExtInd = partition.extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
+    partition.extension[partitionExtInd].extension.push({
+      url: 'http://gofr.org/fhir/StructureDefinition/shared',
+      extension: [{
+        url: 'shareToSameOrgid',
+        valueBoolean: fields.shareToSameOrgid,
+      }, {
+        url: 'http://gofr.org/fhir/StructureDefinition/shareToAll',
+        extension: [{
+          url: 'activated',
+          valueBoolean: fields.shareToAll,
+        }, {
+          url: 'limitByUserLocation',
+          valueBoolean: fields.limitByUserLocation,
+        }],
+      }],
+    });
+    if (fields.levelData) {
+      let levelData;
+      try {
+        levelData = JSON.parse(fields.levelData);
+      } catch (error) {
+        levelData = fields.levelData;
+      }
+      const levels = Object.keys(levelData);
+      const dbLevel = {};
+      for (const level of levels) {
+        if (level.startsWith('level') && levelData[level]) {
+          dbLevel[level] = levelData[level];
+        }
+      }
+      dbLevel.code = levelData.code;
+      dbLevel.facility = levelData.facility;
+      resource.extension[0].extension.push({
+        url: 'http://gofr.org/fhir/StructureDefinition/levelMapping',
+        valueString: JSON.stringify(dbLevel),
+      });
+    }
+    const bundle = {
+      resourceType: 'Bundle',
+      type: 'batch',
+      entry: [{
+        resource: partition,
+        request: {
+          method: 'PUT',
+          url: `Basic/${partition.id}`,
+        },
+      }, {
+        resource,
+        request: {
+          method: 'POST',
+          url: 'Basic',
+        },
+      }],
+    };
+    fhirAxios.create(bundle, 'DEFAULT').then(() => {
+      let password = '';
+      if (fields.password) {
+        password = mixin.encrypt(fields.password);
+      }
+      return res.status(200).json({
+        status: 'done',
+        password,
+      });
+    }).catch((err) => {
+      logger.error(err);
+      res.status(500).send();
+    });
+  }).catch(() => res.status(500).send());
 });
 
 router.post('/editSource', (req, res) => {
@@ -644,52 +641,50 @@ router.post('/editSource', (req, res) => {
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    logger.info('Received a request to edit a data source');
-    fhirAxios.read('Basic', fields.id.split('/')[1], '', 'DEFAULT').then((source) => {
-      let password;
-      if (fields.password) {
-        password = mixin.encrypt(fields.password);
+  const fields = req.body
+  logger.info('Received a request to edit a data source');
+  fhirAxios.read('Basic', fields.id.split('/')[1], '', 'DEFAULT').then((source) => {
+    let password;
+    if (fields.password) {
+      password = mixin.encrypt(fields.password);
+    }
+    const dsDetails = source.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/datasource');
+    for (const index in dsDetails.extension) {
+      if (dsDetails.extension[index].url === 'http://gofr.org/fhir/StructureDefinition/name' && fields.display) {
+        dsDetails.extension[index].valueString = fields.display;
       }
-      const dsDetails = source.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/datasource');
-      for (const index in dsDetails.extension) {
-        if (dsDetails.extension[index].url === 'http://gofr.org/fhir/StructureDefinition/name' && fields.display) {
-          dsDetails.extension[index].valueString = fields.display;
-        }
-        if (dsDetails.extension[index].url === 'http://gofr.org/fhir/StructureDefinition/host' && fields.host) {
-          dsDetails.extension[index].valueString = fields.host;
-        }
-        if (dsDetails.extension[index].url === 'http://gofr.org/fhir/StructureDefinition/sourceType' && fields.sourceType) {
-          dsDetails.extension[index].valueString = fields.sourceType;
-        }
-        if (dsDetails.extension[index].url === 'http://gofr.org/fhir/StructureDefinition/source' && fields.source) {
-          dsDetails.extension[index].valueString = fields.source;
-        }
-        if (dsDetails.extension[index].url === 'http://gofr.org/fhir/StructureDefinition/username' && fields.username) {
-          dsDetails.extension[index].valueString = fields.username;
-        }
-        if (dsDetails.extension[index].url === 'http://gofr.org/fhir/StructureDefinition/password' && password) {
-          dsDetails.extension[index].valueString = password;
-        }
+      if (dsDetails.extension[index].url === 'http://gofr.org/fhir/StructureDefinition/host' && fields.host) {
+        dsDetails.extension[index].valueString = fields.host;
       }
-      fhirAxios.update(source, 'DEFAULT').then(() => {
-        logger.info('Data source edited sucessfully');
-        return res.status(200).send({
-          status: 'done',
-          password,
-        });
-      }).catch((err) => {
-        logger.error(err);
-        res.status(500).json({
-          error: 'Unexpected error occured,please retry',
-        });
+      if (dsDetails.extension[index].url === 'http://gofr.org/fhir/StructureDefinition/sourceType' && fields.sourceType) {
+        dsDetails.extension[index].valueString = fields.sourceType;
+      }
+      if (dsDetails.extension[index].url === 'http://gofr.org/fhir/StructureDefinition/source' && fields.source) {
+        dsDetails.extension[index].valueString = fields.source;
+      }
+      if (dsDetails.extension[index].url === 'http://gofr.org/fhir/StructureDefinition/username' && fields.username) {
+        dsDetails.extension[index].valueString = fields.username;
+      }
+      if (dsDetails.extension[index].url === 'http://gofr.org/fhir/StructureDefinition/password' && password) {
+        dsDetails.extension[index].valueString = password;
+      }
+    }
+    fhirAxios.update(source, 'DEFAULT').then(() => {
+      logger.info('Data source edited sucessfully');
+      return res.status(200).send({
+        status: 'done',
+        password,
       });
     }).catch((err) => {
       logger.error(err);
       res.status(500).json({
         error: 'Unexpected error occured,please retry',
       });
+    });
+  }).catch((err) => {
+    logger.error(err);
+    res.status(500).json({
+      error: 'Unexpected error occured,please retry',
     });
   });
 });
@@ -986,54 +981,51 @@ router.post('/updatePermissions', (req, res) => {
     return res.status(403).json(outcomes.DENIED);
   }
   logger.info('Received a request to update data source permissions');
-  const form = new formidable.IncomingForm();
-
-  form.parse(req, (err, fields, files) => {
-    const permissions = JSON.parse(fields.permissions);
-    const { user, partition } = fields;
-    const _permissions = generatePermissions(permissions);
-    fhirAxios.read('Basic', partition, '', 'DEFAULT').then((dsrcPartition) => {
-      if (!dsrcPartition || !dsrcPartition.extension) {
-        logger.error(err);
-        logger.error('An error occured while updating datasource permissions');
-        return res.status(500).send('An error occured while sharing data source');
-      }
-      const partDetails = dsrcPartition.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
-      let sharedIndex = partDetails.extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/shared');
-      if (sharedIndex === -1) {
-        partDetails.extension.push({
-          url: 'http://gofr.org/fhir/StructureDefinition/shared',
-          extension: [],
-        });
-        sharedIndex = 0;
-      }
-      const userExists = partDetails.extension[sharedIndex].extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/shareduser' && ext.extension.find(shareExt => shareExt.url === 'user' && shareExt.valueReference.reference === `Person/${user}`));
-      if (userExists !== -1) {
-        partDetails.extension[sharedIndex].extension.splice(userExists, 1);
-      }
-      const userIndex = partDetails.extension[sharedIndex].extension.push({
-        url: 'http://gofr.org/fhir/StructureDefinition/shareduser',
+  const fields = req.body
+  const permissions = JSON.parse(fields.permissions);
+  const { user, partition } = fields;
+  const _permissions = generatePermissions(permissions);
+  fhirAxios.read('Basic', partition, '', 'DEFAULT').then((dsrcPartition) => {
+    if (!dsrcPartition || !dsrcPartition.extension) {
+      logger.error(err);
+      logger.error('An error occured while updating datasource permissions');
+      return res.status(500).send('An error occured while sharing data source');
+    }
+    const partDetails = dsrcPartition.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
+    let sharedIndex = partDetails.extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/shared');
+    if (sharedIndex === -1) {
+      partDetails.extension.push({
+        url: 'http://gofr.org/fhir/StructureDefinition/shared',
         extension: [],
       });
-      partDetails.extension[sharedIndex].extension[userIndex - 1].extension.push({
-        url: 'user',
-        valueReference: {
-          reference: `Person/${user}`,
-        },
-      }, ..._permissions);
-      fhirAxios.update(dsrcPartition, 'DEFAULT').then(() => {
-        logger.info('Data source permissions updated successfully');
-        return res.status(200).send();
-      }).catch((err) => {
-        logger.error(err);
-        logger.error('An error occured while updating datasource permissions');
-        res.status(500).send('An error occured while sharing data source');
-      });
+      sharedIndex = 0;
+    }
+    const userExists = partDetails.extension[sharedIndex].extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/shareduser' && ext.extension.find(shareExt => shareExt.url === 'user' && shareExt.valueReference.reference === `Person/${user}`));
+    if (userExists !== -1) {
+      partDetails.extension[sharedIndex].extension.splice(userExists, 1);
+    }
+    const userIndex = partDetails.extension[sharedIndex].extension.push({
+      url: 'http://gofr.org/fhir/StructureDefinition/shareduser',
+      extension: [],
+    });
+    partDetails.extension[sharedIndex].extension[userIndex - 1].extension.push({
+      url: 'user',
+      valueReference: {
+        reference: `Person/${user}`,
+      },
+    }, ..._permissions);
+    fhirAxios.update(dsrcPartition, 'DEFAULT').then(() => {
+      logger.info('Data source permissions updated successfully');
+      return res.status(200).send();
     }).catch((err) => {
       logger.error(err);
       logger.error('An error occured while updating datasource permissions');
       res.status(500).send('An error occured while sharing data source');
     });
+  }).catch((err) => {
+    logger.error(err);
+    logger.error('An error occured while updating datasource permissions');
+    res.status(500).send('An error occured while sharing data source');
   });
 });
 
@@ -1043,64 +1035,61 @@ router.post('/shareSource', (req, res) => {
     return res.status(403).json(outcomes.DENIED);
   }
   logger.info('Received a request to share data source');
-  const form = new formidable.IncomingForm();
-
-  form.parse(req, (err, fields, files) => {
-    const users = JSON.parse(fields.users);
-    const permissions = JSON.parse(fields.permissions);
-    const _permissions = generatePermissions(permissions);
-    const { limitLocationId } = fields;
-    fhirAxios.search('Basic', { _id: fields.shareSource, _include: 'Basic:datasourcepartition' }, 'DEFAULT').then((data) => {
-      const partition = data.entry.find(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-partition'));
-      const partDetails = partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
-      let sharedIndex = partDetails.extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/shared');
-      if (sharedIndex === -1) {
-        partDetails.extension.push({
-          url: 'http://gofr.org/fhir/StructureDefinition/shared',
+  const fields = req.body
+  const users = JSON.parse(fields.users);
+  const permissions = JSON.parse(fields.permissions);
+  const _permissions = generatePermissions(permissions);
+  const { limitLocationId } = fields;
+  fhirAxios.search('Basic', { _id: fields.shareSource, _include: 'Basic:datasourcepartition' }, 'DEFAULT').then((data) => {
+    const partition = data.entry.find(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-partition'));
+    const partDetails = partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
+    let sharedIndex = partDetails.extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/shared');
+    if (sharedIndex === -1) {
+      partDetails.extension.push({
+        url: 'http://gofr.org/fhir/StructureDefinition/shared',
+        extension: [],
+      });
+      sharedIndex = 0;
+    }
+    share(partDetails.extension[sharedIndex].extension, _permissions);
+    function share(extension, permissions) {
+      users.forEach((user) => {
+        const userExists = extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/shareduser' && ext.extension.find(shareExt => shareExt.url === 'user' && shareExt.valueReference.reference === `Person/${user}`));
+        if (userExists !== -1) {
+          extension.splice(userExists, 1);
+        }
+        const userIndex = extension.push({
+          url: 'http://gofr.org/fhir/StructureDefinition/shareduser',
           extension: [],
         });
-        sharedIndex = 0;
-      }
-      share(partDetails.extension[sharedIndex].extension, _permissions);
-      function share(extension, permissions) {
-        users.forEach((user) => {
-          const userExists = extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/shareduser' && ext.extension.find(shareExt => shareExt.url === 'user' && shareExt.valueReference.reference === `Person/${user}`));
-          if (userExists !== -1) {
-            extension.splice(userExists, 1);
-          }
-          const userIndex = extension.push({
-            url: 'http://gofr.org/fhir/StructureDefinition/shareduser',
-            extension: [],
-          });
+        extension[userIndex - 1].extension.push({
+          url: 'user',
+          valueReference: {
+            reference: `Person/${user}`,
+          },
+        }, ...permissions);
+        if (limitLocationId) {
           extension[userIndex - 1].extension.push({
-            url: 'user',
+            url: 'locationLimit',
             valueReference: {
-              reference: `Person/${user}`,
+              reference: limitLocationId,
             },
-          }, ...permissions);
-          if (limitLocationId) {
-            extension[userIndex - 1].extension.push({
-              url: 'locationLimit',
-              valueReference: {
-                reference: limitLocationId,
-              },
-            });
-          }
-        });
-      }
-      fhirAxios.update(partition.resource, 'DEFAULT').then(() => {
-        logger.info('Data source shared successfully');
-        return res.status(200).send();
-      }).catch((err) => {
-        logger.error(err);
-        logger.error('An error occured while sharing data source');
-        res.status(500).send('An error occured while sharing data source');
+          });
+        }
       });
+    }
+    fhirAxios.update(partition.resource, 'DEFAULT').then(() => {
+      logger.info('Data source shared successfully');
+      return res.status(200).send();
     }).catch((err) => {
       logger.error(err);
       logger.error('An error occured while sharing data source');
       res.status(500).send('An error occured while sharing data source');
     });
+  }).catch((err) => {
+    logger.error(err);
+    logger.error('An error occured while sharing data source');
+    res.status(500).send('An error occured while sharing data source');
   });
 });
 
@@ -1109,208 +1098,206 @@ router.post('/createSourcePair', (req, res) => {
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    let {
-      source1, source2, userID, dhis2OrgId, singlePair,
-    } = fields;
-    try {
-      singlePair = JSON.parse(singlePair);
-    } catch (error) {
-      logger.error(error);
-    }
-    const pairName = fields.name;
-    source1 = JSON.parse(source1);
-    source2 = JSON.parse(source2);
-    let searchParams = {
-      _profile: 'http://gofr.org/fhir/StructureDefinition/gofr-datasource-pair',
-      pairsource1: source1.id,
-      pairsource2: source2.id,
-    };
-    fhirAxios.searchAll('Basic', searchParams, 'DEFAULT').then((data) => {
-      if (data.entry && data.entry.length === 0) {
-        getSourcePair({ userID, dhis2OrgId }).then((pairs) => {
-          if (pairs.length > 0 && singlePair) {
-            logger.error('Single pair limit is active and a pair already exists, cant create more pairs');
-            return res.status(400).json({ error: 'Single pair limit is active and a pair already exists, cant create more pairs' });
+  const fields = req.body
+  let {
+    source1, source2, userID, dhis2OrgId, singlePair,
+  } = fields;
+  try {
+    singlePair = JSON.parse(singlePair);
+  } catch (error) {
+    logger.error(error);
+  }
+  const pairName = fields.name;
+  source1 = JSON.parse(source1);
+  source2 = JSON.parse(source2);
+  let searchParams = {
+    _profile: 'http://gofr.org/fhir/StructureDefinition/gofr-datasource-pair',
+    pairsource1: source1.id,
+    pairsource2: source2.id,
+  };
+  fhirAxios.searchAll('Basic', searchParams, 'DEFAULT').then((data) => {
+    if (data.entry && data.entry.length === 0) {
+      getSourcePair({ userID, dhis2OrgId }).then((pairs) => {
+        if (pairs.length > 0 && singlePair) {
+          logger.error('Single pair limit is active and a pair already exists, cant create more pairs');
+          return res.status(400).json({ error: 'Single pair limit is active and a pair already exists, cant create more pairs' });
+        }
+        const database = mixin.toTitleCase(source1.display + userID + source2.display);
+        hapi.addPartition({ name: database, description: 'mapping data source', userID }).then(async (partitionID) => {
+          let partition;
+          try {
+            partition = await fhirAxios.read('Basic', partitionID.split('/')[1], '', 'DEFAULT');
+          } catch (error) {
+            logger.error(error);
+            return res.status(500).send();
           }
-          const database = mixin.toTitleCase(source1.display + userID + source2.display);
-          hapi.addPartition({ name: database, description: 'mapping data source', userID }).then(async (partitionID) => {
-            let partition;
-            try {
-              partition = await fhirAxios.read('Basic', partitionID.split('/')[1], '', 'DEFAULT');
-            } catch (error) {
-              logger.error(error);
-              return res.status(500).send();
-            }
-            if (!partition) {
-              return res.status(500).send();
-            }
+          if (!partition) {
+            return res.status(500).send();
+          }
 
-            let source1Res;
-            let source2Res;
-            searchParams = {
-              _id: `${source1.id},${source2.id}`,
-            };
-            try {
-              const sources = await fhirAxios.search('Basic', searchParams, 'DEFAULT');
-              source1Res = sources.entry && sources.entry.find(entry => entry.resource.id === source1.id);
-              source2Res = sources.entry && sources.entry.find(entry => entry.resource.id === source2.id);
-            } catch (error) {
-              logger.error(error);
-              return res.status(500).send();
-            }
-            const ds1Details = source1Res.resource.extension && source1Res.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/datasource');
-            const ds2Details = source2Res.resource.extension && source2Res.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/datasource');
-            const levelExt1 = ds1Details.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/levelMapping');
-            const levelExt2 = ds2Details.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/levelMapping');
-            await mcsd.createFakeOrgID(database).catch((err) => {
-              logger.error(err);
-            });
-            const resource = {
-              resourceType: 'Basic',
-              meta: {
-                profile: [
-                  'http://gofr.org/fhir/StructureDefinition/gofr-datasource-pair',
-                  'http://gofr.org/fhir/StructureDefinition/gofr-datasource',
-                ],
-              },
+          let source1Res;
+          let source2Res;
+          searchParams = {
+            _id: `${source1.id},${source2.id}`,
+          };
+          try {
+            const sources = await fhirAxios.search('Basic', searchParams, 'DEFAULT');
+            source1Res = sources.entry && sources.entry.find(entry => entry.resource.id === source1.id);
+            source2Res = sources.entry && sources.entry.find(entry => entry.resource.id === source2.id);
+          } catch (error) {
+            logger.error(error);
+            return res.status(500).send();
+          }
+          const ds1Details = source1Res.resource.extension && source1Res.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/datasource');
+          const ds2Details = source2Res.resource.extension && source2Res.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/datasource');
+          const levelExt1 = ds1Details.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/levelMapping');
+          const levelExt2 = ds2Details.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/levelMapping');
+          await mcsd.createFakeOrgID(database).catch((err) => {
+            logger.error(err);
+          });
+          const resource = {
+            resourceType: 'Basic',
+            meta: {
+              profile: [
+                'http://gofr.org/fhir/StructureDefinition/gofr-datasource-pair',
+                'http://gofr.org/fhir/StructureDefinition/gofr-datasource',
+              ],
+            },
+            extension: [{
+              url: 'http://gofr.org/fhir/StructureDefinition/datasourcepair',
               extension: [{
-                url: 'http://gofr.org/fhir/StructureDefinition/datasourcepair',
-                extension: [{
-                  url: 'http://gofr.org/fhir/StructureDefinition/partition',
-                  valueReference: {
-                    reference: partitionID,
-                  },
-                }, {
-                  url: 'http://gofr.org/fhir/StructureDefinition/source1',
-                  valueReference: {
-                    reference: `Basic/${source1.id}`,
-                    display: source1.display,
-                  },
-                }, {
-                  url: 'http://gofr.org/fhir/StructureDefinition/source2',
-                  valueReference: {
-                    reference: `Basic/${source2.id}`,
-                    display: source2.display,
-                  },
-                }, {
-                  url: 'http://gofr.org/fhir/StructureDefinition/status',
-                  valueString: 'active',
-                }, {
-                  url: 'http://gofr.org/fhir/StructureDefinition/recoStatus',
-                  valueString: 'in-progress',
-                }],
+                url: 'http://gofr.org/fhir/StructureDefinition/partition',
+                valueReference: {
+                  reference: partitionID,
+                },
               }, {
-                url: 'http://gofr.org/fhir/StructureDefinition/datasource',
-                extension: [{
-                  url: 'http://gofr.org/fhir/StructureDefinition/partition',
-                  valueReference: {
-                    reference: partitionID,
-                  },
-                }, {
-                  url: 'http://gofr.org/fhir/StructureDefinition/name',
-                  valueString: `${pairName}`,
-                }, {
-                  url: 'http://gofr.org/fhir/StructureDefinition/sourceType',
-                  valueString: 'merging',
-                }, {
-                  url: 'http://gofr.org/fhir/StructureDefinition/source',
-                  valueString: 'merging',
-                }],
+                url: 'http://gofr.org/fhir/StructureDefinition/source1',
+                valueReference: {
+                  reference: `Basic/${source1.id}`,
+                  display: source1.display,
+                },
+              }, {
+                url: 'http://gofr.org/fhir/StructureDefinition/source2',
+                valueReference: {
+                  reference: `Basic/${source2.id}`,
+                  display: source2.display,
+                },
+              }, {
+                url: 'http://gofr.org/fhir/StructureDefinition/status',
+                valueString: 'active',
+              }, {
+                url: 'http://gofr.org/fhir/StructureDefinition/recoStatus',
+                valueString: 'in-progress',
               }],
-            };
-
-            let generatedFrom = [];
-            const srcs1 = fhirpath.evaluate(
-              ds1Details,
-              "extension.where(url='http://gofr.org/fhir/StructureDefinition/generatedFrom').valueString",
-            );
-            const srcs2 = fhirpath.evaluate(
-              ds2Details,
-              "extension.where(url='http://gofr.org/fhir/StructureDefinition/generatedFrom').valueString",
-            );
-            generatedFrom = generatedFrom.concat(srcs1);
-            generatedFrom = generatedFrom.concat(srcs2);
-            generatedFrom.push(source1.display);
-            generatedFrom.push(source2.display);
-            generatedFrom = [...new Set(generatedFrom)];
-            for (const src of generatedFrom) {
-              resource.extension[1].extension.push({
-                url: 'http://gofr.org/fhir/StructureDefinition/generatedFrom',
-                valueString: src,
-              });
-            }
-            if (levelExt1) {
-              resource.extension[1].extension.push({
-                url: 'http://gofr.org/fhir/StructureDefinition/levelMapping',
-                valueString: levelExt1.valueString,
-              });
-            } else if (levelExt2) {
-              resource.extension[1].extension.push({
-                url: 'http://gofr.org/fhir/StructureDefinition/levelMapping',
-                valueString: levelExt2.valueString,
-              });
-            }
-            const partitionExtInd = partition.extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
-            partition.extension[partitionExtInd].extension.push({
-              url: 'http://gofr.org/fhir/StructureDefinition/shared',
+            }, {
+              url: 'http://gofr.org/fhir/StructureDefinition/datasource',
               extension: [{
-                url: 'shareToSameOrgid',
+                url: 'http://gofr.org/fhir/StructureDefinition/partition',
+                valueReference: {
+                  reference: partitionID,
+                },
+              }, {
+                url: 'http://gofr.org/fhir/StructureDefinition/name',
+                valueString: `${pairName}`,
+              }, {
+                url: 'http://gofr.org/fhir/StructureDefinition/sourceType',
+                valueString: 'merging',
+              }, {
+                url: 'http://gofr.org/fhir/StructureDefinition/source',
+                valueString: 'merging',
+              }],
+            }],
+          };
+
+          let generatedFrom = [];
+          const srcs1 = fhirpath.evaluate(
+            ds1Details,
+            "extension.where(url='http://gofr.org/fhir/StructureDefinition/generatedFrom').valueString",
+          );
+          const srcs2 = fhirpath.evaluate(
+            ds2Details,
+            "extension.where(url='http://gofr.org/fhir/StructureDefinition/generatedFrom').valueString",
+          );
+          generatedFrom = generatedFrom.concat(srcs1);
+          generatedFrom = generatedFrom.concat(srcs2);
+          generatedFrom.push(source1.display);
+          generatedFrom.push(source2.display);
+          generatedFrom = [...new Set(generatedFrom)];
+          for (const src of generatedFrom) {
+            resource.extension[1].extension.push({
+              url: 'http://gofr.org/fhir/StructureDefinition/generatedFrom',
+              valueString: src,
+            });
+          }
+          if (levelExt1) {
+            resource.extension[1].extension.push({
+              url: 'http://gofr.org/fhir/StructureDefinition/levelMapping',
+              valueString: levelExt1.valueString,
+            });
+          } else if (levelExt2) {
+            resource.extension[1].extension.push({
+              url: 'http://gofr.org/fhir/StructureDefinition/levelMapping',
+              valueString: levelExt2.valueString,
+            });
+          }
+          const partitionExtInd = partition.extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
+          partition.extension[partitionExtInd].extension.push({
+            url: 'http://gofr.org/fhir/StructureDefinition/shared',
+            extension: [{
+              url: 'shareToSameOrgid',
+              valueBoolean: false,
+            }, {
+              url: 'http://gofr.org/fhir/StructureDefinition/shareToAll',
+              extension: [{
+                url: 'activated',
                 valueBoolean: false,
               }, {
-                url: 'http://gofr.org/fhir/StructureDefinition/shareToAll',
-                extension: [{
-                  url: 'activated',
-                  valueBoolean: false,
-                }, {
-                  url: 'limitByUserLocation',
-                  valueBoolean: false,
-                }],
+                url: 'limitByUserLocation',
+                valueBoolean: false,
               }],
-            });
-
-            const bundle = {
-              resourceType: 'Bundle',
-              type: 'batch',
-              entry: [{
-                resource: partition,
-                request: {
-                  method: 'PUT',
-                  url: `Basic/${partition.id}`,
-                },
-              }, {
-                resource,
-                request: {
-                  method: 'POST',
-                  url: 'Basic',
-                },
-              }],
-            };
-
-            // get active pair and deactivate
-            Promise.all([deactivatePair(userID), deactivateSharedPair(userID)]).then(() => {
-              fhirAxios.create(bundle, 'DEFAULT').then(() => {
-                const levelMapping = {};
-                if (levelExt1) {
-                  levelMapping.levelMapping1 = levelExt1.valueString;
-                }
-                if (levelExt2) {
-                  levelMapping.levelMapping2 = levelExt2.valueString;
-                }
-                logger.info('Data source pair created');
-                return res.status(200).json(levelMapping);
-              }).catch((error) => {
-                logger.error(error);
-                return res.status(500).send();
-              });
-            }).catch(() => res.status(500).send());
+            }],
           });
+
+          const bundle = {
+            resourceType: 'Bundle',
+            type: 'batch',
+            entry: [{
+              resource: partition,
+              request: {
+                method: 'PUT',
+                url: `Basic/${partition.id}`,
+              },
+            }, {
+              resource,
+              request: {
+                method: 'POST',
+                url: 'Basic',
+              },
+            }],
+          };
+
+          // get active pair and deactivate
+          Promise.all([deactivatePair(userID), deactivateSharedPair(userID)]).then(() => {
+            fhirAxios.create(bundle, 'DEFAULT').then(() => {
+              const levelMapping = {};
+              if (levelExt1) {
+                levelMapping.levelMapping1 = levelExt1.valueString;
+              }
+              if (levelExt2) {
+                levelMapping.levelMapping2 = levelExt2.valueString;
+              }
+              logger.info('Data source pair created');
+              return res.status(200).json(levelMapping);
+            }).catch((error) => {
+              logger.error(error);
+              return res.status(500).send();
+            });
+          }).catch(() => res.status(500).send());
         });
-      } else {
-        return res.status(400).send();
-      }
-    });
+      });
+    } else {
+      return res.status(400).send();
+    }
   });
 });
 
@@ -1320,67 +1307,65 @@ router.post('/shareSourcePair', (req, res) => {
     return res.status(403).json(outcomes.DENIED);
   }
   logger.info('Received a request to share data source pair');
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    const users = JSON.parse(fields.users);
-    const permissions = JSON.parse(fields.permissions);
-    const _permissions = generatePermissions(permissions);
-    const { limitLocationId } = fields;
-    fhirAxios.search('Basic', { _id: fields.sharePair, _include: 'Basic:pairpartition' }, 'DEFAULT').then((data) => {
-      const partition = data.entry.find(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-partition'));
-      const partDetails = partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
-      let sharedIndex = partDetails.extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/shared');
-      if (sharedIndex === -1) {
-        partDetails.extension.push({
-          url: 'http://gofr.org/fhir/StructureDefinition/shared',
+  const fields = req.body
+  const users = JSON.parse(fields.users);
+  const permissions = JSON.parse(fields.permissions);
+  const _permissions = generatePermissions(permissions);
+  const { limitLocationId } = fields;
+  fhirAxios.search('Basic', { _id: fields.sharePair, _include: 'Basic:pairpartition' }, 'DEFAULT').then((data) => {
+    const partition = data.entry.find(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-partition'));
+    const partDetails = partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
+    let sharedIndex = partDetails.extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/shared');
+    if (sharedIndex === -1) {
+      partDetails.extension.push({
+        url: 'http://gofr.org/fhir/StructureDefinition/shared',
+        extension: [],
+      });
+      sharedIndex = 0;
+    }
+    share(partDetails.extension[sharedIndex].extension, _permissions);
+    function share(extension, permissions) {
+      users.forEach((user) => {
+        const userExists = extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/shareduser' && ext.extension.find(shareExt => shareExt.url === 'user' && shareExt.valueReference.reference === `Person/${user}`));
+        if (userExists !== -1) {
+          extension.splice(userExists, 1);
+        }
+        const userIndex = extension.push({
+          url: 'http://gofr.org/fhir/StructureDefinition/shareduser',
           extension: [],
         });
-        sharedIndex = 0;
-      }
-      share(partDetails.extension[sharedIndex].extension, _permissions);
-      function share(extension, permissions) {
-        users.forEach((user) => {
-          const userExists = extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/shareduser' && ext.extension.find(shareExt => shareExt.url === 'user' && shareExt.valueReference.reference === `Person/${user}`));
-          if (userExists !== -1) {
-            extension.splice(userExists, 1);
-          }
-          const userIndex = extension.push({
-            url: 'http://gofr.org/fhir/StructureDefinition/shareduser',
-            extension: [],
-          });
+        extension[userIndex - 1].extension.push({
+          url: 'user',
+          valueReference: {
+            reference: `Person/${user}`,
+          },
+        }, ...permissions);
+        if (limitLocationId) {
           extension[userIndex - 1].extension.push({
-            url: 'user',
+            url: 'locationLimit',
             valueReference: {
-              reference: `Person/${user}`,
+              reference: limitLocationId,
             },
-          }, ...permissions);
-          if (limitLocationId) {
-            extension[userIndex - 1].extension.push({
-              url: 'locationLimit',
-              valueReference: {
-                reference: limitLocationId,
-              },
-            });
-          }
-        });
-      }
-      fhirAxios.update(partition.resource, 'DEFAULT').then(() => {
-        logger.info('Data source pair shared successfully');
-        getSourcePair({ userID: fields.userID, dhis2OrgId: fields.orgId }).then(pairs => res.status(200).json(pairs)).catch((err) => {
-          logger.error(err);
-          logger.error('An error has occured while getting data source pairs');
-          res.status(500).send('An error has occured while getting data source pairs');
-        });
-      }).catch((err) => {
+          });
+        }
+      });
+    }
+    fhirAxios.update(partition.resource, 'DEFAULT').then(() => {
+      logger.info('Data source pair shared successfully');
+      getSourcePair({ userID: fields.userID, dhis2OrgId: fields.orgId }).then(pairs => res.status(200).json(pairs)).catch((err) => {
         logger.error(err);
-        logger.error('An error occured while sharing data source pair');
-        res.status(500).send('An error occured while sharing data source pair');
+        logger.error('An error has occured while getting data source pairs');
+        res.status(500).send('An error has occured while getting data source pairs');
       });
     }).catch((err) => {
       logger.error(err);
       logger.error('An error occured while sharing data source pair');
       res.status(500).send('An error occured while sharing data source pair');
     });
+  }).catch((err) => {
+    logger.error(err);
+    logger.error('An error occured while sharing data source pair');
+    res.status(500).send('An error occured while sharing data source pair');
   });
 });
 
@@ -1390,28 +1375,26 @@ router.post('/activatePair', (req, res) => {
     return res.status(403).json(outcomes.DENIED);
   }
   logger.info('Received a request to activate shared data source pair');
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    const { id, userID } = fields;
-    Promise.all([deactivatePair(userID), deactivateSharedPair(userID)]).then(() => {
-      fhirAxios.read('Basic', id, '', 'DEFAULT').then((data) => {
-        const pairDetails = data.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/datasourcepair');
-        const status = pairDetails.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/status');
-        status.valueString = 'active';
-        fhirAxios.update(data, 'DEFAULT').then(() => {
-          res.status(200).send();
-        }).catch((err) => {
-          logger.error(err);
-          return res.status(500).send();
-        });
+  const fields = req.body
+  const { id, userID } = fields;
+  Promise.all([deactivatePair(userID), deactivateSharedPair(userID)]).then(() => {
+    fhirAxios.read('Basic', id, '', 'DEFAULT').then((data) => {
+      const pairDetails = data.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/datasourcepair');
+      const status = pairDetails.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/status');
+      status.valueString = 'active';
+      fhirAxios.update(data, 'DEFAULT').then(() => {
+        res.status(200).send();
       }).catch((err) => {
         logger.error(err);
-        return res.status(200).send();
+        return res.status(500).send();
       });
     }).catch((err) => {
       logger.error(err);
-      return res.status(500).send();
+      return res.status(200).send();
     });
+  }).catch((err) => {
+    logger.error(err);
+    return res.status(500).send();
   });
 });
 
@@ -1421,48 +1404,43 @@ router.post('/activateSharedPair', (req, res) => {
     return res.status(403).json(outcomes.DENIED);
   }
   logger.info('Received a request to activate shared data source pair');
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    const { pairID, userID } = fields;
-    Promise.all([deactivatePair(userID), deactivateSharedPair(userID)]).then(() => {
-      fhirAxios.search('Basic', { _id: pairID, _include: 'Basic:pairpartition' }, 'DEFAULT').then((data) => {
-        const partition = data.entry.find(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-partition'));
-        if (!partition) {
-          logger.error(`Pair ${pairID} Not Found`);
-          return res.status(500).send();
-        }
-        const partDetails = partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
-        const sharedIndex = partDetails.extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/shared');
-        if (sharedIndex !== -1) {
-          const exists = partDetails.extension[sharedIndex].extension.find(ext => ext.url === 'activeUsers' && ext.valueReference.reference === `Person/${userID}`);
-          if (!exists) {
-            partDetails.extension[sharedIndex].extension.push({
-              url: 'activeUsers',
-              valueReference: {
-                reference: `Person/${userID}`,
-              },
-            });
-          }
-        } else {
-          if (!partDetails.extension) {
-            partDetails.extension = [];
-          }
-          partDetails.extension.push({
-            url: 'http://gofr.org/fhir/StructureDefinition/shared',
-            extension: [{
-              url: 'activeUsers',
-              valueReference: {
-                reference: `Person/${userID}`,
-              },
-            }],
+  const fields = req.body
+  const { pairID, userID } = fields;
+  Promise.all([deactivatePair(userID), deactivateSharedPair(userID)]).then(() => {
+    fhirAxios.search('Basic', { _id: pairID, _include: 'Basic:pairpartition' }, 'DEFAULT').then((data) => {
+      const partition = data.entry.find(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-partition'));
+      if (!partition) {
+        logger.error(`Pair ${pairID} Not Found`);
+        return res.status(500).send();
+      }
+      const partDetails = partition.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
+      const sharedIndex = partDetails.extension.findIndex(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/shared');
+      if (sharedIndex !== -1) {
+        const exists = partDetails.extension[sharedIndex].extension.find(ext => ext.url === 'activeUsers' && ext.valueReference.reference === `Person/${userID}`);
+        if (!exists) {
+          partDetails.extension[sharedIndex].extension.push({
+            url: 'activeUsers',
+            valueReference: {
+              reference: `Person/${userID}`,
+            },
           });
         }
-        fhirAxios.update(partition.resource, 'DEFAULT').then(() => {
-          res.status(200).send();
-        }).catch((err) => {
-          logger.error(err);
-          return res.status(500).send();
+      } else {
+        if (!partDetails.extension) {
+          partDetails.extension = [];
+        }
+        partDetails.extension.push({
+          url: 'http://gofr.org/fhir/StructureDefinition/shared',
+          extension: [{
+            url: 'activeUsers',
+            valueReference: {
+              reference: `Person/${userID}`,
+            },
+          }],
         });
+      }
+      fhirAxios.update(partition.resource, 'DEFAULT').then(() => {
+        res.status(200).send();
       }).catch((err) => {
         logger.error(err);
         return res.status(500).send();
@@ -1471,6 +1449,9 @@ router.post('/activateSharedPair', (req, res) => {
       logger.error(err);
       return res.status(500).send();
     });
+  }).catch((err) => {
+    logger.error(err);
+    return res.status(500).send();
   });
 });
 
@@ -1698,30 +1679,28 @@ router.delete('/deleteSourcePair', (req, res) => {
 
 router.post('/updateDatasetAutosync', (req, res) => {
   logger.info('Received a request to edit a data source auto sync');
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    fields.enabled = JSON.parse(fields.enabled);
-    fhirAxios.read('Basic', fields.id, '', 'DEFAULT').then((dataSource) => {
-      let updated = false;
-      const dsDetails = dataSource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/datasource');
-      dsDetails.extension.forEach((ext, index) => {
-        if (ext.url === 'http://gofr.org/fhir/StructureDefinition/autoSync') {
-          dsDetails.extension[index].valueBoolean = fields.enabled;
-          updated = true;
-        }
-      });
-      if (!updated) {
-        dsDetails.extension.push({
-          url: 'http://gofr.org/fhir/StructureDefinition/autoSync',
-          valueBoolean: fields.enabled,
-        });
+  const fields = req.body
+  fields.enabled = JSON.parse(fields.enabled);
+  fhirAxios.read('Basic', fields.id, '', 'DEFAULT').then((dataSource) => {
+    let updated = false;
+    const dsDetails = dataSource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/datasource');
+    dsDetails.extension.forEach((ext, index) => {
+      if (ext.url === 'http://gofr.org/fhir/StructureDefinition/autoSync') {
+        dsDetails.extension[index].valueBoolean = fields.enabled;
+        updated = true;
       }
-      fhirAxios.update(dataSource, 'DEFAULT').catch((err) => {
-        logger.error(err);
+    });
+    if (!updated) {
+      dsDetails.extension.push({
+        url: 'http://gofr.org/fhir/StructureDefinition/autoSync',
+        valueBoolean: fields.enabled,
       });
-    }).catch((err) => {
+    }
+    fhirAxios.update(dataSource, 'DEFAULT').catch((err) => {
       logger.error(err);
     });
+  }).catch((err) => {
+    logger.error(err);
   });
 });
 

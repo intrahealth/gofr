@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "serve": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
+    "build": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build",
+    "lint": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service lint"
   },
   "dependencies": {
     "@terraframe/fhir-gis-widget": "0.0.3-alpha",
@@ -13,6 +13,7 @@
     "core-js": "^3.18.1",
     "ethiopic-calendar": "^2.0.0",
     "fhirpath": "^2.9.1",
+    "jwt-decode": "^3.1.2",
     "keycloak-js": "^15.0.2",
     "liquor-tree": "^0.2.70",
     "moment": "^2.29.1",
@@ -21,7 +22,6 @@
     "vue-axios": "^3.3.7",
     "vue-cookies": "^1.7.4",
     "vue-i18n": "^8.26.1",
-    "vue-jwt-decode": "^0.1.0",
     "vue-router": "^3.5.2",
     "vue-session": "^1.0.0",
     "vue-sidebar-menu": "^4.8.1",

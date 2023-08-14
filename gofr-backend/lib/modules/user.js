@@ -388,6 +388,9 @@ User.prototype.updatePermissions = async function (roleResources) {
       });
     }
     await dataSources.getSources({ isAdmin: false, userID: this.resource.id }).then((sources) => {
+      if(!this.permissions.partitions) {
+        this.permissions.partitions = []
+      }
       sources.forEach((source) => {
         const shareDetails = source.sharedUsers && source.sharedUsers.find(share => share.id === this.resource.id);
         const partIndex = this.permissions.partitions.findIndex(part => part.name === source.name);
@@ -547,7 +550,7 @@ User.prototype.resetPermissions = function () {
 };
 
 User.prototype.checkPassword = function (password) {
-  const details = this.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/gofr-password');
+  const details = this.resource?.extension?.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/gofr-password');
   if (!details) {
     logger.error(`Password details don't exist in user ${this.resource.id}`);
     return false;

@@ -176,18 +176,20 @@ export default {
         (this.$store.state.dataSources.length > 1 ||
           this.$store.state.dataSourcePairs.length > 0)
       ) {
+        this.$store.state.initializingApp = false
         if(this.$store.state.auth.username === "public@gofr.org") {
           this.$router.push({ name: 'HomePublic' })
         } else {
-          // this.$router.push({ name: 'Home' })
+          this.$router.push({ name: 'Home' })
         }
         return
       }
       if (!source1DB || !source2DB) {
+        this.$store.state.initializingApp = false
         if(this.$store.state.auth.username === "public@gofr.org") {
           this.$router.push({ name: 'HomePublic' })
         } else {
-          // this.$router.push({ name: 'Home' })
+          this.$router.push({ name: 'Home' })
         }
         return
       }
@@ -225,7 +227,6 @@ export default {
       if (!source1DB || !source2DB) {
         this.$store.state.totalSource1Levels = 5
         this.$store.state.totalSource2Levels = 5
-        this.$store.state.initializingApp = false
         this.renderInitialPage()
         this.$store.state.recoLevel = 2
         this.getRecoStatus()
@@ -455,10 +456,15 @@ export default {
             this.$store.state.initializingApp = true
             this.$store.state.denyAccess = false
             this.getUserConfig()
+          }).catch(() => {
+            this.$store.state.initializingApp = false
           })
         } else {
+          this.$store.state.initializingApp = false
           this.$router.push('login')
         }
+      } else {
+        this.$store.state.initializingApp = false
       }
     }
 

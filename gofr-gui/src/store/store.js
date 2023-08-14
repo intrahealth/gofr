@@ -156,7 +156,7 @@ export const store = new Vuex.Store({
     remoteDataSources: ['DHIS2', 'FHIR'],
     loadingServers: false,
     dynamicProgress: false,
-    initializingApp: false,
+    initializingApp: true,
     cols: { header: 4, content: 8 },
     searchAction: "",
     requestResourceUpdateData: {

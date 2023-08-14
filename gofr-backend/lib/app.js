@@ -8,7 +8,6 @@ const fileUpload = require('express-fileupload');
 const session = require('express-session');
 const path = require('path');
 const bodyParser = require('body-parser');
-const formidable = require('formidable');
 const fs = require('fs');
 const fsFinder = require('fs-finder');
 const cors = require('cors');
@@ -71,15 +70,15 @@ let configLoaded = false;
 
 async function startUp() {
   const isLoggedIn = (req, res, next) => {
-    return next()
     if (req.method == 'OPTIONS'
-      || (req.query.hasOwnProperty('authDisabled') && req.query.authDisabled)
       || req.path.startsWith('/auth/login')
       || req.path.startsWith('/auth/token')
       || req.path.startsWith('/auth')
       || req.path === '/getSignupConf'
       || req.path === '/config/getGeneralConfig'
-      || req.path === '/addUser/'
+      || req.path === '/users/addDhis2User'
+      || req.path === '/translator/getTranslatedLanguages'
+      || req.path.startsWith('/translator/getLocale/')
       || req.path.startsWith('/progress')
     ) {
       return next();
@@ -108,9 +107,9 @@ async function startUp() {
         });
       }
     }
-    if (config.get('app:idp') === 'gofr') {
+    if (config.get('app:idp') === 'gofr' || config.get('app:idp') === 'dhis2') {
       if (!req.user && req.headers.authorization && req.headers.authorization.split(' ').length === 2) {
-        // Only for API Access when using gofr as IDP
+        // Only for Access using token when using gofr as IDP
         const token = req.headers.authorization.split(' ')[1];
         let decoded;
         jwt.verify(token, config.get('auth:secret'), (err, dec) => {
@@ -225,19 +224,17 @@ async function startUp() {
   });
 
   app.post('/editLocation', (req, res) => {
-    const form = new formidable.IncomingForm();
-    form.parse(req, (err, fields, files) => {
-      const db = mixin.toTitleCase(fields.source + fields.sourceOwner);
-      const id = fields.locationId;
-      const name = fields.locationName;
-      const parent = fields.locationParent;
-      mcsd.editLocation(id, name, parent, db, (resp, err) => {
-        if (err) {
-          res.status(400).send(err);
-        } else {
-          res.status(200).send();
-        }
-      });
+    const fields = req.body
+    const db = mixin.toTitleCase(fields.source + fields.sourceOwner);
+    const id = fields.locationId;
+    const name = fields.locationName;
+    const parent = fields.locationParent;
+    mcsd.editLocation(id, name, parent, db, (resp, err) => {
+      if (err) {
+        res.status(400).send(err);
+      } else {
+        res.status(200).send();
+      }
     });
   });
 
@@ -254,16 +251,16 @@ async function startUp() {
       logger.info(`Checking if data available for ${req.params.source1} and ${req.params.source2}`);
       async.parallel({
         source1Availability(callback) {
-          mcsd.getLocations(req.params.source1, (source1Data) => {
-            if (source1Data.hasOwnProperty('entry') && source1Data.entry.length > 0) {
+          mcsd.countLocations(req.params.source1, (total) => {
+            if (total > 0) {
               return callback(false, true);
             }
             return callback(false, false);
           });
         },
         source2Availability(callback) {
-          mcsd.getLocations(req.params.source2, (source2Data) => {
-            if (source2Data.hasOwnProperty('entry') && source2Data.entry.length > 0) {
+          mcsd.countLocations(req.params.source2, (total) => {
+            if (total > 0) {
               return callback(false, true);
             }
             return callback(false, false);
@@ -285,45 +282,41 @@ async function startUp() {
 
   app.post('/dhisSync', (req, res) => {
     logger.info('received request to sync DHIS2 data');
-    const form = new formidable.IncomingForm();
     res.status(200).end();
-    form.parse(req, (err, fields, files) => {
-      const { mode } = fields;
-      let full = true;
-      if (mode === 'update') {
-        full = false;
-      }
-      dhis.sync(
-        fields.host,
-        fields.username,
-        fields.password,
-        fields.name,
-        fields.clientId,
-        topOrgName,
-        false,
-        full,
-        false,
-        false,
-      );
-    });
+    const fields = req.body
+    const { mode } = fields;
+    let full = true;
+    if (mode === 'update') {
+      full = false;
+    }
+    dhis.sync(
+      fields.host,
+      fields.username,
+      fields.password,
+      fields.name,
+      fields.clientId,
+      topOrgName,
+      false,
+      full,
+      false,
+      false,
+    );
   });
 
   app.post('/fhirSync', (req, res) => {
     res.status(200).end();
-    const form = new formidable.IncomingForm();
-    form.parse(req, (err, fields, files) => {
-      logger.info(`Received a request to sync FHIR server ${fields.host}`);
-      fhir.sync(
-        fields.id,
-        fields.host,
-        fields.username,
-        fields.password,
-        fields.mode,
-        fields.name,
-        fields.clientId,
-        topOrgName,
-      );
-    });
+    const fields = req.body
+    logger.info(`Received a request to sync FHIR server ${fields.host}`);
+    fhir.sync(
+      fields.id,
+      fields.host,
+      fields.username,
+      fields.password,
+      fields.mode,
+      fields.name,
+      fields.clientId,
+      topOrgName,
+    );
   });
 
   app.get('/hierarchy', (req, res) => {
@@ -624,101 +617,99 @@ async function startUp() {
     });
   });
   app.post('/uploadCSV', (req, res) => {
-    const form = new formidable.IncomingForm();
-    form.parse(req, (err, fields, files) => {
-      logger.info(`Received Source1 Data with fields Mapping ${JSON.stringify(fields)}`);
-      if (!fields.csvName) {
-        logger.error({
-          error: 'Missing CSV Name',
-        });
-        res.status(400).json({
-          error: 'Missing CSV Name',
-        });
-        return;
-      }
-      const database = mixin.toTitleCase(fields.csvName + fields.userID);
-      const expectedLevels = config.get('levels');
-      const {
-        clientId,
-      } = fields;
-      const uploadRequestId = `uploadProgress${clientId}`;
-      let uploadReqPro = JSON.stringify({
-        status: 'Request received by server',
-        error: null,
-        percent: null,
+    const fields = req.body
+    logger.info(`Received Source1 Data with fields Mapping ${JSON.stringify(fields)}`);
+    if (!fields.csvName) {
+      logger.error({
+        error: 'Missing CSV Name',
       });
-      redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
-      if (!Array.isArray(expectedLevels)) {
-        logger.error('Invalid config data for key Levels ');
+      res.status(400).json({
+        error: 'Missing CSV Name',
+      });
+      return;
+    }
+    const database = mixin.toTitleCase(fields.csvName + fields.userID);
+    const expectedLevels = config.get('levels');
+    const {
+      clientId,
+    } = fields;
+    const uploadRequestId = `uploadProgress${clientId}`;
+    let uploadReqPro = JSON.stringify({
+      status: 'Request received by server',
+      error: null,
+      percent: null,
+    });
+    redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
+    if (!Array.isArray(expectedLevels)) {
+      logger.error('Invalid config data for key Levels ');
+      res.status(400).json({
+        error: 'Un expected error occured while processing this request',
+      });
+      res.end();
+      return;
+    }
+    if (Object.keys(files).length == 0) {
+      logger.error('No file submitted for reconciliation');
+      res.status(400).json({
+        error: 'Please submit CSV file for facility reconciliation',
+      });
+      return res.end();
+    }
+    const fileName = Object.keys(files)[0];
+    logger.info('validating CSV File');
+    uploadReqPro = JSON.stringify({
+      status: '2/3 Validating CSV Data',
+      error: null,
+      percent: null,
+    });
+    redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
+    mixin.validateCSV(files[fileName].path, fields, (valid, invalid) => {
+      if (invalid.length > 0) {
+        logger.error('Uploaded CSV is invalid (has either duplicated IDs or empty levels/facility),execution stopped');
         res.status(400).json({
-          error: 'Un expected error occured while processing this request',
+          error: invalid,
         });
         res.end();
         return;
       }
-      if (Object.keys(files).length == 0) {
-        logger.error('No file submitted for reconciliation');
-        res.status(400).json({
-          error: 'Please submit CSV file for facility reconciliation',
+
+      logger.info('CSV File Passed Validation');
+      logger.info('Creating HAPI server now');
+      hapi.addPartition({ name: database, description: 'reco data source', userID: fields.userID }).then((partitionID) => {
+        const levelData = mixin.createLevelMapping(fields);
+        res.status(200).end(JSON.stringify({ partitionID, levelData: JSON.stringify(levelData) }));
+        uploadReqPro = JSON.stringify({
+          status: '3/3 Uploading of data started',
+          error: null,
+          percent: null,
         });
-        return res.end();
-      }
-      const fileName = Object.keys(files)[0];
-      logger.info('validating CSV File');
-      uploadReqPro = JSON.stringify({
-        status: '2/3 Validating CSV Data',
-        error: null,
-        percent: null,
-      });
-      redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
-      mixin.validateCSV(files[fileName].path, fields, (valid, invalid) => {
-        if (invalid.length > 0) {
-          logger.error('Uploaded CSV is invalid (has either duplicated IDs or empty levels/facility),execution stopped');
-          res.status(400).json({
-            error: invalid,
-          });
-          res.end();
-          return;
-        }
+        redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
+        const oldPath = files[fileName].path;
 
-        logger.info('CSV File Passed Validation');
-        logger.info('Creating HAPI server now');
-        hapi.addPartition({ name: database, description: 'reco data source', userID: fields.userID }).then((partitionID) => {
-          const levelData = mixin.createLevelMapping(fields);
-          res.status(200).end(JSON.stringify({ partitionID, levelData: JSON.stringify(levelData) }));
-          uploadReqPro = JSON.stringify({
-            status: '3/3 Uploading of data started',
-            error: null,
-            percent: null,
-          });
-          redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
-          const oldPath = files[fileName].path;
-
-          const newPath = `${__dirname}/csvUploads/${fields.userID}+${mixin.toTitleCase(fields.csvName)}+${moment().format()}.csv`;
-          fs.readFile(oldPath, (err, data) => {
+        const newPath = `${__dirname}/csvUploads/${fields.userID}+${mixin.toTitleCase(fields.csvName)}+${moment().format()}.csv`;
+        fs.readFile(oldPath, (err, data) => {
+          if (err) {
+            logger.error(err);
+          }
+          fs.writeFile(newPath, data, (err) => {
             if (err) {
               logger.error(err);
             }
-            fs.writeFile(newPath, data, (err) => {
-              if (err) {
-                logger.error(err);
-              }
-            });
           });
-          logger.info(`Uploading data for ${database} now`);
-          mcsd.CSVTomCSD(files[fileName].path, fields, database, clientId, () => {
-            logger.info(`Data upload for ${database} is done`);
-            uploadReqPro = JSON.stringify({
-              status: 'Done',
-              error: null,
-              percent: 100,
-            });
-            redisClient.set(uploadRequestId, uploadReqPro);
-          });
-        }).catch(() => {
-          logger.error('Error occured while creating partition');
-          return res.status(500).json({ error: 'An error has occured, upload cancelled' });
         });
+        logger.info(`Uploading data for ${database} now`);
+        mcsd.CSVTomCSD(files[fileName].path, fields, database, clientId, () => {
+          logger.info(`Data upload for ${database} is done`);
+          uploadReqPro = JSON.stringify({
+            status: 'Done',
+            error: null,
+            percent: 100,
+          });
+          redisClient.set(uploadRequestId, uploadReqPro);
+        });
+      }).catch(() => {
+        logger.error('Error occured while creating partition');
+        return res.status(500).json({ error: 'An error has occured, upload cancelled' });
       });
     });
   });

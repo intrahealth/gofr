@@ -1,5 +1,4 @@
 const deepmerge = require('deepmerge');
-const formidable = require('formidable');
 const crypto = require('crypto');
 const express = require('express');
 
@@ -925,26 +924,58 @@ router.get('/page/:page/:type?', (req, res) => {
 
 router.post('/updateUserConfig/:userID', (req, res) => {
   logger.info('Received updated user configurations');
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    let appConfig;
-    try {
-      appConfig = JSON.parse(fields.config);
-    } catch (error) {
-      appConfig = fields.config;
-    }
-    const configRes = {
-      resourceType: 'Parameters',
-      id: `gofr-user-config-${req.params.userID}`,
-      parameter: [{
-        name: 'config',
-        valueString: '{}',
-      }],
-    };
+  const fields = req.body
+  let appConfig;
+  try {
+    appConfig = JSON.parse(fields.config);
+  } catch (error) {
+    appConfig = fields.config;
+  }
+  const configRes = {
+    resourceType: 'Parameters',
+    id: `gofr-user-config-${req.params.userID}`,
+    parameter: [{
+      name: 'config',
+      valueString: '{}',
+    }],
+  };
+  const index = configRes.parameter.findIndex(param => param.name === 'config');
+  configRes.parameter[index].valueString = JSON.stringify(appConfig.userConfig);
+  fhirAxios.update(configRes, 'DEFAULT').then(() => {
+    logger.info('User Config Saved');
+    return res.status(200).json({
+      status: 'Done',
+    });
+  }).catch((err) => {
+    logger.error(err);
+    res.status(500).json({
+      error: 'Unexpected error occured,please retry',
+    });
+  });
+});
+
+router.post('/updateGeneralConfig', (req, res) => {
+  logger.info('Received updated general configurations');
+  const fields = req.body
+  let appConfig;
+  try {
+    appConfig = JSON.parse(fields.config);
+  } catch (error) {
+    appConfig = fields.config;
+  }
+  fhirAxios.read('Parameters', 'gofr-general-config', '', 'DEFAULT').then((configRes) => {
     const index = configRes.parameter.findIndex(param => param.name === 'config');
-    configRes.parameter[index].valueString = JSON.stringify(appConfig.userConfig);
+    const _config = JSON.parse(configRes.parameter[index].valueString);
+    if (!_config.externalAuth || appConfig.generalConfig.externalAuth.password != _config.externalAuth.password) {
+      if (appConfig.generalConfig.externalAuth.password) {
+        appConfig.generalConfig.externalAuth.password = mixin.encrypt(appConfig.generalConfig.externalAuth.password);
+      }
+    } else {
+      appConfig.generalConfig.externalAuth.password = _config.externalAuth.password;
+    }
+    configRes.parameter[index].valueString = JSON.stringify(appConfig.generalConfig);
     fhirAxios.update(configRes, 'DEFAULT').then(() => {
-      logger.info('User Config Saved');
+      logger.info('General Config Saved');
       return res.status(200).json({
         status: 'Done',
       });
@@ -952,42 +983,6 @@ router.post('/updateUserConfig/:userID', (req, res) => {
       logger.error(err);
       res.status(500).json({
         error: 'Unexpected error occured,please retry',
-      });
-    });
-  });
-});
-
-router.post('/updateGeneralConfig', (req, res) => {
-  logger.info('Received updated general configurations');
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    let appConfig;
-    try {
-      appConfig = JSON.parse(fields.config);
-    } catch (error) {
-      appConfig = fields.config;
-    }
-    fhirAxios.read('Parameters', 'gofr-general-config', '', 'DEFAULT').then((configRes) => {
-      const index = configRes.parameter.findIndex(param => param.name === 'config');
-      const _config = JSON.parse(configRes.parameter[index].valueString);
-      if (!_config.externalAuth || appConfig.generalConfig.externalAuth.password != _config.externalAuth.password) {
-        if (appConfig.generalConfig.externalAuth.password) {
-          appConfig.generalConfig.externalAuth.password = mixin.encrypt(appConfig.generalConfig.externalAuth.password);
-        }
-      } else {
-        appConfig.generalConfig.externalAuth.password = _config.externalAuth.password;
-      }
-      configRes.parameter[index].valueString = JSON.stringify(appConfig.generalConfig);
-      fhirAxios.update(configRes, 'DEFAULT').then(() => {
-        logger.info('General Config Saved');
-        return res.status(200).json({
-          status: 'Done',
-        });
-      }).catch((err) => {
-        logger.error(err);
-        res.status(500).json({
-          error: 'Unexpected error occured,please retry',
-        });
       });
     });
   });

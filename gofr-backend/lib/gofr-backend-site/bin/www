@@ -1,11 +1,9 @@
 #!/usr/bin/env node
-
 const siteConfig = require(`${__dirname}/../config/default.json`)
 
-let sitePath = process.env.APP__SITE__PATH || siteConfig.app.site.path
-let corePath = process.env.APP__CORE__PATH || siteConfig.app.core.path
-
-const ihrissmartrequire = require('ihrissmartrequire')(sitePath, corePath)
+global["appsitepath" + process.pid] = process.env.APP__SITE__PATH || siteConfig.app.site.path
+global["appcorepath" + process.pid] = process.env.APP__CORE__PATH || siteConfig.app.core.path
+const ihrissmartrequire = require('ihrissmartrequire')
 
 
 const app = ihrissmartrequire('app');
@@ -74,11 +72,9 @@ function onError(error) {
     case 'EACCES':
       console.error(bind + ' requires elevated privileges');
       process.exit(1);
-      break;
     case 'EADDRINUSE':
       console.error(bind + ' is already in use');
       process.exit(1);
-      break;
     default:
       throw error;
   }

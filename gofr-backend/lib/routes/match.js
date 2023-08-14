@@ -6,7 +6,6 @@
 const express = require('express');
 
 const router = express.Router();
-const formidable = require('formidable');
 const request = require('request');
 const redis = require('redis');
 
@@ -735,7 +734,7 @@ router.get('/unmatchedLocations', (req, res) => {
   }
 });
 
-router.post('/performMatch/:type', (req, res) => {
+router.post('/performMatch/:type', async (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'match-location');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
@@ -744,96 +743,92 @@ router.post('/performMatch/:type', (req, res) => {
   const {
     type,
   } = req.params;
-  const form = new formidable.IncomingForm();
-  form.parse(req, async (err, fields, files) => {
-    const status = await recoStatus(fields.pairId);
-    if (status !== 'in-progress') {
-      return res.status(400).send({
-        error: 'Reconciliation closed',
-      });
-    }
-    if (!fields.partition1 || !fields.partition2) {
-      logger.error({
-        error: 'Missing partition1 or partition2',
-      });
-      res.status(400).json({
-        error: 'Missing partition1 or partition2',
-      });
-      return;
-    }
-    const {
-      partition1,
-      partition2,
-      mappingPartition,
-      source1Id,
-      source2Id,
-      recoLevel,
-      totalLevels,
-      flagComment,
-    } = fields;
-    if (!source1Id || !source2Id) {
-      logger.error({
-        error: 'Missing either Source1 ID or Source2 ID or both',
-      });
-      res.status(400).json({
-        error: 'Missing either Source1 ID or Source2 ID or both',
-      });
-      return;
-    }
-    mcsd.saveMatch(source1Id, source2Id, partition1, partition2, mappingPartition, recoLevel, totalLevels, type, false, flagComment, (err, matchComments) => {
-      logger.info('Done matching');
-      if (err) {
-        logger.error(err);
-        res.status(400).send({
-          error: err,
-        });
-      } else {
-        res.status(200).json({
-          matchComments,
-        });
-      }
+  const fields = req.body
+  const status = await recoStatus(fields.pairId);
+  if (status !== 'in-progress') {
+    return res.status(400).send({
+      error: 'Reconciliation closed',
     });
+  }
+  if (!fields.partition1 || !fields.partition2) {
+    logger.error({
+      error: 'Missing partition1 or partition2',
+    });
+    res.status(400).json({
+      error: 'Missing partition1 or partition2',
+    });
+    return;
+  }
+  const {
+    partition1,
+    partition2,
+    mappingPartition,
+    source1Id,
+    source2Id,
+    recoLevel,
+    totalLevels,
+    flagComment,
+  } = fields;
+  if (!source1Id || !source2Id) {
+    logger.error({
+      error: 'Missing either Source1 ID or Source2 ID or both',
+    });
+    res.status(400).json({
+      error: 'Missing either Source1 ID or Source2 ID or both',
+    });
+    return;
+  }
+  mcsd.saveMatch(source1Id, source2Id, partition1, partition2, mappingPartition, recoLevel, totalLevels, type, false, flagComment, (err, matchComments) => {
+    logger.info('Done matching');
+    if (err) {
+      logger.error(err);
+      res.status(400).send({
+        error: err,
+      });
+    } else {
+      res.status(200).json({
+        matchComments,
+      });
+    }
   });
 });
 
-router.post('/acceptFlag/:mappingPartition', (req, res) => {
+router.post('/acceptFlag/:mappingPartition', async(req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'accept-flagged-location');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
   logger.info('Received data for marking flag as a match');
-  const form = new formidable.IncomingForm();
-  form.parse(req, async (err, fields, files) => {
-    const status = await recoStatus(fields.pairId);
-    if (status !== 'in-progress') {
-      return res.status(400).send({
-        error: 'Reconciliation closed',
-      });
-    }
-    const {
-      source1Id,
-    } = fields;
-    if (!source1Id) {
-      logger.error({
-        error: 'Missing source1Id',
-      });
-      res.status(400).json({
-        error: 'Missing source1Id',
-      });
-      return;
-    }
-    mcsd.acceptFlag(source1Id, req.params.mappingPartition, (err) => {
-      logger.info('Done marking flag as a match');
-      if (err) {
-        res.status(400).send({
-          error: err,
-        });
-      } else res.status(200).send();
+  const fields = req.body
+  const status = await recoStatus(fields.pairId);
+  if (status !== 'in-progress') {
+    return res.status(400).send({
+      error: 'Reconciliation closed',
     });
+  }
+  const {
+    source1Id,
+  } = fields;
+  if (!source1Id) {
+    logger.error({
+      error: 'Missing source1Id',
+    });
+    res.status(400).json({
+      error: 'Missing source1Id',
+    });
+    return;
+  }
+  mcsd.acceptFlag(source1Id, req.params.mappingPartition, (err) => {
+    logger.info('Done marking flag as a match');
+    if (err) {
+      res.status(400).send({
+        error: err,
+      });
+    } else res.status(200).send();
   });
 });
 
-router.post('/noMatch/:type', (req, res) => {
+router.post('/noMatch/:type', async (req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'match-location');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
@@ -842,129 +837,123 @@ router.post('/noMatch/:type', (req, res) => {
   const {
     type,
   } = req.params;
-  const form = new formidable.IncomingForm();
-  form.parse(req, async (err, fields, files) => {
-    const status = await recoStatus(fields.pairId);
-    if (status !== 'in-progress') {
-      return res.status(400).send({
-        error: 'Reconciliation closed',
-      });
-    }
-    const {
-      partition1,
-      partition2,
-      mappingPartition,
-      source1Id,
-      recoLevel,
-      totalLevels,
-    } = fields;
-    if (!partition1 || !partition2) {
-      logger.error({
-        error: 'Missing partition1 or partition2',
-      });
-      res.set('Access-Control-Allow-Origin', '*');
-      res.status(400).json({
-        error: 'Missing partition1 or partition2',
-      });
-      return;
-    }
-    if (!source1Id) {
-      logger.error({
-        error: 'Missing either Source1 ID',
-      });
-      res.set('Access-Control-Allow-Origin', '*');
-      res.status(400).json({
-        error: 'Missing either Source1 ID',
-      });
-      return;
-    }
-
-    mcsd.saveNoMatch(source1Id, partition1, partition2, mappingPartition, recoLevel, totalLevels, type, (err) => {
-      logger.info('Done matching');
-      if (err) {
-        res.status(400).send({
-          error: 'Un expected error has occured',
-        });
-      } else res.status(200).send();
+  const fields = req.body
+  const status = await recoStatus(fields.pairId);
+  if (status !== 'in-progress') {
+    return res.status(400).send({
+      error: 'Reconciliation closed',
     });
+  }
+  const {
+    partition1,
+    partition2,
+    mappingPartition,
+    source1Id,
+    recoLevel,
+    totalLevels,
+  } = fields;
+  if (!partition1 || !partition2) {
+    logger.error({
+      error: 'Missing partition1 or partition2',
+    });
+    res.set('Access-Control-Allow-Origin', '*');
+    res.status(400).json({
+      error: 'Missing partition1 or partition2',
+    });
+    return;
+  }
+  if (!source1Id) {
+    logger.error({
+      error: 'Missing either Source1 ID',
+    });
+    res.set('Access-Control-Allow-Origin', '*');
+    res.status(400).json({
+      error: 'Missing either Source1 ID',
+    });
+    return;
+  }
+
+  mcsd.saveNoMatch(source1Id, partition1, partition2, mappingPartition, recoLevel, totalLevels, type, (err) => {
+    logger.info('Done matching');
+    if (err) {
+      res.status(400).send({
+        error: 'Un expected error has occured',
+      });
+    } else res.status(200).send();
   });
 });
 
-router.post('/breakMatch', (req, res) => {
+router.post('/breakMatch', async(req, res) => {
   const allowed = req.user.hasPermissionByName('special', 'custom', 'break-matched-location');
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
   }
-  const form = new formidable.IncomingForm();
-  form.parse(req, async (err, fields, files) => {
-    if (!fields.partition1) {
-      logger.error({
-        error: 'Missing partition1',
-      });
-      res.status(400).json({
-        error: 'Missing partition1',
-      });
-      return;
-    }
-    const status = await recoStatus(fields.pairId);
-    if (status !== 'in-progress') {
-      return res.status(400).send({
-        error: 'Reconciliation closed',
-      });
-    }
-    logger.info(`Received break match request for ${fields.source1Id}`);
-    const { source1Id } = fields;
-
-    mcsd.breakMatch(source1Id, fields.mappingPartition, fields.partition1, (err, results) => {
-      if (err) {
-        logger.error(err);
-        return res.status(500).json({
-          error: err,
-        });
-      }
-      logger.info(`break match done for ${fields.source1Id}`);
-      res.status(200).send(err);
+  const fields = req.body
+  if (!fields.partition1) {
+    logger.error({
+      error: 'Missing partition1',
     });
-  });
-});
-
-router.post('/breakNoMatch/:type', (req, res) => {
-  const allowed = req.user.hasPermissionByName('special', 'custom', 'break-matched-location');
-  if (!allowed) {
-    return res.status(403).json(outcomes.DENIED);
+    res.status(400).json({
+      error: 'Missing partition1',
+    });
+    return;
   }
-  const form = new formidable.IncomingForm();
-  form.parse(req, async (err, fields, files) => {
-    const status = await recoStatus(fields.pairId);
-    if (!fields.mappingPartition) {
-      logger.error({
-        error: 'Missing mapping partition',
-      });
-      res.status(500).json({
-        error: 'Missing mapping partition',
-      });
-      return;
-    }
-    if (status !== 'in-progress') {
-      return res.status(400).send({
-        error: 'Reconciliation closed',
-      });
-    }
-    logger.info(`Received break no match request for ${fields.source1Id}`);
-    const { source1Id } = fields;
-    if (!source1Id) {
-      logger.error({
-        error: 'Missing Source1 ID',
-      });
+  const status = await recoStatus(fields.pairId);
+  if (status !== 'in-progress') {
+    return res.status(400).send({
+      error: 'Reconciliation closed',
+    });
+  }
+  logger.info(`Received break match request for ${fields.source1Id}`);
+  const { source1Id } = fields;
+
+  mcsd.breakMatch(source1Id, fields.mappingPartition, fields.partition1, (err, results) => {
+    if (err) {
+      logger.error(err);
       return res.status(500).json({
-        error: 'Missing Source1 ID',
+        error: err,
       });
     }
+    logger.info(`break match done for ${fields.source1Id}`);
+    res.status(200).send(err);
+  });
+});
 
-    mcsd.breakNoMatch(source1Id, fields.mappingPartition, (err) => {
-      logger.info(`break no match done for ${fields.source1Id}`);
-      res.status(200).send(err);
+router.post('/breakNoMatch/:type', async(req, res) => {
+  const allowed = req.user.hasPermissionByName('special', 'custom', 'break-matched-location');
+  if (!allowed) {
+    return res.status(403).json(outcomes.DENIED);
+  }
+  const fields = req.body
+  const status = await recoStatus(fields.pairId);
+  if (!fields.mappingPartition) {
+    logger.error({
+      error: 'Missing mapping partition',
     });
+    res.status(500).json({
+      error: 'Missing mapping partition',
+    });
+    return;
+  }
+  if (status !== 'in-progress') {
+    return res.status(400).send({
+      error: 'Reconciliation closed',
+    });
+  }
+  logger.info(`Received break no match request for ${fields.source1Id}`);
+  const { source1Id } = fields;
+  if (!source1Id) {
+    logger.error({
+      error: 'Missing Source1 ID',
+    });
+    return res.status(500).json({
+      error: 'Missing Source1 ID',
+    });
+  }
+
+  mcsd.breakNoMatch(source1Id, fields.mappingPartition, (err) => {
+    logger.info(`break no match done for ${fields.source1Id}`);
+    res.status(200).send(err);
   });
 });
 

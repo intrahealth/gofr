@@ -279,7 +279,7 @@ export const generalMixin = {
     },
     getRoles () {
       axios
-        .get('/getRoles')
+        .get('/users/getRoles')
         .then(roles => {
           for (let role of roles.data) {
             this.roles.push({
@@ -332,7 +332,6 @@ export const generalMixin = {
         })
     },
     setDHIS2Credentials () {
-      // tell the backend that auth is disabled
       this.$store.state.auth.userID = ''
       if (process.env.NODE_ENV === 'production') {
         let href = location.href.split('api')
@@ -340,17 +339,11 @@ export const generalMixin = {
           return false
         }
         this.$store.state.dhis.host = location.href.split('api').shift()
-        axios.defaults.params = {
-          authDisabled: true
-        }
         return true
       } else if (process.env.NODE_ENV === 'development') {
-        this.$store.state.dhis.host = 'https://test.geoalign.datim.org/'
-        this.$store.state.dhis.dev.auth.username = 'Alicia_MOH_DataImport'
-        this.$store.state.dhis.dev.auth.password = 'P@$$w0rd@1'
-        axios.defaults.params = {
-          authDisabled: true
-        }
+        this.$store.state.dhis.host = 'https://play.dhis2.org/2.38.4.3'
+        this.$store.state.dhis.dev.auth.username = 'admin'
+        this.$store.state.dhis.dev.auth.password = 'district'
         return true
       }
     }

@@ -1,8 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const translate = require('@vitalets/google-translate-api');
-const config = require('../../../config')
-const ihrissmartrequire = require("ihrissmartrequire")(config.get("app:site:path"), config.get("app:core:path"))
+const ihrissmartrequire = require("ihrissmartrequire")
 const async = require("async")
 const fs = require("fs")
 
@@ -167,7 +166,7 @@ router.get("/getLocale/:locale", async(req, res) => {
   return res.json(translations)
 })
 
-router.get("/getLocales/:locale?", async(req, res) => {
+router.get("/getLocales", async(req, res) => {
   let localesPath = getLocalePath()
   const files = await fs.readdirSync(localesPath);
   let locales = {

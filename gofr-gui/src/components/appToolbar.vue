@@ -21,7 +21,7 @@
     <v-toolbar-items>
       <template v-if="($keycloak && $keycloak.authenticated) || $store.state.auth.userID || $store.state.config.generalConfig.authDisabled">
         <v-btn
-          flat
+          text
           :href="dhisLink"
           v-if='dhisLink'
         >

@@ -10,7 +10,7 @@ import axios from 'axios'
 import VueAxios from 'vue-axios'
 import VueCookies from 'vue-cookies'
 import VueSession from 'vue-session'
-import VueJwtDecode from 'vue-jwt-decode'
+import jwt_decode from "jwt-decode";
 import * as Keycloak from 'keycloak-js';
 let ProgressBar = require('progressbar.js');
 import 'whatwg-fetch'
@@ -94,13 +94,13 @@ if (guiConfig.BACKEND_HOST === '.') {
   guiConfig.BACKEND_PROTOCOL = window.location.protocol.replace(':', '')
 }
 guiConfig.BACKEND_SERVER = guiConfig.BACKEND_PROTOCOL + '://' + guiConfig.BACKEND_HOST + ':' + guiConfig.BACKEND_PORT
-// if running inside DHIS2 then get any config defined inside the datastore
+
 function getDHIS2StoreConfig (callback) {
-  let href = location.href.split('api')
+  let url = location.href
+  let href = url.split('api')
   if (href.length >= 2) {
-    let dhis2URL = location.href.split('api').shift()
-    axios.get(dhis2URL + 'api/dataStore/GOFR/config').then((response) => {
-      callback(response.data)
+    let dhis2URL = url.split('api').shift()
+    axios.get(dhis2URL + 'api/dataStore/GOFR/config').then(async(response) => {
       // if BACKEND_URL is missing then set it
       if (!response.data.BACKEND_SERVER) {
         let url = process.env.VUE_APP_BACKEND_SERVER || guiConfig.BACKEND_SERVER
@@ -109,6 +109,8 @@ function getDHIS2StoreConfig (callback) {
         }
         addDHIS2StoreConfig(config)
       }
+      axios.defaults.baseURL = response.data.BACKEND_SERVER
+      callback(response.data)
     }).catch((err) => {
       console.log(JSON.stringify(err))
       let resp = false
@@ -169,7 +171,7 @@ function kcAuthenticatePublicUser(genConfig) {
       const url = store.state.keycloak.baseURL + '/realms/' + store.state.keycloak.realm + '/protocol/openid-connect/token'
       let data = `client_id=${store.state.keycloak.UIClientId}&grant_type=password&username=public@gofr.org&password=public`
       axios.post(url, data).then((resp) => {
-        let userinfo = VueJwtDecode.decode(resp.data.access_token)
+        let userinfo = jwt_decode(resp.data.access_token)
         let token = resp.data.access_token
         let refreshToken = resp.data.refresh_token
         Vue.$keycloak.init({onLoad: 'login-required', checkLoginIframe: false, token, refreshToken}).then( () => {
@@ -246,7 +248,7 @@ function renderApp(genConfig) {
 /* eslint-disable no-new */
 getDHIS2StoreConfig((storeConfig) => {
   if (storeConfig && storeConfig.BACKEND_SERVER) {
-    axios.defaults.baseURL = process.env.VUE_APP_BACKEND_SERVER || storeConfig.BACKEND_SERVER
+    axios.defaults.baseURL = storeConfig.BACKEND_SERVER
   } else if (process.env.VUE_APP_BACKEND_SERVER) {
     axios.defaults.baseURL = process.env.VUE_APP_BACKEND_SERVER
   } else {

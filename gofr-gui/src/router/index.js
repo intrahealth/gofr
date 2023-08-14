@@ -26,7 +26,6 @@ import {store} from '../store/store.js'
 Vue.use(Router)
 
 let router = new Router({
-  mode: "history",
   routes: [{
     path: '/Home',
     name: 'Home',
@@ -310,8 +309,14 @@ router.beforeEach((to, from, next) => {
       return next()
     }
   } else {
-    if (!store.state.auth.userObj.resource) {
-      if (to.path !== '/Login' && to.path !== '/Signup' && !store.state.config.generalConfig.authDisabled) {
+    if(to.path === '/Login' || to.path === '/dhis2Auth') {
+      return next()
+    } else if (!store.state.auth.userObj.resource) {
+      if (store.state.idp === 'dhis2') {
+        store.state.initializingApp = true
+        store.state.denyAccess = false
+        return next({ name: 'DHIS2Auth' })
+      } else if (to.path !== '/Login' && to.path !== '/Signup' && !store.state.config.generalConfig.authDisabled) {
         next({
           path: '/Login'
         })

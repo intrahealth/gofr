@@ -83,6 +83,12 @@
         {
           "url": "task",
           "valueReference": {
+            "reference": "Basic/gofr-task-get-source-pair"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
             "reference": "Basic/gofr-task-deactivate-source-pair"
           }
         },
@@ -120,6 +126,12 @@
           "url": "task",
           "valueReference": {
             "reference": "Basic/gofr-task-add-data-source"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-get-data-source"
           }
         },
         {
@@ -168,6 +180,12 @@
           "url": "task",
           "valueReference": {
             "reference": "Basic/gofr-task-view-add-organization-page"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-view-config-page"
           }
         },
         {
@@ -227,6 +245,12 @@
         {
           "url": "task",
           "valueReference": {
+            "reference": "Basic/gofr-task-read-metadata-resource"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
             "reference": "Basic/gofr-task-read-healthcareservice-resource"
           }
         },
@@ -264,6 +288,18 @@
           "url": "task",
           "valueReference": {
             "reference": "Basic/gofr-task-open-matching"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-manage-data-source"
+          }
+        },
+        {
+          "url": "task",
+          "valueReference": {
+            "reference": "Basic/gofr-task-access-facility-reconciliation-mod"
           }
         }
       ]

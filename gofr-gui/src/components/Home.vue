@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <v-layout column>
+    <v-layout column v-if="!$store.state.initializingApp">
       <v-flex>
         <v-card>
           <v-card-text>
@@ -79,6 +79,7 @@
                   <fhirPageSearch
                     page="facility"
                     :key="reload"
+                    v-if="$store.state.dataSources.length > 0"
                   />
                 </v-flex>
                 <v-spacer></v-spacer>
@@ -86,6 +87,7 @@
                   <fhirPageSearch
                     page="jurisdiction"
                     :key="reload"
+                    v-if="$store.state.dataSources.length > 0"
                   />
                 </v-flex>
                 <v-spacer></v-spacer>
@@ -122,14 +124,12 @@
         </v-layout>
       </v-flex>
     </v-layout>
+    <v-progress-linear v-else :indeterminate="true"></v-progress-linear>
   </v-container>
 </template>
 
 <script>
 import { generalMixin } from '@/mixins/generalMixin'
-import fhirPageSearch from '@/components/FacilityRegistry/fhir-page-search.vue'
-import viewMap from '@/components/ViewMap'
-import ActivePartitionStats from './DataSources/ActivePartitionStats.vue'
 export default {
   mixins: [generalMixin],
   data () {
@@ -165,9 +165,9 @@ export default {
     }
   },
   components: {
-    'fhirPageSearch': fhirPageSearch,
-    'viewMap': viewMap,
-    'ActivePartitionStats': ActivePartitionStats
+    'fhirPageSearch': () => import(/* webpackChunkName: "fhirPageSearch" */ "@/components/FacilityRegistry/fhir-page-search.vue"),
+    'viewMap': () => import(/* webpackChunkName: "viewMap" */ "@/components/ViewMap"),
+    'ActivePartitionStats': () => import(/* webpackChunkName: "ActivePartitionStats" */ "@/components/DataSources/ActivePartitionStats.vue")
   }
 }
 </script>

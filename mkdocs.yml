@@ -45,14 +45,13 @@ nav:
 
   - Developer Guide:
       - developer_guide/getting_started.md
+      - developer_guide/architechture.md
       - developer_guide/load_query.md
       - developer_guide/working_with_fhir.md
       - developer_guide/mcsd.md
       - developer_guide/forms.md
       - developer_guide/ansible.md
       - developer_guide/server_administration.md
-      - developer_guide/key_cloak.md
-      - developer_guide/configuration.md
 
 markdown_extensions:
   - pymdownx.emoji:

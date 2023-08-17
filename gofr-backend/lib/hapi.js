@@ -41,7 +41,7 @@ function getAvailableId() {
 }
 
 function addPartition({
-  id, name, description, userID,
+  id, name, description, userID, orgId
 }) {
   return new Promise((resolve, reject) => {
     logger.info(`Adding partition with name ${name}`);
@@ -111,6 +111,9 @@ function addPartition({
                 valueReference: {
                   reference: `Person/${userID}`,
                 },
+              }, {
+                url: 'dhis2OrgId',
+                valueString: orgId
               }],
             }, {
               url: 'http://gofr.org/fhir/StructureDefinition/createdTime',

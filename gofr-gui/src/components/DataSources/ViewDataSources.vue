@@ -330,6 +330,8 @@
               {{ $t(`App.hardcoded-texts.Remote Sources`) }}
             </v-toolbar>
           </v-card-title>
+          <v-card-text>
+          </v-card-text>
           <v-card-actions>
             <v-btn
               color="primary"

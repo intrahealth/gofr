@@ -188,6 +188,7 @@ function getSourcePair({ userID, dhis2OrgId }) {
       },
     }, (err) => {
       if (err) {
+        logger.error(err);
         return reject(err);
       }
       if (resources.length > 0) {
@@ -483,7 +484,7 @@ router.post('/addSource', (req, res) => {
   const createPartition = new Promise((resolve, reject) => {
     if (!fields.partitionID) {
       const database = mixin.toTitleCase(fields.name + fields.userID);
-      hapi.addPartition({ name: database, description: 'reco data source', userID: fields.userID }).then(async (partitionID) => {
+      hapi.addPartition({ name: database, description: 'reco data source', userID: fields.userID, orgId: fields.orgId }).then(async (partitionID) => {
         await mcsd.createFakeOrgID(database).catch((err) => {
           logger.error(err);
         });

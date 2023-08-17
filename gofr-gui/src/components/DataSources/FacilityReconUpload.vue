@@ -705,6 +705,7 @@ export default {
       formData.append('level7', this.level7)
       formData.append('clientId', this.$store.state.clientId)
       formData.append('userID', this.$store.state.auth.userID)
+      formData.append('orgId', this.$store.state.dhis.user.orgId)
       this.confirmUpload = false
       this.$store.state.uploadRunning = true
       this.uploadPrepaProgr = true

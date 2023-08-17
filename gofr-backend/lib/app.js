@@ -618,6 +618,7 @@ async function startUp() {
   });
   app.post('/uploadCSV', (req, res) => {
     const fields = req.body
+    const files = req.files
     logger.info(`Received Source1 Data with fields Mapping ${JSON.stringify(fields)}`);
     if (!fields.csvName) {
       logger.error({
@@ -648,68 +649,60 @@ async function startUp() {
       res.end();
       return;
     }
-    if (Object.keys(files).length == 0) {
+    if (!files.file || !files.file.name) {
       logger.error('No file submitted for reconciliation');
       res.status(400).json({
         error: 'Please submit CSV file for facility reconciliation',
       });
       return res.end();
     }
-    const fileName = Object.keys(files)[0];
-    logger.info('validating CSV File');
-    uploadReqPro = JSON.stringify({
-      status: '2/3 Validating CSV Data',
-      error: null,
-      percent: null,
-    });
-    redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
-    mixin.validateCSV(files[fileName].path, fields, (valid, invalid) => {
-      if (invalid.length > 0) {
-        logger.error('Uploaded CSV is invalid (has either duplicated IDs or empty levels/facility),execution stopped');
-        res.status(400).json({
-          error: invalid,
-        });
-        res.end();
-        return;
+    const fullPath = `${__dirname}/csvUploads/${fields.userID}+${mixin.toTitleCase(fields.csvName)}+${moment().format()}.csv`;
+    files.file.mv(fullPath, function(err) {
+      if (err) {
+        return res.status(500).send(err);
       }
-
-      logger.info('CSV File Passed Validation');
-      logger.info('Creating HAPI server now');
-      hapi.addPartition({ name: database, description: 'reco data source', userID: fields.userID }).then((partitionID) => {
-        const levelData = mixin.createLevelMapping(fields);
-        res.status(200).end(JSON.stringify({ partitionID, levelData: JSON.stringify(levelData) }));
-        uploadReqPro = JSON.stringify({
-          status: '3/3 Uploading of data started',
-          error: null,
-          percent: null,
-        });
-        redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
-        const oldPath = files[fileName].path;
-
-        const newPath = `${__dirname}/csvUploads/${fields.userID}+${mixin.toTitleCase(fields.csvName)}+${moment().format()}.csv`;
-        fs.readFile(oldPath, (err, data) => {
-          if (err) {
-            logger.error(err);
-          }
-          fs.writeFile(newPath, data, (err) => {
-            if (err) {
-              logger.error(err);
-            }
+      logger.info('validating CSV File');
+      uploadReqPro = JSON.stringify({
+        status: '2/3 Validating CSV Data',
+        error: null,
+        percent: null,
+      });
+      redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
+      mixin.validateCSV(fullPath, fields, (valid, invalid) => {
+        if (invalid.length > 0) {
+          logger.error('Uploaded CSV is invalid (has either duplicated IDs or empty levels/facility),execution stopped');
+          res.status(400).json({
+            error: invalid,
           });
-        });
-        logger.info(`Uploading data for ${database} now`);
-        mcsd.CSVTomCSD(files[fileName].path, fields, database, clientId, () => {
-          logger.info(`Data upload for ${database} is done`);
+          res.end();
+          return;
+        }
+
+        logger.info('CSV File Passed Validation');
+        logger.info('Creating HAPI server now');
+        hapi.addPartition({ name: database, description: 'reco data source', userID: fields.userID, orgId: fields.orgId }).then((partitionID) => {
+          const levelData = mixin.createLevelMapping(fields);
+          res.status(200).end(JSON.stringify({ partitionID, levelData: JSON.stringify(levelData) }));
           uploadReqPro = JSON.stringify({
-            status: 'Done',
+            status: '3/3 Uploading of data started',
             error: null,
-            percent: 100,
+            percent: null,
           });
-          redisClient.set(uploadRequestId, uploadReqPro);
+          redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
+          logger.info(`Uploading data for ${database} now`);
+          mcsd.CSVTomCSD(fullPath, fields, database, clientId, () => {
+            logger.info(`Data upload for ${database} is done`);
+            uploadReqPro = JSON.stringify({
+              status: 'Done',
+              error: null,
+              percent: 100,
+            });
+            redisClient.set(uploadRequestId, uploadReqPro);
+          });
+        }).catch(() => {
+          logger.error('Error occured while creating partition');
+          return res.status(500).json({ error: 'An error has occured, upload cancelled' });
         });
-      }).catch(() => {
-        logger.error('Error occured while creating partition');
-        return res.status(500).json({ error: 'An error has occured, upload cancelled' });
       });
     });
   });

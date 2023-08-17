@@ -78,10 +78,12 @@ const getSources = ({ isAdmin = false, orgId, userID }) => new Promise((resolve,
         _revinclude: 'Basic:datasourcepartition',
         _include: ['Basic:partitionowner', 'Basic:partitionshareduser'],
       };
+      console.log(searchParams);
       fhirAxios.searchAll('Basic', searchParams, 'DEFAULT').then((parts) => {
         if (parts.entry) {
           resources = resources.concat(parts.entry);
         }
+        logger.error(JSON.stringify(parts.entry, 0, 2));
         return callback(null);
       }).catch((err) => {
         logger.error(err);
@@ -115,13 +117,19 @@ const getSources = ({ isAdmin = false, orgId, userID }) => new Promise((resolve,
         const _shareToAll = fhirpath.evaluate(partRes.resource, whereShareToAll);
         const shareToAll = {};
         _shareToAll.forEach((shall) => {
-          if (shall.url === 'activated') {
-            shareToAll.activated = shall.valueBoolean;
+          let activated = shall.extension && shall.extension.find((ext) => {
+            return ext.url === 'activated'
+          })?.valueBoolean
+          let limitActivated = shall.extension && shall.extension.find((ext) => {
+            return ext.url === 'limitByUserLocation'
+          })?.valueBoolean
+          if (activated) {
+            shareToAll.activated = activated;
           } else {
             shareToAll.activated = false;
           }
-          if (shall.url === 'limitByUserLocation') {
-            shareToAll.limitByUserLocation = shall.valueBoolean;
+          if (limitActivated) {
+            shareToAll.limitByUserLocation = limitActivated;
           } else {
             shareToAll.limitByUserLocation = false;
           }

@@ -92,7 +92,7 @@
           <v-spacer></v-spacer>
           <v-text-field
             v-model="searchDatasource"
-            append-icon="search"
+            append-icon="mdi-search"
             label="Search"
             single-line
             hide-details

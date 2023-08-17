@@ -252,7 +252,7 @@
       "Share this dataset with all other users that are on the same org unit as you": "Share this dataset with all other users that are on the same org unit as you",
       "Share with other users of the same org unit as yours": "Share with other users of the same org unit as yours",
       "Share with all other users": "Share with all other users",
-      "Limit orgs sharing by user orgid": "Limit orgs sharing by user orgid",
+      "Limit orgs sharing by DHIS2 user orgid": "Limit orgs sharing by DHIS2 user orgid",
       "if activated, other users will see locations (including location children) that has the same location id as their location id": "if activated, other users will see locations (including location children) that has the same location id as their location id",
       "Add Blank Source": "Add Blank Source",
       "Total": "Total",

@@ -83,7 +83,7 @@
                 </span>
               </v-tooltip>
               <v-checkbox
-                v-if='$store.state.config.generalConfig.allowShareToAllForNonAdmin || $store.state.auth.role === "Admin"'
+                v-if='canShareToAll'
                 @change="sharingOptions"
                 color="primary"
                 :label="$t(`App.hardcoded-texts.Share with all other users`)"
@@ -91,16 +91,21 @@
               >
               </v-checkbox>
               <v-tooltip top>
-                <v-checkbox
-                  v-if="shareWithAll && $store.state.dhis.user.orgId"
-                  slot="activator"
-                  color="primary"
-                  :label="$t(`App.hardcoded-texts.Limit orgs sharing by user orgid`)"
-                  v-model="limitShareByOrgId"
-                >
-                </v-checkbox>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-checkbox
+                    v-if="canShareToAll"
+                    :disabled="!shareWithAll"
+                    slot="activator"
+                    color="primary"
+                    :label="$t(`App.hardcoded-texts.Limit orgs sharing by DHIS2 user orgid`)"
+                    v-model="limitShareByOrgId"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                  </v-checkbox>
+                </template>
                 <span>
-                  {{ $t(`App.hardcoded-texts.if activated, other users will see locations (including location children) that has the same location id as their location id`) }}
+                  {{ $t(`App.hardcoded-texts.if activated, other DHIS2 users will see locations (including location children) that has the same location id as their location id`) }}
                 </span>
               </v-tooltip>
             </template>
@@ -140,6 +145,20 @@ export default {
     return {
       datasetLimitWarn: false,
       nameErrors: []
+    }
+  },
+  computed: {
+    canShareToAll() {
+      let roles = this.$store.state.auth.userObj.resource.extension.filter((ext) => {
+        return ext.url === "http://gofr.org/fhir/StructureDefinition/gofr-assign-role"
+      })
+      let admin = roles.find((role) => {
+        return role.valueReference.reference === "Basic/gofr-role-admin"
+      })
+      if(this.$store.state.config.generalConfig.allowShareToAllForNonAdmin || admin) {
+        return true
+      }
+      return false
     }
   },
   methods: {

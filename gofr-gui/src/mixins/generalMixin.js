@@ -26,7 +26,7 @@ export const generalMixin = {
           }
           let userID = this.$store.state.auth.userID
           let orgId = this.$store.state.dhis.user.orgId
-          let sharedToMe = source.shared.users.find(user => {
+          let sharedToMe = source.sharedUsers.find(user => {
             return user.id === userID
           })
           let itsMine = source.owner.id === userID
@@ -227,7 +227,6 @@ export const generalMixin = {
       let dtSrc2 = this.$store.state.dataSources.find(dtSrc => {
         return dtSrc.id === this.$store.state.activePair.source2.id
       })
-
       if (dtSrc1 && dtSrc1.hasOwnProperty('userID') && dtSrc1.userID !== this.$store.state.auth.userID) {
         let share = dtSrc1.sharedUsers.find(sharedUser => {
           return sharedUser.id === this.$store.state.auth.userID
@@ -341,9 +340,9 @@ export const generalMixin = {
         this.$store.state.dhis.host = location.href.split('api').shift()
         return true
       } else if (process.env.NODE_ENV === 'development') {
-        this.$store.state.dhis.host = 'https://play.dhis2.org/2.38.4.3'
-        this.$store.state.dhis.dev.auth.username = 'admin'
-        this.$store.state.dhis.dev.auth.password = 'district'
+        this.$store.state.dhis.host = 'https://test.geoalign.datim.org/'
+        this.$store.state.dhis.dev.auth.username = 'gofr_testing_mw1'
+        this.$store.state.dhis.dev.auth.password = 'ccq28KVpc38f90%*'
         return true
       }
     }

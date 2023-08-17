@@ -1,8 +1,8 @@
 {
     "version": "4.0.1",
     "appType": "APP",
-    "name": "Facility Reconciliation",
-    "description": "Facility Reconciliation",
+    "name": "GOFR",
+    "description": "GOFR",
     "launch_path": "index.html",
     "icons": {
         "16": "logo.jpeg",

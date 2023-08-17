@@ -166,7 +166,14 @@ export default {
         if(this.$store.state.auth.username === "public@gofr.org") {
           this.$store.state.config.userConfig.FRDatasource = this.$store.state.config.generalConfig.public_access.partition
         } else if(this.$store.state.dataSources.length > 0) {
-          this.$store.state.config.userConfig.FRDatasource = this.$store.state.dataSources[0].name
+          let hasDefault = this.$store.state.dataSources.find((src) => {
+            return src.name === 'DEFAULT'
+          })
+          if(hasDefault) {
+            this.$store.state.config.userConfig.FRDatasource = 'DEFAULT'
+          } else {
+            this.$store.state.config.userConfig.FRDatasource = this.$store.state.dataSources[0].name
+          }
         }
       }
       let source1DB = this.$store.state.activePair.source1.name
@@ -390,7 +397,7 @@ export default {
         let orgId = this.$store.state.dhis.user.orgId
         let datasources = []
         for (let source of this.$store.state.dataSources) {
-          let sharedToMe = source.shared.users.find((user) => {
+          let sharedToMe = source.sharedUsers.find((user) => {
             return user.id === userID
           })
           let itsMine = source.owner.id === userID

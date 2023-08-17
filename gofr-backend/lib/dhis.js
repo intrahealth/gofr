@@ -88,7 +88,7 @@ const dhis = {
       const {
         auth,
       } = credentials;
-      logger.info(`GETTING ${dhis2URL.protocol()}://${dhis2URL.hostname()}:${dhis2URL.port()}${dhis2URL.path()}/api/metadata.json?${metadataOpts.join('&')}`);
+      logger.info(`GETTING ${dhis2URL.protocol()}://${dhis2URL.hostname()}:${dhis2URL.port()}${dhis2URL.path()}api/metadata.json?${metadataOpts.join('&')}`);
       let reqMod = https;
       if (dhis2URL.protocol() === 'http') {
         reqMod = http;
@@ -96,7 +96,7 @@ const dhis = {
       reqMod.request({
         hostname: dhis2URL.hostname(),
         port: dhis2URL.port(),
-        path: `${dhis2URL.path()}/api/metadata.json?${metadataOpts.join('&')}`,
+        path: `${dhis2URL.path()}api/metadata.json?${metadataOpts.join('&')}`,
         headers: {
           Authorization: auth,
         },
@@ -171,7 +171,7 @@ const dhis = {
       reqMod.request({
         hostname: dhis2URL.hostname(),
         port: dhis2URL.port(),
-        path: `${dhis2URL.path()}/api/dataStore/CSD-Loader-Last-Export/${database}`,
+        path: `${dhis2URL.path()}api/dataStore/CSD-Loader-Last-Export/${database}`,
         headers: {
           Authorization: auth,
         },
@@ -200,7 +200,7 @@ const dhis = {
     const req = reqMod.request({
       hostname: dhis2URL.hostname(),
       port: dhis2URL.port(),
-      path: `${dhis2URL.path()}/api/dataStore/CSD-Loader-Last-Export/${name}`,
+      path: `${dhis2URL.path()}api/dataStore/CSD-Loader-Last-Export/${name}`,
       headers: {
         Authorization: auth,
       },
@@ -479,7 +479,7 @@ function setLastUpdate(hasKey, lastUpdate) {
   const req = reqMod.request({
     hostname: dhis2URL.hostname(),
     port: dhis2URL.port(),
-    path: `${dhis2URL.path()}/api/dataStore/CSD-Loader-Last-Export/${database}`,
+    path: `${dhis2URL.path()}api/dataStore/CSD-Loader-Last-Export/${database}`,
     headers: {
       Authorization: auth,
       'Content-Type': 'application/json',

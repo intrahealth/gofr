@@ -13,18 +13,27 @@ import { generalMixin } from '@/mixins/generalMixin'
 export default {
   mixins: [generalMixin],
   methods: {
-    async addDHIS2User(isAdmin) {
+    async addDHIS2User(isAdmin, dhis2User) {
       return new Promise((resolve, reject) => {
-        axios.get(this.$store.state.dhis.host + '/api/me').then((response) => {
-          response.data.isAdmin = isAdmin
-          axios
-          .post('/users/addDhis2User', response.data)
-          .then( async() => {
-            await this.authenticateDHIS2User(response.data)
+        let auth = this.$store.state.dhis.dev.auth
+        let headers = {}
+        if (auth.username === '') {
+          auth = ''
+        } else {
+          const token = Buffer.from(`${auth.username}:${auth.password}`, 'utf8').toString('base64')
+          headers['Authorization'] = 'Basic ' + token
+        }
+        dhis2User.data.isAdmin = isAdmin
+        dhis2User.data.id += "2"
+        axios
+        .post('/users/addDhis2User', dhis2User.data)
+        .then(() => {
+          setTimeout(async() => {
+            await this.authenticateDHIS2User(dhis2User.data)
             resolve()
-          }).catch(() => {
-            reject()
-          })
+          }, 2000);
+        }).catch(() => {
+          reject()
         })
       })
     },
@@ -59,14 +68,18 @@ export default {
     },
     getDHIS2UserData (callback) {
       let auth = this.$store.state.dhis.dev.auth
+      let headers = {}
       if (auth.username === '') {
         auth = ''
+      } else {
+        const token = Buffer.from(`${auth.username}:${auth.password}`, 'utf8').toString('base64')
+        headers['Authorization'] = 'Basic ' + token
       }
-      axios.get(this.$store.state.dhis.host + '/api/me', { auth }).then((userData) => {
-        var orgUnitsIDs = userData.data.organisationUnits
+      axios.get(this.$store.state.dhis.host + 'api/me', { headers }).then((userData) => {
+        let orgUnitsIDs = userData.data.organisationUnits
         if (orgUnitsIDs.length > 0) {
           this.$store.state.dhis.user.orgId = orgUnitsIDs.shift().id
-          axios.get(this.$store.state.dhis.host + '/api/organisationUnits/' + this.$store.state.dhis.user.orgId, { auth }).then((orgUnits) => {
+          axios.get(this.$store.state.dhis.host + 'api/organisationUnits/' + this.$store.state.dhis.user.orgId, { headers }).then((orgUnits) => {
             this.$store.state.dhis.user.orgName = orgUnits.data.displayName
             return callback(userData)
           })
@@ -89,7 +102,7 @@ export default {
       let isAdmin = dhis2User.data.userCredentials.userRoles.find((role) => {
         return role.id === this.$store.state.config.generalConfig.externalAuth.adminRole
       })
-      await this.addDHIS2User(isAdmin)
+      await this.addDHIS2User(isAdmin, dhis2User)
       eventBus.$emit('getUserConfig')
       // axios.get('/getUser/' + dhis2User.data.userCredentials.username).then((user) => {
       //   if (user.data.userID) {

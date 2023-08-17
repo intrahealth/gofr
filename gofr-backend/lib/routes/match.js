@@ -64,6 +64,11 @@ router.get('/reconcile', (req, res) => {
     source2LimitOrgId,
     getPotential,
   } = req.query;
+  try {
+    source2LimitOrgId = JSON.parse(source2LimitOrgId)
+  } catch (error) {
+    source2LimitOrgId = []
+  }
   if (source1LimitOrgId.length === 0) {
     source1LimitOrgId = [mixin.getTopOrgId(partition1, 'Location')];
   }

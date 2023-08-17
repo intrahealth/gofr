@@ -215,8 +215,7 @@ Usage:          #definition
 * code = #partitiondhis2orgid
 * base[0] = #Basic
 * type = #string
-* expression = "Basic.extension('http://gofr.org/fhir/StructureDefinition/partition').extension('http://gofr.org/fhir/StructureDefinition/pairowner').extension('dhis2orgid')"
-* xpath = "f:Basic/f:extension[@url='http://gofr.org/fhir/StructureDefinition/partition']/f:extension[@url='http://gofr.org/fhir/StructureDefinition/pairowner']/f:extension[@url='dhis2OrgId']"
+* expression = "Basic.extension('http://gofr.org/fhir/StructureDefinition/partition').extension('http://gofr.org/fhir/StructureDefinition/owner').extension('dhis2OrgId')"
 
 Instance:       gofr-search-partitionid
 InstanceOf:     SearchParameter

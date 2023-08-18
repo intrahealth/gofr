@@ -341,8 +341,8 @@ export const generalMixin = {
         return true
       } else if (process.env.NODE_ENV === 'development') {
         this.$store.state.dhis.host = 'https://test.geoalign.datim.org/'
-        this.$store.state.dhis.dev.auth.username = 'gofr_testing_mw2'
-        this.$store.state.dhis.dev.auth.password = 'ccq28KVpc38f90%*'
+        this.$store.state.dhis.dev.auth.username = ''
+        this.$store.state.dhis.dev.auth.password = ''
         return true
       }
     }

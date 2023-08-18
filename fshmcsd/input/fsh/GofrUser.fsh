@@ -24,7 +24,8 @@ Description:    "GOFR profile of the Person resource to manage user access."
 * extension contains
       GofrOwningOrganization named organization 1..1 MS and
       GofrPassword named password 1..1 MS and
-      GofrAssignRole named role 1..1 MS
+      GofrAssignRole named role 1..1 MS and
+      Dhis2OrgId named dhis2-org-id 0..1 MS
 * extension[password] MS
 * extension[password] ^label = "Password"
 * extension[role].value[x] only Reference
@@ -32,6 +33,8 @@ Description:    "GOFR profile of the Person resource to manage user access."
 * extension[role].valueReference ^label = "Role"
 * extension[organization].valueReference MS
 * extension[organization].valueReference ^label = "Owning Organization"
+* extension[dhis2-org-id].valueString 1..1 MS
+* extension[dhis2-org-id].valueString ^label = "Role"
 
 Extension:      GofrOwningOrganization
 Id:             gofr-owning-organization
@@ -60,6 +63,16 @@ Description:    "GOFR password extension for local users."
 * extension[salt].value[x] only string
 * extension[salt].valueString ^label = "Salt"
 * extension[salt].valueString 1..1 MS
+
+Extension:      Dhis2OrgId
+Id:             dhis2-org-id
+Title:          "DHIS2 Organization Unit ID"
+Description:    "DHIS2 Organization Unit ID"
+* ^context[0].type = #element
+* ^context[0].expression = "GofrPersonUser"
+* value[x] only string
+* valueString 1..1 MS
+* valueString ^label = "DHIS2 Organization Unit ID"
 
 Instance:       e9b41c35-7c85-46df-aeea-a4e8dbf0364e
 InstanceOf:     GofrPersonUser

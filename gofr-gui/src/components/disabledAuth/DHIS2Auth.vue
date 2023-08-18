@@ -101,40 +101,6 @@ export default {
       })
       await this.addDHIS2User(isAdmin, dhis2User)
       eventBus.$emit('getUserConfig')
-      // axios.get('/getUser/' + dhis2User.data.userCredentials.username).then((user) => {
-      //   if (user.data.userID) {
-      //     this.$store.state.auth.username = dhis2User.data.userCredentials.username
-      //     this.$store.state.auth.userID = user.data.userID
-      //     this.$store.state.auth.role = roleText
-      //     this.$store.state.initializingApp = true
-      //     this.$store.state.denyAccess = false
-      //     eventBus.$emit('getUserConfig')
-      //   } else {
-      //     let formData = new FormData()
-      //     formData.append('firstName', dhis2User.data.firstName)
-      //     formData.append('otherName', '')
-      //     formData.append('password', dhis2User.data.surname)
-      //     formData.append('userName', dhis2User.data.userCredentials.username)
-      //     formData.append('surname', dhis2User.data.surname)
-      //     formData.append('role', roleID)
-      //     axios.post('/addUser', formData, {
-      //       headers: {
-      //         'Content-Type': 'multipart/form-data'
-      //       }
-      //     }).then(() => {
-      //       axios.get('/getUser/' + dhis2User.data.userCredentials.username).then((user) => {
-      //         if (user.data.userID) {
-      //           this.$store.state.auth.username = dhis2User.data.userCredentials.username
-      //           this.$store.state.auth.userID = user.data.userID
-      //           this.$store.state.auth.role = user.data.role
-      //           this.$store.state.initializingApp = true
-      //           this.$store.state.denyAccess = false
-      //           eventBus.$emit('getUserConfig')
-      //         }
-      //       })
-      //     })
-      //   }
-      // })
     })
   }
 }

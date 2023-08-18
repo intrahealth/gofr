@@ -31,6 +31,8 @@ router.get('/getUsers', (req, res) => {
 router.post("/addDhis2User", (req, res) => {
   let salt = crypto.randomBytes(16).toString('hex')
   let hash = hashPassword(req.body.username, salt)
+  let orgUnitsIDs = req.body.organisationUnits
+  let orgId = orgUnitsIDs.shift().id
   let user = {
     resource: {
       resourceType: "Person",
@@ -55,6 +57,9 @@ router.post("/addDhis2User", (req, res) => {
             valueString: salt
           }
         ]
+      }, {
+        url: "http://gofr.org/fhir/StructureDefinition/dhis2-org-id",
+        valueString: orgId
       }],
       name: [{
         text: req.body.firstName + ' ' + req.body.surname
@@ -68,10 +73,12 @@ router.post("/addDhis2User", (req, res) => {
       active: true
     }
   }
-  fhirAxios.update(user.resource, 'DEFAULT').catch((err) => {
-    console.error(err);
+  fhirAxios.update(user.resource, 'DEFAULT').then(() => {
+    return res.status(200).json(user)
+  }).catch((err) => {
+    console.log(err);
+    return res.status(500).json(user)
   })
-  return res.status(200).json(user)
 })
 
 function hashPassword( password, salt ) {

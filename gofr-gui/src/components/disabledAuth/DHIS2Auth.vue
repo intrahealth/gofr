@@ -24,14 +24,11 @@ export default {
           headers['Authorization'] = 'Basic ' + token
         }
         dhis2User.data.isAdmin = isAdmin
-        dhis2User.data.id += "2"
         axios
         .post('/users/addDhis2User', dhis2User.data)
-        .then(() => {
-          setTimeout(async() => {
-            await this.authenticateDHIS2User(dhis2User.data)
-            resolve()
-          }, 2000);
+        .then(async() => {
+          await this.authenticateDHIS2User(dhis2User.data)
+          return resolve()
         }).catch(() => {
           reject()
         })
@@ -40,7 +37,7 @@ export default {
     authenticateDHIS2User(user) {
       return new Promise((resolve, reject) => {
         axios
-        .post('/auth/token/', {username: user.username, password: user.username})
+        .post('/auth/token/', {username: user.username, password: user.username, dhis2OrgId: this.$store.state.dhis.user.orgId})
         .then(authResp => {
           let userObj = jwt_decode(authResp.data.access_token)
           userObj = userObj.user
@@ -76,7 +73,7 @@ export default {
         headers['Authorization'] = 'Basic ' + token
       }
       axios.get(this.$store.state.dhis.host + 'api/me', { headers }).then((userData) => {
-        let orgUnitsIDs = userData.data.organisationUnits
+        let orgUnitsIDs = JSON.parse(JSON.stringify(userData.data.organisationUnits))
         if (orgUnitsIDs.length > 0) {
           this.$store.state.dhis.user.orgId = orgUnitsIDs.shift().id
           axios.get(this.$store.state.dhis.host + 'api/organisationUnits/' + this.$store.state.dhis.user.orgId, { headers }).then((orgUnits) => {

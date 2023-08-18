@@ -204,17 +204,11 @@ export default {
         this.$store.state.initializingApp = false
         if (results.data.dataUploaded) {
           this.$store.state.recalculateScores = true
-          if(this.$store.state.auth.username === "public@gofr.org") {
-            this.$router.push({ name: 'HomePublic' })
-          } else {
-            // this.$router.push({ name: 'Home' })
-          }
+        }
+        if(this.$store.state.auth.username === "public@gofr.org") {
+          this.$router.push({ name: 'HomePublic' })
         } else {
-          if(this.$store.state.auth.username === "public@gofr.org") {
-            this.$router.push({ name: 'HomePublic' })
-          } else {
-            // this.$router.push({ name: 'Home' })
-          }
+          this.$router.push({ name: 'Home' })
         }
       })
       .catch(err => {
@@ -222,7 +216,7 @@ export default {
         if(this.$store.state.auth.username === "public@gofr.org") {
           this.$router.push({ name: 'HomePublic' })
         } else {
-          // this.$router.push({ name: 'Home' })
+          this.$router.push({ name: 'Home' })
         }
       })
     },

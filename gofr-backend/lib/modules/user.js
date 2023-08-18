@@ -387,7 +387,10 @@ User.prototype.updatePermissions = async function (roleResources) {
         }
       });
     }
-    await dataSources.getSources({ isAdmin: false, userID: this.resource.id }).then((sources) => {
+    let dhis2OrgId = this.resource.extension.find((ext) => {
+      return ext.url === "http://gofr.org/fhir/StructureDefinition/dhis2-org-id"
+    })?.valueString
+    await dataSources.getSources({ isAdmin: false, userID: this.resource.id, orgId: dhis2OrgId }).then((sources) => {
       if(!this.permissions.partitions) {
         this.permissions.partitions = []
       }
@@ -407,6 +410,16 @@ User.prototype.updatePermissions = async function (roleResources) {
             name: source.name,
             ...shareDetails.permissions,
           };
+        } else {
+          partPerm = {
+            name: source.name,
+            read: {
+              metadata: true,
+              HealthcareService: true,
+              Organization: true,
+              Location: true
+            }
+          }
         }
         if (partIndex === -1) {
           this.permissions.partitions.push(partPerm);

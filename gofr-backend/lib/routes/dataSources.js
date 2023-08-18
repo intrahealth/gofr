@@ -208,14 +208,14 @@ function getSourcePair({ userID, dhis2OrgId }) {
             const partDetails = partRes.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
             const partExt = mixin.flattenExtension(partDetails.extension);
             const userId = partExt['http://gofr.org/fhir/StructureDefinition/owner'][0].find(ext => ext.url === 'userID').valueReference.reference;
-            const ownerName = usersRes.find(usr => usr.resource.id === userId.split('/')[1]).resource.name[0].text;
+            const ownerName = usersRes.find(usr => usr.resource.id === userId.split('/')[1])?.resource?.name[0]?.text;
             const whereSharedUsers = "Basic.extension.where('http://gofr.org/fhir/StructureDefinition/partition').extension.where(url='http://gofr.org/fhir/StructureDefinition/shared').extension.where(url='http://gofr.org/fhir/StructureDefinition/shareduser').extension.where(url='user').valueReference.reference";
             const _sharedUsers = fhirpath.evaluate(partRes.resource, whereSharedUsers);
             const sharedUsers = [];
             for (const user of _sharedUsers) {
               sharedUsers.push({
                 id: user.split('/')[1],
-                name: usersRes.find(usr => usr.resource.id === user.split('/')[1]).resource.name[0].text,
+                name: usersRes.find(usr => usr.resource.id === user.split('/')[1])?.resource?.name[0]?.text,
               });
             }
 
@@ -225,7 +225,7 @@ function getSourcePair({ userID, dhis2OrgId }) {
             for (const user of _activeUsers) {
               activeUsers.push({
                 id: user.split('/')[1],
-                name: usersRes.find(usr => usr.resource.id === user.split('/')[1]).resource.name[0].text,
+                name: usersRes.find(usr => usr.resource.id === user.split('/')[1])?.resource?.name[0]?.text,
               });
             }
             let src1Res = sourcesRes.find(source => source.resource.id === src1Ext.valueReference.reference.split('/')[1]);
@@ -709,7 +709,10 @@ router.get('/getSource/:userID/:orgId?', (req, res) => {
       logger.error(err);
       return res.status(500).send('An error has occured while getting data source');
     });
-  }).catch(err => res.status(500).send());
+  }).catch(err => {
+    logger.error(err);
+    res.status(500).send()
+  });
 });
 
 router.get('/getSourceDetails/:partitionID', (req, res) => {
@@ -1124,7 +1127,7 @@ router.post('/createSourcePair', (req, res) => {
           return res.status(400).json({ error: 'Single pair limit is active and a pair already exists, cant create more pairs' });
         }
         const database = mixin.toTitleCase(source1.display + userID + source2.display);
-        hapi.addPartition({ name: database, description: 'mapping data source', userID }).then(async (partitionID) => {
+        hapi.addPartition({ name: database, description: 'mapping data source', userID, orgId: fields.orgId }).then(async (partitionID) => {
           let partition;
           try {
             partition = await fhirAxios.read('Basic', partitionID.split('/')[1], '', 'DEFAULT');
@@ -1324,6 +1327,19 @@ router.post('/shareSourcePair', (req, res) => {
       });
       sharedIndex = 0;
     }
+    let shareToSameOrgidIndex = partDetails.extension[sharedIndex].extension.findIndex((ext) => {
+      return ext.url === 'shareToSameOrgid'
+    })
+    if(!shareToSameOrgidIndex) {
+      shareToSameOrgidIndex = 0
+    }
+    try {
+      fields.shareToSameOrgid = JSON.parse(fields.shareToSameOrgid)
+    } catch (error) {
+      fields.shareToSameOrgid = false
+    }
+    partDetails.extension[sharedIndex].extension[shareToSameOrgidIndex].url = 'shareToSameOrgid'
+    partDetails.extension[sharedIndex].extension[shareToSameOrgidIndex].valueBoolean = fields.shareToSameOrgid
     share(partDetails.extension[sharedIndex].extension, _permissions);
     function share(extension, permissions) {
       users.forEach((user) => {

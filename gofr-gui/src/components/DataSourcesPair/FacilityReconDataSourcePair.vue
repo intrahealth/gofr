@@ -222,6 +222,17 @@
             </v-btn>
           </v-toolbar>
           <v-card-text>
+            <v-tooltip top>
+              <v-checkbox
+                slot="activator"
+                color="primary"
+                label="Share with other users of the same org unit as yours"
+                v-model="shareToSameOrgid"
+              ></v-checkbox>
+              <span>
+                Share this dataset with all other users that are on the same org unit as you
+              </span>
+            </v-tooltip>
             <permissions @grantedPermissions="receivedPermissions"></permissions>
             <v-text-field
               v-model="searchUsers"
@@ -527,6 +538,7 @@ export default {
       alertMsg: '',
       pairLimitWarn: false,
       shareDialog: false,
+      shareToSameOrgid: false,
       permissions: [],
       mapSourcePairLevels: false,
       pairLevelsMapping: {},
@@ -741,7 +753,7 @@ export default {
         }
         this.shareDialog = true
       } else if (action === 'saveShare') {
-        if (this.sharedUsers.length === 0) {
+        if (!this.shareToSameOrgid && this.sharedUsers.length === 0) {
           this.$store.state.dialogError = true
           this.$store.state.errorTitle = 'Info'
           this.$store.state.errorDescription = 'Please select atleast one user'
@@ -753,6 +765,7 @@ export default {
         formData.append('permissions', JSON.stringify(this.permissions))
         formData.append('userID', this.$store.state.auth.userID)
         formData.append('orgId', this.$store.state.dhis.user.orgId)
+        formData.append('shareToSameOrgid', this.shareToSameOrgid)
         this.$store.state.loadingServers = true
         this.shareDialog = false
         axios.post('/datasource/shareSourcePair', formData, {

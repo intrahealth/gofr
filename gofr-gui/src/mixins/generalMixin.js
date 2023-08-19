@@ -40,7 +40,7 @@ export const generalMixin = {
           }
           totalDtSrcs++
         }
-        if (totalDtSrcs >= 1) {
+        if (totalDtSrcs >= 2) {
           this.datasetLimitWarn = true
           return false
         } else {

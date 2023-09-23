@@ -83,7 +83,7 @@
     "server": {
       "protocal": "http",
       "host": "localhost",
-      "port": "8081",
+      "port": "8080",
       "basePath": "gofr/fhir",
       "username": "",
       "password": ""

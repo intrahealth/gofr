@@ -993,7 +993,6 @@ router.get('/getUserConfig/:userID', (req, res) => {
   if (config.getBool("security:disabled")) {
     site.security = {disabled: true};
   }
-  console.log(`gofr-user-config-${req.params.userID}`);
   fhirAxios.read('Parameters', `gofr-user-config-${req.params.userID}`, '', 'DEFAULT').then((response) => {
     const usrConfig = response.parameter.find(param => param.name === 'config');
     return res.status(200).json({

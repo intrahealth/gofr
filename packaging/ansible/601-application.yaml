@@ -45,11 +45,12 @@ hapi:
   fhir:
     openapi_enabled: true
     fhir_version: R4
+    allow_multiple_delete: true
     auto_create_placeholder_reference_targets: true
     enable_index_missing_fields: true
-    client_id_strategy: ANY
+    # client_id_strategy: ANY
     partitioning:
-      allow_references_across_partitions: false
+      allow_references_across_partitions: true
       partitioning_include_in_search_hashes: false
     cors:
       allow_Credentials: true

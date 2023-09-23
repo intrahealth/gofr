@@ -311,7 +311,7 @@ router.beforeEach((to, from, next) => {
   } else {
     if(to.path === '/Login' || to.path === '/dhis2Auth') {
       return next()
-    } else if (!store.state.auth.userObj.resource) {
+    } else if (!store.state.auth.userObj.resource || store.state.auth.userObj.resource.id === 'ihris-user-loggedout') {
       if (store.state.idp === 'dhis2') {
         store.state.initializingApp = true
         store.state.denyAccess = false

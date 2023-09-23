@@ -442,33 +442,6 @@ export default {
     'appSideMenu': SideMenu
   },
   created () {
-    this.$store.state.config.generalConfig = this.generalConfig
-    if(this.$store.state.idp === 'keycloak') {
-      this.$store.state.clientId = uuid.v4()
-      this.$store.state.initializingApp = true
-      this.$store.state.denyAccess = false
-      this.getUserConfig()
-    } else {
-      if (this.$store.state.auth.userObj.resource) {
-        if (!this.$store.state.config.generalConfig.authDisabled) {
-          axios.get('/isSessionActive/').then(() => {
-            // will come here only if the session is active
-            this.$store.state.clientId = uuid.v4()
-            this.$store.state.initializingApp = true
-            this.$store.state.denyAccess = false
-            this.getUserConfig()
-          }).catch(() => {
-            this.$store.state.initializingApp = false
-          })
-        } else {
-          this.$store.state.initializingApp = false
-          this.$router.push('login')
-        }
-      } else {
-        this.$store.state.initializingApp = false
-      }
-    }
-
     eventBus.$on('refreshApp', () => {
       this.getDataSources()
     })
@@ -505,6 +478,39 @@ export default {
         }
       })
     })
+
+    if (!this.$store.state.auth.userObj.resource || this.$store.state.auth.userObj.resource.id === 'ihris-user-loggedout') {
+      if (this.$store.state.idp === 'dhis2') {
+        return this.$router.push({ name: 'DHIS2Auth' })
+      }
+      return this.$router.push({ name: 'Login' })
+    }
+    this.$store.state.config.generalConfig = this.generalConfig
+    if(this.$store.state.idp === 'keycloak') {
+      this.$store.state.clientId = uuid.v4()
+      this.$store.state.initializingApp = true
+      this.$store.state.denyAccess = false
+      this.getUserConfig()
+    } else {
+      if (this.$store.state.auth.userObj.resource) {
+        if (!this.$store.state.config.generalConfig.authDisabled) {
+          axios.get('/isSessionActive/').then(() => {
+            // will come here only if the session is active
+            this.$store.state.clientId = uuid.v4()
+            this.$store.state.initializingApp = true
+            this.$store.state.denyAccess = false
+            this.getUserConfig()
+          }).catch(() => {
+            this.$store.state.initializingApp = false
+          })
+        } else {
+          this.$store.state.initializingApp = false
+          this.$router.push('login')
+        }
+      } else {
+        this.$store.state.initializingApp = false
+      }
+    }
   },
   mounted: function() {
     let elHtml = document.getElementsByTagName('html')[0]

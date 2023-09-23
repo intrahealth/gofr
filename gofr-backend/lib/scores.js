@@ -137,7 +137,6 @@ module.exports = function () {
             }
           }
         }
-        logger.info('Calculating scores now');
         count = 0;
         async.eachSeries(mcsdSource1.entry, (source1Entry, source1Callback) => {
           // check if this Source1 Orgid is mapped
@@ -627,7 +626,7 @@ module.exports = function () {
 
         // clear mcsdSource2All
         mcsdSource2All = {};
-        logger.info('Calculating scores now');
+        logger.info('Calculating scores now1');
         count = 0;
         async.eachSeries(mcsdSource1.entry, (source1Entry, source1Callback) => {
           // check if this Source1 Orgid is mapped
@@ -728,10 +727,14 @@ module.exports = function () {
                   if (matchCommentsTag && matchCommentsTag.hasOwnProperty('display')) {
                     matchComments.push(matchCommentsTag.display);
                   }
+                  let mappedParentName = ""
+                  if(source2MappedParentNames[matchedSource2Id] && source2MappedParentNames[matchedSource2Id].length > 0) {
+                    mappedParentName = source2MappedParentNames[matchedSource2Id][0]
+                  }
                   thisRanking.exactMatch = {
                     name: matchInSource2.resource.name,
                     parents: source2ParentNames[matchedSource2Id],
-                    mappedParentName: source2MappedParentNames[matchedSource2Id][0],
+                    mappedParentName,
                     id: matchedSource2Id,
                     source2IdHierarchy,
                     matchComments,

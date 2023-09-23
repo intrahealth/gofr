@@ -108,7 +108,7 @@ async function startUp() {
       }
     }
     if (config.get('app:idp') === 'gofr' || config.get('app:idp') === 'dhis2') {
-      if (!req.user && req.headers.authorization && req.headers.authorization.split(' ').length === 2) {
+      if ((!req.user || config.get('app:idp') === 'dhis2') && req.headers.authorization && req.headers.authorization.split(' ').length === 2) {
         // Only for Access using token when using gofr as IDP
         const token = req.headers.authorization.split(' ')[1];
         let decoded;

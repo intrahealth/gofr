@@ -483,6 +483,7 @@ export default {
       if (this.$store.state.idp === 'dhis2') {
         return this.$router.push({ name: 'DHIS2Auth' })
       }
+      this.$store.state.initializingApp = false
       return this.$router.push({ name: 'Login' })
     }
     this.$store.state.config.generalConfig = this.generalConfig

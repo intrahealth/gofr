@@ -5,7 +5,7 @@
   "name": "RequestStatusCodeSystem",
   "id": "request-status-codesystem",
   "title": "Request Status",
-  "version": "\"0.1.0\"ServiceDeliveryLocationRoleType",
+  "version": "0.1.0",
   "url": "http://gofr.org/fhir/CodeSystem/request-status-codesystem",
   "concept": [
     {

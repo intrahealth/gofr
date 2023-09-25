@@ -1,0 +1,964 @@
+{
+  "resourceType": "Parameters",
+  "id": "gofr-config",
+  "meta": {
+    "profile": [
+      "http://gofr.org/fhir/StructureDefinition/gofr-parameters-remote-config"
+    ]
+  },
+  "parameter": [
+    {
+      "name": "signature",
+      "valueSignature": {
+        "type": [
+          {
+            "code": "1.2.840.10065.1.12.1.14",
+            "system": "urn:iso-astm:E1762-95:2013"
+          }
+        ],
+        "when": "2022-09-20T03:44:20.575Z",
+        "who": {
+          "reference": "http://gofr.org/fhir/Organization/gofr"
+        },
+        "data": "V6Bo9nNnuTomn6Xxay6Ryr7GAjjAA22uZDrcXvw/OjViwjTU62pbJiup3H4SeXzBzuZllGHUKxkeS+bABmUXNV3sUpRXUh40FBIo9LsVxIFI5rzuOBOahmuOeVW5Uih/ogun7bmpYIWSnvDE7XjC+NRtXGpiA1rjOFaBIL1TPNs="
+      }
+    },
+    {
+      "name": "config",
+      "part": [
+        {
+          "name": "site:title",
+          "valueString": "Manage"
+        },
+        {
+          "name": "site:site",
+          "valueString": "Demo"
+        },
+        {
+          "name": "site:logo",
+          "valueString": "iHRIS5Logo.png"
+        },
+        {
+          "name": "site:auth:local:method",
+          "valueString": "post"
+        },
+        {
+          "name": "site:auth:local:link",
+          "valueString": "/auth/login"
+        },
+        {
+          "name": "site:auth:local:btn:image",
+          "valueString": "btn_ihris_signin.png"
+        },
+        {
+          "name": "site:auth:local:btn:image2x",
+          "valueString": "btn_ihris_signin_dark.png"
+        },
+        {
+          "name": "site:auth:local:btn:text",
+          "valueString": "Sign in with GOFR"
+        },
+        {
+          "name": "site:footer:links:about:text",
+          "valueString": "About GOFR"
+        },
+        {
+          "name": "site:footer:links:about:to",
+          "valueString": "/static/page-about"
+        },
+        {
+          "name": "site:footer:links:feedback:text",
+          "valueString": "Feedback"
+        },
+        {
+          "name": "site:footer:links:feedback:href",
+          "valueString": "https://forms.gle/jQJ7N3nDBSxSNne58"
+        },
+        {
+          "name": "site:footer:links:ihris:text",
+          "valueString": "GOFR Website"
+        },
+        {
+          "name": "site:footer:links:ihris:href",
+          "valueString": "http://ihris.org/"
+        },
+        {
+          "name": "site:nav:active",
+          "valueString": "home"
+        },
+        {
+          "name": "site:nav:menu:home:text",
+          "valueString": "Home"
+        },
+        {
+          "name": "site:nav:menu:home:tooltip",
+          "valueString": "Home Page"
+        },
+        {
+          "name": "site:nav:menu:home:order",
+          "valueString": "1"
+        },
+        {
+          "name": "site:nav:menu:home:icon",
+          "valueString": "mdi-home"
+        },
+        {
+          "name": "site:nav:menu:home:url",
+          "valueString": "/home"
+        },
+        {
+          "name": "site:nav:menu:home:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:home:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:home:access:id",
+          "valueString": "view-home-page"
+        },
+        {
+          "name": "site:nav:menu:datasources:text",
+          "valueString": "Data Sources"
+        },
+        {
+          "name": "site:nav:menu:datasources:tooltip",
+          "valueString": "Data Sources"
+        },
+        {
+          "name": "site:nav:menu:datasources:order",
+          "valueString": "2"
+        },
+        {
+          "name": "site:nav:menu:datasources:icon",
+          "valueString": "mdi-sync"
+        },
+        {
+          "name": "site:nav:menu:datasources:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:datasources:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:datasources:access:id",
+          "valueString": "manage-data-source"
+        },
+        {
+          "name": "site:nav:menu:datasources:menu:adddatasource:text",
+          "valueString": "Add Data Sources"
+        },
+        {
+          "name": "site:nav:menu:datasources:menu:adddatasource:tooltip",
+          "valueString": "Add a new dataset that you want to reconcile"
+        },
+        {
+          "name": "site:nav:menu:datasources:menu:adddatasource:icon",
+          "valueString": "mdi-cloud-upload"
+        },
+        {
+          "name": "site:nav:menu:datasources:menu:adddatasource:url",
+          "valueString": "/AddDataSources"
+        },
+        {
+          "name": "site:nav:menu:datasources:menu:adddatasource:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:datasources:menu:adddatasource:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:datasources:menu:adddatasource:access:id",
+          "valueString": "add-data-source"
+        },
+        {
+          "name": "site:nav:menu:datasources:menu:viewdatasource:text",
+          "valueString": "View Data Sources"
+        },
+        {
+          "name": "site:nav:menu:datasources:menu:viewdatasource:tooltip",
+          "valueString": "View datasets that can be used for reconciliation"
+        },
+        {
+          "name": "site:nav:menu:datasources:menu:viewdatasource:icon",
+          "valueString": "mdi-format-list-bulleted-square"
+        },
+        {
+          "name": "site:nav:menu:datasources:menu:viewdatasource:url",
+          "valueString": "/ViewDataSources"
+        },
+        {
+          "name": "site:nav:menu:datasources:menu:viewdatasource:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:datasources:menu:viewdatasource:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:datasources:menu:viewdatasource:access:id",
+          "valueString": "view-data-source"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:text",
+          "valueString": "Facility Registry"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:tooltip",
+          "valueString": "Facility Registry"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:order",
+          "valueString": "3"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:icon",
+          "valueString": "mdi-map-marker"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:access:id",
+          "valueString": "access-facility-registry-mod"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:text",
+          "valueString": "Search"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:tooltip",
+          "valueString": "Search"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:icon",
+          "valueString": "mdi-magnify"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:access:id",
+          "valueString": "search-records"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacility:text",
+          "valueString": "Search Facility"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacility:tooltip",
+          "valueString": "Search Facility"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacility:icon",
+          "valueString": "mdi-magnify"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacility:url",
+          "valueString": "/Resource/Search/facility"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacility:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacility:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacility:access:id",
+          "valueString": "view-search-facility-page"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchjurisdiction:text",
+          "valueString": "Search Jurisdiction"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchjurisdiction:tooltip",
+          "valueString": "Search Jurisdiction"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchjurisdiction:icon",
+          "valueString": "mdi-magnify"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchjurisdiction:url",
+          "valueString": "/Resource/Search/jurisdiction"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchjurisdiction:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchjurisdiction:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchjurisdiction:access:id",
+          "valueString": "view-search-jurisdiction-page"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchorganization:text",
+          "valueString": "Search Organization"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchorganization:tooltip",
+          "valueString": "Search Organization"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchorganization:icon",
+          "valueString": "mdi-magnify"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchorganization:url",
+          "valueString": "/Resource/Search/mcsd-organization"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchorganization:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchorganization:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchorganization:access:id",
+          "valueString": "view-search-organization-page"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchservice:text",
+          "valueString": "Search Service"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchservice:tooltip",
+          "valueString": "Search Service"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchservice:icon",
+          "valueString": "mdi-magnify"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchservice:url",
+          "valueString": "/Resource/Search/service"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchservice:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchservice:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchservice:access:id",
+          "valueString": "view-search-service-page"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacilityaddreq:text",
+          "valueString": "Search Facility Add Request"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacilityaddreq:tooltip",
+          "valueString": "Search Facility Add Request"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacilityaddreq:icon",
+          "valueString": "mdi-magnify"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacilityaddreq:url",
+          "valueString": "/Resource/Search/facility-add-request/process-add-request"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacilityaddreq:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacilityaddreq:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacilityaddreq:access:id",
+          "valueString": "view-add-facility-requests"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacilityupdatereq:text",
+          "valueString": "Search Facility Add Request"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacilityupdatereq:tooltip",
+          "valueString": "Search Facility Add Request"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacilityupdatereq:icon",
+          "valueString": "mdi-magnify"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacilityupdatereq:url",
+          "valueString": "/Resource/Search/facility-update-request/process-update-request"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacilityupdatereq:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacilityupdatereq:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:searchfr:menu:searchfacilityupdatereq:access:id",
+          "valueString": "view-update-facility-requests"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddjurisdiction:text",
+          "valueString": "Add Jurisdiction"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddjurisdiction:tooltip",
+          "valueString": "Add Jurisdiction"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddjurisdiction:icon",
+          "valueString": "mdi-home-city"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddjurisdiction:url",
+          "valueString": "/questionnaire/gofr-jurisdiction-questionnaire/jurisdiction"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddjurisdiction:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddjurisdiction:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddjurisdiction:access:id",
+          "valueString": "view-add-jurisdiction-page"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddfacility:text",
+          "valueString": "Add Facility"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddfacility:tooltip",
+          "valueString": "Add Facility"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddfacility:icon",
+          "valueString": "mdi-hospital-building"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddfacility:url",
+          "valueString": "/questionnaire/gofr-facility-questionnaire/facility"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddfacility:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddfacility:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddfacility:access:id",
+          "valueString": "view-add-facility-page"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddorganization:text",
+          "valueString": "Add Organization"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddorganization:tooltip",
+          "valueString": "Add Organization"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddorganization:icon",
+          "valueString": "mdi-home-city"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddorganization:url",
+          "valueString": "/questionnaire/gofr-organization-questionnaire/mcsd-organization"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddorganization:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddorganization:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddorganization:access:id",
+          "valueString": "view-add-organization-page"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddservice:text",
+          "valueString": "Add Service"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddservice:tooltip",
+          "valueString": "Add Service offered by health facilities"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddservice:icon",
+          "valueString": "mdi-room-service"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddservice:url",
+          "valueString": "/Resource/Add/service"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddservice:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddservice:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:viewaddservice:access:id",
+          "valueString": "view-add-healthcare-service-page"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:text",
+          "valueString": "Requests"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:tooltip",
+          "valueString": "Send requests about addition of new facilities or update of facility details"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:icon",
+          "valueString": "mdi-call-made"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:access:id",
+          "valueString": "make-facilityregistry-requests"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:menu:reqnewfacility:text",
+          "valueString": "Request Addition of New Facility"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:menu:reqnewfacility:tooltip",
+          "valueString": "Request Addition of New Facility"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:menu:reqnewfacility:icon",
+          "valueString": "mdi-call-made"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:menu:reqnewfacility:url",
+          "valueString": "/questionnaire/gofr-facility-add-request-questionnaire/facility-add-request"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:menu:reqnewfacility:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:menu:reqnewfacility:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:menu:reqnewfacility:access:id",
+          "valueString": "view-request-add-facility-page"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:menu:requpdatefacility:text",
+          "valueString": "Request Update of Facility Details"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:menu:requpdatefacility:tooltip",
+          "valueString": "Request Update of Facility Details"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:menu:requpdatefacility:icon",
+          "valueString": "mdi-call-made"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:menu:requpdatefacility:url",
+          "valueString": "/Resource/Search/facility?searchAction=send-update-request"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:menu:requpdatefacility:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:menu:requpdatefacility:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityregistry:menu:requests:menu:requpdatefacility:access:id",
+          "valueString": "view-request-update-facility-page"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:text",
+          "valueString": "Facility Reconciliation"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:tooltip",
+          "valueString": "Facility Reconciliation"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:order",
+          "valueString": "4"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:icon",
+          "valueString": "mdi-spellcheck"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:access:id",
+          "valueString": "access-facility-reconciliation-mod"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:createpair:text",
+          "valueString": "Create and Manage Data Source Pair"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:createpair:tooltip",
+          "valueString": "Select data sources to start mathing"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:createpair:icon",
+          "valueString": "mdi-numeric-2-box-multiple-outline"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:createpair:url",
+          "valueString": "/dataSourcesPair"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:createpair:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:createpair:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:createpair:access:id",
+          "valueString": "view-source-pair"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:reconcile:text",
+          "valueString": "Reconcile"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:reconcile:tooltip",
+          "valueString": "Perform location matching of your selected data sources"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:reconcile:icon",
+          "valueString": "mdi-book-search"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:reconcile:url",
+          "valueString": "/scores"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:reconcile:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:reconcile:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:reconcile:access:id",
+          "valueString": "data-source-reconciliation"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:recostatus:text",
+          "valueString": "Reconciliation Status"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:recostatus:tooltip",
+          "valueString": "Matching Status"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:recostatus:icon",
+          "valueString": "mdi-view-dashboard"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:recostatus:url",
+          "valueString": "/recoStatus"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:recostatus:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:recostatus:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:recostatus:access:id",
+          "valueString": "view-matching-status"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:recoview:text",
+          "valueString": "Pair Side to Side View"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:recoview:tooltip",
+          "valueString": "Explore data sources pair contents"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:recoview:icon",
+          "valueString": "mdi-format-list-bulleted-square"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:recoview:url",
+          "valueString": "/view"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:recoview:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:recoview:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:facilityrecon:menu:recoview:access:id",
+          "valueString": "data-source-reconciliation"
+        },
+        {
+          "name": "site:nav:menu:viewmap:text",
+          "valueString": "Map"
+        },
+        {
+          "name": "site:nav:menu:viewmap:tooltip",
+          "valueString": "View Map"
+        },
+        {
+          "name": "site:nav:menu:viewmap:order",
+          "valueString": "5"
+        },
+        {
+          "name": "site:nav:menu:viewmap:icon",
+          "valueString": "mdi-google-maps"
+        },
+        {
+          "name": "site:nav:menu:viewmap:url",
+          "valueString": "/ViewMap"
+        },
+        {
+          "name": "site:nav:menu:viewmap:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:viewmap:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:viewmap:access:id",
+          "valueString": "view-home-page"
+        },
+        {
+          "name": "site:nav:menu:configure:text",
+          "valueString": "configure System"
+        },
+        {
+          "name": "site:nav:menu:configure:tooltip",
+          "valueString": "configure System"
+        },
+        {
+          "name": "site:nav:menu:configure:order",
+          "valueString": "7"
+        },
+        {
+          "name": "site:nav:menu:configure:icon",
+          "valueString": "mdi-cog"
+        },
+        {
+          "name": "site:nav:menu:configure:url",
+          "valueString": "/configure"
+        },
+        {
+          "name": "site:nav:menu:configure:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:configure:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:configure:access:id",
+          "valueString": "view-config-page"
+        },
+        {
+          "name": "site:nav:menu:account:text",
+          "valueString": "Account"
+        },
+        {
+          "name": "site:nav:menu:account:tooltip",
+          "valueString": "Account"
+        },
+        {
+          "name": "site:nav:menu:account:order",
+          "valueString": "6"
+        },
+        {
+          "name": "site:nav:menu:account:icon",
+          "valueString": "mdi-account-outline"
+        },
+        {
+          "name": "site:nav:menu:account:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:account:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:account:access:id",
+          "valueString": "manage-account"
+        },
+        {
+          "name": "site:nav:menu:account:menu:adduser:text",
+          "valueString": "Add User"
+        },
+        {
+          "name": "site:nav:menu:account:menu:adduser:tooltip",
+          "valueString": "Create new user account"
+        },
+        {
+          "name": "site:nav:menu:account:menu:adduser:icon",
+          "valueString": "mdi-account-outline"
+        },
+        {
+          "name": "site:nav:menu:account:menu:adduser:url",
+          "valueString": "/addUser"
+        },
+        {
+          "name": "site:nav:menu:account:menu:adduser:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:account:menu:adduser:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:account:menu:adduser:access:id",
+          "valueString": "add-user"
+        },
+        {
+          "name": "site:nav:menu:account:menu:viewuser:text",
+          "valueString": "Users List"
+        },
+        {
+          "name": "site:nav:menu:account:menu:viewuser:tooltip",
+          "valueString": "Manage user accounts"
+        },
+        {
+          "name": "site:nav:menu:account:menu:viewuser:icon",
+          "valueString": "mdi-account-outline"
+        },
+        {
+          "name": "site:nav:menu:account:menu:viewuser:url",
+          "valueString": "/usersList"
+        },
+        {
+          "name": "site:nav:menu:account:menu:viewuser:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:account:menu:viewuser:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:account:menu:viewuser:access:id",
+          "valueString": "view-user"
+        },
+        {
+          "name": "site:nav:menu:account:menu:rolesmanagement:text",
+          "valueString": "Roles Management"
+        },
+        {
+          "name": "site:nav:menu:account:menu:rolesmanagement:tooltip",
+          "valueString": "Add or remove specific tasks on roles"
+        },
+        {
+          "name": "site:nav:menu:account:menu:rolesmanagement:icon",
+          "valueString": "mdi-account-outline"
+        },
+        {
+          "name": "site:nav:menu:account:menu:rolesmanagement:url",
+          "valueString": "/rolesManagement"
+        },
+        {
+          "name": "site:nav:menu:account:menu:rolesmanagement:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:account:menu:rolesmanagement:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:account:menu:rolesmanagement:access:id",
+          "valueString": "add-user"
+        },
+        {
+          "name": "site:nav:menu:apps:text",
+          "valueString": "GOFR Apps"
+        },
+        {
+          "name": "site:nav:menu:apps:order",
+          "valueString": "7"
+        },
+        {
+          "name": "site:nav:menu:apps:icon",
+          "valueString": "mdi-apps"
+        },
+        {
+          "name": "site:nav:menu:apps:url",
+          "valueString": "/apps"
+        },
+        {
+          "name": "site:nav:menu:account:menu:viewuser:access:permission",
+          "valueString": "special"
+        },
+        {
+          "name": "site:nav:menu:account:menu:viewuser:access:resource",
+          "valueString": "custom"
+        },
+        {
+          "name": "site:nav:menu:account:menu:viewuser:access:id",
+          "valueString": "view-apps"
+        }
+      ]
+    }
+  ]
+}

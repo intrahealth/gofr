@@ -45,7 +45,7 @@
       force: yes
 
 
-  - name: /opt/maven/bin/mvn clean --no-transfer-progress --batch-mode package
+  - name: Building hapi-fhir
     shell: /opt/maven/bin/mvn clean install --no-transfer-progress --batch-mode package -DskipTests
     args:
       chdir: /tmp/hapi-fhir-jpaserver-starter

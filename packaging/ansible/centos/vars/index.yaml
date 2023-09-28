@@ -12,3 +12,6 @@ ui_admin_pass: Str0ngAdminP@ssw3rd          # UI admin password
 #maven
 maven_ver: 3.9.4
 maven_v_num: 3
+
+#hapi
+hapi_ver: 5.7.0

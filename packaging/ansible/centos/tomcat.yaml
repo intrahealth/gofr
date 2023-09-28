@@ -1,10 +1,10 @@
 ---
-- name: Install Apache tomcat9 using ansible
+- name: Installing Apache tomcat{{tomcat_v_num}}
   hosts: all
   tasks:
     - name: Add the OS specific variables
       include_vars:
-        file: RedHat.yaml
+        file: index.yaml
 
     - name: Download JDK 17
       get_url:
@@ -24,28 +24,28 @@
       user:
         name: tomcat
         group: tomcat
-        home: /opt/tomcat9
+        home: /opt/tomcat{{tomcat_v_num}}
         createhome: no
         system: yes
 
     - name: Create a Tomcat Directory
       file:
-        path: /opt/tomcat9
+        path: /opt/tomcat{{tomcat_v_num}}
         owner: tomcat
         group: tomcat
         mode: 755
         recurse: yes
 
-    - name: download & unarchive tomcat9 
+    - name: download & unarchive tomcat{{tomcat_v_num}}
       unarchive:
         src: https://archive.apache.org/dist/tomcat/tomcat-{{tomcat_v_num}}/v{{tomcat_ver}}/bin/apache-tomcat-{{tomcat_ver}}.tar.gz
-        dest: /opt/tomcat9
+        dest: /opt/tomcat{{tomcat_v_num}}
         remote_src: yes
         extra_opts: [--strip-components=1]
 
     - name: Change ownership of tomcat directory
       file:
-        path: /opt/tomcat9
+        path: /opt/tomcat{{tomcat_v_num}}
         owner: tomcat
         group: tomcat
         mode: "u+rwx,g+rx,o=rx"
@@ -104,7 +104,7 @@
     - name: Set UI access credentials
       template:
         src: tomcat-users.xml.j2
-        dest: /opt/tomcat9/conf/tomcat-users.xml
+        dest: /opt/tomcat{{tomcat_v_num}}/conf/tomcat-users.xml
       notify: restart tomcat
 
     - name: Allow access to Manager and Host Manager apps from any IP
@@ -112,8 +112,8 @@
         src: context.xml.j2 
         dest: "{{ item }}"
       with_items:
-        - /opt/tomcat9/webapps/host-manager/META-INF/context.xml
-        - /opt/tomcat9/webapps/manager/META-INF/context.xml
+        - /opt/tomcat{{tomcat_v_num}}/webapps/host-manager/META-INF/context.xml
+        - /opt/tomcat{{tomcat_v_num}}/webapps/manager/META-INF/context.xml
       notify: restart tomcat
 
   handlers:

@@ -48,6 +48,9 @@ function destroyPartition(partitionName, partitionID) {
             resolve();
           }).catch((err) => {
             logger.error(err);
+            if(resource === 'Basic') {
+              return resolve()
+            }
             reject();
           });
         }).catch((err) => {
@@ -197,7 +200,15 @@ function getSourcePair({ userID, dhis2OrgId }) {
         const sourcesRes = resources.filter(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-datasource'));
         const usersRes = resources.filter(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-person-user'));
         const promises = [];
+        let ids = []
         for (const pairRes of pairsRes) {
+          let found = ids.find((id) => {
+            return pairRes.resource.id === id
+          })
+          if(found) {
+            continue
+          }
+          ids.push(pairRes.resource.id)
           const pairDetails = pairRes.resource.extension && pairRes.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/datasourcepair');
           promises.push(new Promise((resolve, reject) => {
             const src1Ext = pairDetails.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/source1');

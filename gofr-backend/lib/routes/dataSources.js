@@ -47,10 +47,10 @@ function destroyPartition(partitionName, partitionID) {
           fhirAxios.expunge(resource, expungeParams, partitionName).then(() => {
             resolve();
           }).catch((err) => {
-            logger.error(err);
             if(resource === 'Basic') {
               return resolve()
             }
+            logger.error(err);
             reject();
           });
         }).catch((err) => {

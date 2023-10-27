@@ -13,7 +13,10 @@
           dark
         >
           <v-card-text>
-            {{$store.state.progressTitle}}
+            <center>{{$store.state.progressTitle}}</center>
+            <div v-if="$store.state.progressSubTitle">
+              <center>{{$store.state.progressSubTitle}}</center>
+            </div>
             <v-progress-linear
               indeterminate
               color="white"

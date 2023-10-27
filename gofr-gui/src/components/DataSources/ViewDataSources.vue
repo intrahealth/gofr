@@ -763,6 +763,7 @@ export default {
       this.deleteConfirm = false
       this.$store.state.dynamicProgress = true
       this.$store.state.progressTitle = "Deleting Selected Datasource"
+      this.$store.state.progressSubTitle = "(This may take long)"
       axios.delete(`/datasource/deleteDataSource/${this.server.id}`).then(() => {
         this.$store.state.dynamicProgress = false
         this.server = {}

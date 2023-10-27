@@ -156,6 +156,8 @@ export const store = new Vuex.Store({
     remoteDataSources: ['DHIS2', 'FHIR'],
     loadingServers: false,
     dynamicProgress: false,
+    progressTitle: '',
+    progressSubTitle: '',
     initializingApp: true,
     cols: { header: 4, content: 8 },
     searchAction: "",

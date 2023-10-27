@@ -44,16 +44,17 @@ function destroyPartition(partitionName, partitionID) {
     for (const resource of deleteResources) {
       promises.push(new Promise((resolve, reject) => {
         fhirAxios.delete(resource, { _count: 0 }, partitionName).then(() => {
+          logger.info('Deleted data for resource ' + resource)
           fhirAxios.expunge(resource, expungeParams, partitionName).then(() => {
+            logger.info('Expunged data for resource ' + resource)
             resolve();
           }).catch((err) => {
-            if(resource === 'Basic') {
-              return resolve()
-            }
-            logger.error(err);
-            reject();
+            logger.warn('Failed to expunge data for resource ' + resource);
+            logger.warn(err);
+            resolve();
           });
         }).catch((err) => {
+          logger.info('Failed to delete data for resource ' + resource)
           logger.error(err);
           reject();
         });
@@ -61,7 +62,12 @@ function destroyPartition(partitionName, partitionID) {
     }
 
     Promise.all(promises).then(() => {
-      hapi.deletePartition({ partitionID }).then(() => resolve()).catch((err) => {
+      logger.info('Deleting partition')
+      hapi.deletePartition({ partitionID }).then(() => {
+        logger.info('partition deleted')
+        resolve()
+      }).catch((err) => {
+        logger.error('Failed to delete partition');
         logger.error(err);
         return reject();
       });
@@ -254,12 +260,15 @@ function getSourcePair({ userID, dhis2OrgId }) {
                 src2Res = response.entry && response.entry.find(entry => entry.resource.id === src2Ext.valueReference.reference.split('/')[1]);
                 partsRes = partsRes.concat(response.entry && response.entry.filter(entry => entry.resource.meta && entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-partition')));
                 if (!src1Res || !src2Res) {
-                  return reject();
+                  return resolve(true);
                 }
                 return resolve();
               });
             });
-            getSourcesResources.then(() => {
+            getSourcesResources.then((invalid) => {
+              if(invalid) {
+                return resolve()
+              }
               const src1Part = partsRes.find(part => part.resource.id === fhirpath.evaluate(src1Res.resource, "Basic.extension.where(url='http://gofr.org/fhir/StructureDefinition/datasource').extension.where(url='http://gofr.org/fhir/StructureDefinition/partition').valueReference.reference")[0].split('/')[1]);
               const src2Part = partsRes.find(part => part.resource.id === fhirpath.evaluate(src2Res.resource, "Basic.extension.where(url='http://gofr.org/fhir/StructureDefinition/datasource').extension.where(url='http://gofr.org/fhir/StructureDefinition/partition').valueReference.reference")[0].split('/')[1]);
               const pair = {
@@ -1655,7 +1664,9 @@ router.delete('/deleteDataSource/:id', (req, res) => {
     destroyPartition(partitionName, partitionID).then(() => {
       const baseUrl = fhirAxios.__genUrl(partitionName);
       mcsd.cleanCache(`url_${baseUrl}`, true);
+      logger.info('Deleting data source')
       fhirAxios.delete('Basic', { _id: id }, 'DEFAULT').then(() => {
+        logger.info('Data source deleted')
         getPairsFromSource(id).then((pairs) => {
           async.eachSeries(pairs, (pair, nxt) => {
             deleteSourcePair((`Basic/${pair.resource.id}`)).then(() => nxt()).catch((err) => {
@@ -1668,6 +1679,7 @@ router.delete('/deleteDataSource/:id', (req, res) => {
           return res.status(500).send();
         });
       }).catch((err) => {
+        logger.error('Failed deleting data source');
         logger.error(err);
         return res.status(500).send();
       });

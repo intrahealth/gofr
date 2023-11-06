@@ -67,7 +67,14 @@ router.get('/reconcile', (req, res) => {
   try {
     source2LimitOrgId = JSON.parse(source2LimitOrgId)
   } catch (error) {
+    logger.error(error);
     source2LimitOrgId = []
+  }
+  try {
+    source1LimitOrgId = JSON.parse(source1LimitOrgId)
+  } catch (error) {
+    logger.error(error);
+    source1LimitOrgId = []
   }
   if (source1LimitOrgId.length === 0) {
     source1LimitOrgId = [mixin.getTopOrgId(partition1, 'Location')];
@@ -117,57 +124,82 @@ router.get('/reconcile', (req, res) => {
       percent: null,
     });
     redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
-    async.parallel({
-      source2Locations(callback) {
-        mcsd.getLocationChildren({
-          database: partition2,
-          parent: source2LimitOrgId[0],
-        }, (mcsdSource2) => {
-          mcsdSource2All = mcsdSource2;
-          let level;
-          if (recoLevel === totalSource1Levels) {
-            level = totalSource2Levels;
-          } else {
-            level = recoLevel;
-          }
 
-          if (levelMaps[orgid] && levelMaps[orgid][recoLevel]) {
-            level = levelMaps[orgid][recoLevel];
-          }
-          mcsd.filterLocations(mcsdSource2, source2LimitOrgId[0], level, mcsdSource2Level => callback(false, mcsdSource2Level));
+    console.time("get children")
+    const source2Locations = new Promise((resolve, reject) => {
+      console.time("get src2")
+      mcsd.getLocationChildren({
+        database: partition2,
+        parent: source2LimitOrgId[0],
+      }, (mcsdSource2) => {
+        mcsdSource2All = mcsdSource2;
+        let level;
+        if (recoLevel === totalSource1Levels) {
+          level = totalSource2Levels;
+        } else {
+          level = recoLevel;
+        }
+
+        if (levelMaps[orgid] && levelMaps[orgid][recoLevel]) {
+          level = levelMaps[orgid][recoLevel];
+        }
+        console.timeEnd("get src2")
+        console.time("filter src2")
+        mcsd.filterLocations(mcsdSource2, source2LimitOrgId[0], level, mcsdSource2Level => {
+          console.timeEnd("filter src2")
+          resolve(mcsdSource2Level)
         });
-      },
-      source1Loations(callback) {
-        mcsd.getLocationChildren({
-          database: partition1,
-          parent: source1LimitOrgId[0],
-        }, (mcsdSource1) => {
-          mcsdSource1All = mcsdSource1;
-          if (id) {
-            const locations = mcsdSource1.entry.filter(entry => entry.resource.id == id);
-            const mcsdSource1Locations = {};
-            if (locations.length > 0) {
-              mcsdSource1Locations.total = 1;
-              mcsdSource1Locations.entry = [];
-              mcsdSource1Locations.entry = mcsdSource1Locations.entry.concat(locations);
-              mcsdSource1Locations.total = 1;
-            } else {
-              mcsdSource1Locations.total = 0;
-            }
-            return callback(null, mcsdSource1Locations);
+      });
+    })
+    logger.error(partition1);
+    const source1Locations = new Promise((resolve, reject) => {
+      console.time("get src1")
+      mcsd.getLocationChildren({
+        database: partition1,
+        parent: source1LimitOrgId[0],
+      }, (mcsdSource1) => {
+        mcsdSource1All = mcsdSource1;
+        if (id) {
+          const locations = mcsdSource1.entry.filter(entry => entry.resource.id == id);
+          const mcsdSource1Locations = {};
+          if (locations.length > 0) {
+            mcsdSource1Locations.total = 1;
+            mcsdSource1Locations.entry = [];
+            mcsdSource1Locations.entry = mcsdSource1Locations.entry.concat(locations);
+            mcsdSource1Locations.total = 1;
+          } else {
+            mcsdSource1Locations.total = 0;
           }
-          mcsd.filterLocations(mcsdSource1, source1LimitOrgId[0], recoLevel, mcsdSource1Level => callback(false, mcsdSource1Level));
+          console.timeEnd("get src1")
+          console.time("filter src2")
+          return resolve(mcsdSource1Locations);
+        }
+        console.timeEnd("get src1")
+        console.time("filter src1")
+        mcsd.filterLocations(mcsdSource1, source1LimitOrgId[0], recoLevel, mcsdSource1Level => {
+          console.timeEnd("filter src1")
+          resolve(mcsdSource1Level)
         });
-      },
-      mappingData(callback) {
-        mcsd.getLocations(mappingPartition, mcsdMapped => callback(false, mcsdMapped));
-      },
-    }, (error, results) => {
+      });
+    })
+    const mappingData = new Promise((resolve, reject) => {
+      logger.error('getting mapping');
+      console.time("mapping")
+      mcsd.getLocations(mappingPartition, mcsdMapped => {
+        logger.error('return mapping');
+        console.timeEnd("mapping")
+        resolve(mcsdMapped)
+      });
+    })
+
+    Promise.all([source1Locations, source2Locations, mappingData]).then((results) => {
+      logger.error('results');
+      console.timeEnd("get children")
       if (recoLevel == totalSource1Levels) {
         scores.getBuildingsScores(
-          results.source1Loations,
-          results.source2Locations,
-          results.mappingData,
+          results[0],
+          results[1],
+          results[2],
           mcsdSource2All,
           mcsdSource1All,
           partition1,
@@ -183,7 +215,7 @@ router.get('/reconcile', (req, res) => {
               scoreResults,
               source2Unmatched,
               recoLevel,
-              source2TotalRecords: results.source2Locations.entry.length,
+              source2TotalRecords: results[1].entry.length,
               source2TotalAllRecords: mcsdSource2All.entry.length - 1,
               totalAllMapped,
               totalAllFlagged,
@@ -208,9 +240,9 @@ router.get('/reconcile', (req, res) => {
         );
       } else {
         scores.getJurisdictionScore(
-          results.source1Loations,
-          results.source2Locations,
-          results.mappingData,
+          results[0],
+          results[1],
+          results[2],
           mcsdSource2All,
           mcsdSource1All,
           partition1,
@@ -227,7 +259,7 @@ router.get('/reconcile', (req, res) => {
               scoreResults,
               source2Unmatched,
               recoLevel,
-              source2TotalRecords: results.source2Locations.entry.length,
+              source2TotalRecords: results[1].entry.length,
               source2TotalAllRecords: mcsdSource2All.entry.length - 1,
               totalAllMapped,
               totalAllFlagged,

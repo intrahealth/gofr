@@ -262,10 +262,11 @@ export const scoresMixin = {
       }
       let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
       let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
-      console.log(source2LimitOrgId);
+      source1LimitOrgId = JSON.stringify(source1LimitOrgId)
+      source2LimitOrgId = JSON.stringify(source2LimitOrgId)
       let parentConstraint = JSON.stringify(this.$store.state.config.generalConfig.reconciliation.parentConstraint)
       let path = `partition1=${partition1}&partition2=${partition2}&mappingPartition=${mappingPartition}&source1LimitOrgId=${source1LimitOrgId}`
-      path += `&source2LimitOrgId=${JSON.stringify(source2LimitOrgId)}&totalSource1Levels=${totalSource1Levels}&totalSource2Levels=${totalSource2Levels}`
+      path += `&source2LimitOrgId=${source2LimitOrgId}&totalSource1Levels=${totalSource1Levels}&totalSource2Levels=${totalSource2Levels}`
       path += `&recoLevel=${recoLevel}&clientId=${clientId}&parentConstraint=${parentConstraint}&getPotential=${getPotential}`
       axios.get('/match/reconcile/?' + path).then(() => {
         this.checkScoreProgress()

@@ -64,7 +64,7 @@
               v-model="password"
               filled
               color="deep-purple"
-              :label="$t(`App.hardcoded-texts.Source Name`)"
+              :label="$t(`App.hardcoded-texts.Password`)"
               style="min-height: 96px"
               type="password"
             ></v-text-field>

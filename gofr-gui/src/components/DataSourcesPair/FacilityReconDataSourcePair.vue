@@ -612,11 +612,15 @@ export default {
     },
     deletePair () {
       this.confirmPairDeleteDialog = false
+      this.$store.state.dynamicProgress = true
+      this.$store.state.progressTitle = "Deleting Selected Datasource Pair"
+      this.$store.state.progressSubTitle = "(This may take long)"
       let query = `pairId=${this.activeDataSourcePair.id}&userID=${this.$store.state.auth.userID}&pairOwner=${this.activeDataSourcePair.user.id}&source1Name=${this.activeDataSourcePair.source1.name}&source2Name=${this.activeDataSourcePair.source2.name}`
       axios.delete('/datasource/deleteSourcePair?' + query).then(() => {
         this.$store.state.errorTitle = 'Pair Deletion'
         this.$store.state.errorDescription = 'Pair deleted successfully'
         this.$store.state.dialogError = true
+        this.$store.state.dynamicProgress = false
         setTimeout(() => {
           eventBus.$emit('getDataSourcePair')
         }, 500)

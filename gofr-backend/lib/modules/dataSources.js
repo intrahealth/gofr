@@ -89,9 +89,9 @@ const getSources = ({ isAdmin = false, orgId, userID }) => new Promise((resolve,
   Promise.all([owning, sharedUser, sharedAll, sameOrgid]).then(() => {
     const sources = [];
     if (resources.length > 0) {
-      const partsRes = resources.filter(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-partition'));
-      const sourcesRes = resources.filter(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-datasource'));
-      const usersRes = resources.filter(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-person-user'));
+      const partsRes = resources.filter(entry => entry?.resource?.meta?.profile?.includes('http://gofr.org/fhir/StructureDefinition/gofr-partition'));
+      const sourcesRes = resources.filter(entry => entry?.resource?.meta?.profile?.includes('http://gofr.org/fhir/StructureDefinition/gofr-datasource'));
+      const usersRes = resources.filter(entry => entry?.resource?.meta?.profile?.includes('http://gofr.org/fhir/StructureDefinition/gofr-person-user'));
       let count = 1
       sourcesRes.forEach((entry) => {
         const exists = sources.find(src => src.id === entry.resource.id);
@@ -162,7 +162,7 @@ const getSources = ({ isAdmin = false, orgId, userID }) => new Promise((resolve,
           const userid = user.valueReference.reference.split('/')[1];
           sharedUsers.push({
             id: userid,
-            name: usersRes.find(usr => usr.resource.id === userid).resource.name[0].text,
+            name: usersRes.find(usr => usr.resource.id === userid)?.resource?.name[0]?.text,
             limits,
             permissions,
           });

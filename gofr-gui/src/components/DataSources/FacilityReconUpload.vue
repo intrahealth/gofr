@@ -524,6 +524,7 @@ export default {
   mixins: [dataSourcesMixin, generalMixin],
   data () {
     return {
+      emptyProgressAttempt: 0,
       partitionID: '',
       levelData: '',
       datasetLimitWarn: false,
@@ -626,17 +627,27 @@ export default {
     confirmSubmit () {
       this.confirmUpload = true
     },
+    hasEmptyProgress() {
+      if(this.emptyProgressAttempt > 5) {
+        this.$store.state.uploadRunning = false
+        this.uploadPrepaProgr = false
+        this.percentDialog = false
+        this.$store.state.errorTitle = 'An error has occured'
+        this.$store.state.errorDescription = 'You should delete this data source from view data source page then re-upload'
+        this.$store.state.errorColor = 'error'
+        this.$store.state.dialogError = true
+      } else {
+        // this.emptyProgressAttempt++
+        setTimeout(() => {
+          this.checkUploadProgress()
+        }, 2000)
+      }
+    },
     checkUploadProgress () {
       const clientId = this.$store.state.clientId
       axios.get('/progress/uploadProgress/' + clientId).then((uploadProgress) => {
         if (!uploadProgress.data || (!uploadProgress.data.status && !uploadProgress.data.percent && !uploadProgress.data.error)) {
-          this.$store.state.uploadRunning = false
-          this.uploadPrepaProgr = false
-          this.percentDialog = false
-          this.$store.state.errorTitle = 'An error has occured'
-          this.$store.state.errorDescription = 'You should delete this data source from view data source page then re-upload'
-          this.$store.state.errorColor = 'error'
-          this.$store.state.dialogError = true
+          this.hasEmptyProgress()
           return
         } else if (uploadProgress.data.error !== null) {
           this.$store.state.uploadRunning = false
@@ -648,6 +659,7 @@ export default {
           console.log(uploadProgress.data.error)
           return
         }
+        this.emptyProgressAttempt = 0
         this.uploadStatus = uploadProgress.data.status
         if (uploadProgress.data.percent) {
           if (!this.percentDialog) {
@@ -666,11 +678,15 @@ export default {
           this.dialog = true
           this.$store.state.uploadRunning = false
         } else {
-          this.checkUploadProgress()
+          setTimeout(() => {
+            this.checkUploadProgress()
+          }, 2000);
         }
       }).catch((err) => {
         console.log(err)
-        this.checkUploadProgress()
+        setTimeout(() => {
+          this.checkUploadProgress()
+        }, 2000);
       })
     },
     performExtraCheck () {

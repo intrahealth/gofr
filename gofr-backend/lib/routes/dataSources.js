@@ -201,30 +201,30 @@ function getSourcePair({ userID, dhis2OrgId }) {
         return reject(err);
       }
       if (resources.length > 0) {
-        let partsRes = resources.filter(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-partition'));
-        const pairsRes = resources.filter(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-datasource-pair'));
-        const sourcesRes = resources.filter(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-datasource'));
-        const usersRes = resources.filter(entry => entry.resource.meta.profile.includes('http://gofr.org/fhir/StructureDefinition/gofr-person-user'));
+        let partsRes = resources.filter(entry => entry?.resource?.meta?.profile?.includes('http://gofr.org/fhir/StructureDefinition/gofr-partition'));
+        const pairsRes = resources.filter(entry => entry?.resource?.meta?.profile?.includes('http://gofr.org/fhir/StructureDefinition/gofr-datasource-pair'));
+        const sourcesRes = resources.filter(entry => entry?.resource?.meta?.profile?.includes('http://gofr.org/fhir/StructureDefinition/gofr-datasource'));
+        const usersRes = resources.filter(entry => entry?.resource?.meta?.profile?.includes('http://gofr.org/fhir/StructureDefinition/gofr-person-user'));
         const promises = [];
         let ids = []
         for (const pairRes of pairsRes) {
           let found = ids.find((id) => {
-            return pairRes.resource.id === id
+            return pairRes?.resource?.id === id
           })
           if(found) {
             continue
           }
           ids.push(pairRes.resource.id)
-          const pairDetails = pairRes.resource.extension && pairRes.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/datasourcepair');
+          const pairDetails = pairRes?.resource?.extension && pairRes?.resource?.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/datasourcepair');
           promises.push(new Promise((resolve, reject) => {
             const src1Ext = pairDetails.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/source1');
             const src2Ext = pairDetails.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/source2');
             const pairExt = mixin.flattenExtension(pairDetails.extension);
             const partId = pairExt['http://gofr.org/fhir/StructureDefinition/partition'].reference;
             const partRes = partsRes.find(part => part.resource.id === partId.split('/')[1]);
-            const partDetails = partRes.resource.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
+            const partDetails = partRes?.resource?.extension.find(ext => ext.url === 'http://gofr.org/fhir/StructureDefinition/partition');
             const partExt = mixin.flattenExtension(partDetails.extension);
-            const userId = partExt['http://gofr.org/fhir/StructureDefinition/owner'][0].find(ext => ext.url === 'userID').valueReference.reference;
+            const userId = partExt['http://gofr.org/fhir/StructureDefinition/owner'][0].find(ext => ext.url === 'userID')?.valueReference?.reference;
             const ownerName = usersRes.find(usr => usr.resource.id === userId.split('/')[1])?.resource?.name[0]?.text;
             const whereSharedUsers = "Basic.extension.where('http://gofr.org/fhir/StructureDefinition/partition').extension.where(url='http://gofr.org/fhir/StructureDefinition/shared').extension.where(url='http://gofr.org/fhir/StructureDefinition/shareduser').extension.where(url='user').valueReference.reference";
             const _sharedUsers = fhirpath.evaluate(partRes.resource, whereSharedUsers);
@@ -269,8 +269,11 @@ function getSourcePair({ userID, dhis2OrgId }) {
               if(invalid) {
                 return resolve()
               }
-              const src1Part = partsRes.find(part => part.resource.id === fhirpath.evaluate(src1Res.resource, "Basic.extension.where(url='http://gofr.org/fhir/StructureDefinition/datasource').extension.where(url='http://gofr.org/fhir/StructureDefinition/partition').valueReference.reference")[0].split('/')[1]);
-              const src2Part = partsRes.find(part => part.resource.id === fhirpath.evaluate(src2Res.resource, "Basic.extension.where(url='http://gofr.org/fhir/StructureDefinition/datasource').extension.where(url='http://gofr.org/fhir/StructureDefinition/partition').valueReference.reference")[0].split('/')[1]);
+              const src1Part = partsRes.find(part => part?.resource?.id === fhirpath.evaluate(src1Res.resource, "Basic.extension.where(url='http://gofr.org/fhir/StructureDefinition/datasource').extension.where(url='http://gofr.org/fhir/StructureDefinition/partition').valueReference.reference")[0].split('/')[1]);
+              const src2Part = partsRes.find(part => part?.resource?.id === fhirpath.evaluate(src2Res.resource, "Basic.extension.where(url='http://gofr.org/fhir/StructureDefinition/datasource').extension.where(url='http://gofr.org/fhir/StructureDefinition/partition').valueReference.reference")[0].split('/')[1]);
+              if(!src1Part || !src2Part) {
+                return resolve()
+              }
               const pair = {
                 id: pairRes.resource.id,
                 name: fhirpath.evaluate(

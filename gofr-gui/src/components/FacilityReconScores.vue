@@ -1316,6 +1316,8 @@ export default {
       let userID = this.$store.state.activePair.userID
       let source1LimitOrgId = this.getLimitOrgIdOnActivePair().source1LimitOrgId
       let source2LimitOrgId = this.getLimitOrgIdOnActivePair().source2LimitOrgId
+      source1LimitOrgId = JSON.stringify(source1LimitOrgId)
+      source2LimitOrgId = JSON.stringify(source2LimitOrgId)
       let parentConstraint = JSON.stringify(
         this.$store.state.config.generalConfig.reconciliation.parentConstraint
       )

@@ -1574,7 +1574,6 @@ module.exports = () => ({
       });
     });
   },
-
   saveLocations(mCSD, database, callback) {
     if (!database) {
       database = config.get('mCSD:registryDB');
@@ -1605,6 +1604,39 @@ module.exports = () => ({
       this.cleanCache('parents', true);
       callback(err, body);
     });
+  },
+  saveLocationsPromise(mCSD, database) {
+    return new Promise((resolve, reject) => {
+      if (!database) {
+        database = config.get('mCSD:registryDB');
+      }
+      let url = URI(fhirAxios.__genUrl());
+      if (database) {
+        url = url.segment(database);
+      }
+      url = url.toString();
+      const options = {
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        json: mCSD,
+      };
+      request.post(options, (err, res, body) => {
+        if (res.statusCode === 404) {
+          logger.error(body);
+          logger.error('Looks like the mapping DB does not exist, cant save this location');
+          return resolve('Failed to save', null);
+        }
+        if (err) {
+          logger.error(err);
+          return resolve(err);
+        }
+        this.cleanCache(`url_${url}/Location`, true);
+        this.cleanCache('parents', true);
+        resolve(body);
+      });
+    })
   },
   cleanCache(key, isPrefix) {
     if (isPrefix) {
@@ -2122,88 +2154,92 @@ module.exports = () => ({
     };
     let fakeOrgIdAdded = false;
     const invalidIDChars = [/\//g, /\s/g];
+    let csvRows = []
     csv
       .fromPath(filePath, {
         headers: true,
       })
-      .on('data', (data) => {
-        const jurisdictions = [];
-        if (data[headerMapping.facility] == '') {
+      .on('data', async(data) => {
+        csvRows.push(data)
+      }).on('end', async() => {
+        for(let data of csvRows) {
+          const jurisdictions = [];
           countRow++;
-          const percent = parseFloat((countRow * 100 / totalRows).toFixed(1));
-          const uploadReqPro = JSON.stringify({
-            status: '3/3 Writing Uploaded data into server',
-            error: null,
-            percent,
-          });
-          redisClient.set(uploadRequestId, uploadReqPro);
-          logger.error(`Skipped ${JSON.stringify(data)}`);
-          return;
-        }
-        for (const invalidChar of invalidIDChars) {
-          data[headerMapping.code] = data[headerMapping.code].replace(invalidChar, '-');
-        }
-        const facilityParent = {};
-        async.eachSeries(levels, (level, nxtLevel) => {
-          if (data[headerMapping[level]] != null
-            && data[headerMapping[level]] != undefined
-            && data[headerMapping[level]] != false
-            && data[headerMapping[level]] != ''
-          ) {
-            let name = data[headerMapping[level]].trim();
-            name = mixin.toTitleCaseSpace(name);
-            const levelNumber = parseInt(level.replace('level', ''));
-            let mergedParents = '';
+          if (data[headerMapping.facility] == '') {
+            // countRow++;
+            const percent = parseFloat((countRow * 100 / csvRows.length).toFixed(1));
+            const uploadReqPro = JSON.stringify({
+              status: '3/3 Writing Uploaded data into server',
+              error: null,
+              percent,
+            });
+            redisClient.set(uploadRequestId, uploadReqPro);
+            logger.error(`Skipped ${JSON.stringify(data)}`);
+            return;
+          }
+          for (const invalidChar of invalidIDChars) {
+            data[headerMapping.code] = data[headerMapping.code].replace(invalidChar, '-');
+          }
+          const facilityParent = {};
+          for(let level of levels) {
+            if (data[headerMapping[level]] != null
+              && data[headerMapping[level]] != undefined
+              && data[headerMapping[level]] != false
+              && data[headerMapping[level]] != ''
+            ) {
+              let name = data[headerMapping[level]].trim();
+              name = mixin.toTitleCaseSpace(name);
+              const levelNumber = parseInt(level.replace('level', ''));
+              let mergedParents = '';
 
-            // merge parents of this location
-            for (let k = levelNumber - 1; k >= 1; k--) {
-              let parent = data[headerMapping[`level${k}`]].trim();
-              parent = mixin.toTitleCaseSpace(parent);
-              // parent = parent.toLowerCase();
-              mergedParents += parent;
-            }
-            if (levelNumber.toString().length < 2) {
-              var namespaceMod = `${namespace}00${levelNumber}`;
-            } else {
-              var namespaceMod = `${namespace}0${levelNumber}`;
-            }
-
-            const UUID = uuid5(name + mergedParents + database, namespaceMod);
-            const topLevels = [...new Array(levelNumber)].map(Function.call, Number);
-            // removing zero as levels starts from 1
-            topLevels.splice(0, 1);
-            topLevels.reverse();
-            let parentFound = false;
-            let parentUUID = null;
-            let parent = null;
-            if (levelNumber == 1) {
-              parent = orgname;
-              parentUUID = countryUUID;
-            }
-            async.eachSeries(topLevels, (topLevel, nxtTopLevel) => {
-              const topLevelName = `level${topLevel}`;
-              if (data[headerMapping[topLevelName]] && parentFound === false) {
-                let mergedGrandParents = '';
-                for (let k = topLevel - 1; k >= 1; k--) {
-                  let grandParent = data[headerMapping[`level${k}`]].trim();
-                  grandParent = mixin.toTitleCaseSpace(grandParent);
-                  // grandParent = grandParent.toLowerCase();
-                  mergedGrandParents += grandParent;
-                }
-                parent = data[headerMapping[topLevelName]].trim();
+              // merge parents of this location
+              for (let k = levelNumber - 1; k >= 1; k--) {
+                let parent = data[headerMapping[`level${k}`]].trim();
                 parent = mixin.toTitleCaseSpace(parent);
                 // parent = parent.toLowerCase();
-                let namespaceMod;
-                if (topLevel.toString().length < 2) {
-                  namespaceMod = `${namespace}00${topLevel}`;
-                } else {
-                  namespaceMod = `${namespace}0${topLevel}`;
-                }
-                parentUUID = uuid5(parent + mergedGrandParents + database, namespaceMod);
-                parentFound = true;
+                mergedParents += parent;
               }
-              nxtTopLevel();
-            }, () => {
+              if (levelNumber.toString().length < 2) {
+                var namespaceMod = `${namespace}00${levelNumber}`;
+              } else {
+                var namespaceMod = `${namespace}0${levelNumber}`;
+              }
+
+              const UUID = uuid5(name + mergedParents + database, namespaceMod);
+              const topLevels = [...new Array(levelNumber)].map(Function.call, Number);
+              // removing zero as levels starts from 1
+              topLevels.splice(0, 1);
+              topLevels.reverse();
+              let parentFound = false;
+              let parentUUID = null;
+              let parent = null;
+              if (levelNumber == 1) {
+                parent = orgname;
+                parentUUID = countryUUID;
+              }
+              for(let topLevel of topLevels) {
+                const topLevelName = `level${topLevel}`;
+                if (data[headerMapping[topLevelName]] && parentFound === false) {
+                  let mergedGrandParents = '';
+                  for (let k = topLevel - 1; k >= 1; k--) {
+                    let grandParent = data[headerMapping[`level${k}`]].trim();
+                    grandParent = mixin.toTitleCaseSpace(grandParent);
+                    // grandParent = grandParent.toLowerCase();
+                    mergedGrandParents += grandParent;
+                  }
+                  parent = data[headerMapping[topLevelName]].trim();
+                  parent = mixin.toTitleCaseSpace(parent);
+                  // parent = parent.toLowerCase();
+                  let namespaceMod;
+                  if (topLevel.toString().length < 2) {
+                    namespaceMod = `${namespace}00${topLevel}`;
+                  } else {
+                    namespaceMod = `${namespace}0${topLevel}`;
+                  }
+                  parentUUID = uuid5(parent + mergedGrandParents + database, namespaceMod);
+                  parentFound = true;
+                }
+              }
               facilityParent.name = name;
               facilityParent.uuid = UUID;
               if (!processed.includes(UUID)) {
@@ -2215,12 +2251,8 @@ module.exports = () => ({
                 });
                 processed.push(UUID);
               }
-              nxtLevel();
-            });
-          } else {
-            nxtLevel();
+            }
           }
-        }, () => {
           recordCount += jurisdictions.length;
           if (!fakeOrgIdAdded) {
             jurisdictions.unshift(fakeOrgId);
@@ -2257,35 +2289,30 @@ module.exports = () => ({
             };
             recordCount = 0;
             totalRows += tmpBundle.entry.length;
-            promises.push(new Promise((resolve, reject) => {
-              this.saveLocations(tmpBundle, database, () => {
-                countRow += tmpBundle.entry.length;
-                const percent = parseFloat((countRow * 100 / totalRows).toFixed(1));
-                const uploadReqPro = JSON.stringify({
-                  status: '3/3 Writing Uploaded data into server',
-                  error: null,
-                  percent,
-                });
-                redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
-
-                resolve();
+            await fhirAxios.create(tmpBundle, database).then(() => {
+              const percent = parseFloat((countRow * 100 / csvRows.length).toFixed(1));
+              const uploadReqPro = JSON.stringify({
+                status: '3/3 Writing Uploaded data into server',
+                error: null,
+                percent,
               });
-            }));
+              let uploadRequestId = `uploadProgress${clientId}`;
+              redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
+            })
           }
+        }
+        if(saveBundle.entry.length > 0) {
+          totalRows += saveBundle.entry.length;
+          await fhirAxios.create(saveBundle, database)
+        }
+        const uploadRequestId = `uploadProgress${clientId}`;
+        const uploadReqPro = JSON.stringify({
+          status: 'Done',
+          error: null,
+          percent: 100,
         });
-      }).on('end', () => {
-        this.saveLocations(saveBundle, database, () => {
-          Promise.all(promises).then(() => {
-            const uploadRequestId = `uploadProgress${clientId}`;
-            const uploadReqPro = JSON.stringify({
-              status: 'Done',
-              error: null,
-              percent: 100,
-            });
-            redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
-            callback();
-          });
-        });
+        redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
+        callback();
       });
   },
 
@@ -2296,13 +2323,13 @@ module.exports = () => ({
           profile: config.get('profiles:jurisdiction'),
         },
         resourceType: 'Location',
-        type: {
+        type: [{
           coding: [{
             system: 'urn:ietf:rfc:3986',
             code: 'urn:ihe:iti:mcsd:2019:jurisdiction',
             display: 'Jurisdiction',
-          }],
-        },
+          }]
+        }]
       };
       resource.name = jurisdiction.name;
       resource.status = 'active';
@@ -2342,13 +2369,13 @@ module.exports = () => ({
         profile: config.get('profiles:facility'),
       },
       resourceType: 'Location',
-      type: {
+      type: [{
         coding: [{
           system: 'urn:ietf:rfc:3986',
           code: 'urn:ihe:iti:mcsd:2019:facility',
           display: 'Facility',
         }],
-      },
+      }],
     };
     resource.status = 'active';
     resource.mode = 'instance';

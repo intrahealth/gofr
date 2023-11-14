@@ -61,7 +61,7 @@ Description:    "GOFR password extension for local users."
 * extension[salt].valueString ^label = "Salt"
 * extension[salt].valueString 1..1 MS
 
-Instance:       e9b41c35-7c85-46df-aeea-a4e8dbf0364e
+Instance:       pJryMYLm5MFB6Skk5EsE1m
 InstanceOf:     GofrPersonUser
 Title:          "GOFR Admin User"
 Usage:          #example

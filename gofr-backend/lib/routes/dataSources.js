@@ -14,6 +14,7 @@ const dhis = require('../dhis');
 const mcsd = require('../mcsd')();
 const hapi = require('../hapi');
 const config = require('../config');
+const uploadToSql = require("../modules/uploadToSql")
 const outcomes = require('../../config/operationOutcomes');
 
 function destroyPartition(partitionName, partitionID) {
@@ -1665,6 +1666,9 @@ router.delete('/deleteDataSource/:id', (req, res) => {
       return res.status(500).send();
     }
     destroyPartition(partitionName, partitionID).then(() => {
+      uploadToSql.dropTable(partitionName).catch((err) => {
+        logger.error(err);
+      })
       const baseUrl = fhirAxios.__genUrl(partitionName);
       mcsd.cleanCache(`url_${baseUrl}`, true);
       logger.info('Deleting data source')

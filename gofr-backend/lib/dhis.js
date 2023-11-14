@@ -1,6 +1,6 @@
 /* eslint-disable func-names */
 const request = require('request');
-const async = require('async');
+const uuid4 = require('uuid/v4');
 const URI = require('urijs');
 const http = require('http');
 const https = require('https');
@@ -10,6 +10,7 @@ const mixin = require('./mixin');
 const logger = require('./winston');
 const fhirAxios = require('./modules/fhirAxios');
 const config = require('./config');
+const uploadToSql = require("./modules/uploadToSql")
 
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST || '127.0.0.1',
@@ -152,6 +153,9 @@ const dhis = {
     });
   },
   sync: (host, username, password, name, clientId, topOrgName, reset, full, dousers, doservices) => {
+    if(!host.endsWith("/")) {
+      host += "/"
+    }
     const dhis2URL = new URI(host);
     const auth = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
     credentials.dhis2URL = dhis2URL;
@@ -237,7 +241,7 @@ const dhis = {
   },
 };
 
-function processOrgUnit(metadata, hasKey) {
+async function processOrgUnit(metadata, hasKey) {
   logger.info('Now writting org units into the database');
   const {
     name,
@@ -283,10 +287,40 @@ function processOrgUnit(metadata, hasKey) {
     }
   });
 
+  let queries = []
+  let fakeOrgId = {
+    name: config.get('mCSD:fakeOrgName'),
+    parent: null,
+    uuid: credentials.topOrgId,
+    parentUUID: null,
+  };
+  await uploadToSql.createTable(database).catch((err) => {
+    console.log(err);
+  })
+  uploadToSql.buildSQL(fakeOrgId, queries, database)
+  let bundle = {
+    id: uuid4(),
+    resourceType: 'Bundle',
+    type: 'transaction',
+    entry: [],
+  }
   let i = 0;
   metadata.organisationUnits.sort((a, b) => a.level - b.level);
-  async.eachSeries(metadata.organisationUnits, (org, nxtOrg) => {
+  for(org of metadata.organisationUnits) {
     logger.info(`Processing (${++i}/${max}) ${org.id}`);
+    let location = {
+      uuid: org.id,
+      id: [org.id],
+      code: [],
+      name: org.name,
+      lat: "",
+      long: "",
+      parent: "",
+      parentUUID: "",
+    }
+    if(org.code) {
+      location.code.push(org.code)
+    }
     const fhir = {
       meta: {
         profile: [],
@@ -361,6 +395,8 @@ function processOrgUnit(metadata, hasKey) {
     if (org.featureType == 'POINT' && org.coordinates) {
       try {
         const coords = JSON.parse(org.coordinates);
+        location.lat = coords[1]
+        location.long = coords[0]
         fhir.position = {
           longitude: coords[0],
           latitude: coords[1],
@@ -373,11 +409,13 @@ function processOrgUnit(metadata, hasKey) {
       fhir.partOf = {
         reference: `Location/${org.parent.id}`,
       };
+      location.parentUUID = org.parent.id
     } else {
       fhir.partOf = {
         reference: `Location/${credentials.topOrgId}`,
         display: credentials.topOrgName,
       };
+      location.parentUUID = credentials.topOrgId
     }
     if (org.attributeValues) {
       for (const attr of org.attributeValues) {
@@ -386,52 +424,67 @@ function processOrgUnit(metadata, hasKey) {
             system: 'http://dhis2.org/id',
             value: attr.value,
           });
+          location.id.push(attr.value)
         }
         if (attr.attribute.id == 'Ed6SCy0OXfx') {
           fhir.identifier.push({
             system: 'http://dhis2.org/code',
             value: attr.value,
           });
+          location.code.push(attr.value)
         }
       }
     }
-
-    hostURL = URI(fhirAxios.__genUrl(database))
-      .segment('Location')
-      .segment(fhir.id)
-      .toString();
-    options = {
-      url: hostURL.toString(),
-      headers: {
-        'Content-Type': 'application/fhir+json',
-      },
-      json: fhir,
-    };
-    request.put(options, (err, res, body) => {
-      counter += 1;
-      const percent = parseFloat((counter * 100 / max).toFixed(2));
-      let status = '2/2 - Saving DHIS2 locations into FHIR server';
-      if (counter === max) {
-        status = 'Done';
+    bundle.entry.push({
+      resource: fhir,
+      request: {
+        method: 'PUT',
+        url: `Location/${fhir.id}`,
       }
+    })
+    uploadToSql.buildSQL(location, queries, database)
+    counter++
+    if(bundle.entry.length > 250) {
+      await fhirAxios.create(bundle, database).then(() => {
+        bundle.entry = []
+        const percent = parseFloat((counter * 100 / max).toFixed(2));
+        let status = '2/2 - Saving DHIS2 locations into FHIR server';
+        if (counter === max) {
+          status = 'Done';
+        }
+        const dhisSyncRequestId = `dhisSyncRequest${clientId}`;
+        const dhisSyncRequest = JSON.stringify({
+          status,
+          error: null,
+          percent,
+        });
+        redisClient.set(dhisSyncRequestId, dhisSyncRequest);
+      }).catch((err) => {
+        logger.error(err);
+      })
+      await uploadToSql.saveSQL(queries)
+      queries = []
+    }
+  }
+  if(queries.length > 0) {
+    uploadToSql.saveSQL(queries)
+  }
+  if(bundle.entry.length > 0) {
+    await fhirAxios.create(bundle, database).then(() => {
+      bundle.entry = []
       const dhisSyncRequestId = `dhisSyncRequest${clientId}`;
       const dhisSyncRequest = JSON.stringify({
-        status,
+        status: "Done",
         error: null,
-        percent,
+        percent: 100,
       });
       redisClient.set(dhisSyncRequestId, dhisSyncRequest);
-      if (err) {
-        logger.error(err);
-      } else {
-        logger.info(body);
-      }
-      return nxtOrg();
-    });
-  }, () => {
-    const thisRunTime = new Date().toISOString();
-    setLastUpdate(hasKey, thisRunTime);
-  });
+    }).catch((err) => {
+      logger.error(err);
+    })
+  }
+  const thisRunTime = new Date().toISOString();
+  setLastUpdate(hasKey, thisRunTime);
 }
 
 function checkLoaderDataStore() {

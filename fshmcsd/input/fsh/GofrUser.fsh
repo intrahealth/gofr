@@ -74,7 +74,7 @@ Description:    "DHIS2 Organization Unit ID"
 * valueString 1..1 MS
 * valueString ^label = "DHIS2 Organization Unit ID"
 
-Instance:       e9b41c35-7c85-46df-aeea-a4e8dbf0364e
+Instance:       pJryMYLm5MFB6Skk5EsE1m
 InstanceOf:     GofrPersonUser
 Title:          "GOFR Admin User"
 Usage:          #example
@@ -89,7 +89,7 @@ Usage:          #example
 * extension[password].extension[hash].valueString = "727c00bcb3d604db9b807155240b97347951e5e89e4c69b823279287694501fcaa683d883f5854a05c2c50c5b31413c6bb4a5949876a42b5c5bd74247e5777fc"
 * extension[role][0].valueReference = Reference(Basic/gofr-role-admin)
 
-Instance:       26e19ebd-65e5-4181-84b6-589bcf3bc44b
+Instance:       kLsxhfrrrB3rMGwBkDS4kY
 InstanceOf:     GofrPersonUser
 Title:          "GOFR Public User"
 Usage:          #example

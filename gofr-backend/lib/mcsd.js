@@ -21,6 +21,8 @@ const config = require('./config');
 const logger = require('./winston');
 const codesystem = require('../terminologies/gofr-codesystem.json');
 const fhirAxios = require('./modules/fhirAxios');
+const uploadToSql = require("./modules/uploadToSql")
+const { pool } = require("./modules/postgres");
 
 const topOrgName = config.get('mCSD:fakeOrgName');
 
@@ -427,7 +429,48 @@ module.exports = () => ({
       },
     );
   },
-
+  getLocationChildrenSql({database, parent}) {
+    return new Promise((resolve, reject) => {
+      if (!database) {
+        database = config.get('mCSD:registryDB');
+      }
+      if (!parent) {
+        parent = "parent IS NULL"
+      } else {
+        parent = `id='${parent}'`
+      }
+      pool.query(`
+        WITH RECURSIVE ${database}_cte(root, id, name, code, otherId, tag, parent) AS (
+            SELECT 
+                id AS root,
+                id,
+                name,
+                code,
+                otherId,
+                tag,
+                parent             
+                FROM ${database}
+                WHERE ${parent}                               
+            UNION
+                SELECT 
+                ${database}_cte.root,
+                ${database}.id,
+                ${database}.name,
+                ${database}.code,
+                ${database}.otherId,
+                ${database}.tag,
+                ${database}.parent
+                    FROM ${database}
+                    JOIN ${database}_cte 
+                    ON ${database}.parent = ${database}_cte.id
+        )                       
+        SELECT * 
+        FROM ${database}_cte;
+      `).then((response) => {
+        resolve(response)
+      })
+    })
+  },
   getLocationChildren({
     database,
     parent,
@@ -631,51 +674,46 @@ module.exports = () => ({
       return callback(mcsd.parentCache.parents.slice());
     }
     const parents = [];
-    if (!mcsd.hasOwnProperty('entry') || !entityParent) {
-      return callback(parents);
-    }
-    if (mcsd.entry.length === 0) {
+    if (!mcsd.length === 0 || !entityParent) {
       return callback(parents);
     }
 
     function filter(entityParent, callback) {
-      const splParent = entityParent.split('/');
-      entityParent = splParent[(splParent.length - 1)];
 
-      const entry = mcsd.entry.find(entry => entry.resource.id == entityParent);
+      const entry = mcsd.find(entry => entry.id == entityParent);
 
       if (entry) {
         let long = null;
         let lat = null;
-        if (entry.resource.hasOwnProperty('position')) {
-          long = entry.resource.position.longitude;
-          lat = entry.resource.position.latitude;
+        if (entry.longitude) {
+          long = entry.longitude;
+          lat = entry.latitude;
+        }
+        if (entry.latitude) {
+          lat = entry.latitude;
         }
         var entityParent = null;
-        if (entry.resource.hasOwnProperty('partOf')) {
-          entityParent = entry.resource.partOf.reference;
+        if (entry.parent) {
+          entityParent = entry.parent;
         }
 
         if (details == 'all' || !details) {
           parents.push({
-            text: entry.resource.name,
-            id: entry.resource.id,
+            text: entry.name,
+            id: entry.id,
             lat,
             long,
           });
         } else if (details == 'id') {
-          parents.push(entry.resource.id);
+          parents.push(entry.id);
         } else if (details == 'names') {
-          parents.push(entry.resource.name);
+          parents.push(entry.name);
         } else {
           logger.error('parent details (either id,names or all) to be returned not specified');
         }
 
-        if (entry.resource.hasOwnProperty('partOf')
-          && entry.resource.partOf.reference != false
-          && entry.resource.partOf.reference != null
-          && entry.resource.partOf.reference != undefined) {
-          entityParent = entry.resource.partOf.reference;
+        if (entry.parent) {
+          entityParent = entry.parent;
           filter(entityParent, parents => callback(parents));
         } else {
           return callback(parents);
@@ -729,7 +767,6 @@ module.exports = () => ({
       mcsdLevelNumber.entry = mcsdLevelNumber.entry.concat(entry);
       return callback(mcsdLevelNumber);
     }
-
     function filter(id, callback) {
       const res = mcsd.entry.filter((entry) => {
         if (entry.resource.hasOwnProperty('partOf')) {
@@ -768,6 +805,49 @@ module.exports = () => ({
     }, () => {
       callback(mcsdLevelNumber);
     });
+  },
+
+  filterLocationsSQL(rows, topOrgId, levelNumber, callback) {
+    let mcsdLevelNumber = [];
+    if (rows.length == 0 || !topOrgId) {
+      return callback(mcsdLevelNumber);
+    }
+    const entry = rows.find(row => row.id == topOrgId);
+    if (!entry) {
+      return callback(mcsdLevelNumber);
+    }
+    if (levelNumber == 1) {
+      mcsdLevelNumber = mcsdLevelNumber.concat(entry);
+      return callback(mcsdLevelNumber);
+    }
+    function filter(id, callback) {
+      const res = rows.filter((row) => {
+        if (row.parent) {
+          return row.parent === id;
+        }
+      });
+      return callback(res);
+    }
+
+    let totalLoops = 0;
+    totalLoops = levelNumber;
+    let tmpArr = [];
+    tmpArr.push(entry);
+    totalLoops = Array.from(new Array(totalLoops - 1), (val, index) => index + 1);
+    for(let loop of totalLoops) {
+      let totalElements = 0;
+      for(let arr of tmpArr) {
+        filter(arr.id, (res) => {
+          tmpArr = tmpArr.concat(res);
+          if (levelNumber == loop + 1) {
+            mcsdLevelNumber = mcsdLevelNumber.concat(res);
+          }
+          totalElements++;
+        });
+      }
+      tmpArr.splice(0, totalElements);
+    }
+    callback(mcsdLevelNumber);
   },
 
   countLevels(db, topOrgId, callback) {
@@ -2096,6 +2176,7 @@ module.exports = () => ({
             location.entry[0].request.method = 'PUT';
             location.entry[0].request.url = `Location/${location.entry[0].resource.id}`;
             this.saveLocations(location, source1DB, (err, res) => {
+              this.addTagInSql(source1DB, source1Id, matchBrokenCode)
               callback(err, null);
             });
           } else {
@@ -2123,7 +2204,73 @@ module.exports = () => ({
       callback(err);
     });
   },
-  CSVTomCSD(filePath, headerMapping, database, clientId, callback) {
+  addTagInSql(db, id, tagCode) {
+    return new Promise((resolve, reject) => {
+      pool.query(`select * from ${db} where id='${id}'`).then((response) => {
+        if(response.rows.length > 0) {
+          let location = response.rows[0]
+          if(!location.tag) {
+            location.tag = []
+          } else if(typeof location.tag === 'string') {
+            location.tag = JSON.parse(location.tag)
+          }
+          let exist = location.tag.find((tag) => {
+            return tag === tagCode
+          })
+          if(!exist) {
+            location.tag.push(tagCode)
+          }
+          location.tag = JSON.stringify(location.tag)
+          pool.query(`update ${db} set tag='${location.tag}' where id='${id}'`).then(() => {
+            resolve()
+          }).catch((err) => {
+            logger.error(err);
+            reject()
+          })
+        } else {
+          return resolve()
+        }
+      }).catch((err) => {
+        logger.error(err);
+        return reject()
+      })
+    })
+  },
+  removeTagInSql(db, id, tagCode) {
+    return new Promise((resolve, reject) => {
+      pool.query(`select * from ${db} where id='${id}'`).then((response) => {
+        if(response.rows.length > 0) {
+          let location = response.rows[0]
+          if(!location.tag) {
+            return resolve()
+          } else if(typeof location.tag === 'string') {
+            location.tag = JSON.parse(location.tag)
+          }
+          let tagIndex = location.tag.findIndex((tag) => {
+            return tag === tagCode
+          })
+          if(tagIndex == -1) {
+            return resolve()
+          }
+          location.tag.splice(tagIndex, 1)
+          location.tag = JSON.stringify(location.tag)
+          pool.query(`update ${db} set tag='${location.tag}' where id='${id}'`).then(() => {
+            resolve()
+          }).catch((err) => {
+            logger.error(err);
+            reject()
+          })
+        } else {
+          return resolve()
+        }
+      }).catch((err) => {
+        logger.error(err);
+        return reject()
+      })
+    })
+  },
+  async CSVTomCSD(filePath, headerMapping, database, clientId, callback) {
+    await uploadToSql.createTable(database)
     const uploadRequestId = `uploadProgress${clientId}`;
     const namespace = config.get('UUID:namespace');
     const levels = config.get('levels');
@@ -2132,7 +2279,6 @@ module.exports = () => ({
     const orgname = config.get('mCSD:fakeOrgName');
     const countryUUID = topOrgId;
 
-    const promises = [];
     const processed = [];
     let countRow = 0;
 
@@ -2155,6 +2301,8 @@ module.exports = () => ({
     let fakeOrgIdAdded = false;
     const invalidIDChars = [/\//g, /\s/g];
     let csvRows = []
+    let queries = []
+    uploadToSql.buildSQL(JSON.parse(JSON.stringify(fakeOrgId)), queries, database)
     csv
       .fromPath(filePath, {
         headers: true,
@@ -2250,6 +2398,12 @@ module.exports = () => ({
                   parentUUID,
                 });
                 processed.push(UUID);
+                uploadToSql.buildSQL({
+                  name,
+                  parent,
+                  uuid: UUID,
+                  parentUUID,
+                }, queries, database)
               }
             }
           }
@@ -2268,7 +2422,7 @@ module.exports = () => ({
           }
           const building = {
             uuid: UUID,
-            id: data[headerMapping.code],
+            code: data[headerMapping.code],
             name: facilityName,
             lat: data[headerMapping.lat],
             long: data[headerMapping.long],
@@ -2277,6 +2431,7 @@ module.exports = () => ({
           };
           recordCount++;
           this.buildBuilding(building, saveBundle);
+          uploadToSql.buildSQL(JSON.parse(JSON.stringify(building)), queries, database)
           if (recordCount >= 250) {
             const tmpBundle = {
               ...saveBundle,
@@ -2299,7 +2454,12 @@ module.exports = () => ({
               let uploadRequestId = `uploadProgress${clientId}`;
               redisClient.set(uploadRequestId, uploadReqPro, 'EX', 1200);
             })
+            await uploadToSql.saveSQL(queries)
+            queries = []
           }
+        }
+        if(queries.length > 0) {
+          uploadToSql.saveSQL(queries)
         }
         if(saveBundle.entry.length > 0) {
           totalRows += saveBundle.entry.length;
@@ -2384,7 +2544,7 @@ module.exports = () => ({
     resource.identifier = [];
     resource.identifier.push({
       system: 'https://digitalhealth.intrahealth.org/source1',
-      value: building.id,
+      value: building.code,
     });
     resource.partOf = {
       display: building.parent,

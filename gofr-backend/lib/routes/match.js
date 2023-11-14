@@ -125,14 +125,12 @@ router.get('/reconcile', (req, res) => {
     });
     redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
 
-    console.time("get children")
     const source2Locations = new Promise((resolve, reject) => {
-      console.time("get src2")
-      mcsd.getLocationChildren({
+      mcsd.getLocationChildrenSql({
         database: partition2,
-        parent: source2LimitOrgId[0],
-      }, (mcsdSource2) => {
-        mcsdSource2All = mcsdSource2;
+        parent: source2LimitOrgId[0]
+      }).then((rows) => {
+        mcsdSource2All = rows.rows;
         let level;
         if (recoLevel === totalSource1Levels) {
           level = totalSource2Levels;
@@ -143,58 +141,34 @@ router.get('/reconcile', (req, res) => {
         if (levelMaps[orgid] && levelMaps[orgid][recoLevel]) {
           level = levelMaps[orgid][recoLevel];
         }
-        console.timeEnd("get src2")
-        console.time("filter src2")
-        mcsd.filterLocations(mcsdSource2, source2LimitOrgId[0], level, mcsdSource2Level => {
-          console.timeEnd("filter src2")
+        mcsd.filterLocationsSQL(rows.rows, source2LimitOrgId[0], level, mcsdSource2Level => {
           resolve(mcsdSource2Level)
         });
-      });
+        resolve()
+      })
     })
-    logger.error(partition1);
     const source1Locations = new Promise((resolve, reject) => {
-      console.time("get src1")
-      mcsd.getLocationChildren({
+      mcsd.getLocationChildrenSql({
         database: partition1,
         parent: source1LimitOrgId[0],
-      }, (mcsdSource1) => {
-        mcsdSource1All = mcsdSource1;
+      }).then((rows) => {
+        mcsdSource1All = rows.rows;
         if (id) {
-          const locations = mcsdSource1.entry.filter(entry => entry.resource.id == id);
-          const mcsdSource1Locations = {};
-          if (locations.length > 0) {
-            mcsdSource1Locations.total = 1;
-            mcsdSource1Locations.entry = [];
-            mcsdSource1Locations.entry = mcsdSource1Locations.entry.concat(locations);
-            mcsdSource1Locations.total = 1;
-          } else {
-            mcsdSource1Locations.total = 0;
-          }
-          console.timeEnd("get src1")
-          console.time("filter src2")
-          return resolve(mcsdSource1Locations);
+          const location = rows.rows.find(row => row.id == id);
+          return resolve([location]);
         }
-        console.timeEnd("get src1")
-        console.time("filter src1")
-        mcsd.filterLocations(mcsdSource1, source1LimitOrgId[0], recoLevel, mcsdSource1Level => {
-          console.timeEnd("filter src1")
+        mcsd.filterLocationsSQL(rows.rows, source1LimitOrgId[0], recoLevel, mcsdSource1Level => {
           resolve(mcsdSource1Level)
         });
       });
     })
     const mappingData = new Promise((resolve, reject) => {
-      logger.error('getting mapping');
-      console.time("mapping")
       mcsd.getLocations(mappingPartition, mcsdMapped => {
-        logger.error('return mapping');
-        console.timeEnd("mapping")
         resolve(mcsdMapped)
       });
     })
 
     Promise.all([source1Locations, source2Locations, mappingData]).then((results) => {
-      logger.error('results');
-      console.timeEnd("get children")
       if (recoLevel == totalSource1Levels) {
         scores.getBuildingsScores(
           results[0],
@@ -210,19 +184,19 @@ router.get('/reconcile', (req, res) => {
           clientId,
           parentConstraint,
           getPotential, (scoreResults, source2Unmatched, totalAllMapped, totalAllFlagged, totalAllIgnored, totalAllNoMatch) => {
-            const source1TotalAllNotMapped = (mcsdSource1All.entry.length - 1) - totalAllMapped;
+            const source1TotalAllNotMapped = (mcsdSource1All.length - 1) - totalAllMapped;
             const responseData = {
               scoreResults,
               source2Unmatched,
               recoLevel,
-              source2TotalRecords: results[1].entry.length,
-              source2TotalAllRecords: mcsdSource2All.entry.length - 1,
+              source2TotalRecords: results[1].length,
+              source2TotalAllRecords: mcsdSource2All.length - 1,
               totalAllMapped,
               totalAllFlagged,
               totalAllNoMatch,
               totalAllIgnored,
               source1TotalAllNotMapped,
-              source1TotalAllRecords: mcsdSource1All.entry.length - 1,
+              source1TotalAllRecords: mcsdSource1All.length - 1,
             };
             scoreResData = JSON.stringify({
               status: 'Done',
@@ -254,19 +228,19 @@ router.get('/reconcile', (req, res) => {
           parentConstraint,
           getPotential,
           (scoreResults, source2Unmatched, totalAllMapped, totalAllFlagged, totalAllIgnored, totalAllNoMatch) => {
-            const source1TotalAllNotMapped = (mcsdSource1All.entry.length - 1) - totalAllMapped;
+            const source1TotalAllNotMapped = (mcsdSource1All.length - 1) - totalAllMapped;
             const responseData = {
               scoreResults,
               source2Unmatched,
               recoLevel,
-              source2TotalRecords: results[1].entry.length,
-              source2TotalAllRecords: mcsdSource2All.entry.length - 1,
+              source2TotalRecords: results[1].length,
+              source2TotalAllRecords: mcsdSource2All.length - 1,
               totalAllMapped,
               totalAllFlagged,
               totalAllNoMatch,
               totalAllIgnored,
               source1TotalAllNotMapped,
-              source1TotalAllRecords: mcsdSource1All.entry.length - 1,
+              source1TotalAllRecords: mcsdSource1All.length - 1,
             };
             scoreResData = JSON.stringify({
               status: 'Done',

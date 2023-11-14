@@ -20,7 +20,9 @@ export const scoresMixin = {
       if (percent !== 100 || (percent === 100 && this.$store.state.scoresProgressData.stage !== 'last')) {
         this.$store.state.scoresProgressData.requestCancelled = true
         this.$store.state.scoresProgressData.cancelTokenSource.cancel('Cancelling request.')
-        this.checkScoreProgress()
+        setTimeout(() => {
+          this.checkScoreProgress()
+        }, 2000);
       } else {
         this.$store.state.scoresProgressData.scoreProgressTitle = 'Please be patient, waiting for server response'
       }
@@ -158,14 +160,18 @@ export const scoresMixin = {
           this.$store.state.scoresProgressData.scoreDialog = false
           this.$store.state.scoresProgressData.scoreProgressTitle = 'Waiting for progress status'
         } else {
-          this.checkScoreProgress()
+          setTimeout(() => {
+            this.checkScoreProgress()
+          }, 2000);
         }
       }).catch(() => {
         if (this.$store.state.scoresProgressData.requestCancelled) {
           this.$store.state.scoresProgressData.requestCancelled = false
         } else {
           clearInterval(this.$store.state.scoresProgressData.progressReqTimer)
-          this.checkScoreProgress()
+          setTimeout(() => {
+            this.checkScoreProgress()
+          }, 2000);
         }
       })
     },
@@ -269,7 +275,9 @@ export const scoresMixin = {
       path += `&source2LimitOrgId=${source2LimitOrgId}&totalSource1Levels=${totalSource1Levels}&totalSource2Levels=${totalSource2Levels}`
       path += `&recoLevel=${recoLevel}&clientId=${clientId}&parentConstraint=${parentConstraint}&getPotential=${getPotential}`
       axios.get('/match/reconcile/?' + path).then(() => {
-        this.checkScoreProgress()
+        setTimeout(() => {
+          this.checkScoreProgress()
+        }, 2000);
       })
       // this.$store.state.scoresProgressData.scoreProgressTimer = setInterval(this.checkScoreProgress, 2000)
     },

@@ -139,20 +139,28 @@ module.exports = {
     return matchedId;
   },
   createIdHierarchy(mcsdSource, parentId) {
-    const sourceEntry = mcsdSource.entry.find(entry => entry.resource.id === parentId);
+    const sourceEntry = mcsdSource.find(entry => entry.id === parentId);
     const idHierarchy = {
       id: parentId,
       name: parentId,
       children: [],
     };
-    if (sourceEntry && sourceEntry.resource.identifier) {
-      for (const identifier of sourceEntry.resource.identifier) {
-        if (identifier.value === parentId) {
+    if(typeof sourceEntry.code === 'string') {
+      sourceEntry.code = JSON.parse(sourceEntry.code)
+    }
+    if(typeof sourceEntry.otherid === 'string') {
+      sourceEntry.otherid = JSON.parse(sourceEntry.otherid)
+    }
+    if (sourceEntry && (sourceEntry.code.length > 0 || sourceEntry.otherid.length > 0)) {
+      let ids = sourceEntry.code
+      ids = ids.concat(sourceEntry.otherid)
+      for (const identifier of ids) {
+        if (identifier === parentId) {
           continue;
         }
         idHierarchy.children.push({
-          id: identifier.value,
-          name: identifier.value,
+          id: identifier,
+          name: identifier,
         });
       }
     }

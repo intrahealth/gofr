@@ -155,6 +155,7 @@ async function startUp() {
     app.use(AuthRouter.passport.initialize());
     app.use(AuthRouter.passport.session());
   }
+  app.use('/gofrapp', express.static(path.join(__dirname, 'apps')));
   app.use(express.static(path.join(config.get("app:site:path"), 'gui')));
 
   app.use(bodyParser.urlencoded({
@@ -180,7 +181,6 @@ async function startUp() {
     }
   }
   // end of mounting site routes
-  app.use('/gofrapp', express.static(path.join(__dirname, 'apps')));
   app.use('/auth', AuthRouter);
   app.use('/users', UsersRouter);
   app.use('/datasource', DataSourcesRouter);
@@ -192,7 +192,6 @@ async function startUp() {
   app.use('/facilitiesRequests', facilitiesRequests);
   app.use('/translator', translatorRouter);
   app.use('/apps', gofrAppsRouter);
-  app.use('/gofrapp', express.static(path.join(__dirname, 'apps')));
 
   process.on('message', (message) => {
     if (message.content === 'clean') {

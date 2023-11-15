@@ -3,8 +3,14 @@ const logger = require('../winston');
 
 module.exports = {
   createTable: (table) => {
-    console.log(`create table if not exists ${table}(id TEXT PRIMARY KEY, code TEXT, otherid TEXT, tag TEXT, name TEXT, latitude double precision, longitude double precision, parent TEXT REFERENCES ${table}(id) )`);
-    return pool.query(`create table if not exists ${table}(id TEXT PRIMARY KEY, code TEXT, otherid TEXT, tag TEXT, name TEXT, latitude double precision, longitude double precision, parent TEXT REFERENCES ${table}(id) )`)
+    return new Promise((resolve, reject) => {
+      pool.query(`create table if not exists ${table}(id TEXT PRIMARY KEY, code TEXT, otherid TEXT, tag TEXT, name TEXT, latitude double precision, longitude double precision, parent TEXT REFERENCES ${table}(id) )`, (err, response) => {
+        if(err) {
+          logger.error(err);
+        }
+        resolve()
+      })
+    })
   },
   dropTable: (table) => {
     return pool.query(`drop table ${table}`)

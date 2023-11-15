@@ -289,14 +289,14 @@
       "The search box let you search locations for a selected level only": "The search box let you search locations for a selected level only",
       "Only": "Only",
       "Source 1 Matched": "Source 1 Matched",
-      "Source 1 No Match": "",
+      "Source 1 No Match": "Source 1 No Match",
       "Source 1 Flagged": "Source 1 Flagged",
       "Source 2 Matched": "Source 2 Matched",
       "Source 2 Flagged": "Source 2 Flagged",
       "Mark Reconciliation As Done": "Mark Reconciliation As Done",
       "Mark Reconciliation As UnDone": "Mark Reconciliation As UnDone",
       "Source 1 Not Mapped": "Source 1 Not Mapped",
-      "Source 1 NO MATCH": "Source 1 IGNORED",
+      "Source 1 IGNORED": "Source 1 IGNORED",
       "Create Account": "Create Account",
       "Clear": "Clear",
       "Back To Login": "Back To Login",
@@ -329,7 +329,8 @@
       "Last Updated Time": "Last Updated Time",
       "Enabled": "Enabled",
       "initApp": "Initializing App",
-      "GOFR Version": "GOFR Version"
+      "GOFR Version": "GOFR Version",
+      "OK": "Ok"
     }
   }
 }

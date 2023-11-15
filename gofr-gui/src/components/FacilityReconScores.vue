@@ -129,7 +129,7 @@
             dark
           >
             <v-toolbar-title>
-              {{ $t(`App.hardcoded-texts.Matching`) }} {{ selectedSource1Name }} {{dialogWidth}}
+              {{ $t(`App.hardcoded-texts.Matching`) }} {{ selectedSource1Name }}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-text-field

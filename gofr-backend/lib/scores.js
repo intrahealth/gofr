@@ -103,7 +103,7 @@ module.exports = function () {
                     .segment('Location')
                     .segment(parent.id)
                     .toString();
-                  const mapped = this.matchStatus(mcsdMapped, parentIdentifier)
+                  const mapped = matchStatus(mcsdMapped, parentIdentifier)
                   if (mapped) {
                     source2MappedParentIds[entry.id].push(mapped.resource.id);
                     source2MappedParentNames[entry.id].push(mapped.resource.name);
@@ -150,7 +150,7 @@ module.exports = function () {
             .segment('Location')
             .segment(source1Id)
             .toString();
-          const match = this.matchStatus(mcsdMapped, source1Identifier)
+          const match = matchStatus(mcsdMapped, source1Identifier)
           if (match) {
             const noMatchCode = config.get('mapping:noMatchCode');
             const ignoreCode = config.get('mapping:ignoreCode');
@@ -307,7 +307,7 @@ module.exports = function () {
                 continue;
               }
               // check if this is already mapped
-              const mapped = this.matchStatus(mcsdMapped, source2Identifier)
+              const mapped = matchStatus(mcsdMapped, source2Identifier)
               if (mapped) {
                 ignore.push(source2Entry.id);
                 continue;
@@ -535,7 +535,6 @@ module.exports = function () {
             logger.error(err);
           }
         }
-        useCachedParents = false
         if (!useCachedParents) {
           logger.info('Populating parents');
           for (let i = 0, len = mcsdSource2.length; i < len; i++) {
@@ -545,7 +544,7 @@ module.exports = function () {
               .segment(entry.id)
               .toString();
             source2LevelMappingStatus[entry.id] = [];
-            const mapped = this.matchStatus(mcsdMapped, source2Identifier)
+            const mapped = matchStatus(mcsdMapped, source2Identifier)
             if (mapped) {
               source2LevelMappingStatus[entry.id] = true;
             } else {
@@ -563,7 +562,7 @@ module.exports = function () {
                     .segment('Location')
                     .segment(parent.id)
                     .toString();
-                  const mapped = this.matchStatus(mcsdMapped, parentIdentifier)
+                  const mapped = matchStatus(mcsdMapped, parentIdentifier)
                   if (mapped) {
                     source2MappedParentIds[entry.id].push(mapped.resource.id);
                     source2MappedParentNames[entry.id].push(mapped.resource.name);
@@ -597,340 +596,288 @@ module.exports = function () {
 
         // clear mcsdSource2All
         mcsdSource2All = {};
-        logger.info('Calculating scores now1');
+        logger.info('Calculating scores now');
         count = 0;
-        for(let source1Entry of mcsdSource1) {
-          // check if this Source1 Orgid is mapped
-          const source1Id = source1Entry.id;
-          source1Entry.code = JSON.parse(source1Entry.code)
-          source1Entry.otherid = JSON.parse(source1Entry.otherid)
-          const source1Identifiers = [...source1Entry.code, ...source1Entry.otherid];
-          let source1Latitude = null;
-          let source1Longitude = null;
-          if (source1Entry.latitude) {
-            source1Latitude = source1Entry.latitude;
-          }
-          if (source1Entry.longitude) {
-            source1Longitude = source1Entry.longitude;
-          }
+        calculateScores()
+        function calculateScores() {
+          if(mcsdSource1.length > 0) {
+            let subarray = mcsdSource1.splice(0, 30)
+            let source2FilteredCache = {}
+            for(let source1Entry of subarray) {
+              logger.error(count + '/' + totalSource1Records);
+              // check if this Source1 Orgid is mapped
+              const source1Id = source1Entry.id;
+              source1Entry.code = JSON.parse(source1Entry.code)
+              source1Entry.otherid = JSON.parse(source1Entry.otherid)
+              const source1Identifiers = [...source1Entry.code, ...source1Entry.otherid];
+              let source1Latitude = null;
+              let source1Longitude = null;
+              if (source1Entry.latitude) {
+                source1Latitude = source1Entry.latitude;
+              }
+              if (source1Entry.longitude) {
+                source1Longitude = source1Entry.longitude;
+              }
 
-          let matchBroken = false;
-          if(source1Entry.tag) {
-            source1Entry.tag = JSON.parse(source1Entry.tag)
-          } else {
-            source1Entry.tag = []
-          }
-          if (source1Entry.tag.length > 0) {
-            const matchBrokenTag = source1Entry.tag.find(tag => tag == matchBrokenCode);
-            if (matchBrokenTag) {
-              matchBroken = true;
-            }
-          }
-          const source1Identifier = URI(fhirAxios.__genUrl(source1DB))
-            .segment('Location')
-            .segment(source1Id)
-            .toString();
-          const match = this.matchStatus(mcsdMapped, source1Identifier)
-          // if this Source1 Org is already mapped
-          let thisRanking = {};
-          if (match) {
-            const noMatchCode = config.get('mapping:noMatchCode');
-            const ignoreCode = config.get('mapping:ignoreCode');
-            const flagCode = config.get('mapping:flagCode');
-            const flagCommentCode = config.get('mapping:flagCommentCode');
-            const matchCommentsCode = config.get('mapping:matchCommentsCode');
-            let entityParent = null;
-            if (source1Entry.parent) {
-              entityParent = source1Entry.parent;
-            }
-            let source1Parents
-            mcsd.getLocationParentsFromData(entityParent, mcsdSource1All, 'names', (prnts) => {
-              source1Parents = prnts
-            })
-            const source1BuildingId = source1Entry.id;
-            const source1IdHierarchy = mixin.createIdHierarchy(mcsdSource1, source1BuildingId);
-            thisRanking.source1 = {
-              name: source1Entry.name,
-              parents: source1Parents.slice(0, source1Parents.length - 1),
-              lat: source1Latitude,
-              long: source1Longitude,
-              id: source1BuildingId,
-              source1IdHierarchy,
-            };
-            thisRanking.potentialMatches = {};
-            thisRanking.exactMatch = {};
-            let noMatch = null;
-            let ignorered = null;
-            let flagged = null;
-            let matchCommentsTag = {};
-            if (match.resource.meta.hasOwnProperty('tag')) {
-              noMatch = match.resource.meta.tag.find(tag => tag.code == noMatchCode);
-              ignorered = match.resource.meta.tag.find(tag => tag.code == ignoreCode);
-              flagged = match.resource.meta.tag.find(tag => tag.code == flagCode);
-              matchCommentsTag = match.resource.meta.tag.find(tag => tag.code == matchCommentsCode);
-            }
-            if (flagged) {
-              totalAllFlagged += 1;
-              thisRanking.source1.tag = 'flagged';
-              const flagComment = match.resource.meta.tag.find(tag => tag.code == flagCommentCode);
-              if (flagComment) {
-                thisRanking.source1.flagComment = flagComment.display;
-              }
-            }
-            // in case this is marked as no match then process next Source1
-            if (noMatch || ignorered) {
-              if (noMatch) {
-                totalAllNoMatch += 1;
-                thisRanking.source1.tag = 'noMatch';
-              }
-              if (ignorered) {
-                totalAllIgnored += 1;
-                thisRanking.source1.tag = 'ignore';
-              }
-              scoreResults.push(thisRanking);
-              count += 1;
-              const percent = parseFloat((count * 100 / totalSource1Records).toFixed(1));
-              const scoreResData = JSON.stringify({
-                status: '3/3 - Running Automatching',
-                error: null,
-                percent,
-                stage: 'last',
-              });
-              redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
-              updateDataSavingPercent();
-              continue
-            }
-
-            const matchedSource2Id = mixin.getIdFromIdentifiers(match.resource.identifier, 'https://digitalhealth.intrahealth.org/source2');
-            const matchInSource2 = mcsdSource2.find(entry => entry.id == matchedSource2Id);
-            if (matchInSource2) {
-              const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, matchedSource2Id);
-              source2MatchedIDs.push(matchedSource2Id);
-              const matchComments = [];
-              if (matchCommentsTag && matchCommentsTag.hasOwnProperty('display')) {
-                matchComments.push(matchCommentsTag.display);
-              }
-              let mappedParentName = ""
-              if(source2MappedParentNames[matchedSource2Id] && source2MappedParentNames[matchedSource2Id].length > 0) {
-                mappedParentName = source2MappedParentNames[matchedSource2Id][0]
-              }
-              thisRanking.exactMatch = {
-                name: matchInSource2.name,
-                parents: source2ParentNames[matchedSource2Id],
-                mappedParentName,
-                id: matchedSource2Id,
-                source2IdHierarchy,
-                matchComments,
-              };
-            }
-            scoreResults.push(thisRanking);
-            count += 1;
-            const percent = parseFloat((count * 100 / totalSource1Records).toFixed(1));
-            const scoreResData = JSON.stringify({
-              status: '3/3 - Running Automatching',
-              error: null,
-              percent,
-              stage: 'last',
-            });
-            redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
-            updateDataSavingPercent();
-            continue
-          } else { // if not mapped
-            const source1Name = source1Entry.name;
-            const source1ParentNames = [];
-            const source1ParentIds = [];
-            let source1Parents;
-            if (source1Entry.parent) {
-              const entityParent = source1Entry.parent;
-              mcsd.getLocationParentsFromData(entityParent, mcsdSource1All, 'all', (parents) => {
-                source1Parents = parents;
-                for (const parent of parents) {
-                  source1ParentNames.push(parent.text);
-                  source1ParentIds.push(parent.id);
-                }
-              });
-            }
-            thisRanking = {};
-            const source1BuildingId = source1Entry.id;
-            let parents;
-            if (source1Parents[source1Parents.length - 1].id == topOrgId1) {
-              parents = source1ParentNames.slice(0, source1Parents.length - 1);
-            } else {
-              parents = source1ParentNames;
-            }
-            const source1IdHierarchy = mixin.createIdHierarchy(mcsdSource1, source1BuildingId);
-            thisRanking.source1 = {
-              name: source1Name,
-              parents,
-              lat: source1Latitude,
-              long: source1Longitude,
-              id: source1BuildingId,
-              source1IdHierarchy,
-            };
-            thisRanking.potentialMatches = {};
-            thisRanking.exactMatch = {};
-            let source2Filtered;
-            if (parentConstraint.enabled) {
-              source2Filtered = mcsdSource2.filter(entry => source2MappedParentIds[entry.id].includes(mixin.getMappingId(source1ParentIds[0])));
-            } else {
-              source2Filtered = mcsdSource2;
-            }
-            let noNeedToSave = true;
-            for(let source2Entry of source2Filtered) {
-              if (Object.keys(thisRanking.exactMatch).length > 0) {
-                continue
-              }
-              const matchComments = [];
-              const { id } = source2Entry;
-              if(typeof source2Entry.code === 'string') {
-                source2Entry.code = JSON.parse(source2Entry.code)
-              }
-              if(typeof source2Entry.otherid === 'string') {
-                source2Entry.otherid = JSON.parse(source2Entry.otherid)
-              }
-              const source2Identifiers = [...source2Entry.code, ...source2Entry.otherid];
-              // if this source2 is already mapped then skip it
-              const ignoreThis = ignore.find(toIgnore => toIgnore == id);
-              if (ignoreThis) {
-                continue
-              }
-              // if this is already mapped then ignore
-              if (source2LevelMappingStatus[id]) {
-                continue
-              }
-              let parentsDiffer = false;
-              if (!source2MappedParentIds[source2Entry.id].includes(mixin.getMappingId(source1ParentIds[0])) && recoLevel != 2) {
-                parentsDiffer = true;
-                matchComments.push('Parents differ');
-              }
-              const source2Name = source2Entry.name;
-              let source2Latitude = null;
-              let source2Longitude = null;
-              if (source2Entry.latitude) {
-                source2Latitude = source2Entry.latitude;
-              }
-              if (source2Entry.longitude) {
-                source2Longitude = source2Entry.longitude;
-              }
-              let dist = '';
-              if (source2Latitude && source2Longitude) {
-                dist = geodist({
-                  source2Latitude,
-                  source2Longitude,
-                }, {
-                  source1Latitude,
-                  source1Longitude,
-                }, {
-                  exact: false,
-                  unit: 'miles',
-                });
-                if (dist !== 0) {
-                  matchComments.push('Coordinates differ');
-                }
+              let matchBroken = false;
+              if(source1Entry.tag) {
+                source1Entry.tag = JSON.parse(source1Entry.tag)
               } else {
-                matchComments.push('Coordinates missing');
+                source1Entry.tag = []
               }
-              // check if IDS are the same and mark as exact match
-              const matchingIdent = source2Identifiers.find(source2Ident => source1Identifiers.find(source1Ident => source2Ident == source1Ident));
-              if (matchingIdent && !matchBroken) {
-                const lev = levenshtein.get(source2Name.toLowerCase(), source1Name.toLowerCase());
-                if (lev != 0) {
-                  matchComments.push('Names differ');
+              if (source1Entry.tag.length > 0) {
+                const matchBrokenTag = source1Entry.tag.find(tag => tag == matchBrokenCode);
+                if (matchBrokenTag) {
+                  matchBroken = true;
                 }
-                ignore.push(source2Entry.id);
-                const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.id);
-                thisRanking.exactMatch = {
-                  name: source2Name,
-                  parents: source2ParentNames[source2Entry.id].slice(0, source2ParentNames[source2Entry.id].length - 1),
-                  mappedParentName: source2MappedParentNames[source2Entry.id][0],
-                  lat: source2Latitude,
-                  long: source2Longitude,
-                  geoDistance: dist,
-                  matchComments,
-                  id: source2Entry.id,
-                  source2IdHierarchy,
+              }
+              const source1Identifier = URI(fhirAxios.__genUrl(source1DB))
+                .segment('Location')
+                .segment(source1Id)
+                .toString();
+              const match = matchStatus(mcsdMapped, source1Identifier)
+              // if this Source1 Org is already mapped
+              let thisRanking = {};
+              if (match) {
+                const noMatchCode = config.get('mapping:noMatchCode');
+                const ignoreCode = config.get('mapping:ignoreCode');
+                const flagCode = config.get('mapping:flagCode');
+                const flagCommentCode = config.get('mapping:flagCommentCode');
+                const matchCommentsCode = config.get('mapping:matchCommentsCode');
+                let entityParent = null;
+                if (source1Entry.parent) {
+                  entityParent = source1Entry.parent;
+                }
+                let source1Parents
+                mcsd.getLocationParentsFromData(entityParent, mcsdSource1All, 'names', (prnts) => {
+                  source1Parents = prnts
+                })
+                const source1BuildingId = source1Entry.id;
+                // const source1IdHierarchy = mixin.createIdHierarchy(mcsdSource1, source1BuildingId);
+                thisRanking.source1 = {
+                  name: source1Entry.name,
+                  parents: source1Parents.slice(0, source1Parents.length - 1),
+                  lat: source1Latitude,
+                  long: source1Longitude,
+                  id: source1BuildingId,
+                  // source1IdHierarchy,
                 };
                 thisRanking.potentialMatches = {};
-
-                noNeedToSave = false;
-                matchesToSave.push({
-                  source1Id,
-                  source2Id: source2Entry.id,
-                  source1DB,
-                  source2DB,
-                  mappingDB,
-                  recoLevel,
-                  totalLevels,
-                });
-                totalAllMapped += 1;
-                source2MatchedIDs.push(source2Entry.id);
-                continue
-              }
-              if (matchingIdent && matchBroken && getPotential) {
-                const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.id);
-                if (!thisRanking.potentialMatches.hasOwnProperty('0')) {
-                  thisRanking.potentialMatches['0'] = [];
+                thisRanking.exactMatch = {};
+                let noMatch = null;
+                let ignorered = null;
+                let flagged = null;
+                let matchCommentsTag = {};
+                if (match.resource.meta.hasOwnProperty('tag')) {
+                  noMatch = match.resource.meta.tag.find(tag => tag.code == noMatchCode);
+                  ignorered = match.resource.meta.tag.find(tag => tag.code == ignoreCode);
+                  flagged = match.resource.meta.tag.find(tag => tag.code == flagCode);
+                  matchCommentsTag = match.resource.meta.tag.find(tag => tag.code == matchCommentsCode);
                 }
-                thisRanking.potentialMatches['0'].push({
-                  name: source2Name,
-                  parents: source2ParentNames[source2Entry.id].slice(0, source2ParentNames[source2Entry.id].length - 1),
-                  mappedParentName: source2MappedParentNames[source2Entry.id][0],
-                  lat: source2Latitude,
-                  long: source2Longitude,
-                  geoDistance: dist,
-                  id: source2Entry.id,
-                  source2IdHierarchy,
+                if (flagged) {
+                  totalAllFlagged += 1;
+                  thisRanking.source1.tag = 'flagged';
+                  const flagComment = match.resource.meta.tag.find(tag => tag.code == flagCommentCode);
+                  if (flagComment) {
+                    thisRanking.source1.flagComment = flagComment.display;
+                  }
+                }
+                // in case this is marked as no match then process next Source1
+                if (noMatch || ignorered) {
+                  if (noMatch) {
+                    totalAllNoMatch += 1;
+                    thisRanking.source1.tag = 'noMatch';
+                  }
+                  if (ignorered) {
+                    totalAllIgnored += 1;
+                    thisRanking.source1.tag = 'ignore';
+                  }
+                  scoreResults.push(thisRanking);
+                  count += 1;
+                  const percent = parseFloat((count * 100 / totalSource1Records).toFixed(1));
+                  const scoreResData = JSON.stringify({
+                    status: '3/3 - Running Automatching ' + count.toLocaleString() +'/' + totalSource1Records.toLocaleString(),
+                    error: null,
+                    percent,
+                    stage: 'last',
+                  });
+                  redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
+                  updateDataSavingPercent();
+                  continue
+                }
+
+                const matchedSource2Id = mixin.getIdFromIdentifiers(match.resource.identifier, 'https://digitalhealth.intrahealth.org/source2');
+                const matchInSource2 = mcsdSource2.find(entry => entry.id == matchedSource2Id);
+                if (matchInSource2) {
+                  const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, matchedSource2Id);
+                  source2MatchedIDs.push(matchedSource2Id);
+                  const matchComments = [];
+                  if (matchCommentsTag && matchCommentsTag.hasOwnProperty('display')) {
+                    matchComments.push(matchCommentsTag.display);
+                  }
+                  let mappedParentName = ""
+                  if(source2MappedParentNames[matchedSource2Id] && source2MappedParentNames[matchedSource2Id].length > 0) {
+                    mappedParentName = source2MappedParentNames[matchedSource2Id][0]
+                  }
+                  thisRanking.exactMatch = {
+                    name: matchInSource2.name,
+                    parents: source2ParentNames[matchedSource2Id],
+                    mappedParentName,
+                    id: matchedSource2Id,
+                    source2IdHierarchy,
+                    matchComments,
+                  };
+                }
+                scoreResults.push(thisRanking);
+                count += 1;
+                const percent = parseFloat((count * 100 / totalSource1Records).toFixed(1));
+                const scoreResData = JSON.stringify({
+                  status: '3/3 - Running Automatching ' + count.toLocaleString() +'/' + totalSource1Records.toLocaleString(),
+                  error: null,
+                  percent,
+                  stage: 'last',
                 });
+                redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
+                updateDataSavingPercent();
                 continue
-              }
-
-              matchComments.push('ID differ');
-
-              const lev = levenshtein.get(source2Name.toLowerCase(), source1Name.toLowerCase());
-
-              if (lev == 0 && !matchBroken
-                && (parentsDiffer == false || (parentConstraint.enabled == false && parentConstraint.nameAutoMatch == true) || recoLevel == 2)
-              ) {
-                const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.id);
-                ignore.push(source2Entry.id);
-                thisRanking.exactMatch = {
-                  name: source2Name,
-                  parents: source2ParentNames[source2Entry.id].slice(0, source2ParentNames[source2Entry.id].length - 1),
-                  mappedParentName: source2MappedParentNames[source2Entry.id][0],
-                  lat: source2Latitude,
-                  long: source2Longitude,
-                  geoDistance: dist,
-                  matchComments,
-                  id: source2Entry.id,
-                  source2IdHierarchy,
+              } else { // if not mapped
+                const source1Name = source1Entry.name;
+                const source1ParentNames = [];
+                const source1ParentIds = [];
+                let source1Parents = [];
+                if (source1Entry.parent) {
+                  const entityParent = source1Entry.parent;
+                  mcsd.getLocationParentsFromData(entityParent, mcsdSource1All, 'all', (parents) => {
+                    source1Parents = parents;
+                    for (const parent of parents) {
+                      source1ParentNames.push(parent.text);
+                      source1ParentIds.push(parent.id);
+                    }
+                  });
+                }
+                thisRanking = {};
+                const source1BuildingId = source1Entry.id;
+                let parents;
+                if (source1Parents[source1Parents.length - 1].id == topOrgId1) {
+                  parents = source1ParentNames.slice(0, source1Parents.length - 1);
+                } else {
+                  parents = source1ParentNames;
+                }
+                // const source1IdHierarchy = mixin.createIdHierarchy(mcsdSource1, source1BuildingId);
+                thisRanking.source1 = {
+                  name: source1Name,
+                  parents,
+                  lat: source1Latitude,
+                  long: source1Longitude,
+                  id: source1BuildingId,
+                  // source1IdHierarchy,
                 };
                 thisRanking.potentialMatches = {};
-                noNeedToSave = false;
-                matchesToSave.push({
-                  source1Id,
-                  source2Id: source2Entry.id,
-                  source1DB,
-                  source2DB,
-                  mappingDB,
-                  recoLevel,
-                  totalLevels,
-                });
-                totalAllMapped += 1;
-                source2MatchedIDs.push(source2Entry.id);
-                continue
-              }
+                thisRanking.exactMatch = {};
+                let source2Filtered;
+                if (parentConstraint.enabled) {
+                  if(!source2FilteredCache[mixin.getMappingId(source1ParentIds[0])]) {
+                    source2FilteredCache[mixin.getMappingId(source1ParentIds[0])] = source2Filtered = mcsdSource2.filter(entry => source2MappedParentIds[entry.id].includes(mixin.getMappingId(source1ParentIds[0])));
+                    source2Filtered = source2FilteredCache[mixin.getMappingId(source1ParentIds[0])]
+                  } else {
+                    source2Filtered = source2FilteredCache[mixin.getMappingId(source1ParentIds[0])]
+                  }
+                } else {
+                  source2Filtered = mcsdSource2;
+                }
+                let noNeedToSave = true;
+                for(let source2Entry of source2Filtered) {
+                  if (Object.keys(thisRanking.exactMatch).length > 0) {
+                    continue
+                  }
+                  const matchComments = [];
+                  const { id } = source2Entry;
+                  if(typeof source2Entry.code === 'string') {
+                    source2Entry.code = JSON.parse(source2Entry.code)
+                  }
+                  if(typeof source2Entry.otherid === 'string') {
+                    source2Entry.otherid = JSON.parse(source2Entry.otherid)
+                  }
+                  const source2Identifiers = [...source2Entry.code, ...source2Entry.otherid];
+                  // if this source2 is already mapped then skip it
+                  const ignoreThis = ignore.find(toIgnore => toIgnore == id);
+                  if (ignoreThis) {
+                    continue
+                  }
+                  // if this is already mapped then ignore
+                  if (source2LevelMappingStatus[id]) {
+                    continue
+                  }
+                  let parentsDiffer = false;
+                  if (!source2MappedParentIds[source2Entry.id].includes(mixin.getMappingId(source1ParentIds[0])) && recoLevel != 2) {
+                    parentsDiffer = true;
+                    matchComments.push('Parents differ');
+                  }
+                  const source2Name = source2Entry.name;
+                  let source2Latitude = null;
+                  let source2Longitude = null;
+                  if (source2Entry.latitude) {
+                    source2Latitude = source2Entry.latitude;
+                  }
+                  if (source2Entry.longitude) {
+                    source2Longitude = source2Entry.longitude;
+                  }
+                  let dist = '';
+                  if (source2Latitude && source2Longitude) {
+                    dist = geodist({
+                      source2Latitude,
+                      source2Longitude,
+                    }, {
+                      source1Latitude,
+                      source1Longitude,
+                    }, {
+                      exact: false,
+                      unit: 'miles',
+                    });
+                    if (dist !== 0) {
+                      matchComments.push('Coordinates differ');
+                    }
+                  } else {
+                    matchComments.push('Coordinates missing');
+                  }
+                  // check if IDS are the same and mark as exact match
+                  const matchingIdent = source2Identifiers.find(source2Ident => source1Identifiers.find(source1Ident => source2Ident == source1Ident));
+                  if (matchingIdent && !matchBroken) {
+                    const lev = levenshtein.get(source2Name.toLowerCase(), source1Name.toLowerCase());
+                    if (lev != 0) {
+                      matchComments.push('Names differ');
+                    }
+                    ignore.push(source2Entry.id);
+                    // const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.id);
+                    thisRanking.exactMatch = {
+                      name: source2Name,
+                      parents: source2ParentNames[source2Entry.id].slice(0, source2ParentNames[source2Entry.id].length - 1),
+                      mappedParentName: source2MappedParentNames[source2Entry.id][0],
+                      lat: source2Latitude,
+                      long: source2Longitude,
+                      geoDistance: dist,
+                      matchComments,
+                      id: source2Entry.id,
+                      // source2IdHierarchy,
+                    };
+                    thisRanking.potentialMatches = {};
 
-              if (getPotential) {
-                // use dictionary
-                const dictionary = config.get('dictionary');
-                let stopHere = false
-                for (const abbr in dictionary) {
-                  let replacedSource1 = source1Name.replace(abbr, '');
-                  replacedSource1 = replacedSource1.replace(dictionary[abbr], '').trim();
-                  let replacedSource2 = source2Name.replace(abbr, '');
-                  replacedSource2 = replacedSource2.replace(dictionary[abbr], '').trim();
-                  if (replacedSource1.toLowerCase() === replacedSource2.toLowerCase()) {
-                    const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.id);
+                    noNeedToSave = false;
+                    matchesToSave.push({
+                      source1Id,
+                      source2Id: source2Entry.id,
+                      source1DB,
+                      source2DB,
+                      mappingDB,
+                      recoLevel,
+                      totalLevels,
+                    });
+                    totalAllMapped += 1;
+                    source2MatchedIDs.push(source2Entry.id);
+                    break
+                  }
+                  if (matchingIdent && matchBroken && getPotential) {
+                    // const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.id);
                     if (!thisRanking.potentialMatches.hasOwnProperty('0')) {
                       thisRanking.potentialMatches['0'] = [];
                     }
@@ -942,57 +889,87 @@ module.exports = function () {
                       long: source2Longitude,
                       geoDistance: dist,
                       id: source2Entry.id,
-                      source2IdHierarchy,
+                      // source2IdHierarchy,
                     });
-                    stopHere = true
+                    continue
+                  } else if(matchingIdent && matchBroken) {
+                    break
                   }
-                }
-                if(stopHere) {
-                  continue
-                }
-              }
 
-              if (lev == 0 && getPotential) {
-                const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.id);
-                if (!thisRanking.potentialMatches.hasOwnProperty('0')) {
-                  thisRanking.potentialMatches['0'] = [];
-                }
-                thisRanking.potentialMatches['0'].push({
-                  name: source2Name,
-                  parents: source2ParentNames[source2Entry.id].slice(0, source2ParentNames[source2Entry.id].length - 1),
-                  mappedParentName: source2MappedParentNames[source2Entry.id][0],
-                  lat: source2Latitude,
-                  long: source2Longitude,
-                  geoDistance: dist,
-                  id: source2Entry.id,
-                  source2IdHierarchy,
-                });
-                continue
-              }
-              if (Object.keys(thisRanking.exactMatch).length == 0 && getPotential) {
-                if (thisRanking.potentialMatches.hasOwnProperty(lev) || Object.keys(thisRanking.potentialMatches).length < maxSuggestions) {
-                  const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.id);
-                  if (!thisRanking.potentialMatches.hasOwnProperty(lev)) {
-                    thisRanking.potentialMatches[lev] = [];
+                  matchComments.push('ID differ');
+
+                  const lev = levenshtein.get(source2Name.toLowerCase(), source1Name.toLowerCase());
+
+                  if (lev == 0 && !matchBroken
+                    && (parentsDiffer == false || (parentConstraint.enabled == false && parentConstraint.nameAutoMatch == true) || recoLevel == 2)
+                  ) {
+                    // const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.id);
+                    ignore.push(source2Entry.id);
+                    thisRanking.exactMatch = {
+                      name: source2Name,
+                      parents: source2ParentNames[source2Entry.id].slice(0, source2ParentNames[source2Entry.id].length - 1),
+                      mappedParentName: source2MappedParentNames[source2Entry.id][0],
+                      lat: source2Latitude,
+                      long: source2Longitude,
+                      geoDistance: dist,
+                      matchComments,
+                      id: source2Entry.id,
+                      // source2IdHierarchy,
+                    };
+                    thisRanking.potentialMatches = {};
+                    noNeedToSave = false;
+                    matchesToSave.push({
+                      source1Id,
+                      source2Id: source2Entry.id,
+                      source1DB,
+                      source2DB,
+                      mappingDB,
+                      recoLevel,
+                      totalLevels,
+                    });
+                    totalAllMapped += 1;
+                    source2MatchedIDs.push(source2Entry.id);
+                    continue
                   }
-                  thisRanking.potentialMatches[lev].push({
-                    name: source2Name,
-                    parents: source2ParentNames[source2Entry.id].slice(0, source2ParentNames[source2Entry.id].length - 1),
-                    mappedParentName: source2MappedParentNames[source2Entry.id][0],
-                    lat: source2Latitude,
-                    long: source2Longitude,
-                    geoDistance: dist,
-                    id: source2Entry.id,
-                    source2IdHierarchy,
-                  });
-                } else {
-                  const existingLev = Object.keys(thisRanking.potentialMatches);
-                  const max = lodash.max(existingLev);
-                  if (lev < max) {
-                    const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.id);
-                    delete thisRanking.potentialMatches[max];
-                    thisRanking.potentialMatches[lev] = [];
-                    thisRanking.potentialMatches[lev].push({
+
+                  if (getPotential) {
+                    // use dictionary
+                    const dictionary = config.get('dictionary');
+                    let stopHere = false
+                    for (const abbr in dictionary) {
+                      let replacedSource1 = source1Name.replace(abbr, '');
+                      replacedSource1 = replacedSource1.replace(dictionary[abbr], '').trim();
+                      let replacedSource2 = source2Name.replace(abbr, '');
+                      replacedSource2 = replacedSource2.replace(dictionary[abbr], '').trim();
+                      if (replacedSource1.toLowerCase() === replacedSource2.toLowerCase()) {
+                        // const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.id);
+                        if (!thisRanking.potentialMatches.hasOwnProperty('0')) {
+                          thisRanking.potentialMatches['0'] = [];
+                        }
+                        thisRanking.potentialMatches['0'].push({
+                          name: source2Name,
+                          parents: source2ParentNames[source2Entry.id].slice(0, source2ParentNames[source2Entry.id].length - 1),
+                          mappedParentName: source2MappedParentNames[source2Entry.id][0],
+                          lat: source2Latitude,
+                          long: source2Longitude,
+                          geoDistance: dist,
+                          id: source2Entry.id,
+                          // source2IdHierarchy,
+                        });
+                        stopHere = true
+                      }
+                    }
+                    if(stopHere) {
+                      continue
+                    }
+                  }
+
+                  if (lev == 0 && getPotential) {
+                    // const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.id);
+                    if (!thisRanking.potentialMatches.hasOwnProperty('0')) {
+                      thisRanking.potentialMatches['0'] = [];
+                    }
+                    thisRanking.potentialMatches['0'].push({
                       name: source2Name,
                       parents: source2ParentNames[source2Entry.id].slice(0, source2ParentNames[source2Entry.id].length - 1),
                       mappedParentName: source2MappedParentNames[source2Entry.id][0],
@@ -1000,60 +977,102 @@ module.exports = function () {
                       long: source2Longitude,
                       geoDistance: dist,
                       id: source2Entry.id,
-                      source2IdHierarchy,
+                      // source2IdHierarchy,
                     });
+                    continue
                   }
+                  if (Object.keys(thisRanking.exactMatch).length == 0 && getPotential) {
+                    if (thisRanking.potentialMatches.hasOwnProperty(lev) || Object.keys(thisRanking.potentialMatches).length < maxSuggestions) {
+                      // const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.id);
+                      if (!thisRanking.potentialMatches.hasOwnProperty(lev)) {
+                        thisRanking.potentialMatches[lev] = [];
+                      }
+                      thisRanking.potentialMatches[lev].push({
+                        name: source2Name,
+                        parents: source2ParentNames[source2Entry.id].slice(0, source2ParentNames[source2Entry.id].length - 1),
+                        mappedParentName: source2MappedParentNames[source2Entry.id][0],
+                        lat: source2Latitude,
+                        long: source2Longitude,
+                        geoDistance: dist,
+                        id: source2Entry.id,
+                        // source2IdHierarchy,
+                      });
+                    } else {
+                      const existingLev = Object.keys(thisRanking.potentialMatches);
+                      const max = lodash.max(existingLev);
+                      if (lev < max) {
+                        // const source2IdHierarchy = mixin.createIdHierarchy(mcsdSource2, source2Entry.id);
+                        delete thisRanking.potentialMatches[max];
+                        thisRanking.potentialMatches[lev] = [];
+                        thisRanking.potentialMatches[lev].push({
+                          name: source2Name,
+                          parents: source2ParentNames[source2Entry.id].slice(0, source2ParentNames[source2Entry.id].length - 1),
+                          mappedParentName: source2MappedParentNames[source2Entry.id][0],
+                          lat: source2Latitude,
+                          long: source2Longitude,
+                          geoDistance: dist,
+                          id: source2Entry.id,
+                          // source2IdHierarchy,
+                        });
+                      }
+                    }
+                  }
+                }
+                scoreResults.push(thisRanking);
+                count += 1;
+                const percent = parseFloat((count * 100 / totalSource1Records).toFixed(1));
+                const scoreResData = JSON.stringify({
+                  status: '3/3 - Running Automatching ' + count.toLocaleString() +'/' + totalSource1Records.toLocaleString(),
+                  error: null,
+                  percent,
+                  stage: 'last',
+                });
+                redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
+                if (noNeedToSave) {
+                  updateDataSavingPercent();
                 }
               }
             }
-            scoreResults.push(thisRanking);
-            count += 1;
-            const percent = parseFloat((count * 100 / totalSource1Records).toFixed(1));
-            const scoreResData = JSON.stringify({
-              status: '3/3 - Running Automatching',
-              error: null,
-              percent,
-              stage: 'last',
-            });
-            redisClient.set(scoreRequestId, scoreResData, 'EX', 1200);
-            if (noNeedToSave) {
-              updateDataSavingPercent();
-            }
-          }
-        }
-        if (getPotential) {
-          mcsdSource2All = {};
-          callback(scoreResults, source2Unmatched, totalAllMapped, totalAllFlagged, totalAllIgnored, totalAllNoMatch);
-          async.eachSeries(matchesToSave, (match, nxtMatch) => {
-            mcsd.saveMatch(match.source1Id, match.source2Id, match.source1DB, match.source2DB, match.mappingDB, match.recoLevel, match.totalLevels, 'match', true, false, () => {
-              updateDataSavingPercent();
-              return nxtMatch();
-            });
-          }, () => {
-            updateDataSavingPercent('done');
-          });
-        } else {
-          for(let entry of mcsdSource2) {
-            if (!source2MatchedIDs.includes(entry.id)) {
-              source2Unmatched.push({
-                id: entry.id,
-                name: entry.name,
-                parents: source2ParentNames[entry.id].slice(0, source2ParentNames[entry.id].length - 1),
-                mappedParentName: source2MappedParentNames[entry.id][0],
+            setTimeout(() => {
+              calculateScores()
+            }, 0);
+          } else {
+            if (getPotential) {
+              mcsdSource2All = {};
+              callback(scoreResults, source2Unmatched, totalAllMapped, totalAllFlagged, totalAllIgnored, totalAllNoMatch);
+              async.eachSeries(matchesToSave, (match, nxtMatch) => {
+                mcsd.saveMatch(match.source1Id, match.source2Id, match.source1DB, match.source2DB, match.mappingDB, match.recoLevel, match.totalLevels, 'match', true, false, () => {
+                  updateDataSavingPercent();
+                  return nxtMatch();
+                });
+              }, () => {
+                updateDataSavingPercent('done');
+              });
+            } else {
+              for(let entry of mcsdSource2) {
+                if (!source2MatchedIDs.includes(entry.id)) {
+                  source2Unmatched.push({
+                    id: entry.id,
+                    name: entry.name,
+                    parents: source2ParentNames[entry.id].slice(0, source2ParentNames[entry.id].length - 1),
+                    mappedParentName: source2MappedParentNames[entry.id][0],
+                  });
+                }
+              }
+              mcsdSource2All = {};
+              callback(scoreResults, source2Unmatched, totalAllMapped, totalAllFlagged, totalAllIgnored, totalAllNoMatch);
+              async.eachSeries(matchesToSave, (match, nxtMatch) => {
+                mcsd.saveMatch(match.source1Id, match.source2Id, match.source1DB, match.source2DB, match.mappingDB, match.recoLevel, match.totalLevels, 'match', true, false, () => {
+                  updateDataSavingPercent();
+                  return nxtMatch();
+                });
+              }, () => {
+                updateDataSavingPercent('done');
               });
             }
           }
-          mcsdSource2All = {};
-          callback(scoreResults, source2Unmatched, totalAllMapped, totalAllFlagged, totalAllIgnored, totalAllNoMatch);
-          async.eachSeries(matchesToSave, (match, nxtMatch) => {
-            mcsd.saveMatch(match.source1Id, match.source2Id, match.source1DB, match.source2DB, match.mappingDB, match.recoLevel, match.totalLevels, 'match', true, false, () => {
-              updateDataSavingPercent();
-              return nxtMatch();
-            });
-          }, () => {
-            updateDataSavingPercent('done');
-          });
         }
+        
       });
 
       function updateDataSavingPercent(status) {
@@ -1073,16 +1092,6 @@ module.exports = function () {
         });
         redisClient.set(scoreSavingStatId, scoreSavingData, 'EX', 1200);
       }
-    },
-    matchStatus(mcsdMapped, id) {
-      if (!mcsdMapped || !mcsdMapped.entry || mcsdMapped.entry.length === 0) {
-        return;
-      }
-      const status = mcsdMapped.entry.find(
-        entry => entry.resource.id === id
-        || (entry.resource.identifier && entry.resource.identifier.find(identifier => identifier.value === id)),
-      );
-      return status;
     },
     getUnmatched(mcsdAll, mcsdFiltered, mappingDB, getmCSD, source, parentsFields, callback) {
       const unmatched = [];
@@ -1242,7 +1251,7 @@ module.exports = function () {
           source1UploadedId = ident.value;
         }
         const source1Id = entry.resource.id;
-        const mapped = this.matchStatus(mappedLocations, source1Id)
+        const mapped = matchStatus(mappedLocations, source1Id)
         if (mapped) {
           const source2Entry = source2Locations.entry.find((source2Entry) => {
             const matchedSource2Id = mixin.getIdFromIdentifiers(mapped.resource.identifier, 'https://digitalhealth.intrahealth.org/source2');
@@ -1321,3 +1330,14 @@ module.exports = function () {
 
   };
 };
+
+function matchStatus(mcsdMapped, id) {
+  if (!mcsdMapped || !mcsdMapped.entry || mcsdMapped.entry.length === 0) {
+    return;
+  }
+  const status = mcsdMapped.entry.find(
+    entry => entry.resource.id === id
+    || (entry.resource.identifier && entry.resource.identifier.find(identifier => identifier.value === id)),
+  );
+  return status;
+}

@@ -278,6 +278,11 @@ export const scoresMixin = {
         setTimeout(() => {
           this.checkScoreProgress()
         }, 2000);
+      }).catch((err) => {
+        console.error(err);
+        setTimeout(() => {
+          this.checkScoreProgress()
+        }, 2000);
       })
       // this.$store.state.scoresProgressData.scoreProgressTimer = setInterval(this.checkScoreProgress, 2000)
     },

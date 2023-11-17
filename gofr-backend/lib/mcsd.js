@@ -430,6 +430,9 @@ module.exports = () => ({
     );
   },
   getLocationChildrenSql({database, parent}) {
+    if(database == 'Geoalignsqle9b41c35-7c85-46df-aeea-a4e8dbf0364e') {
+      database = 'geoalign'
+    }
     return new Promise((resolve, reject) => {
       if (!database) {
         database = config.get('mCSD:registryDB');
@@ -1671,7 +1674,7 @@ module.exports = () => ({
       json: mCSD,
     };
     request.post(options, (err, res, body) => {
-      if (res.statusCode === 404) {
+      if (res?.statusCode === 404) {
         logger.error(body);
         logger.error('Looks like the mapping DB does not exist, cant save this location');
         return callback('Failed to save', null);

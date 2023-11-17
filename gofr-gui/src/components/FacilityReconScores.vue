@@ -1388,7 +1388,17 @@ export default {
           }
         })
         .catch(error => {
-          console.log(error)
+          if(!error.response) {
+            console.error(error);
+            this.getBuildingPotentialMatches(id)
+          } else {
+            this.flagComment = ''
+            this.$store.state.dynamicProgress = false
+            this.alert = true
+            this.alertTitle = 'Error'
+            this.alertText = error.response.data.error
+            this.dialog = false
+          }
         })
     },
     getJurisdictionPotentialMatches (id) {
@@ -1576,14 +1586,19 @@ export default {
           this.dialog = false
         })
         .catch(err => {
-          this.flagComment = ''
-          this.$store.state.dynamicProgress = false
-          this.alert = true
-          this.alertTitle = 'Error'
-          this.alertText = err.response.data.error
-          this.selectedSource1Id = null
-          this.selectedSource1Name = null
-          this.dialog = false
+          if(!err.response) {
+            console.error(err);
+            this.saveMatch()
+          } else {
+            this.flagComment = ''
+            this.$store.state.dynamicProgress = false
+            this.alert = true
+            this.alertTitle = 'Error'
+            this.alertText = err.response.data.error
+            this.selectedSource1Id = null
+            this.selectedSource1Name = null
+            this.dialog = false
+          }
         })
     },
     acceptFlag (source1Id) {
@@ -1617,14 +1632,19 @@ export default {
           }
         })
         .catch(err => {
-          this.$store.state.dynamicProgress = false
-          this.alert = true
-          this.alertTitle = 'Error'
-          this.alertText = err.response.data.error
-          this.selectedSource1Id = null
-          this.selectedSource1Name = null
-          this.dialog = false
-          console.log(err)
+          if(!err.response) {
+            console.error(err);
+            this.acceptFlag(source1Id)
+          } else {
+            this.$store.state.dynamicProgress = false
+            this.alert = true
+            this.alertTitle = 'Error'
+            this.alertText = err.response.data.error
+            this.selectedSource1Id = null
+            this.selectedSource1Name = null
+            this.dialog = false
+            console.log(err)
+          }
         })
     },
     breakMatch (source1Id) {
@@ -1668,14 +1688,19 @@ export default {
           }
         })
         .catch(err => {
-          this.$store.state.dynamicProgress = false
-          this.alert = true
-          this.alertTitle = 'Error'
-          this.alertText = err.response.data.error
-          this.selectedSource1Id = null
-          this.selectedSource1Name = null
-          this.dialog = false
-          console.log(err)
+          if(!err.response) {
+            console.error(err);
+            this.breakMatch(source1Id)
+          } else {
+            this.$store.state.dynamicProgress = false
+            this.alert = true
+            this.alertTitle = 'Error'
+            this.alertText = err.response.data.error
+            this.selectedSource1Id = null
+            this.selectedSource1Name = null
+            this.dialog = false
+            console.log(err)
+          }
         })
     },
     unFlag (source1Id) {
@@ -1714,14 +1739,19 @@ export default {
           }
         })
         .catch(err => {
-          this.$store.state.dynamicProgress = false
-          this.alert = true
-          this.alertTitle = 'Error'
-          this.alertText = err.response.data.error
-          this.selectedSource1Id = null
-          this.selectedSource1Name = null
-          this.dialog = false
-          console.log(err)
+          if(!err.response) {
+            console.error(err);
+            this.unFlag(source1Id)
+          } else {
+            this.$store.state.dynamicProgress = false
+            this.alert = true
+            this.alertTitle = 'Error'
+            this.alertText = err.response.data.error
+            this.selectedSource1Id = null
+            this.selectedSource1Name = null
+            this.dialog = false
+            console.log(err)
+          }
         })
     },
     breakNoMatch (source1Id, type) {
@@ -1768,14 +1798,19 @@ export default {
           }
         })
         .catch(err => {
-          this.$store.state.dynamicProgress = false
-          this.alert = true
-          this.alertTitle = 'Error'
-          this.alertText = err.response.data.error
-          this.selectedSource1Id = null
-          this.selectedSource1Name = null
-          this.dialog = false
-          console.log(err)
+          if(!err.response) {
+            console.error(err);
+            this.breakNoMatch(source1Id, type)
+          } else {
+            this.$store.state.dynamicProgress = false
+            this.alert = true
+            this.alertTitle = 'Error'
+            this.alertText = err.response.data.error
+            this.selectedSource1Id = null
+            this.selectedSource1Name = null
+            this.dialog = false
+            console.log(err)
+          }
         })
     },
     noMatch (type) {
@@ -1837,13 +1872,18 @@ export default {
           this.selectedSource1Name = null
         })
         .catch(err => {
-          this.$store.state.dynamicProgress = false
-          this.alert = true
-          this.alertTitle = 'Error'
-          this.alertText = err.response.data.error
-          this.dialog = false
-          this.selectedSource1Id = null
-          this.selectedSource1Name = null
+          if(!err.response) {
+            console.error(err);
+            this.noMatch(type)
+          } else {
+            this.$store.state.dynamicProgress = false
+            this.alert = true
+            this.alertTitle = 'Error'
+            this.alertText = err.response.data.error
+            this.dialog = false
+            this.selectedSource1Id = null
+            this.selectedSource1Name = null
+          }
         })
     },
     back () {

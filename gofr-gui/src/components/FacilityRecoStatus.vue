@@ -733,8 +733,12 @@ export default {
         this.$store.state.errorColor = 'primary'
         this.$store.state.dialogError = true
       }).catch((err) => {
-        this.$store.state.dynamicProgress = false
-        console.log(err.response.data.error)
+        if(!err.response) {
+          this.markRecoDone()
+        } else {
+          this.$store.state.dynamicProgress = false
+          console.log(err.response.data.error)
+        }
       })
     },
     markRecoUnDone () {
@@ -750,8 +754,12 @@ export default {
         this.$store.state.errorColor = 'primary'
         this.$store.state.dialogError = true
       }).catch((err) => {
-        this.$store.state.dynamicProgress = false
-        console.log(err.response.data.error)
+        if(!err.response) {
+          this.markRecoUnDone()
+        } else {
+          this.$store.state.dynamicProgress = false
+          console.log(err.response.data.error)
+        }
       })
     }
   },

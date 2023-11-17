@@ -755,41 +755,44 @@ export default {
         this.levelData = levelData
         this.checkUploadProgress()
       }).catch((err) => {
-        console.error(err);
-        this.checkUploadProgress()
-        // if (Array.isArray(err.response.data.error)) {
-        //   this.invalidRows = true
-        //   for (var k = 0; k < err.response.data.error.length; k++) {
-        //     if (k === 0) {
-        //       let headers = Object.keys(err.response.data.error[k].data)
-        //       for (let header of headers) {
-        //         this.invalidRowsHeader.push({
-        //           text: header,
-        //           value: header
-        //         })
-        //       }
-        //       this.invalidRowsHeader.push({
-        //         text: 'Reason',
-        //         value: 'reason'
-        //       })
-        //     }
-        //     let row = Object.values(err.response.data.error[k].data)
-        //     let content = {}
-        //     for (let ind in row) {
-        //       content[this.invalidRowsHeader[ind].value] = row[ind]
-        //     }
-        //     content['reason'] = err.response.data.error[k].reason
-        //     this.invalidRowsContent.push(content)
-        //   }
-        // } else {
-        //   this.$store.state.dialogError = true
-        //   this.$store.state.errorTitle = 'Error'
-        //   this.$store.state.errorDescription = err.response.data.error + '. Reload page and retry'
-        // }
-        // this.$store.state.uploadRunning = false
-        // this.uploadPrepaProgr = false
-        // this.percentDialog = false
-        // clearInterval(this.UploadProgressTimer)
+        if(!err.response) {
+          console.error(err);
+          this.checkUploadProgress()
+        } else {
+          if (Array.isArray(err.response.data.error)) {
+            this.invalidRows = true
+            for (var k = 0; k < err.response.data.error.length; k++) {
+              if (k === 0) {
+                let headers = Object.keys(err.response.data.error[k].data)
+                for (let header of headers) {
+                  this.invalidRowsHeader.push({
+                    text: header,
+                    value: header
+                  })
+                }
+                this.invalidRowsHeader.push({
+                  text: 'Reason',
+                  value: 'reason'
+                })
+              }
+              let row = Object.values(err.response.data.error[k].data)
+              let content = {}
+              for (let ind in row) {
+                content[this.invalidRowsHeader[ind].value] = row[ind]
+              }
+              content['reason'] = err.response.data.error[k].reason
+              this.invalidRowsContent.push(content)
+            }
+          } else {
+            this.$store.state.dialogError = true
+            this.$store.state.errorTitle = 'Error'
+            this.$store.state.errorDescription = err.response.data.error + '. Reload page and retry'
+          }
+          this.$store.state.uploadRunning = false
+          this.uploadPrepaProgr = false
+          this.percentDialog = false
+          clearInterval(this.UploadProgressTimer)
+        }
       })
     },
     closeInvalidRows () {

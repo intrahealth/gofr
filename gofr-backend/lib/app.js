@@ -542,7 +542,6 @@ async function startUp() {
   });
 
   app.get('/progress/:type/:clientId', (req, res) => {
-    logger.error('progress');
     const {
       clientId,
       type,

@@ -4,11 +4,12 @@
   "description": "GOFR",
   "main": "app.js",
   "scripts": {
-    "start": "node --max-old-space-size=8192 lib/app.js"
+    "start": "node --max-old-space-size=8192 lib/app.js",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/openhie/facility-recon.git"
+    "url": "https://github.com/intrahealth/gofr.git"
   },
   "keywords": [
     "GOFR",
@@ -18,9 +19,9 @@
   "author": "Intrahealth Digital Health Team <digitalhealth@intrahealth.org>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/openhie/facility-recon/issues"
+    "url": "https://github.com/intrahealth/gofr/issues"
   },
-  "homepage": "https://github.com/openhie/facility-recon/blob/master/README.md",
+  "homepage": "https://github.com/intrahealth/gofr/blob/master/README.md",
   "dependencies": {
     "@keycloak/keycloak-admin-client": "^15.0.2",
     "@vitalets/google-translate-api": "^8.0.0",
@@ -82,6 +83,7 @@
     "request": "^2.85.0",
     "require-from-string": "^2.0.2",
     "stdio": "^0.2.7",
+    "supertest": "^6.3.3",
     "tar": "^4.4.6",
     "tmp": "0.0.33",
     "uid-generator": "^1.0.0",

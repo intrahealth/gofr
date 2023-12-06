@@ -20,6 +20,9 @@ router.get('/:partition/:resource/:id?', (req, res, next) => {
   if (req.params.resource.startsWith('$') || (req.params.id && req.params.id.startsWith('$'))) {
     return next();
   }
+  if ( !req.user ) {
+    return res.status(401).json( outcomes.NOTLOGGEDIN)
+  }
   let allowed = false;
   if (req.params.id) {
     allowed = req.user.hasPermissionByName('read', req.params.resource, req.params.id, req.params.partition);
@@ -49,7 +52,7 @@ router.get('/:partition/:resource/:id?', (req, res, next) => {
       /* for custom responses */
       logger.error(err.message);
       const outcome = { ...outcomes.ERROR };
-      outcome.issue[0].diagnostics = err.message;
+      outcome.issue[0].diagnostics = err;
       return res.status(500).json(outcome);
     });
   } else {
@@ -82,13 +85,16 @@ router.get('/:partition/:resource/:id?', (req, res, next) => {
     }).catch((err) => {
       logger.error(err.message);
       const outcome = { ...outcomes.ERROR };
-      outcome.issue[0].diagnostics = err.message;
+      outcome.issue[0].diagnostics = err;
       return res.status(500).json(outcome);
     });
   }
 });
 
 router.post('/:partition/:resource', (req, res) => {
+  if ( !req.user ) {
+    return res.status(401).json( outcomes.NOTLOGGEDIN)
+  }
   const allowed = req.user.hasPermissionByObject('write', req.body, req.params.partition);
   let resource;
   if (allowed === true) {
@@ -100,7 +106,7 @@ router.post('/:partition/:resource', (req, res) => {
   }
   fhirAxios.create(resource, req.params.partition).then((output) => {
     fhirAudit.create(req.user, req.ip, `${output.resourceType}/${output.id
-    }${output.meta.versionId ? `/_history/${output.meta.versionId}` : ''}`, true);
+    }${output?.meta?.versionId ? `/_history/${output.meta.versionId}` : ''}`, true);
     return res.status(201).json(output);
   }).catch((err) => {
     fhirAudit.create(req.user, req.ip, null, false, { resource, err });
@@ -190,6 +196,9 @@ router.patch('/:partition/CodeSystem/:id/:code', (req, res) => {
 });
 
 router.put('/:partition/:resource/:id', (req, res) => {
+  if ( !req.user ) {
+    return res.status(401).json( outcomes.NOTLOGGEDIN)
+  }
   const update = req.body;
   const allowed = req.user.hasPermissionByObject('write', update, req.params.partition);
   if (!allowed) {
@@ -204,7 +213,7 @@ router.put('/:partition/:resource/:id', (req, res) => {
   }
   fhirAxios.update(update, req.params.partition).then((resource) => {
     fhirAudit.update(req.user, req.ip, `${resource.resourceType}/${resource.id
-    }${resource.meta.versionId ? `/_history/${resource.meta.versionId}` : ''}`, true);
+    }${resource?.meta?.versionId ? `/_history/${resource.meta.versionId}` : ''}`, true);
     res.status(200).json(resource);
   }).catch((err) => {
     /* return response from FHIR server */
@@ -218,6 +227,9 @@ router.put('/:partition/:resource/:id', (req, res) => {
 });
 
 router.get('/:partition/ValueSet/:id/\\$expand', (req, res) => {
+  if ( !req.user ) {
+    return res.status(401).json( outcomes.NOTLOGGEDIN)
+  }
   const allowed = req.user.hasPermissionByName('read', 'ValueSet', req.params.id);
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);
@@ -260,6 +272,9 @@ router.get('/:partition/CodeSystem/\\$lookup', (req, res) => {
 });
 
 router.get('/:partition/DocumentReference/:id/\\$html', (req, res) => {
+  if ( !req.user ) {
+    return res.status(401).json( outcomes.NOTLOGGEDIN)
+  }
   const allowed = req.user.hasPermissionByName('read', 'DocumentReference', req.params.id, req.params.partition);
   if (!allowed) {
     return res.status(403).json(outcomes.DENIED);

@@ -111,7 +111,7 @@ router.get('/', async (req, res) => {
       userObj: req.user,
     });
   }
-  return res.status(200).send();
+  return res.status(200).send({ok: true});
 },
 passport.authenticate('custom-loggedout', {}), (req, res) => {
   if (req.user) {
@@ -134,6 +134,7 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
 
 router.post('/login', passport.authenticate('local', {}), (req, res) => {
   res.status(200).json({
+    oK: true,
     userObj: req.user,
   });
 });

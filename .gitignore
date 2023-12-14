@@ -32,3 +32,6 @@ tests/screenshot*
 
 # notebooks
 .ipynb_checkpoints
+
+/.idea
+/log

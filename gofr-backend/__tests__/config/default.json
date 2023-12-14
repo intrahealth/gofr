@@ -10,7 +10,7 @@
     "idp": "dhis2",
     "version": "2.2.0",
     "site": {
-      "path": "/home/ally/gofr/gofr-backend/lib/gofr-backend-site",
+      "path": "/home/pc/Documents/Intrahealth/Gofr/updated/gofr/gofr-backend/lib/gofr-backend-site",
       "routes": {
         "performance": {
           "mount": "performance",
@@ -19,7 +19,7 @@
       }
     },
     "core": {
-      "path": "/home/ally/gofr/gofr-backend/lib"
+      "path": "/home/pc/Documents/Intrahealth/Gofr/updated/gofr/gofr-backend/lib"
     }
   },
   "server": {
@@ -88,8 +88,8 @@
     "server": {
       "protocal": "http",
       "host": "localhost",
-      "port": "8081",
-      "basePath": "gofr/fhir",
+      "port": "8090",
+      "basePath": "fhir",
       "username": "",
       "password": ""
     },
@@ -163,5 +163,9 @@
   "encryption": {
     "algorithm": "aes-256-ctr",
     "secret": "b1ea334a-bf5a-11e8-a355-529269fb1459"
+  },
+  "test": {
+    "DEFAULT_URL": "http://localhost:8090/fhir/DEFAULT",
+    "PARTITION": "DEFAULT"
   }
 }

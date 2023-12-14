@@ -51,6 +51,7 @@ nav:
       - developer_guide/mcsd.md
       - developer_guide/forms.md
       - developer_guide/ansible.md
+      - developer_guide/gofr_installation.md
       - developer_guide/server_administration.md
 
 markdown_extensions:

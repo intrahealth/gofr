@@ -1707,12 +1707,17 @@ export default {
       this.$store.state.progressTitle = 'Unflagging match'
       this.$store.state.dynamicProgress = true
       let formData = new FormData()
-      let userID = this.$store.state.activePair.userID
-      let sourcesOwner = this.getDatasourceOwner()
+      let partition1 = this.$store.state.activePair.source1.name
+      let partition2 = this.$store.state.activePair.source2.name
+      let mappingPartition = this.$store.state.activePair.name
+      formData.append('partition1', partition1)
+      formData.append('partition2', partition2)
+      formData.append('mappingPartition', mappingPartition)
       formData.append('source1Id', source1Id)
       formData.append('pairId', this.$store.state.activePair.id)
+      
       axios
-        .post('/match/breakMatch/' + this.getSource1() + '/' + this.getSource2() + '/' + sourcesOwner.source1Owner + '/' + sourcesOwner.source2Owner + '/' + userID, formData, {
+        .post('/match/breakMatch', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }

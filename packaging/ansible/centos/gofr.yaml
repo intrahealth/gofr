@@ -75,13 +75,10 @@
     - name: Saving configuration file
       copy: content="{{ updated.configfile | to_nice_json }}" dest="/var/lib/gofr/gofr-backend/{{site}}/config/default.json"
 
-    - name: Get Node.js path
-      shell: "which node"
-      register: node_path_output
-
-    - name: Store Node.js path in a variable
-      set_fact:
-        node_path: "{{ node_path_output.stdout }}"
+    - name: Getting path of node
+      command: which node
+      register: node_path
+      ignore_errors: yes
 
     - name: Install systemd template for gofr service
       template:

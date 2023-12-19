@@ -103,8 +103,6 @@ const fhirAxios = {
     axios.get(url.toString(), { auth }).then((response) => {
       resolve(response.data);
     }).catch((err) => {
-      console.log('throwing error');
-      console.log(err);
       reject(err);
     });
   }),

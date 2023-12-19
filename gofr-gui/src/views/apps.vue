@@ -83,12 +83,7 @@ export default {
       let baseURL = location.href.split('/')
       baseURL.pop()
       baseURL = baseURL.join('/')
-      //check if runs as DHIS2 app
-      let href = location.href.split('api/apps/GOFR')
-      if(href.length == 2) {
-        return axios.defaults.baseURL + "/gofrapp/" + app.app_short_name + "/" + app.launch_path + "?baseURL=" + baseURL
-      }
-      return "/gofrapp/" + app.app_short_name + "/" + app.launch_path + "?baseURL=" + baseURL
+      return "/gofrapp/" + app.app_short_name + "/" + app.launch_path + "?baseURL=" + baseURL 
     }
   },
   created() {

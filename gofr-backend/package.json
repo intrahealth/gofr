@@ -49,6 +49,7 @@
     "ihrissmartrequire": "^1.0.1",
     "is-empty": "^1.2.0",
     "is-json": "^2.0.1",
+    "jest": "^29.7.0",
     "jsdom": "^16.5.3",
     "json-as-xlsx": "^2.4.2",
     "json-merger": "^1.1.7",

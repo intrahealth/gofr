@@ -17,6 +17,13 @@
       "path": "/var/lib/gofr/gofr-backend/lib"
     }
   },
+  "database": {
+    "dbname": "hapi",
+    "username": "hapi",
+    "password": "hapi",
+    "host": "localhost",
+    "port": 5432
+  },
   "server": {
     "hostname": "0.0.0.0",
     "port": 4000

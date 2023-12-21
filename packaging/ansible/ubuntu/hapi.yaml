@@ -7,7 +7,7 @@
   tasks:
 
     - name: Add the OS specific variables
-        include_vars:
+      include_vars:
           file: index.yaml
 
     - name: hapi folder exists

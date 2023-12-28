@@ -6,7 +6,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/var/lib/gofr/gofr-backend
-ExecStart={{node_path}} /var/lib/gofr/gofr-backend/{{site}}/bin/www
+ExecStart={{node_path.stdout}} /var/lib/gofr/gofr-backend/{{site}}/bin/www
 Restart=always
 Environment=NODE_ENV=production
 

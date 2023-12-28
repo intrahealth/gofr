@@ -66,6 +66,8 @@ services:
       - mCSD__server__host=fhir
       - mCSD__server__port=8080
       - mCSD__server__basePath=fhir
+      - app__site__path=/src/gofr-backend/docker-site
+      - app__core__path=/src/gofr-backend/lib
       - app__installed=${false}
       - app__idp=gofr
       - keycloak__baseURL=http://keycloak:8084/auth

@@ -39,6 +39,16 @@
         src: /var/lib/gofr/gofr-gui/src/gofr-frontend-site/
         dest: /var/lib/gofr/gofr-gui/src/site
 
+    - name: Remove package-lock.json from gofr-backend
+      ansible.builtin.file:
+        path: "/var/lib/gofr/gofr-backend/package-lock.json"
+        state: absent
+
+    - name: Remove package-lock.json from gofr-gui
+      ansible.builtin.file:
+        path: "/var/lib/gofr/gofr-gui/package-lock.json"
+        state: absent
+
     - name: Installing npm packages into gofr-backend
       shell: |
         cd /var/lib/gofr/gofr-backend

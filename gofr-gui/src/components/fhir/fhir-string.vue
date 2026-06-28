@@ -11,8 +11,10 @@
         hide-details="auto"
         :rules="rules"
         :type="isPassword ? (showPassword ? 'text' : 'password') : 'text'"
-        :append-icon="isPassword ? (showPassword ? 'mdi-eye' : 'mdi-eye-off') : ''"
-        @click:append="showPassword = !showPassword"
+        :append-icon="isHfid ? 'mdi-refresh' : (isPassword ? (showPassword ? 'mdi-eye' : 'mdi-eye-off') : '')"
+        @click:append="isHfid ? generateHfid() : (showPassword = !showPassword)"
+        :hint="isHfid && hfidDisplayFormat ? 'Display: ' + hfidDisplayFormat : ''"
+        :persistent-hint="isHfid && !!hfidDisplayFormat"
         dense
       >
       <template #label>{{ $t(`App.fhir-resources-texts.${display}`) }}<span v-if="required" class="red--text font-weight-bold">*</span></template>
@@ -22,13 +24,14 @@
       {{ $t(`App.fhir-resources-texts.${display}`) }}
     </template>
     <template #value>
-      {{value}}
+      {{isHfid && value ? hfidDisplayFormat : value}}
     </template>
   </gofr-element>
 </template>
 
 <script>
 import GofrElement from "../gofr/gofr-element.vue"
+import { generateHfid, verifyHfid, formatHfidDisplay, parseHfidInput } from '@/plugins/hfid.js'
 
 export default {
   name: "fhir-string",
@@ -58,6 +61,8 @@ export default {
         //console.log("WATCH STRING",this.field,this.path,this.slotProps)
         if ( !this.lockWatch ) {
           this.setupData()
+        } else {
+          this.ensureHfidValue()
         }
       },
       deep: true
@@ -84,6 +89,16 @@ export default {
         this.disabled = this.readOnlyIfSet && (!!this.value)
         //console.log(this.source)
       }
+      this.ensureHfidValue()
+    },
+    generateHfid() {
+      this.value = generateHfid()
+    },
+    ensureHfidValue() {
+      if (!this.isHfid || this.value) {
+        return
+      }
+      this.value = generateHfid()
     }
   },
   computed: {
@@ -98,12 +113,28 @@ export default {
     required: function() {
       return (this.index || 0) < this.min
     },
+    isHfid: function() {
+      return (this.display || '').toUpperCase().includes('HFID')
+    },
+    hfidDisplayFormat: function() {
+      if (!this.isHfid || !this.value) return ''
+      const parsed = parseHfidInput(this.value)
+      return parsed ? formatHfidDisplay(parsed) : ''
+    },
     rules: function() {
-      if ( this.required ) {
-        return [ v => !!v || this.display+" is required" ]
-      } else {
-        return []
+      const rulesArr = []
+      if (this.required) {
+        rulesArr.push(v => !!v || this.display + ' is required')
       }
+      if (this.isHfid) {
+        rulesArr.push(v => {
+          if (!v) return true
+          const parsed = parseHfidInput(v)
+          if (!parsed) return 'HFID must be a 6-digit number (optionally formatted as F-XXX-XXX)'
+          return verifyHfid(parsed) || 'Invalid HFID — check digit does not match (Damm algorithm)'
+        })
+      }
+      return rulesArr
     },
     isPassword: function() {
       return this.displayType === 'password'

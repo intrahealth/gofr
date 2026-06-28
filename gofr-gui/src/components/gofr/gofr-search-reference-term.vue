@@ -181,12 +181,12 @@ export default {
 
     },
     checkChildren: function(item) {
-      let params = { "partof": item.id, "_summary": "count" }
+      let params = { "partof": item.id, "_count": 1 }
       let url = "/fhir/"+this.$store.state.config.userConfig.FRDatasource+"/"+this.resource+"?"+querystring.stringify( params )
       return new Promise( resolve => {
         axios.get( url ).then( response => {
           let data = response.data
-          if ( data.total && data.total > 0 ) {
+          if ( ( data.entry && data.entry.length > 0 ) || ( data.total && data.total > 0 ) ) {
             item.children = []
           }
           resolve()

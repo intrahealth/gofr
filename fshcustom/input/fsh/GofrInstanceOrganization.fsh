@@ -14,7 +14,7 @@ Usage:          #example
 * extension[display].extension[title].valueString = "Organization"
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/gofr-mcsd-organization)
 * extension[display].extension[search][0].valueString = "Name|name"
-* extension[display].extension[filter][0].valueString = "Name|name:contains"
+* extension[display].extension[filter][0].valueString = "Name|name|name:contains"
 * extension[section][0].extension[title].valueString = "Basic Details"
 * extension[section][0].extension[description].valueString = "Basic Details"
 * extension[section][0].extension[name].valueString = "Basic Details"

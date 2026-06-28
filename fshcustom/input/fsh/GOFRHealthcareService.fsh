@@ -100,6 +100,13 @@ Description:    "GOFR Profile of facilities service."
 * location 1..* MS
 * location only Reference(GofrFacility)
 * location ^label = "Facility Service Is Provided"
+* extension contains
+    CamDHEAServiceAvailability named serviceAvailability 0..1 MS and
+    CamDHEAServiceLastVerifiedDate named serviceLastVerifiedDate 0..1 MS
+* extension[serviceAvailability] ^label = "Service Availability"
+* extension[serviceAvailability].valueCodeableConcept MS
+* extension[serviceLastVerifiedDate] ^label = "Last Verified Date"
+* extension[serviceLastVerifiedDate].valueDate MS
 
 Instance:       gofr-page-service
 InstanceOf:     GofrPage
@@ -110,8 +117,8 @@ Usage:          #example
 * extension[display].extension[resource].valueReference = Reference(StructureDefinition/gofr-facility-service)
 * extension[display].extension[search][0].valueString = "Name|name"
 * extension[display].extension[search][1].valueString = "Active|active"
-* extension[display].extension[filter][0].valueString = "Name|name:contains"
-* extension[display].extension[filter][1].valueString = "Active|active"
+* extension[display].extension[filter][0].valueString = "Name|name|name:contains"
+* extension[display].extension[filter][1].valueString = "Active|active|active"
 * extension[section][0].extension[title].valueString = "Details"
 * extension[section][0].extension[description].valueString = "Healthcare service details"
 * extension[section][0].extension[name].valueString = "Healthcare service"
@@ -131,6 +138,8 @@ Usage:          #example
 * extension[section][0].extension[field][13].valueString = "HealthcareService.notAvailable"
 * extension[section][0].extension[field][14].valueString = "HealthcareService.appointmentRequired"
 * extension[section][0].extension[field][15].valueString = "HealthcareService.active"
+* extension[section][0].extension[field][16].valueString = "HealthcareService.extension:serviceAvailability"
+* extension[section][0].extension[field][17].valueString = "HealthcareService.extension:serviceLastVerifiedDate"
 * extension[section][1].extension[title].valueString = "Facilities Service Is Offered"
 * extension[section][1].extension[description].valueString = "Facilities Service Is Offered"
 * extension[section][1].extension[name].valueString = "Facilities Service Is Offered"

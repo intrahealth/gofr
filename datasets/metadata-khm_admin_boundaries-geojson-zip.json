@@ -1,0 +1,15 @@
+{
+    "created": "2025-12-18T17:03:02.278780",
+    "description": "Cambodia administrative level 0-3 boundaries (COD-AB), GeoJSON",
+    "format": "GeoJSON",
+    "download_url": "https://data.humdata.org/dataset/7472f7e0-3deb-44d9-bd36-38237c666a2e/resource/b89f2deb-6ffa-4a16-9972-7e6c12a92620/download/khm_admin_boundaries.geojson.zip",
+    "id": "b89f2deb-6ffa-4a16-9972-7e6c12a92620",
+    "last_modified": "2026-01-26T15:43:45.903222",
+    "metadata_modified": "2026-03-10T09:03:47.713492",
+    "microdata": false,
+    "dataset_id": "7472f7e0-3deb-44d9-bd36-38237c666a2e",
+    "resource_type": "file.upload",
+    "name": "khm_admin_boundaries.geojson.zip",
+    "mimetype": "application/zip",
+    "size": "3.0M"
+}

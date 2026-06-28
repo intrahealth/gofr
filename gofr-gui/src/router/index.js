@@ -25,6 +25,28 @@ import {store} from '../store/store.js'
 
 Vue.use(Router)
 
+// Silence harmless "NavigationDuplicated" rejections from router.push/replace
+// (vue-router 3.1+ returns a Promise that rejects when navigating to the
+// current location; GOFR has many push() callers that don't .catch()).
+const originalPush = Router.prototype.push
+Router.prototype.push = function push (location, onResolve, onReject) {
+  if (onResolve || onReject) return originalPush.call(this, location, onResolve, onReject)
+  return originalPush.call(this, location).catch((err) => {
+    if (Router.isNavigationFailure && Router.isNavigationFailure(err)) return err
+    if (err && err.name === 'NavigationDuplicated') return err
+    throw err
+  })
+}
+const originalReplace = Router.prototype.replace
+Router.prototype.replace = function replace (location, onResolve, onReject) {
+  if (onResolve || onReject) return originalReplace.call(this, location, onResolve, onReject)
+  return originalReplace.call(this, location).catch((err) => {
+    if (Router.isNavigationFailure && Router.isNavigationFailure(err)) return err
+    if (err && err.name === 'NavigationDuplicated') return err
+    throw err
+  })
+}
+
 let router = new Router({
   routes: [{
     path: '/Home',

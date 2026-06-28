@@ -4,6 +4,9 @@ let cache = {};
 
 const fhirDefinition = {
   _getFieldDefinition: (fieldId, structureDef) => new Promise((resolve, reject) => {
+    if (!structureDef || !structureDef.snapshot || !structureDef.snapshot.element) {
+      return reject(new Error(`StructureDefinition ${(structureDef && structureDef.url) || '(unknown)'} has no snapshot`));
+    }
     // take [#] off of fieldId here
     fieldId = fieldId.replace(/\[\d+\]/g, '');
     let field = structureDef.snapshot.element.find(element => element.id === fieldId);
@@ -15,10 +18,14 @@ const fhirDefinition = {
       const remainder = [];
       let count = 0;
       while (!found) {
-        if (count++ > 50) reject(`Failed to find ${fieldId} in ${structureDef.url}`);
+        if (count++ > 50) return reject(new Error(`Failed to find ${fieldId} in ${structureDef.url}`));
+        if (fieldSplit.length === 0) return reject(new Error(`Failed to find ${fieldId} in ${structureDef.url}`));
         remainder.unshift(fieldSplit.pop());
         field = structureDef.snapshot.element.find(element => element.id === fieldSplit.join('.'));
         if (field) found = true;
+      }
+      if (!field.type || !field.type[0] || !field.type[0].code) {
+        return reject(new Error(`Field ${fieldSplit.join('.')} in ${structureDef.url} has no type`));
       }
       const subExpression = `http://hl7.org/fhir/StructureDefinition/${field.type[0].code}#${field.type[0].code}.${remainder.join('.')}`;
       fhirDefinition.getFieldDefinition(subExpression).then((field) => {
@@ -37,6 +44,8 @@ const fhirDefinition = {
         cache[exp[0]] = resource;
         fhirDefinition._getFieldDefinition(exp[1], cache[exp[0]]).then((field) => {
           resolve(field);
+        }).catch((err) => {
+          reject(err);
         });
       }).catch((err) => {
         reject(err);
@@ -44,6 +53,8 @@ const fhirDefinition = {
     } else {
       fhirDefinition._getFieldDefinition(exp[1], cache[exp[0]]).then((field) => {
         resolve(field);
+      }).catch((err) => {
+        reject(err);
       });
     }
   }),
@@ -77,7 +88,7 @@ const fhirDefinition = {
       for (const copy of copies) {
         if (ele.hasOwnProperty(copy)) {
           piece[copy] = ele[copy];
-        } else if (ele.base.hasOwnProperty(copy)) {
+        } else if (ele.base && ele.base.hasOwnProperty(copy)) {
           piece[copy] = ele.base[copy];
         }
       }
@@ -89,24 +100,24 @@ const fhirDefinition = {
           const prop = `${type}Value${copy}`;
           if (ele.hasOwnProperty(prop)) {
             piece[prop] = ele[prop];
-          } else if (ele.base.hasOwnProperty(prop)) {
+          } else if (ele.base && ele.base.hasOwnProperty(prop)) {
             piece[prop] = ele.base[prop];
           }
         }
       }
 
       for (const copy of ['min', 'max']) {
-        if (ele.base.hasOwnProperty(copy)) {
+        if (ele.base && ele.base.hasOwnProperty(copy)) {
           piece[`base-${copy}`] = ele.base[copy];
         }
       }
 
-      if (ele.type[0].hasOwnProperty('code')) {
+      if (ele.type && ele.type[0] && ele.type[0].hasOwnProperty('code')) {
         piece.code = ele.type[0].code;
       }
       const types = ['profile', 'targetProfile'];
       for (const type of types) {
-        if (ele.type[0].hasOwnProperty(type) && ele.type[0][type][0]) {
+        if (ele.type && ele.type[0] && ele.type[0].hasOwnProperty(type) && ele.type[0][type][0]) {
           piece[type] = ele.type[0][type][0];
         }
       }

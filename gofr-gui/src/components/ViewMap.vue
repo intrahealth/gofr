@@ -17,8 +17,8 @@ export default {
     accessToken: 'pk.eyJ1IjoiYWxseXNoYWJhbjUiLCJhIjoiY2twbzFpODRtMDFkMTJwbWFvNXUza3hodCJ9.mhcv_KlLLtvR0x73E90WAw',
     options: {
       "center": [
-        8.521441,
-        -11.84389
+        104.9910,
+        12.5657
       ],
       "zoom": 3,
       "isFacility" : true,

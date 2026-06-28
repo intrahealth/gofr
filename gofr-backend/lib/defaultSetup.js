@@ -199,7 +199,11 @@ const loadFSHFiles = () => new Promise(async (resolvePar, rejectPar) => {
     return resolvePar();
   }
   const fshDir = config.get('builtFSHFIles');
-  const dirs = await fs.readdirSync(`${__dirname}/${fshDir}`);
+  const fshPath = `${__dirname}/${fshDir}`;
+  if (!fs.existsSync(fshPath)) {
+    return resolvePar();
+  }
+  const dirs = fs.readdirSync(fshPath);
   let errorOccured = false;
   async.eachSeries(dirs, (dir, nxtDir) => {
     let files = [];

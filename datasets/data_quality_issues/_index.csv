@@ -1,0 +1,20 @@
+issue_id,category,severity,description,record_count,file
+completeness_missing_required,Completeness,Major,Records missing one or more dictionary-required fields,1302,completeness_missing_required.csv
+validity_code_format,Validity,Major,Admin codes that are present but non-numeric or wrong length,49,validity_code_format.csv
+validity_hierarchy_nesting,Validity,Blocker,Admin codes that violate pcode prefix nesting,64,validity_hierarchy_nesting.csv
+validity_gps,Validity,Major,"Missing, unparseable, null-island, or out-of-country coordinates",25,validity_gps.csv
+validity_value_set,Validity,Minor,Values outside the CamDHEA controlled vocabularies (typos),4,validity_value_set.csv
+validity_placeholder_email,Validity,Minor,CONTACT_EMAIL carrying a literal placeholder (None/NA/etc.),1324,validity_placeholder_email.csv
+validity_unparseable_start_date,Validity,Minor,START_DATE present but not a parseable calendar date,51,validity_unparseable_start_date.csv
+duplicate_hf_code,Uniqueness,Blocker,Records sharing an HF_CODE that must be unique,25,duplicate_hf_code.csv
+duplicate_name_within_commune,Uniqueness,Major,Same facility name repeated within one commune (probable dup),14,duplicate_name_within_commune.csv
+coverage_districts_no_facilities,Coverage,Major,Reference districts with zero facilities in the data,2,coverage_districts_no_facilities.csv
+coverage_communes_no_facilities,Coverage,Major,Reference communes with zero facilities in the data,439,coverage_communes_no_facilities.csv
+coverage_orphan_district_codes,Coverage,Major,Records whose DIS_CODE is absent from the boundary reference,29,coverage_orphan_district_codes.csv
+coverage_orphan_commune_codes,Coverage,Major,Records whose COM_CODE is absent from the boundary reference,53,coverage_orphan_commune_codes.csv
+integrity_province_code_name_conflict,Integrity,Major,Province codes mapped to more than one English name,2,integrity_province_code_name_conflict.csv
+integrity_district_code_name_conflict,Integrity,Major,District codes mapped to more than one English name,28,integrity_district_code_name_conflict.csv
+integrity_commune_code_name_conflict,Integrity,Major,Commune codes mapped to more than one English name,27,integrity_commune_code_name_conflict.csv
+dupnames_reused_commune_names,Duplicated names,Minor,Commune names shared by multiple distinct communes,86,dupnames_reused_commune_names.csv
+dupnames_facility_equals_commune,Duplicated names,Minor,Facility whose NAME_EN equals its commune name,21,dupnames_facility_equals_commune.csv
+dupnames_reused_facility_names,Duplicated names,Minor,Records whose NAME_EN is shared by other facilities,150,dupnames_reused_facility_names.csv

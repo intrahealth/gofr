@@ -1,17 +1,15 @@
-version: '3.3'
-
 services:
-#   keycloak:
-#     container_name: keycloak
-#     image: jboss/keycloak:15.0.2
-#     volumes:
-#       - ../../../resources/keycloak/themes/gofr:/opt/jboss/keycloak/themes/gofr
-#     command: ["-Djboss.http.port=8084"]
-#     ports:
-#       - "8084:8084"
-#     environment:
-#       - KEYCLOAK_USER=admin
-#       - KEYCLOAK_PASSWORD=admin
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:15.0.2
+    volumes:
+      - ../../../resources/keycloak/themes/gofr:/opt/jboss/keycloak/themes/gofr
+    command: ["-Djboss.http.port=8084"]
+    ports:
+      - "8084:8084"
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
       
   redis:
     image: redis:alpine
@@ -21,6 +19,18 @@ services:
     volumes:
       - redis-data:/data
 
+  fhir-db:
+    image: postgres:14-alpine
+    container_name: fhir-db
+    restart: always
+    environment:
+      - POSTGRES_DB=hapi
+      - POSTGRES_USER=hapi
+      - POSTGRES_PASSWORD=hapi
+    volumes:
+      - fhir-db-data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+
   fhir:
     container_name: hapi-fhir
     image: hapiproject/hapi:v5.5.2-distroless
@@ -29,6 +39,7 @@ services:
     restart: always
     depends_on:
       - redis
+      - fhir-db
     environment:
       # add mcsd ig
       - hapi.fhir.implementationguides.mcsd.name=ihe.iti.mcsd
@@ -45,6 +56,11 @@ services:
       - hapi.fhir.enable_index_missing_fields=true
       - hapi.fhir.auto_create_placeholder_reference_targets=true
       - hapi.fhir.client_id_strategy=ANY
+      - spring.datasource.url=jdbc:postgresql://fhir-db:5432/hapi
+      - spring.datasource.username=hapi
+      - spring.datasource.password=hapi
+      - spring.datasource.driverClassName=org.postgresql.Driver
+      - spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQL10Dialect
       - spring.jpa.properties.hibernate.search.enabled=true
       - spring.jpa.properties.hibernate.search.backend.type=lucene
       - spring.jpa.properties.hibernate.search.backend.analysis.configurer=ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer
@@ -56,7 +72,10 @@ services:
 
   gofr:
     container_name: gofr
-    image: intrahealth/gofr:latest
+    build:
+      context: ../..
+      dockerfile: instant/docker/Dockerfile
+    image: gofr:local
     depends_on:
       - fhir
     environment:
@@ -68,7 +87,6 @@ services:
       - mCSD__server__basePath=fhir
       - app__site__path=/src/gofr-backend/docker-site
       - app__core__path=/src/gofr-backend/lib
-      - app__installed=${false}
       - app__idp=gofr
       - keycloak__baseURL=http://keycloak:8084/auth
       - REDIS_HOST=redis
@@ -85,4 +103,5 @@ networks:
 
 volumes:
   redis-data:
+  fhir-db-data:
   hapi-data:

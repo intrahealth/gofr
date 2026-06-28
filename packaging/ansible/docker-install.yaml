@@ -1,0 +1,289 @@
+---
+- name: Install GOFR Docker stack
+  hosts: all
+  remote_user: "{{ user }}"
+  become: true
+  tags: docker
+
+  vars_prompt:
+    - name: "user"
+      prompt: "Please enter the username (with sudo) -- NOT root user or it will fail"
+      private: no
+
+  vars:
+    gofr_repo: "https://github.com/ddhmoh-tech/Facility-Registry.git"
+    gofr_repo_clone_url: "{{ gofr_repo }}"
+    gofr_repo_key_file: ""
+    gofr_version: "camdhea-features"
+    gofr_install_dir: "/home/{{ user }}/gofr"
+    gofr_compose_dir: "{{ gofr_install_dir }}/instant/docker"
+    gofr_compose_project: "gofr"
+    gofr_enable_nginx: true
+    gofr_nginx_certs_dir: "/home/{{ user }}/gofr-nginx-certs"
+    gofr_nginx_ssl_cert_src: ""
+    gofr_nginx_ssl_key_src: ""
+    gofr_nginx_server_name: "_"
+    gofr_compose_files: >-
+      -f docker-compose.yml
+      {{ '-f docker-compose.nginx.yml' if gofr_enable_nginx | bool else '' }}
+    gofr_source_archive: "/tmp/gofr-source-{{ inventory_hostname }}.tar.gz"
+    gofr_remote_source_archive: "/tmp/gofr-source.tar.gz"
+    docker_apt_distribution: >-
+      {{ 'debian' if ansible_facts['distribution'] == 'Debian' else 'ubuntu' }}
+    docker_apt_arch: >-
+      {{ 'amd64' if ansible_facts['architecture'] == 'x86_64' else
+      'arm64' if ansible_facts['architecture'] in ['aarch64', 'arm64'] else
+      ansible_facts['architecture'] }}
+
+  tasks:
+
+    - name: Ensure supported operating system
+      ansible.builtin.assert:
+        that:
+          - ansible_facts['os_family'] == "Debian"
+          - ansible_facts['distribution'] in ["Ubuntu", "Debian"]
+        fail_msg: "This Docker installer currently supports Ubuntu and Debian hosts."
+
+    - name: Run the equivalent of "apt-get update"
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Ensure Docker pre-reqs
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - git
+          - gnupg
+          - lsb-release
+          - python3-debian
+        state: present
+
+    - name: Ensure Docker apt keyring directory
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Add Docker apt key
+      ansible.builtin.get_url:
+        url: "https://download.docker.com/linux/{{ docker_apt_distribution }}/gpg"
+        dest: /etc/apt/keyrings/docker.asc
+        mode: "0644"
+        force: yes
+
+    - name: Add Docker apt repo
+      ansible.builtin.deb822_repository:
+        name: docker
+        types:
+          - deb
+        uris:
+          - "https://download.docker.com/linux/{{ docker_apt_distribution }}"
+        suites:
+          - "{{ ansible_facts['distribution_release'] }}"
+        components:
+          - stable
+        architectures:
+          - "{{ docker_apt_arch }}"
+        signed_by: /etc/apt/keyrings/docker.asc
+        state: present
+
+    - name: Update apt cache after adding Docker repo
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install Docker Engine and Compose plugin
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+
+    - name: Ensure docker is running
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add user to docker group
+      ansible.builtin.user:
+        name: "{{ user }}"
+        groups: docker
+        append: yes
+        state: present
+
+    - name: Check GOFR repo access
+      ansible.builtin.command:
+        cmd: "git ls-remote {{ gofr_repo_clone_url }} -h refs/heads/{{ gofr_version }}"
+      register: gofr_repo_access
+      changed_when: false
+      failed_when: false
+      environment:
+        GIT_TERMINAL_PROMPT: "0"
+      become_user: "{{ user }}"
+      no_log: "{{ gofr_repo_clone_url != gofr_repo }}"
+
+    - name: Explain controller checkout upload fallback
+      ansible.builtin.debug:
+        msg: >-
+          Cannot read {{ gofr_repo }} branch {{ gofr_version }} from the target
+          host. Uploading the controller checkout instead.
+      when: gofr_repo_access.rc != 0
+
+    - name: Clone or update GOFR repo
+      ansible.builtin.git:
+        repo: "{{ gofr_repo_clone_url }}"
+        dest: "{{ gofr_install_dir }}"
+        version: "{{ gofr_version }}"
+        clone: yes
+        update: yes
+        accept_hostkey: yes
+        key_file: "{{ gofr_repo_key_file | default(omit, true) }}"
+      environment:
+        GIT_TERMINAL_PROMPT: "0"
+      become_user: "{{ user }}"
+      no_log: "{{ gofr_repo_clone_url != gofr_repo }}"
+      when: gofr_repo_access.rc == 0
+
+    - name: Create source archive from controller checkout
+      ansible.builtin.command:
+        cmd: >-
+          tar
+          --exclude=.git
+          --exclude=node_modules
+          --exclude='*/node_modules'
+          -czf {{ gofr_source_archive }}
+          .
+        chdir: "{{ playbook_dir }}/../.."
+      delegate_to: localhost
+      become: false
+      changed_when: true
+      when: gofr_repo_access.rc != 0
+
+    - name: Copy source archive to target
+      ansible.builtin.copy:
+        src: "{{ gofr_source_archive }}"
+        dest: "{{ gofr_remote_source_archive }}"
+        mode: "0644"
+      when: gofr_repo_access.rc != 0
+
+    - name: Remove existing uploaded source checkout
+      ansible.builtin.file:
+        path: "{{ gofr_install_dir }}"
+        state: absent
+      when: gofr_repo_access.rc != 0
+
+    - name: Recreate GOFR install directory
+      ansible.builtin.file:
+        path: "{{ gofr_install_dir }}"
+        state: directory
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: "0755"
+      when: gofr_repo_access.rc != 0
+
+    - name: Unpack controller checkout on target
+      ansible.builtin.unarchive:
+        src: "{{ gofr_remote_source_archive }}"
+        dest: "{{ gofr_install_dir }}"
+        remote_src: yes
+        owner: "{{ user }}"
+        group: "{{ user }}"
+      when: gofr_repo_access.rc != 0
+
+    - name: Remove target source archive
+      ansible.builtin.file:
+        path: "{{ gofr_remote_source_archive }}"
+        state: absent
+      when: gofr_repo_access.rc != 0
+
+    - name: Remove controller source archive
+      ansible.builtin.file:
+        path: "{{ gofr_source_archive }}"
+        state: absent
+      delegate_to: localhost
+      become: false
+      when: gofr_repo_access.rc != 0
+
+    - name: Check sibling resources path for docker-compose theme mount
+      ansible.builtin.stat:
+        path: "{{ gofr_install_dir | dirname }}/resources"
+      register: gofr_sibling_resources
+
+    - name: Link sibling resources path for docker-compose theme mount
+      ansible.builtin.file:
+        src: "{{ gofr_install_dir }}/resources"
+        dest: "{{ gofr_install_dir | dirname }}/resources"
+        state: link
+        owner: "{{ user }}"
+        group: "{{ user }}"
+      when: not gofr_sibling_resources.stat.exists
+
+    - name: Ensure nginx certificate directory
+      ansible.builtin.file:
+        path: "{{ gofr_nginx_certs_dir }}"
+        state: directory
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: "0750"
+      when: gofr_enable_nginx | bool
+
+    - name: Install nginx SSL certificate
+      ansible.builtin.copy:
+        src: "{{ gofr_nginx_ssl_cert_src }}"
+        dest: "{{ gofr_nginx_certs_dir }}/tls.crt"
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: "0640"
+      when:
+        - gofr_enable_nginx | bool
+        - gofr_nginx_ssl_cert_src | length > 0
+
+    - name: Install nginx SSL private key
+      ansible.builtin.copy:
+        src: "{{ gofr_nginx_ssl_key_src }}"
+        dest: "{{ gofr_nginx_certs_dir }}/tls.key"
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: "0600"
+      when:
+        - gofr_enable_nginx | bool
+        - gofr_nginx_ssl_key_src | length > 0
+
+    - name: Start GOFR Docker stack
+      ansible.builtin.command:
+        cmd: >-
+          docker compose -p {{ gofr_compose_project }}
+          {{ gofr_compose_files }}
+          up -d --build
+        chdir: "{{ gofr_compose_dir }}"
+      environment:
+        GOFR_NGINX_CERTS_DIR: "{{ gofr_nginx_certs_dir }}"
+        NGINX_SERVER_NAME: "{{ gofr_nginx_server_name }}"
+      register: gofr_compose_up
+      changed_when: >-
+        'Started' in gofr_compose_up.stderr or
+        'Created' in gofr_compose_up.stderr or
+        'Built' in gofr_compose_up.stderr or
+        'Recreated' in gofr_compose_up.stderr
+
+    - name: Show GOFR Docker stack status
+      ansible.builtin.command:
+        cmd: >-
+          docker compose -p {{ gofr_compose_project }}
+          {{ gofr_compose_files }}
+          ps
+        chdir: "{{ gofr_compose_dir }}"
+      environment:
+        GOFR_NGINX_CERTS_DIR: "{{ gofr_nginx_certs_dir }}"
+        NGINX_SERVER_NAME: "{{ gofr_nginx_server_name }}"
+      register: gofr_compose_ps
+      changed_when: false
+
+    - name: Print GOFR Docker stack status
+      ansible.builtin.debug:
+        msg: "{{ gofr_compose_ps.stdout_lines }}"

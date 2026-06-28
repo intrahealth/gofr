@@ -1,0 +1,16 @@
+services:
+  nginx:
+    container_name: gofr-nginx
+    image: nginx:alpine
+    depends_on:
+      - gofr
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - NGINX_SERVER_NAME=${NGINX_SERVER_NAME:-_}
+    volumes:
+      - ./nginx/start-nginx.sh:/etc/nginx/start-nginx.sh:ro
+      - ${GOFR_NGINX_CERTS_DIR:-./nginx/certs}:/etc/nginx/certs:ro
+    command: ["/bin/sh", "/etc/nginx/start-nginx.sh"]
+    restart: always

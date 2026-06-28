@@ -5,7 +5,9 @@
   "main": "app.js",
   "scripts": {
     "start": "node --max-old-space-size=8192 lib/app.js",
-    "test": "jest"
+    "test": "jest",
+    "validate:facility-dictionary": "node lib/scripts/validateFacilityDictionaryCsv.js",
+    "transform:facility-dictionary": "node lib/scripts/transformFacilityDictionaryToGofrCsv.js"
   },
   "repository": {
     "type": "git",

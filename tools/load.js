@@ -11,10 +11,22 @@ nconf.argv()
 
 const convert = new Fhir()
 const server = nconf.get('server')
+const username = nconf.get('username')
+const password = nconf.get('password')
 
 if ( !server ) {
     console.log("invalid arguments")
     process.exit(0)
+}
+
+if ( ( username && !password ) || ( password && !username ) ) {
+    console.log("username and password must both be provided")
+    process.exit(0)
+}
+
+const requestOptions = {}
+if ( username && password ) {
+  requestOptions.auth = { username, password }
 }
 
 for ( let file of nconf.get('_') ) {
@@ -31,7 +43,7 @@ for ( let file of nconf.get('_') ) {
         ( fhir.type === "transaction" || fhir.type === "batch" ) ) {
         console.log( "Saving " + fhir.type )
         let dest = URI(server).toString()
-        axios.post( dest, fhir ).then( ( res ) => {
+        axios.post( dest, fhir, requestOptions ).then( ( res ) => {
           console.log( dest+": "+ res.status )
           console.log( JSON.stringify( res.data, null, 2 ) )
         } ).catch( (err) => {
@@ -41,7 +53,7 @@ for ( let file of nconf.get('_') ) {
       } else {
         console.log( "Saving " + fhir.resourceType +" - "+fhir.id )
         let dest = URI(server).segment(fhir.resourceType).segment(fhir.id).toString()
-        axios.put( dest, fhir ).then( ( res ) => {
+        axios.put( dest, fhir, requestOptions ).then( ( res ) => {
           console.log( dest+": "+ res.status )
           console.log( res.headers['content-location'] )
         } ).catch( (err) => {

@@ -1,0 +1,15 @@
+{
+  "package-id": "gofr",
+  "canonical": "http://gofr.org/fhir",
+  "title": "GOFR Implementation Guide",
+  "introduction": "Conformance resources that define the base installation of GOFR",
+  "list": [
+    {
+      "version": "current",
+      "desc": "Continuous Integration Build",
+      "path": "http://gofr.org/fhir",
+      "status": "ci-build",
+      "current": true
+    }
+  ]
+}

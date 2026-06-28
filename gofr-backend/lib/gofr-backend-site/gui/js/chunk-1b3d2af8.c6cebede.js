@@ -1,2 +1,416 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-1b3d2af8"],{b78c:function(t,s,e){"use strict";e.r(s);var r=function(){var t=this,s=t.$createElement,e=t._self._c||s;return e("gofr-element",{attrs:{edit:t.edit,loading:!1},scopedSlots:t._u([{key:"form",fn:function(){return[e("v-text-field",{attrs:{"error-messages":t.errors,disabled:t.disabled,label:t.$t("App.fhir-resources-texts."+t.display),outlined:"","hide-details":"auto",rules:t.rules,type:t.isPassword?t.showPassword?"text":"password":"text","append-icon":t.isPassword?t.showPassword?"mdi-eye":"mdi-eye-off":"",dense:""},on:{change:function(s){t.errors=[]},"click:append":function(s){t.showPassword=!t.showPassword}},scopedSlots:t._u([{key:"label",fn:function(){return[t._v(t._s(t.$t("App.fhir-resources-texts."+t.display))),t.required?e("span",{staticClass:"red--text font-weight-bold"},[t._v("*")]):t._e()]},proxy:!0}]),model:{value:t.value,callback:function(s){t.value=s},expression:"value"}})]},proxy:!0},{key:"header",fn:function(){return[t._v(" "+t._s(t.$t("App.fhir-resources-texts."+t.display))+" ")]},proxy:!0},{key:"value",fn:function(){return[t._v(" "+t._s(t.value)+" ")]},proxy:!0}])})},o=[],a=e("d79a"),i={name:"fhir-string",props:["field","label","min","max","id","path","slotProps","sliceName","base-min","base-max","edit","readOnlyIfSet","constraints","displayType"],components:{GofrElement:a["a"]},data:function(){return{source:{path:"",data:{}},value:"",showPassword:!1,qField:"valueString",disabled:!1,errors:[],lockWatch:!1}},created:function(){this.setupData()},watch:{slotProps:{handler:function(){this.lockWatch||this.setupData()},deep:!0}},methods:{setupData:function(){if(this.slotProps&&this.slotProps.source){if(this.source={path:this.slotProps.source.path+"."+this.field,data:{}},this.slotProps.source.fromArray)this.source.data=this.slotProps.source.data,this.value=this.source.data,this.lockWatch=!0;else{var t=this.$fhirutils.pathFieldExpression(this.field);this.source.data=this.$fhirpath.evaluate(this.slotProps.source.data,t),1==this.source.data.length&&(this.value=this.source.data[0],this.lockWatch=!0)}this.disabled=this.readOnlyIfSet&&!!this.value}}},computed:{index:function(){return this.slotProps&&this.slotProps.input?this.slotProps.input.index:void 0},display:function(){return this.slotProps&&this.slotProps.input?this.slotProps.input.label:this.label},required:function(){return(this.index||0)<this.min},rules:function(){var t=this;return this.required?[function(s){return!!s||t.display+" is required"}]:[]},isPassword:function(){return"password"===this.displayType}}},n=i,l=e("2877"),d=e("6544"),u=e.n(d),c=e("8654"),h=Object(l["a"])(n,r,o,!1,null,null,null);s["default"]=h.exports;u()(h,{VTextField:c["a"]})},d79a:function(t,s,e){"use strict";var r=function(){var t=this,s=t.$createElement,e=t._self._c||s;return e("div",[t.edit?e("v-container",[t._t("form")],2):e("div",[e("v-row",{attrs:{dense:""}},[e("v-col",{staticClass:"font-weight-bold",attrs:{cols:t.$store.state.cols.header}},[t._t("header")],2),t.loading?e("v-col",{attrs:{cols:t.$store.state.cols.content}},[e("v-progress-linear",{attrs:{indeterminate:"",color:"primary"}})],1):e("v-col",{attrs:{cols:t.$store.state.cols.content}},[t._t("value")],2)],1),e("v-divider")],1)],1)},o=[],a={name:"gofr-element",props:["edit","loading"]},i=a,n=e("2877"),l=e("6544"),d=e.n(l),u=e("62ad"),c=e("a523"),h=e("ce7e"),p=e("8e36"),f=e("0fd9"),v=Object(n["a"])(i,r,o,!1,null,null,null);s["a"]=v.exports;d()(v,{VCol:u["a"],VContainer:c["a"],VDivider:h["a"],VProgressLinear:p["a"],VRow:f["a"]})}}]);
-//# sourceMappingURL=chunk-1b3d2af8.c6cebede.js.map
+(window["webpackJsonp"] = window["webpackJsonp"] || []).push([
+	["chunk-1b3d2af8"],
+	{
+		b78c: function(module, __webpack_exports__, __webpack_require__) {
+			"use strict";
+
+			__webpack_require__.r(__webpack_exports__);
+
+			var DAMM_TABLE = [
+				[0, 3, 1, 7, 5, 9, 8, 6, 4, 2],
+				[7, 0, 9, 2, 1, 5, 4, 8, 6, 3],
+				[4, 2, 0, 6, 8, 7, 1, 3, 5, 9],
+				[1, 7, 5, 0, 9, 8, 3, 4, 2, 6],
+				[6, 1, 2, 3, 0, 4, 5, 9, 7, 8],
+				[3, 6, 7, 4, 2, 0, 9, 5, 8, 1],
+				[5, 8, 6, 9, 7, 2, 0, 1, 3, 4],
+				[8, 9, 4, 5, 3, 6, 2, 0, 1, 7],
+				[9, 4, 3, 8, 6, 1, 7, 2, 0, 5],
+				[2, 5, 8, 1, 4, 3, 6, 7, 9, 0]
+			];
+
+			function computeCheckDigit(body) {
+				var interim = 0;
+				var index;
+
+				for (index = 0; index < body.length; index += 1) {
+					interim = DAMM_TABLE[interim][parseInt(body.charAt(index), 10)];
+				}
+
+				return interim;
+			}
+
+			function verifyHfidValue(numericString) {
+				var interim = 0;
+				var index;
+
+				if (!/^\d{6}$/.test(numericString)) {
+					return false;
+				}
+
+				for (index = 0; index < numericString.length; index += 1) {
+					interim = DAMM_TABLE[interim][parseInt(numericString.charAt(index), 10)];
+				}
+
+				return interim === 0;
+			}
+
+			function generateHfidValue() {
+				var body = "";
+				var index;
+
+				for (index = 0; index < 5; index += 1) {
+					body += String(Math.floor(Math.random() * 10));
+				}
+
+				return body + String(computeCheckDigit(body));
+			}
+
+			function formatHfidDisplayValue(numericString) {
+				if (!/^\d{6}$/.test(numericString)) {
+					return numericString;
+				}
+
+				return "F-" + numericString.slice(0, 3) + "-" + numericString.slice(3);
+			}
+
+			function parseHfidInputValue(rawInput) {
+				var cleaned;
+
+				if (rawInput === undefined || rawInput === null || rawInput === "") {
+					return null;
+				}
+
+				cleaned = String(rawInput).trim();
+				if (cleaned.toUpperCase().indexOf("F") === 0) {
+					cleaned = cleaned.slice(1);
+				}
+
+				cleaned = cleaned.replace(/[-\s]/g, "");
+				if (!/^\d{6}$/.test(cleaned)) {
+					return null;
+				}
+
+				return cleaned;
+			}
+
+			var render = function() {
+				var vm = this;
+				var h = vm.$createElement;
+
+				return h("gofr-element", {
+					attrs: {
+						edit: vm.edit,
+						loading: false
+					},
+					scopedSlots: {
+						form: function() {
+							return [
+								h("v-text-field", {
+									attrs: {
+										"error-messages": vm.errors,
+										disabled: vm.disabled,
+										label: vm.$t("App.fhir-resources-texts." + vm.display),
+										outlined: "",
+										"hide-details": "auto",
+										rules: vm.rules,
+										type: vm.isPassword ? (vm.showPassword ? "text" : "password") : "text",
+										"append-icon": vm.isHfid
+											? "mdi-refresh"
+											: (vm.isPassword ? (vm.showPassword ? "mdi-eye" : "mdi-eye-off") : ""),
+										hint: vm.isHfid && vm.hfidDisplayFormat ? "Display: " + vm.hfidDisplayFormat : "",
+										"persistent-hint": vm.isHfid && !!vm.hfidDisplayFormat,
+										dense: ""
+									},
+									on: {
+										change: function() {
+											vm.errors = [];
+										},
+										"click:append": function() {
+											if (vm.isHfid) {
+												vm.generateHfid();
+												return;
+											}
+
+											vm.showPassword = !vm.showPassword;
+										}
+									},
+									scopedSlots: {
+										label: function() {
+											var nodes = [vm._v(vm._s(vm.$t("App.fhir-resources-texts." + vm.display)))];
+
+											if (vm.required) {
+												nodes.push(
+													h("span", { staticClass: "red--text font-weight-bold" }, [vm._v("*")])
+												);
+											}
+
+											return nodes;
+										}
+									},
+									model: {
+										value: vm.value,
+										callback: function($$v) {
+											vm.value = $$v;
+										},
+										expression: "value"
+									}
+								})
+							];
+						},
+						header: function() {
+							return [vm._v(" " + vm._s(vm.$t("App.fhir-resources-texts." + vm.display)) + " ")];
+						},
+						value: function() {
+							return [
+								vm._v(" " + vm._s(vm.isHfid && vm.value ? vm.hfidDisplayFormat : vm.value) + " ")
+							];
+						}
+					}
+				});
+			};
+
+			var staticRenderFns = [];
+
+			var GofrElement = __webpack_require__("d79a");
+			var componentOptions = {
+				name: "fhir-string",
+				props: [
+					"field",
+					"label",
+					"min",
+					"max",
+					"id",
+					"path",
+					"slotProps",
+					"sliceName",
+					"base-min",
+					"base-max",
+					"edit",
+					"readOnlyIfSet",
+					"constraints",
+					"displayType"
+				],
+				components: {
+					GofrElement: GofrElement["a"]
+				},
+				data: function() {
+					return {
+						source: { path: "", data: {} },
+						value: "",
+						showPassword: false,
+						qField: "valueString",
+						disabled: false,
+						errors: [],
+						lockWatch: false
+					};
+				},
+				created: function() {
+					this.setupData();
+				},
+				watch: {
+					slotProps: {
+						handler: function() {
+							if (!this.lockWatch) {
+								this.setupData();
+							} else {
+								this.ensureHfidValue();
+							}
+						},
+						deep: true
+					}
+				},
+				methods: {
+					setupData: function() {
+						if (this.slotProps && this.slotProps.source) {
+							this.source = {
+								path: this.slotProps.source.path + "." + this.field,
+								data: {}
+							};
+
+							if (this.slotProps.source.fromArray) {
+								this.source.data = this.slotProps.source.data;
+								this.value = this.source.data;
+								this.lockWatch = true;
+							} else {
+								var expression = this.$fhirutils.pathFieldExpression(this.field);
+
+								this.source.data = this.$fhirpath.evaluate(this.slotProps.source.data, expression);
+								if (this.source.data.length === 1) {
+									this.value = this.source.data[0];
+									this.lockWatch = true;
+								}
+							}
+
+							this.disabled = this.readOnlyIfSet && !!this.value;
+						}
+
+						this.ensureHfidValue();
+					},
+					generateHfid: function() {
+						this.value = generateHfidValue();
+					},
+					ensureHfidValue: function() {
+						if (!this.isHfid || this.value) {
+							return;
+						}
+
+						this.value = generateHfidValue();
+					}
+				},
+				computed: {
+					index: function() {
+						return this.slotProps && this.slotProps.input ? this.slotProps.input.index : undefined;
+					},
+					display: function() {
+						return this.slotProps && this.slotProps.input ? this.slotProps.input.label : this.label;
+					},
+					required: function() {
+						return (this.index || 0) < this.min;
+					},
+					isHfid: function() {
+						return (this.display || "").toUpperCase().indexOf("HFID") !== -1;
+					},
+					hfidDisplayFormat: function() {
+						var parsed;
+
+						if (!this.isHfid || !this.value) {
+							return "";
+						}
+
+						parsed = parseHfidInputValue(this.value);
+						return parsed ? formatHfidDisplayValue(parsed) : "";
+					},
+					rules: function() {
+						var vm = this;
+						var rules = [];
+
+						if (this.required) {
+							rules.push(function(value) {
+								return !!value || vm.display + " is required";
+							});
+						}
+
+						if (this.isHfid) {
+							rules.push(function(value) {
+								var parsed;
+
+								if (!value) {
+									return true;
+								}
+
+								parsed = parseHfidInputValue(value);
+								if (!parsed) {
+									return "HFID must be a 6-digit number (optionally formatted as F-XXX-XXX)";
+								}
+
+								return verifyHfidValue(parsed) || "Invalid HFID - check digit does not match (Damm algorithm)";
+							});
+						}
+
+						return rules;
+					},
+					isPassword: function() {
+						return this.displayType === "password";
+					}
+				}
+			};
+
+			var componentNormalizer = __webpack_require__("2877");
+			var installComponents = __webpack_require__("6544");
+			var installComponentsDefault = __webpack_require__.n(installComponents);
+			var VTextField = __webpack_require__("8654");
+			var component = Object(componentNormalizer["a"])(
+				componentOptions,
+				render,
+				staticRenderFns,
+				false,
+				null,
+				null,
+				null
+			);
+
+			__webpack_exports__["default"] = component.exports;
+			installComponentsDefault()(component, { VTextField: VTextField["a"] });
+		},
+
+		d79a: function(module, __webpack_exports__, __webpack_require__) {
+			"use strict";
+
+			var render = function() {
+				var vm = this;
+				var h = vm.$createElement;
+
+				return h(
+					"div",
+					[
+						vm.edit
+							? h("v-container", [vm._t("form")], 2)
+							: h("div", [
+									h(
+										"v-row",
+										{ attrs: { dense: "" } },
+										[
+											h(
+												"v-col",
+												{
+													staticClass: "font-weight-bold",
+													attrs: { cols: vm.$store.state.cols.header }
+												},
+												[vm._t("header")],
+												2
+											),
+											vm.loading
+												? h(
+														"v-col",
+														{ attrs: { cols: vm.$store.state.cols.content } },
+														[
+															h("v-progress-linear", {
+																attrs: {
+																	indeterminate: "",
+																	color: "primary"
+																}
+															})
+														],
+														1
+													)
+												: h(
+														"v-col",
+														{ attrs: { cols: vm.$store.state.cols.content } },
+														[vm._t("value")],
+														2
+													)
+										],
+										1
+									),
+									h("v-divider")
+								], 1)
+					],
+					1
+				);
+			};
+
+			var staticRenderFns = [];
+			var componentOptions = {
+				name: "gofr-element",
+				props: ["edit", "loading"]
+			};
+			var componentNormalizer = __webpack_require__("2877");
+			var installComponents = __webpack_require__("6544");
+			var installComponentsDefault = __webpack_require__.n(installComponents);
+			var VCol = __webpack_require__("62ad");
+			var VContainer = __webpack_require__("a523");
+			var VDivider = __webpack_require__("ce7e");
+			var VProgressLinear = __webpack_require__("8e36");
+			var VRow = __webpack_require__("0fd9");
+			var component = Object(componentNormalizer["a"])(
+				componentOptions,
+				render,
+				staticRenderFns,
+				false,
+				null,
+				null,
+				null
+			);
+
+			__webpack_exports__["a"] = component.exports;
+			installComponentsDefault()(component, {
+				VCol: VCol["a"],
+				VContainer: VContainer["a"],
+				VDivider: VDivider["a"],
+				VProgressLinear: VProgressLinear["a"],
+				VRow: VRow["a"]
+			});
+		}
+	}
+]);

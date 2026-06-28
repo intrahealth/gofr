@@ -66,7 +66,7 @@
       }
     }
   },
-  "builtFSHFIles": "../../fshmcsd/fsh-generated/resources",
+  "builtFSHFIles": "../../fshcustom/fsh-generated/resources",
   "workflow": {
     "processor": {},
     "questionnaire": {}

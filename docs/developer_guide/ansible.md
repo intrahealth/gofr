@@ -77,6 +77,71 @@ ansible-playbook -i hosts  nicetohave.yaml -e user=gofr
 
 > Note: For the remainder of the playbooks, `-e user=gofr` is appended to the commands and must be changed if there's a different user being used on the target host.
 
+### Docker-based installation
+
+Use `docker-install.yaml` to set up a fresh Ubuntu or Debian server with Docker and run the Docker Compose stack from `instant/docker`.
+
+This playbook:
+* installs Docker Engine, Docker Buildx, and the Docker Compose plugin
+* adds the install user to the `docker` group
+* clones `https://github.com/ddhmoh-tech/Facility-Registry.git`
+* checks out the `main` branch
+* starts the GOFR stack with `docker compose up -d --build`
+* starts an nginx reverse proxy on port 80 by default
+
+Run:
+```sh
+ansible-playbook -i hosts docker-install.yaml -e user=gofr
+```
+
+If the repository is private, configure a GitHub SSH deploy key for the target user and pass the SSH clone URL:
+```sh
+ansible-playbook -i hosts docker-install.yaml -e user=gofr -e gofr_repo_clone_url=git@github.com:ddhmoh-tech/Facility-Registry.git
+```
+
+If the SSH key is not the user's default key, pass its path on the target host:
+```sh
+ansible-playbook -i hosts docker-install.yaml -e user=gofr -e gofr_repo_clone_url=git@github.com:ddhmoh-tech/Facility-Registry.git -e gofr_repo_key_file=/home/gofr/.ssh/facility_registry_deploy_key
+```
+
+If the target host cannot read the repository, the playbook uploads the controller's current checkout instead. This requires running the playbook from this repository and is useful when the controller has repository access but the target server does not.
+
+The playbook installs the application repo at `/home/<user>/gofr` by default and runs Compose from `/home/<user>/gofr/instant/docker`.
+
+The nginx overlay is enabled by default. Without SSL certificates, nginx proxies GOFR over HTTP on port 80. With certificates, nginx listens on 443 and redirects HTTP traffic to HTTPS.
+
+To install with SSL, provide a certificate and private key from the controller:
+```sh
+ansible-playbook -i hosts docker-install.yaml -e user=gofr -e gofr_nginx_ssl_cert_src=/path/to/fullchain.pem -e gofr_nginx_ssl_key_src=/path/to/privkey.pem -e gofr_nginx_server_name=facility.example.org
+```
+
+The playbook copies those files to `/home/<user>/gofr-nginx-certs/tls.crt` and `/home/<user>/gofr-nginx-certs/tls.key` on the target host. Existing files in that directory are reused on later runs; remove them to return nginx to HTTP-only mode. To disable the nginx overlay and expose only the compose file's direct service ports, run:
+```sh
+ansible-playbook -i hosts docker-install.yaml -e user=gofr -e gofr_enable_nginx=false
+```
+
+After installation, check the containers:
+```sh
+ssh gofr@<server>
+cd ~/gofr/instant/docker
+GOFR_NGINX_CERTS_DIR=~/gofr-nginx-certs docker compose -p gofr -f docker-compose.yml -f docker-compose.nginx.yml ps
+```
+
+Check external TCP access from the controller or another remote machine:
+```sh
+nc -vz <server> 80
+nc -vz <server> 443
+```
+
+Without SSL certificates, port 80 should connect and port 443 may refuse HTTPS traffic. With SSL certificates installed, both ports should connect, and HTTP requests on port 80 should redirect to HTTPS.
+
+To restart or update the Docker stack after pulling changes:
+```sh
+ansible-playbook -i hosts docker-install.yaml -e user=gofr
+```
+
+### Native Ubuntu installation
+
 Prerequisites: git, redis, nodejs, native build pkgs for node, java, tomcat, maven:
 ```sh 
 ansible-playbook -i hosts prep.yaml -e user=gofr
@@ -208,4 +273,3 @@ HAPI v6.0.1 error with GOFR accessing HAPI:
 "diagnostics": "HAPI-0389: Failed to call access method: org.springframework.transaction.CannotCreateTransactionException: Could not open JPA EntityManager for transaction; nested exception is org.hibernate.exception.JDBCConnectionException: Unable to acquire JDBC Connection"
 }
 ```
-

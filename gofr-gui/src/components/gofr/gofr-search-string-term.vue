@@ -44,10 +44,13 @@ export default {
       items: [],
       error: false,
       err_messages: null,
-      value: []
+      value: this.binding ? [] : ''
     }
   },
   mounted: function() {
+    if ( !this.binding ) {
+      return
+    }
     this.loading = true
     this.$fhirutils.expand( this.binding ).then( items => {
       this.items = items

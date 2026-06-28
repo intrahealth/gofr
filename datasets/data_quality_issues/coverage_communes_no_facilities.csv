@@ -1,0 +1,440 @@
+commune_code,commune_name,district_name,province_name
+010503,Kuttasat,Ou Chrov,Banteay Meanchey
+010507,Soengh,Ou Chrov,Banteay Meanchey
+010706,Kumru,Thma Puok,Banteay Meanchey
+010805,Ta Baen,Svay Chek,Banteay Meanchey
+010905,Tuol Pongro,Malai,Banteay Meanchey
+020102,Kantueu Pir,Banan,Battambang
+020103,Bay Damram,Banan,Battambang
+020302,Prek Preah Sdach,Battambang,Battambang
+020303,Rottanak,Battambang,Battambang
+020309,Ou Char,Battambang,Battambang
+020503,Preaek Khpob,Aek Phnum,Battambang
+020702,Andaeuk Haeb,Rotonak Mondol,Battambang
+020901,Ta Taok,Samlout,Battambang
+020904,Sung,Samlout,Battambang
+021002,Angkor Ban,Sampov Lun,Battambang
+021004,Santepheap,Sampov Lun,Battambang
+021006,Chrey Seima,Sampov Lun,Battambang
+021101,Phnum Proek,Phnum Proek,Battambang
+021105,Ou Rumduol,Phnum Proek,Battambang
+021202,Boeng Reang,Kamrieng,Battambang
+021203,Ou Da,Kamrieng,Battambang
+021205,Ta Saen,Kamrieng,Battambang
+021303,Hab,Koas Krala,Battambang
+021304,Preah Phos,Koas Krala,Battambang
+021305,Doun Ba,Koas Krala,Battambang
+021306,Chhnal Moan,Koas Krala,Battambang
+021402,Prey Tralach,Rukh Kiri,Battambang
+021403,Mukh Reah,Rukh Kiri,Battambang
+030103,Chealea,Batheay,Kampong Cham
+030105,Me Pring,Batheay,Kampong Cham
+030302,Kouk Rovieng,Cheung Prey,Kampong Cham
+030303,Pdau Chum,Cheung Prey,Kampong Cham
+030304,Prey Char,Cheung Prey,Kampong Cham
+030309,Sramar,Cheung Prey,Kampong Cham
+030501,Boeng Kok,Kampong Cham,Kampong Cham
+030608,Kaoh Tontuem,Kampong Siem,Kampong Cham
+030611,Ro'ang,Kampong Siem,Kampong Cham
+030612,Rumchek,Kampong Siem,Kampong Cham
+030702,Kang Ta Noeng,Kang Meas,Kampong Cham
+030705,Preaek Koy,Kang Meas,Kampong Cham
+030709,Roka Koy,Kang Meas,Kampong Cham
+030807,Pongro,Kaoh Soutin,Kampong Cham
+031302,Boeng Nay,Prey Chhor,Kampong Cham
+031304,Khvet Thum,Prey Chhor,Kampong Cham
+031309,Prey Chhor,Prey Chhor,Kampong Cham
+031312,Sragnae,Prey Chhor,Kampong Cham
+031402,Chi Bal,Srei Santhor,Kampong Cham
+031403,Khnar Sa,Srei Santhor,Kampong Cham
+031404,Kaoh Andaet,Srei Santhor,Kampong Cham
+031406,Phteah Kandal,Srei Santhor,Kampong Cham
+031411,Ruessei Srok,Srei Santhor,Kampong Cham
+031508,Preah Andoung,Stueng Trang,Kampong Cham
+040101,Anhchanh Rung,Baribour,Kampong Chhnang
+040103,Chak,Baribour,Kampong Chhnang
+040104,Khon Rang,Baribour,Kampong Chhnang
+040105,Kampong Preah Kokir,Baribour,Kampong Chhnang
+040106,Melum,Baribour,Kampong Chhnang
+040110,Ponley,Baribour,Kampong Chhnang
+040201,Chol Sar,Chol Kiri,Kampong Chhnang
+040203,Kampong Ous,Chol Kiri,Kampong Chhnang
+040303,B'er,Kampong Chhnang,Kampong Chhnang
+040304,Khsam,Kampong Chhnang,Kampong Chhnang
+040402,Dar,Kampong Leaeng,Kampong Chhnang
+040405,Pou,Kampong Leaeng,Kampong Chhnang
+040407,Samraong Saen,Kampong Leaeng,Kampong Chhnang
+040409,Trangel,Kampong Leaeng,Kampong Chhnang
+040506,Ou Ruessei,Kampong Tralach,Kampong Chhnang
+040510,Thma Edth,Kampong Tralach,Kampong Chhnang
+040601,Andoung Snay,Rolea B'ier,Kampong Chhnang
+040602,Banteay Preal,Rolea B'ier,Kampong Chhnang
+040608,Prasnoeb,Rolea B'ier,Kampong Chhnang
+040706,Svay,Sameakki Mean Chey,Kampong Chhnang
+040805,Khlong Popok,Tuek Phos,Kampong Chhnang
+040808,Tuol Khpos,Tuek Phos,Kampong Chhnang
+050105,Pheari Mean Chey,Basedth,Kampong Speu
+050110,Svay Chacheb,Basedth,Kampong Speu
+050115,Preah Khae,Basedth,Kampong Speu
+050204,Sopoar Tep,Chbar Mon,Kampong Speu
+050205,Svay Kravan,Chbar Mon,Kampong Speu
+050301,Angk Popel,Kong Pisei,Kampong Speu
+050312,Tuek L'ak,Kong Pisei,Kampong Speu
+050401,Haong Samnam,Aoral,Kampong Speu
+050402,Reaksmei Sameakki,Aoral,Kampong Speu
+050405,Ta Sal,Aoral,Kampong Speu
+050502,Cheung Roas,Odongk,Kampong Speu
+050503,Chumpu Proeks,Odongk,Kampong Speu
+050506,Mean Chey,Odongk,Kampong Speu
+050507,Preah Srae,Odongk,Kampong Speu
+050509,Trach Tong,Odongk,Kampong Speu
+050513,Damnak Reang,Odongk,Kampong Speu
+050514,Peang Lvea,Odongk,Kampong Speu
+050602,Choam Sangkae,Phnum Sruoch,Kampong Speu
+050603,Dambouk Rung,Phnum Sruoch,Kampong Speu
+050605,Krang Dei Vay,Phnum Sruoch,Kampong Speu
+050609,Prey Kmeng,Phnum Sruoch,Kampong Speu
+050610,Tang Samraong,Phnum Sruoch,Kampong Speu
+050611,Tang Sya,Phnum Sruoch,Kampong Speu
+050703,Khtum Krang,Samraong Tong,Kampong Speu
+050704,Krang Ampil,Samraong Tong,Kampong Speu
+050708,Sambour,Samraong Tong,Kampong Speu
+050709,Saen Dei,Samraong Tong,Kampong Speu
+050712,Thummoda Ar,Samraong Tong,Kampong Speu
+050714,Tumpoar Meas,Samraong Tong,Kampong Speu
+050802,Monourom,Thpong,Kampong Speu
+050806,Toap Mean,Thpong,Kampong Speu
+050808,Yea Angk,Thpong,Kampong Speu
+060101,Bak Sna,Baray,Kampong Thom
+060109,Chrolong,Baray,Kampong Thom
+060113,Pongro,Baray,Kampong Thom
+060205,Nipech,Kampong Svay,Kampong Thom
+060206,Phat Sanday,Kampong Svay,Kampong Thom
+060208,Tbaeng,Kampong Svay,Kampong Thom
+060210,Kdei Doung,Kampong Svay,Kampong Thom
+060211,Prey Kuy,Kampong Svay,Kampong Thom
+060303,Kampong Roteh,Stueng Saen,Kampong Thom
+060304,Ou Kanthor,Stueng Saen,Kampong Thom
+060306,Kampong Krabau,Stueng Saen,Kampong Thom
+060308,Prey Ta Hu,Stueng Saen,Kampong Thom
+060402,Kraya,Prasat Ballangk,Kampong Thom
+060403,Phan Nheum,Prasat Ballangk,Kampong Thom
+060406,Sameakki,Prasat Ballangk,Kampong Thom
+060407,Tuol Kreul,Prasat Ballangk,Kampong Thom
+060502,Koul,Prasat Sambour,Kampong Thom
+060504,Sraeung,Prasat Sambour,Kampong Thom
+060602,Dang Kambet,Sandan,Kampong Thom
+060603,Klaeng,Sandan,Kampong Thom
+060604,Mean Rith,Sandan,Kampong Thom
+060606,Ngan,Sandan,Kampong Thom
+060608,Sochet,Sandan,Kampong Thom
+060701,Boeng Lvea,Santuk,Kampong Thom
+060702,Chroab,Santuk,Kampong Thom
+060706,Pnov,Santuk,Kampong Thom
+060804,Kampong Chen Cheung,Stoung,Kampong Thom
+060810,Preah Damrei,Stoung,Kampong Thom
+060811,Rung Roeang,Stoung,Kampong Thom
+070101,Angk Phnum Touch,Angkor Chey,Kampot
+070107,Mroum,Angkor Chey,Kampot
+070111,Tani,Angkor Chey,Kampot
+070204,Samraong Kraom,Banteay Meas,Kampot
+070206,Sdach Kong Khang Cheung,Banteay Meas,Kampot
+070211,Trapeang Sala Khang Lech,Banteay Meas,Kampot
+070212,Tuk Meas Khang Kaeut,Banteay Meas,Kampot
+070214,Voat Angk Khang Cheung,Banteay Meas,Kampot
+070310,Mean Chey,Chhuk,Kampot
+070312,Satv Pong,Chhuk,Kampot
+070314,Tramaeng,Chhuk,Kampot
+070406,Srae Samraong,Chum Kiri,Kampot
+070501,Damnak Sokram,Dang Tong,Kampot
+070503,Khcheay Khang Cheung,Dang Tong,Kampot
+070504,Khcheay Khang Tboung,Dang Tong,Kampot
+070506,Srae Chea Khang Cheung,Dang Tong,Kampot
+070601,Boeng Sala Khang Cheung,Kampong Trach,Kampot
+070606,Kampong Trach Khang Lech,Kampong Trach,Kampot
+070607,Prasat Phnom Khyang,Kampong Trach,Kampot
+070608,Phnom Prasat,Kampong Trach,Kampot
+070616,Svay Tong Khang Tboung,Kampong Trach,Kampot
+070701,Boeng Tuk,Tuek Chhou,Kampot
+070704,Kampong Samraong,Tuek Chhou,Kampot
+070716,Thmei,Tuek Chhou,Kampot
+070717,Trapeang Pring,Tuek Chhou,Kampot
+070719,Trapeang Thum,Tuek Chhou,Kampot
+070804,Andoung Khmer,Kampot,Kampot
+080105,Cheung Kaeub,Kandal Stueng,Kandal
+080107,Kandaok,Kandal Stueng,Kandal
+080108,Thmei,Kandal Stueng,Kandal
+080109,Kouk Trab,Kandal Stueng,Kandal
+080113,Preah Putth,Kandal Stueng,Kandal
+080115,Preaek Roka,Kandal Stueng,Kandal
+080116,Preaek Slaeng,Kandal Stueng,Kandal
+080118,Roleang Kaen,Kandal Stueng,Kandal
+080125,Tbaeng,Kandal Stueng,Kandal
+080128,Trea,Kandal Stueng,Kandal
+080301,Bak Dav,Khsach Kandal,Kandal
+080305,Kaoh Oknha Tei,Khsach Kandal,Kandal
+080309,Preaek Ta Kov,Khsach Kandal,Kandal
+080314,Sithor,Khsach Kandal,Kandal
+080315,Svay Chrum,Khsach Kandal,Kandal
+080316,Svay Romiet,Khsach Kandal,Kandal
+080317,Ta Aek,Khsach Kandal,Kandal
+080501,Kampong Phnum,Leuk Daek,Kandal
+080503,Khpob Ateav,Leuk Daek,Kandal
+080504,Peam Reang,Leuk Daek,Kandal
+080505,Preaek Dach,Leuk Daek,Kandal
+080506,Preaek Tonloab,Leuk Daek,Kandal
+080507,Sandar,Leuk Daek,Kandal
+080603,Boeng Krum,Lvea Aem,Kandal
+080604,Kaoh Kaev,Lvea Aem,Kandal
+080609,Preaek Kmeng,Lvea Aem,Kandal
+080614,Thma Kor,Lvea Aem,Kandal
+080708,Roka Kong Ti Pir,Mukh Kampul,Kandal
+080803,Chhak Chheu Neang,Angk Snuol,Kandal
+080910,Preaek Ta Teaen,Ponhea Lueu,Kandal
+080911,Phsar Daek,Ponhea Lueu,Kandal
+081002,Kaoh Anlong Chen,S'ang,Kandal
+081009,Roka Khpos,S'ang,Kandal
+081101,Ta Kdol,Ta Khmau,Kandal
+081102,Prek Ruessey,Ta Khmau,Kandal
+081103,Doeum Mien,Ta Khmau,Kandal
+081106,Kampong Samnanh,Ta Khmau,Kandal
+090102,Kandaol,Botum Sakor,Koh Kong
+090203,Preaek Khsach,Kiri Sakor,Koh Kong
+090403,Stueng Veaeng,Khemara Phoumin,Koh Kong
+090502,Peam Krasaob,Mondol Seima,Koh Kong
+090503,Tuol Kokir,Mondol Seima,Koh Kong
+090602,Chi Kha Kraom,Srae Ambel,Koh Kong
+090603,Chi kha Leu,Srae Ambel,Koh Kong
+090604,Chrouy Svay,Srae Ambel,Koh Kong
+090605,Dang Peaeng,Srae Ambel,Koh Kong
+090701,Ta Tey Leu,Thma Bang,Koh Kong
+100103,Han Chey,Chhloung,Kratie
+100207,Kaoh Trong,Kracheh,Kratie
+100304,Koh Ta Suy,Prek Prasab,Kratie
+100401,Boeng Char,Sambour,Kratie
+100403,Kbal Damrei,Sambour,Kratie
+100404,Kaoh Khnhaer,Sambour,Kratie
+100405,Ou Krieng,Sambour,Kratie
+100406,Roluos Mean Chey,Sambour,Kratie
+100409,Srae Chis,Sambour,Kratie
+100606,Kaoh Chraeng,Chetr Borei,Kratie
+110103,Srae Chhuk,Kaev Seima,Mondul Kiri
+110205,Srae Huy,Kaoh Nheaek,Mondul Kiri
+110403,Srae Ampum,Pech Chreada,Mondul Kiri
+110501,Monourom,Saen Monourom,Mondul Kiri
+120101,Tonle Basak,Chamkar Mon,Phnom Penh
+120102,Boeng Keng Kang Ti Muoy,Chamkar Mon,Phnom Penh
+120104,Boeng Keng Kang Ti Bei,Chamkar Mon,Phnom Penh
+120105,Olympic,Chamkar Mon,Phnom Penh
+120106,Tuol Svay Prey Ti Muoy,Chamkar Mon,Phnom Penh
+120109,Tuol Tumpung Ti Pir,Chamkar Mon,Phnom Penh
+120110,Tuol Tumpung Ti Muoy,Chamkar Mon,Phnom Penh
+120111,Boeng Trabaek,Chamkar Mon,Phnom Penh
+120202,Phsar Thmei Ti Pir,Doun Penh,Phnom Penh
+120204,Boeng Reang,Doun Penh,Phnom Penh
+120205,Phsar Kandal Ti Muoy,Doun Penh,Phnom Penh
+120206,Phsar Kandal Ti Pir,Doun Penh,Phnom Penh
+120207,Chakto Mukh,Doun Penh,Phnom Penh
+120209,Phsar Chas,Doun Penh,Phnom Penh
+120211,Voat Phnum,Doun Penh,Phnom Penh
+120301,Ou Ruessei Ti Muoy,Prampir Meakkakra,Phnom Penh
+120302,Ou Ruessei Ti Pir,Prampir Meakkakra,Phnom Penh
+120303,Ou Ruessei Ti Bei,Prampir Meakkakra,Phnom Penh
+120304,Ou Ruessei Ti Buon,Prampir Meakkakra,Phnom Penh
+120305,Monourom,Prampir Meakkakra,Phnom Penh
+120306,Mittapheap,Prampir Meakkakra,Phnom Penh
+120308,Boeng Proluet,Prampir Meakkakra,Phnom Penh
+120401,Phsar Depou Ti Muoy,Tuol Kouk,Phnom Penh
+120402,Phsar Depou Ti Pir,Tuol Kouk,Phnom Penh
+120403,Phsar Depou Ti Bei,Tuol Kouk,Phnom Penh
+120406,Tuek L'ak Ti Bei,Tuol Kouk,Phnom Penh
+120408,Boeng Kak Ti Pir,Tuol Kouk,Phnom Penh
+120409,Phsar Daeum Kor,Tuol Kouk,Phnom Penh
+120410,Boeng Salang,Tuol Kouk,Phnom Penh
+120512,Krang Pongro,Dangkao,Phnom Penh
+120513,Prateah Lang,Dangkao,Phnom Penh
+120516,Kong Noy,Dangkao,Phnom Penh
+120519,Spean Thma,Dangkao,Phnom Penh
+120520,Tien,Dangkao,Phnom Penh
+120601,Stueng Mean Chey,Mean Chey,Phnom Penh
+120602,Boeng Tumpun,Mean Chey,Phnom Penh
+120606,Chak Angrae Leu,Mean Chey,Phnom Penh
+120702,Tuol Sangke,Russey Keo,Phnom Penh
+120706,Ruessei Kaev,Russey Keo,Phnom Penh
+120711,Chrang Chamreh Ti Muoy,Russey Keo,Phnom Penh
+120712,Chrang Chamreh Ti Pir,Russey Keo,Phnom Penh
+120903,Phleung Chheh Roteh,Pur SenChey,Phnom Penh
+120904,Chaom Chau,Pur SenChey,Phnom Penh
+120905,Kakab,Pur SenChey,Phnom Penh
+120908,Boeng Thum,Pur SenChey,Phnom Penh
+120909,Kamboul,Pur SenChey,Phnom Penh
+120910,Kantaok,Pur SenChey,Phnom Penh
+120911,Ovlaok,Pur SenChey,Phnom Penh
+120913,Snaor,Pur SenChey,Phnom Penh
+121002,Preaek Lieb,Chraoy Chongvar,Phnom Penh
+121003,Preaek Ta Sek,Chraoy Chongvar,Phnom Penh
+121005,Bak Kaeng,Chraoy Chongvar,Phnom Penh
+121202,Chbar Ampov Ti Pir,Chbar Ampov,Phnom Penh
+121204,Preaek Pra,Chbar Ampov,Phnom Penh
+121205,Veal Sbov,Chbar Ampov,Phnom Penh
+130102,Tasu,Chey Saen,Preah Vihear
+130103,Khyang,Chey Saen,Preah Vihear
+130105,Thmea,Chey Saen,Preah Vihear
+130202,Chhaeb Pir,Chhaeb,Preah Vihear
+130203,Sangkae Muoy,Chhaeb,Preah Vihear
+130204,Sangkae Pir,Chhaeb,Preah Vihear
+130206,Mlu Prey Pir,Chhaeb,Preah Vihear
+130208,Kampong Sralau Pir,Chhaeb,Preah Vihear
+130303,Pring Thum,Choam Ksant,Preah Vihear
+130304,Rumdaoh Srae,Choam Ksant,Preah Vihear
+130402,Kuleaen Cheung,Kuleaen,Preah Vihear
+130404,Phnum Penh,Kuleaen,Preah Vihear
+130502,Reaksmei,Rovieng,Preah Vihear
+130503,Rohas,Rovieng,Preah Vihear
+130504,Rung Roeang,Rovieng,Preah Vihear
+130505,Rik Reay,Rovieng,Preah Vihear
+130507,Rotanak,Rovieng,Preah Vihear
+130508,Rieb Roy,Rovieng,Preah Vihear
+130509,Reaksa,Rovieng,Preah Vihear
+130510,Rumdaoh,Rovieng,Preah Vihear
+130511,Romtum,Rovieng,Preah Vihear
+130602,Ro'ang,Sangkum Thmei,Preah Vihear
+130603,Phnum Tbaeng Muoy,Sangkum Thmei,Preah Vihear
+130604,Sdau,Sangkum Thmei,Preah Vihear
+130703,Chhean Mukh,Tbaeng Mean Chey,Preah Vihear
+130705,Prame,Tbaeng Mean Chey,Preah Vihear
+130706,Preah Khleang,Tbaeng Mean Chey,Preah Vihear
+140102,Cheung Phnum,Ba Phnum,Prey Veng
+140706,Preaek Khsay Ka,Peam Ro,Prey Veng
+141001,Baray,Prey Veng,Prey Veng
+141002,Cheung Tuek,Prey Veng,Prey Veng
+141205,Pnov Ti Pir,Sithor Kandal,Prey Veng
+141302,Chea Khlang,Svay Antor,Prey Veng
+150207,Svay Luong,Kandieng,Pursat
+150209,Veal,Kandieng,Pursat
+150210,Kaoh Chum,Kandieng,Pursat
+150301,Anlong Tnaot,Krakor,Pursat
+150308,Ou Sandan,Krakor,Pursat
+150405,Rokat,Phnum Kravanh,Pursat
+150406,Santreae,Phnum Kravanh,Pursat
+150501,Chamraeun Phal,Pursat,Pursat
+150507,Svay At,Pursat,Pursat
+150508,Banteay Dei,Pursat,Pursat
+150601,Ou Saom,Veal Veaeng,Pursat
+150602,Krapeu Pir,Veal Veaeng,Pursat
+160203,Yeak Laom,Ban Lung,Ratanak Kiri
+160301,Kak,Bar Kaev,Ratanak Kiri
+160305,Saeung,Bar Kaev,Ratanak Kiri
+160403,Ta Ang,Koun Mom,Ratanak Kiri
+160405,Trapeang Chres,Koun Mom,Ratanak Kiri
+160504,Lbang Pir,Lumphat,Ratanak Kiri
+160505,Ba Tang,Lumphat,Ratanak Kiri
+160601,Cha Ung,Ou Chum,Ratanak Kiri
+160603,Aekakpheap,Ou Chum,Ratanak Kiri
+160604,Kalai,Ou Chum,Ratanak Kiri
+160607,L'ak,Ou Chum,Ratanak Kiri
+160703,Pak Nhai,Ou Ya Dav,Ratanak Kiri
+160704,Pa Te,Ou Ya Dav,Ratanak Kiri
+160705,Sesan,Ou Ya Dav,Ratanak Kiri
+160802,Ta Veaeng Kraom,Ta Veaeng,Ratanak Kiri
+160905,Kaoh Pang,Veun Sai,Ratanak Kiri
+170703,Kdei Run,Puok,Siemreap
+170707,Lvea,Puok,Siemreap
+170708,Mukh Paen,Puok,Siemreap
+170713,Samraong Yea,Puok,Siemreap
+170902,Bakong,Prasat Bakong,Siemreap
+170904,Kampong Phluk,Prasat Bakong,Siemreap
+171004,Sala Kamreuk,Siem Reap,Siemreap
+171011,Ampil,Siem Reap,Siemreap
+171202,Klang Hay,Srei Snam,Siemreap
+171301,Boeng Mealea,Svay Leu,Siemreap
+171305,Ta Siem,Svay Leu,Siemreap
+171401,Prasat,Varin,Siemreap
+180102,Pir,Preah Sihanouk,Preah Sihanouk
+180103,Bei,Preah Sihanouk,Preah Sihanouk
+180105,Kaoh Rung,Preah Sihanouk,Preah Sihanouk
+180202,Boeng Ta Prum,Prey Nob,Preah Sihanouk
+180203,Bet Trang,Prey Nob,Preah Sihanouk
+180205,Ou Chrov,Prey Nob,Preah Sihanouk
+180206,Ou Oknha Heng,Prey Nob,Preah Sihanouk
+180208,Ream,Prey Nob,Preah Sihanouk
+180210,Samrong,Prey Nob,Preah Sihanouk
+180212,Tuek Thla,Prey Nob,Preah Sihanouk
+180301,Kampenh,Stueng Hav,Preah Sihanouk
+180401,Chamkar Luong,Kampong Seila,Preah Sihanouk
+180404,Stueng Chhay,Kampong Seila,Preah Sihanouk
+190103,Phluk,Sesan,Stung Treng
+190104,Samkhuoy,Sesan,Stung Treng
+190105,Sdau,Sesan,Stung Treng
+190202,Kaoh Sampeay,Siem Bouk,Stung Treng
+190205,Ou Ruessei Kandal,Siem Bouk,Stung Treng
+190206,Siem Bouk,Siem Bouk,Stung Treng
+190301,Preaek Meas,Siem Pang,Stung Treng
+190302,Sekong,Siem Pang,Stung Treng
+190303,Santepheap,Siem Pang,Stung Treng
+190402,Srah Ruessei,Stueng Traeng,Stung Treng
+190403,Preah Bat,Stueng Traeng,Stung Treng
+190501,Anlong Phe,Thala Barivat,Stung Treng
+190503,Kang Cham,Thala Barivat,Stung Treng
+190504,Kaoh Snaeng,Thala Barivat,Stung Treng
+190506,Ou Rai,Thala Barivat,Stung Treng
+190507,Ou Svay,Thala Barivat,Stung Treng
+190509,Sam Ang,Thala Barivat,Stung Treng
+190510,Srae Ruessei,Thala Barivat,Stung Treng
+200103,Chantrea,Chantrea,Svay Rieng
+200109,Samraong,Chantrea,Svay Rieng
+200201,Banteay Krang,Kampong Rou,Svay Rieng
+200205,Prey Thum,Kampong Rou,Svay Rieng
+200206,Reach Montir,Kampong Rou,Svay Rieng
+200211,Thmei,Kampong Rou,Svay Rieng
+200302,Thmea,Rumduol,Svay Rieng
+200305,Kampong Ampil,Rumduol,Svay Rieng
+200308,Sangkae,Rumduol,Svay Rieng
+200309,Svay Chek,Rumduol,Svay Rieng
+200310,Thna Thnong,Rumduol,Svay Rieng
+200402,Andoung Pou,Romeas Haek,Svay Rieng
+200414,Sambatt Mean Chey,Romeas Haek,Svay Rieng
+200416,Tras,Romeas Haek,Svay Rieng
+200509,Kouk Pring,Svay Chrum,Svay Rieng
+200512,Pouthi Reach,Svay Chrum,Svay Rieng
+200513,Svay Angk,Svay Chrum,Svay Rieng
+200517,Thlok,Svay Chrum,Svay Rieng
+200602,Prey Chhlak,Svay Rieng,Svay Rieng
+200604,Pou Ta Hao,Svay Rieng,Svay Rieng
+200606,Svay Toea,Svay Rieng,Svay Rieng
+200704,Monourom,Svay Teab,Svay Rieng
+200706,Prey Ta Ei,Svay Teab,Svay Rieng
+200707,Prasoutr,Svay Teab,Svay Rieng
+200708,Romeang Thkaol,Svay Teab,Svay Rieng
+200709,Sambuor,Svay Teab,Svay Rieng
+200801,Bati,Bavet,Svay Rieng
+200803,Chrak Mtes,Bavet,Svay Rieng
+200804,Prasat,Bavet,Svay Rieng
+210105,Preaek Phtoul,Angkor Borei,Takeo
+210209,Pea Ream,Bati,Takeo
+210212,Tang Doung,Bati,Takeo
+210213,Tnaot,Bati,Takeo
+210302,Chey Chouk,Borei Cholsar,Takeo
+210405,Kiri Chong Kaoh,Kiri Vong,Takeo
+210502,Pech Sar,Kaoh Andaet,Takeo
+210602,Ban Kam,Prey Kabbas,Takeo
+210604,Char,Prey Kabbas,Takeo
+210607,Kdanh,Prey Kabbas,Takeo
+210611,Prey Phdau,Prey Kabbas,Takeo
+210703,Cheung Kuon,Samraong,Takeo
+210902,Cheang Tong,Tram Kak,Takeo
+210915,Trapeang Thum Khang Tboung,Tram Kak,Takeo
+211001,Angkanh,Treang,Takeo
+211003,Chi Khma,Treang,Takeo
+211006,Angk Kaev,Treang,Takeo
+211014,Tralach,Treang,Takeo
+220105,Thlat,Anlong Veaeng,Oddar Meanchey
+220301,Cheung Tien,Chong Kal,Oddar Meanchey
+220501,Bak Anloung,Trapeang Prasat,Oddar Meanchey
+220503,Ou Svay,Trapeang Prasat,Oddar Meanchey
+240104,Bar Yakha,Pailin,Pailin
+240204,Ou Andoung,Sala Krau,Pailin
+250103,Kouk Srok,Dambae,Tboung Khmum
+250104,Neang Teut,Dambae,Tboung Khmum
+250709,Mong Riev,Tboung Khmum,Tboung Khmum
+250714,Tonle Bet,Tboung Khmum,Tboung Khmum

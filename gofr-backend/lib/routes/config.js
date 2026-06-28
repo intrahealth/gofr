@@ -154,16 +154,25 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
           const minmax = ['Date', 'DateTime', 'Instant', 'Time', 'Decimal', 'Integer', 'PositiveInt',
             'UnsignedInt', 'Quantity'];
           if (item.definition) {
-            field = await fhirDefinition.getFieldDefinition(item.definition);
+            try {
+              field = await fhirDefinition.getFieldDefinition(item.definition);
+            } catch (err) {
+              logger.warn(`getFieldDefinition failed for ${item.definition}: ${err.message}`);
+              field = null;
+            }
             if (itemType === 'reference' && field && field.type && field.type[0] && field.type[0].targetProfile) {
               vueOutput += ` targetProfile="${field.type[0].targetProfile[0]}"`;
-              const targetResource = await getProfileResource(field.type[0].targetProfile[0]);
-              vueOutput += ` targetResource="${targetResource}"`;
+              try {
+                const targetResource = await getProfileResource(field.type[0].targetProfile[0]);
+                vueOutput += ` targetResource="${targetResource}"`;
+              } catch (err) {
+                logger.warn(`getProfileResource failed for ${field.type[0].targetProfile[0]}: ${err.message}`);
+              }
             }
             for (const mm of minmax) {
               for (const type of ['min', 'max']) {
                 const attr = `${type}Value${mm}`;
-                if (field.hasOwnProperty(attr)) {
+                if (field && field.hasOwnProperty(attr)) {
                   if (field[attr]
                     && field[attr].value && field[attr].code) {
                     vueOutput += ` ${attr}="${field[attr].value}${field[attr].code}"`;
@@ -177,12 +186,12 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
             }
 
             if (!displayType) {
-              if (config.get(`defaults:fields:${field.id}:type`)) {
+              if (field && config.get(`defaults:fields:${field.id}:type`)) {
                 displayType = config.get(`defaults:fields:${field.id}:type`);
               }
             }
 
-            if (config.get(`defaults:fields:${field.id}:user_filter`)) {
+            if (field && config.get(`defaults:fields:${field.id}:user_filter`)) {
               let resource = field.id.substring(0, field.id.indexOf('.'));
               let regex = '(.+)';
               let replace = '$1';
@@ -199,7 +208,7 @@ router.get('/questionnaire/:questionnaire', (req, res) => {
 
             const field_attrs = ['initialValue'];
             for (const attr of field_attrs) {
-              if (config.get(`defaults:fields:${field.id}:${attr}`)) {
+              if (field && config.get(`defaults:fields:${field.id}:${attr}`)) {
                 vueOutput += ` ${attr}="${config.get(`defaults:fields:${field.id}:${attr}`)}"`;
               }
               // else if (attr === 'initialValue' && displayType === 'tree') {
@@ -780,6 +789,59 @@ router.get('/page/:page/:type?', (req, res) => {
       });
     };
 
+    const looksLikeValueSet = (value) => {
+      if (!value) {
+        return false;
+      }
+      return value.startsWith('http://')
+        || value.startsWith('https://')
+        || value.startsWith('ValueSet/')
+        || value.includes('/ValueSet/')
+        || value.toLowerCase().includes('valueset');
+    };
+
+    const filterFieldFromExpression = (expression) => {
+      if (!expression) {
+        return expression;
+      }
+      return expression.split(':')[0];
+    };
+
+    const parseSearchFilter = (valueString) => {
+      const parts = valueString.split('|');
+      const label = parts[0];
+      if (parts.length === 2) {
+        return {
+          label,
+          field: filterFieldFromExpression(parts[1]),
+          expression: parts[1],
+          binding: null,
+        };
+      }
+      if (parts.length === 3) {
+        if (looksLikeValueSet(parts[2])) {
+          return {
+            label,
+            field: parts[1],
+            expression: parts[1],
+            binding: parts[2],
+          };
+        }
+        return {
+          label,
+          field: parts[1],
+          expression: parts[2],
+          binding: null,
+        };
+      }
+      return {
+        label,
+        field: parts[1],
+        expression: parts[2] || parts[1],
+        binding: parts[3] || null,
+      };
+    };
+
     const createSearchTemplate = async (resource, structure) => {
       let search = ['id'];
       try {
@@ -787,7 +849,7 @@ router.get('/page/:page/:type?', (req, res) => {
       } catch (err) { }
       let filters = [];
       try {
-        filters = pageDisplay.extension.filter(ext => ext.url === 'filter').map(ext => ext.valueString.split('|'));
+        filters = pageDisplay.extension.filter(ext => ext.url === 'filter').map(ext => parseSearchFilter(ext.valueString));
       } catch (err) { }
       let addLink = null;
       try {
@@ -822,14 +884,14 @@ router.get('/page/:page/:type?', (req, res) => {
       }
       const structureKeys = Object.keys(structure);
       searchTemplate += '>' + '\n';
-      let fieldDetails;
       for (const filter of filters) {
+        let fieldDetails = null;
         for (const fhir of structureKeys) {
-          if (structure[fhir].fields && structure[fhir].fields[filter[1]]) {
-            fieldDetails = structure[fhir].fields[filter[1]];
+          if (structure[fhir].fields && structure[fhir].fields[filter.field]) {
+            fieldDetails = structure[fhir].fields[filter.field];
           }
         }
-        if (!fieldDetails) {
+        if (!fieldDetails || !filter.expression) {
           continue;
         }
         let displayType;
@@ -844,7 +906,7 @@ router.get('/page/:page/:type?', (req, res) => {
           }
         }
         if (fieldDetails.code === 'Reference') {
-          searchTemplate += `<gofr-search-reference-term v-on:termChange="searchData" field='${filter[1]}' label='${filter[0]}' expression='${filter[2]}'`;
+          searchTemplate += `<gofr-search-reference-term v-on:termChange="searchData" field='${filter.field}' label='${filter.label}' expression='${filter.expression}'`;
           if (fieldDetails.hasOwnProperty('targetProfile') && fieldDetails.targetProfile) {
             fieldDetails.targetResource = await getProfileResource(fieldDetails.targetProfile);
             searchTemplate += ` targetProfile='${fieldDetails.targetProfile}' targetResource='${fieldDetails.targetResource}'`;
@@ -855,9 +917,9 @@ router.get('/page/:page/:type?', (req, res) => {
           searchTemplate += ' />\n';
         } else {
           searchTemplate += '<gofr-search-string-term v-on:termChange="searchData"';
-          searchTemplate += ` label="${filter[0]}" expression="${filter[2]}"`;
-          if (filter[3]) {
-            searchTemplate += ` binding="${filter[3]}"`;
+          searchTemplate += ` label="${filter.label}" expression="${filter.expression}"`;
+          if (filter.binding) {
+            searchTemplate += ` binding="${filter.binding}"`;
           }
           searchTemplate += '></gofr-search-string-term>\n';
         }
